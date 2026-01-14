@@ -1,0 +1,637 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,400;1,200;1,400&display=swap");
+body {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+html {
+  height: 100vh;
+  font-size: 62.5%;
+  overflow: hidden; /* Prevent body scrolling */
+}
+
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+img.welcome {
+  width: 50%;
+  align-self: center;
+  justify-self: center;
+
+body {
+  height: 100%;
+  margin: 0;
+html {
+  height: 100%;
+  font-size: 62.5%;
+}
+
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+.error {
+  color: red;
+}
+
+#Wrap {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3fr;
+  grid-template-rows: auto;
+  background-image: url("../../public/img/dog_paw.png");
+  background-color: #fd7c2b2f;
+  background-position: cover;
+  -ms-flex-line-pack: start;
+      align-content: start;
+  min-height: 100vh;
+  height: 100%;
+  -webkit-backdrop-filter: blur(0);
+          backdrop-filter: blur(0);
+  padding: 0;
+  overflow: hidden;
+}
+
+nav#top {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 999 !important; /* Below UserHeader but above content */
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -ms-flex-pack: distribute;
+      justify-content: space-around;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 1rem;
+  background: #72211f;
+}
+
+a {
+  font-size: 1.6rem;
+  color: #f5f5f5;
+  padding: 0.7rem;
+}
+
+main {
+  width: 90%;
+  height: calc(100vh - 220px); /* Account for nav + UserHeader + footer */
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 130px auto 100px auto; /* 60px nav + 70px UserHeader + 100px footer space */
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 0.5rem;
+  background-color: rgba(247, 239, 228, 0.4);
+  border-radius: 2rem;
+  -webkit-backdrop-filter: blur(5px);
+          backdrop-filter: blur(5px);
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+main p {
+  color: #2E3B5D;
+  text-align: left;
+  font-size: 1.8rem;
+}
+
+.logo {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+h1 {
+  font-size: 2.8rem;
+  background: #42210B;
+  background: -webkit-gradient(linear, left bottom, left top, from(#42210B), to(#B16C2E));
+  background: linear-gradient(to top, #42210B 0%, #B16C2E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+img.welcome {
+  width: 50%;
+  -ms-flex-item-align: center;
+      align-self: center;
+  justify-self: center;
+}
+
+#start_btn {
+  font-size: 1.8rem;
+  padding: 1rem;
+  color: #f5f5f5;
+  background: #A2E267;
+  background: -webkit-gradient(linear, left bottom, left top, from(#7AB941), to(#789617));
+  background: linear-gradient(to top, #7AB941 0%, #789617 100%);
+  border-radius: .8rem;
+  border: none;
+}
+
+#Search {
+  position: -webkit-sticky;
+  position: sticky;
+  border: none;
+  width: 95%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  font-size: 1.6rem;
+  padding: 0.8rem;
+  margin: 2rem 0 2rem 0;
+  border-radius: 0.8rem;
+}
+#Search::-webkit-input-placeholder {
+  text-align: center;
+}
+#Search:-ms-input-placeholder {
+  text-align: center;
+}
+#Search::-ms-input-placeholder {
+  text-align: center;
+}
+#Search::placeholder {
+  text-align: center;
+}
+
+#login-form,
+#adddog-form,
+#register-form {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+}
+#login-form input,
+#login-form select,
+#login-form textarea,
+#adddog-form input,
+#adddog-form select,
+#adddog-form textarea,
+#register-form input,
+#register-form select,
+#register-form textarea {
+  padding: 0.5rem;
+  margin: 0.5rem 0 0.5rem 0;
+  border: none;
+  font-size: 1.4rem;
+  border-radius: 0.8rem;
+  text-align: center;
+}
+#login-form label,
+#adddog-form label,
+#register-form label {
+  font-size: 1.6rem;
+  font-weight: bold;
+  padding: 0.5rem;
+  color: #2e3b5d;
+}
+#login-form input::-webkit-input-placeholder,
+#adddog-form input::-webkit-input-placeholder,
+#register-form input::-webkit-input-placeholder {
+  font-size: 1.4rem;
+}
+#login-form input:-ms-input-placeholder,
+#adddog-form input:-ms-input-placeholder,
+#register-form input:-ms-input-placeholder {
+  font-size: 1.4rem;
+}
+#login-form input::-ms-input-placeholder,
+#adddog-form input::-ms-input-placeholder,
+#register-form input::-ms-input-placeholder {
+  font-size: 1.4rem;
+}
+#login-form input::placeholder,
+#adddog-form input::placeholder,
+#register-form input::placeholder {
+  font-size: 1.4rem;
+}
+#login-form #login,
+#adddog-form #login,
+#register-form #login {
+  margin-top: 0.5rem;
+}
+
+#register-form {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+}
+#register-form input {
+  padding: 0.5rem;
+  margin-bottom: 0.3rem;
+  border: none;
+  font-size: 1.8rem;
+  border-radius: 0.8rem;
+  text-align: center;
+}
+#register-form label {
+  font-size: 1.6rem;
+  padding: 0.5rem;
+}
+#register-form #register {
+  margin-top: 0.5rem;
+}
+
+#vacine,
+#castrats {
+  color: #72211f;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 3rem;
+  font-size: 2rem;
+}
+
+.card {
+  margin: 0 auto 1rem auto;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: 0.8fr 2fr;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  justify-items: center;
+  grid-auto-rows: auto-fit;
+  -webkit-box-shadow: -0.1rem 0.2rem 0.8rem #535151;
+          box-shadow: -0.1rem 0.2rem 0.8rem #535151;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 1.2rem;
+}
+
+.card h3 {
+  text-align: left;
+}
+
+.card p {
+  font-size: 1.3rem;
+  margin: 0.3rem;
+  text-align: left;
+}
+
+.card img {
+  width: 70%;
+  border-radius: 50%;
+}
+
+.card .description {
+  justify-self: left;
+}
+
+.log {
+  color: #125703;
+  padding: 0.3rem;
+}
+
+button {
+  background: #185a1c;
+  border: none;
+  font-size: 1.6rem;
+  color: #f5f5f5;
+  padding: 0.5rem;
+  border-radius: 0.6rem;
+  width: auto;
+  cursor: pointer;
+}
+
+*,
+::after,
+::before {
+  margin: 0;
+  margin-top: 0px;
+  padding: 0;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.alternative-register {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+#footer-nav ul {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  padding: 0.75rem 0.5rem;
+  -webkit-box-shadow: 0.1rem -0.1rem 0.8rem #535151;
+          box-shadow: 0.1rem -0.1rem 0.8rem #535151;
+  width: 100vw;
+  margin: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: space-evenly;
+      -ms-flex-pack: space-evenly;
+          justify-content: space-evenly;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background: #72211f;
+  height: auto;
+  min-height: 80px;
+  box-sizing: border-box;
+}
+
+.eky-icon {
+  cursor: pointer;
+}
+
+@font-face {
+  font-family: 'eky';
+  src: url("../styles/fonts/eky.eot?k6q6d7");
+  src: url("../styles/fonts/eky.eot?k6q6d7#iefix") format("embedded-opentype"), url("../styles/fonts/eky.ttf?k6q6d7") format("truetype"), url("../styles/fonts/eky.woff?k6q6d7") format("woff"), url("../styles/fonts/eky.svg?k6q6d7#eky") format("svg");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+.eky-icon {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'eky' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.eky-add-dog:before {
+  content: "\e900";
+}
+
+.eky-comment .path1:before {
+  content: "\e901";
+  color: black;
+}
+
+.eky-comment .path2:before {
+  content: "\e902";
+  margin-left: -0.93359375em;
+  color: white;
+}
+
+.eky-comment .path3:before {
+  content: "\e903";
+  margin-left: -0.93359375em;
+  color: white;
+}
+
+.eky-comment .path4:before {
+  content: "\e904";
+  margin-left: -0.93359375em;
+  color: white;
+}
+
+.eky-eky:before {
+  content: "\e905";
+}
+
+.eky-envelope:before {
+  content: "\e906";
+}
+
+
+.eky-female:before {
+  content: "\e908";
+}
+
+
+.eky-hamby:before {
+  content: "\e90a";
+}
+
+.eky-heart:before {
+  content: "\e90b";
+  color: red;
+}
+
+.eky-left-arrow:before {
+  content: "\e90c";
+}
+
+.eky-logout:before {
+  content: "\e90d";
+}
+
+.eky-male:before {
+  content: "\e90e";
+}
+
+.eky-map:before {
+  content: "\e90f";
+}
+
+.eky-message:before {
+  content: "\e910";
+}
+
+.eky-paw:before {
+  content: "\e911";
+}
+
+.eky-phone:before {
+  content: "\e912";
+}
+
+.eky-reply:before {
+  content: "\e913";
+}
+
+.eky-search:before {
+  content: "\e914";
+}
+
+.eky-share:before {
+  content: "\e915";
+}
+
+.eky-Symbols:before {
+  content: "\e916";
+}
+
+.eky-trash:before {
+  content: "\e917";
+}
+
+.eky-twitter:before {
+  content: "\e918";
+}
+
+.eky-user:before {
+  content: "\e919";
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  color: #2E3B5D;
+  font-family: 'Nunito', sans-serif;
+  font-weight: bold;
+}
+
+p {
+  font-size: 1.6rem;
+  margin: 0 0 .5rem 0;
+  line-height: 2.1rem;
+}
+
+h1 {
+  font-size: 3rem;
+}
+
+h2 {
+  font-size: 2.8rem;
+  background: #42210B;
+  background: -webkit-gradient(linear, left bottom, left top, from(#42210B), to(#B16C2E));
+  background: linear-gradient(to top, #42210B 0%, #B16C2E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+h3 {
+  font-size: 1.6rem;
+}
+
+header h1 {
+  margin-top: 1rem;
+}
+
+h1.extra-large {
+  margin: 0;
+  padding: 0;
+  font-size: 8.8rem;
+  font-family: "Lao MN", serif;
+  text-align: center;
+  background: #42210B;
+  background: -webkit-gradient(linear, left bottom, left top, from(#42210B), to(#B16C2E));
+  background: linear-gradient(to top, #42210B 0%, #B16C2E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.eky-icon {
+  padding: .5rem;
+}
+
+.meta {
+  font-size: 1.8rem;
+  color: #666;
+}

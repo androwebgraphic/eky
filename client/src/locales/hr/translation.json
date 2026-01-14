@@ -1,0 +1,230 @@
+{
+  "terms_of_use_title": "Uvjeti Korištenja Aplikacije za Posvajanje Pasa",
+  "unauth_subheading": "Morate biti prijavljeni ili registrirani da biste dodali psa, dodali na listu želja ili posvojili.",
+  "terms_of_use": "1. Općenito\nOva aplikacija (u daljnjem tekstu 'Aplikacija') je vlasništvo [Ime Vaše Aplikacije/Tvrtke] (u daljnjem tekstu 'Mi' ili 'Naš'). Korištenjem ove Aplikacije, pristajete na sve uvjete navedene u ovom dokumentu. Ako se ne slažete s ovim uvjetima, nemojte koristiti Aplikaciju.\n2. Definiranje Korisnika\nKorisnik je svaka osoba koja koristi Aplikaciju. Korisnici se mogu podijeliti na:\n• Udruge/Azili: Korisnici koji predstavljaju udruge ili azile za napuštene pse.\n• Posvojitelji: Osobe koje traže psa za posvajanje.\n3. Zabrana Prodaje i Oglasa za Prodaju\n• Striktna Zabana: U cijelosti je zabranjeno koristiti Aplikaciju za bilo kakav oblik prodaje, preprodaje, ili oglašavanja za prodaju pasa, mačaka, ili bilo koje druge životinje.\n• Oglasi za uzgoj: Zabranjeno je oglašavanje uzgoja pasa ili drugih životinja.\n• Kazne: Kršenje ovog uvjeta rezultirat će odmahničkim zabranom korisničkog računa i mogućom pravnom tužbom.\n• Korištenje Aplikacije: Aplikacija je isključivo namijenjena za povezivanje napuštenih pasa s potencijalnim posvojiteljima i za pružanje informacija o udrugama/azilima.\n4. Korištenje Aplikacije\n• Pravovremeno ažuriranje informacija: Udruge/Azili su odgovorne za održavanje ažuriranih informacija o profilima pasa.\n• Pravila komunikacije: Korištenje Aplikacije za bilo kakav oblik neprimjerenog ponašanja, vrijeđanja, ili spamiranje je zabranjeno.\n• Privatnost: Mi se obvezujemo da ćemo zaštititi privatnost korisnika u skladu s našom politikom privatnosti (link do politike privatnosti).\n• Autorska prava: Svi sadržaji na Aplikaciji su zaštićeni autorskim pravima. Neovlaštena upotreba je zabranjena.\n5. Odgovornost\n• Nema garancija: Mi ne jamčimo uspjeh posvajanja ili bilo kakav drugi ishod.\n• Ograničena odgovornost: Mi nismo odgovorni za bilo kakve štete ili gubitke nastale korištenjem Aplikacije.\n• Korisnička odgovornost: Korisnici su odgovorni za svoje postupke i odluke.\n6. Promjene Uvjeta Korištenja\n• Mi zadržavamo pravo da u bilo kojem trenutku promijenimo ove uvjete korištenja.\n• Korisnici su odgovorni za redovito provjeravanje ažuriranih uvjeta korištenja.\n• Nastavak korištenja Aplikacije nakon promjene uvjeta znači prihvaćanje novih uvjeta.\n7. Zakonska Nadležnost\nOvi uvjeti korištenja podliježu zakonima [Vaša zemlja/država] .",
+  "Accept": "Prihvaćam",
+  "Close": "Zatvori",
+  "nav": {
+    "about": "O nama",
+    "login": "Logiraj se",
+    "register": "Registracija",
+    "dogs": "Psi"
+  },
+  "button": {
+    "findFriend": "Pronađi zauvijek prijatelja",
+    "register": "Registracija",
+    "login": "Logiranje",
+    "addDog": "Dodaj psa",
+    "viewDetails": "Vidi detalje",
+    "adopt": "Posvoji",
+    "addToList": "Dodaj u listu",
+    "removeFromList": "Ukloni iz liste",
+    "edit": "Uredi",
+    "remove": "Ukloni",
+    "save": "Spremi"
+  },
+  "heading": {
+    "loggedIn": "Dobrodošli, {{name}} u Sharedog Homeless",
+    "title": "Morate biti logirani u",
+    "subtitle": "aplikaciju za posvajanje pasa"
+  },
+  "about": {
+    "p1": "Aplikacija za posvajanje pasa je ključ za pronalaženje",
+    "p1strong": "vašeg novog najboljeg prijatelja",
+    "founded": "EKY 2007-2020.",
+    "p2": "Posvajanjem psa, vi ćete mu dati drugu šansu i istovremeno pružiti sebi radost ljubav i zadovoljstvo života s njim.",
+    "p3": "Želim Vam puno sreće i zadovoljstva s novim prijateljem"
+  },
+  "search": {
+    "placeholder": "Pretraži po imenu, pasmini ili lokaciji...",
+    "allGenders": "Svi spolovi",
+    "allSizes": "Sve veličine",
+    "allLocations": "Sve lokacije",
+    "noResults": "Nema pasa koji odgovaraju vašim kriterijima pretrage.",
+    "showAdvanced": "Napredna pretraga",
+    "hideAdvanced": "Sakrij napredno",
+    "gender": "Spol",
+    "size": "Veličina",
+    "location": "Lokacija"
+  },
+  "doglist": {
+    "title": "Odaberi svog zauvijek prijatelja",
+    "loading": "Učitavanje pasa...",
+    "empty": "Nema pasa.",
+    "addFirst": "Dodaj prvog psa",
+    "confirmRemove": "Jeste li sigurni da želite ukloniti {{name}}?",
+    "failedToRemove": "Neuspješno uklanjanje psa",
+    "failedToLoad": "Neuspješno učitavanje pasa"
+  },
+  "register": {
+    "register": "Registracija",
+    "name": "Vaše ime",
+    "username": "Korisničko ime",
+    "email": "Vaša e-mail",
+    "phone": "Mobilni telefon",
+    "password": "Zaporka",
+    "passwordAgain": "Ponovi zaporku",
+    "person": "Privatna osoba ili Udruga?",
+    "remember": "Zapamti me",
+    "already": "Već si korisnik?",
+    "altRegister": "Ili se registrirajte s Vašim računom..."
+  },
+  "registerOptions": {
+    "private": "Privatna osoba",
+    "organization": "Udruga"
+  },
+  "brand": {
+    "name": "Sharedog Homeless",
+    "logoAlt": "Sharedog Homeless logo"
+  },
+  "login": {
+    "title": "Logiraj se",
+    "remember": "Zapamti me"
+  },
+  "validation": {
+    "emailRequired": "email je obavezno navesti",
+    "emailInvalid": "unesite valjan email",
+    "passwordRequired": "Zaporka je obavezna",
+    "passwordMin": "Zaporka mora biti najmanje {min} znakova",
+    "required": "je obavezno"
+  },
+  "adddog": {
+    "title": "Dodaj psa",
+    "name": "Ime psa",
+    "breed": "Vrsta psa",
+    "color": "Boja psa",
+    "location": "Lokacija psa",
+    "age": "Starost psa",
+    "description": "O psu",
+    "size": "Veličina psa",
+    "gender": "Spol",
+    "vaccinated": "Cijepljen ?",
+    "neutered": "Kastriran/na ?",
+    "media": "Fotografije",
+    "saving": "Dodavanje...",
+    "added": "Pas uspješno dodan!",
+    "nameRequired": "Ime psa je obavezno",
+    "locationRequired": "Lokacija je obavezna",
+    "failed": "Neuspješno dodavanje psa"
+  },
+  "size": {
+    "small": "Mali",
+    "medium": "Srednji",
+    "large": "Veliki"
+  },
+  "gender": {
+    "male": "Mužjak",
+    "female": "Ženka"
+  },
+  "adddogExtra": {
+    "ageNote": "Možete upisati i decimalnu vrijednost (npr. 3.6 godina)"
+  },
+  "social": {
+    
+  },
+  "share": {
+    "title": "Podijeli s drugima"
+  },
+  "userHeader": {
+    "avatarAlt": "avatar korisnika",
+    "name": "{{name}}",
+    "followers": "Pratitelji: {{count}}",
+    "following": "Prati: {{count}}"
+  },
+  "userProfile": {
+    "title": "Uredi profil",
+    "wishlistTab": "Lista želja",
+    "profileTab": "Profil",
+    "wishlistEmpty": "Vaša lista želja je prazna.",
+    "remove": "Ukloni",
+    "adopt": "Posvoji",
+    "welcome": "Dobro došao",
+    "online": "Online",
+    "saving": "Spremanje...",
+    "saveChanges": "Spremi promjene",
+    "cancel": "Odustani",
+    "editProfile": "Uredi profil",
+    "deleting": "Brisanje...",
+    "deleteAccount": "Izbriši račun",
+    "changePhoto": "Promijeni fotografiju"
+  }
+  ,
+  "editdog": {
+    "title": "Uredi {{name}}",
+    "newPhotos": "Nove fotografije odabrane (zamijeniti će postojeće):",
+    "currentPhotos": "Trenutne fotografije:",
+    "noPhotos": "Nema odabranih fotografija",
+    "resetPhotos": "Resetiraj fotografije",
+    "saving": "Snimanje..."
+  },
+  "fields": {
+    "name": "Ime:",
+    "breed": "Pasma:",
+    "gender": "Spol:",
+    "age": "Dob:",
+    "location": "Lokacija:",
+    "color": "Boja:",
+    "size": "Veličina:",
+    "vaccination": "Cijepljenje:",
+    "description": "Opis:"
+  },
+  "common": {
+    "close": "Zatvori"
+  },
+  "dogDetails": {
+    "imageAlt": "slika psa",
+    "ageSuffix": "god",
+    "mixed": "mješanka",
+    "p1": "Nany je mali slatki psić koji traži dom pun ljubavi.",
+    "p2": "Tko ne bi odolio tako zgodnom stvorenju. Javite se, imajte srca.",
+    "location": "Donji Miholjac",
+    "likes": "lajkova",
+    "vaccinated": "Cijepljen",
+    "notVaccinated": "Nije cijepljen",
+    "neutered": "Kastriran/na",
+    "notNeutered": "Nije kastriran/na",
+    "loadingMap": "Učitavam kartu…",
+    "approximateLocation": "Prikazujem približnu lokaciju",
+    "searchBasedLocation": "Koristim pretraživanje lokacije",
+    "viewFullMap": "Prikaži punu kartu",
+    "mapPreview": "Pregled karte"
+  },
+  "users": {
+    "title": "Korisnici",
+    "empty": "Nema pronađenih korisnika"
+  },
+  "common": {
+    "close": "Zatvori",
+    "cancel": "Odustani",
+    "save": "Spremi",
+    "delete": "Obriši",
+    "edit": "Uredi",
+    "loading": "Učitavanje...",
+    "error": "Greška",
+    "success": "Uspjeh"
+  },
+  "fields": {
+    "name": "Ime:",
+    "breed": "Pasmina:",
+    "age": "Godine:",
+    "location": "Lokacija:",
+    "color": "Boja:",
+    "size": "Veličina:",
+    "gender": "Spol:",
+    "likes": "Sviđanja:",
+    "vaccination": "Cijepljenje:",
+    "description": "Opis:",
+    "phone": "Telefon:",
+    "email": "E-mail:",
+    "userType": "Vrsta korisnika:",
+    "postedBy": "Objavio:",
+    "contactOwner": "Kontaktiraj vlasnika"
+  },
+  "gender": {
+    "male": "Mužjak",
+    "female": "Ženka"
+  },
+  "language": {
+    "selectAria": "Odaberite jezik"
+  }
+}

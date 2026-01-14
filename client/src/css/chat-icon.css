@@ -1,0 +1,19 @@
+.eky-chat {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
+  background: url('./chat-icon.svg') no-repeat center center;
+  background-size: 32px 32px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(33,150,243,0.12);
+  background-color: transparent;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: none;
+  margin: 0 8px;
+}
+
+.eky-chat:hover {
+  box-shadow: 0 4px 16px rgba(33,150,243,0.18);
+  transform: scale(1.08);
+}

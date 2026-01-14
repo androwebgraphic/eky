@@ -1,0 +1,49 @@
+name: Visual regression
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install apt dependencies for Chromium
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-0 libgbm-dev libnss3 libxss1 libasound2 fonts-liberation
+
+      - name: Install dependencies
+        run: cd client && npm ci
+
+      - name: Build client
+        run: cd client && npm run build
+
+      - name: Capture screenshots
+        run: cd client && npm run screenshot-locales
+
+      - name: Upload captured screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-current
+          path: client/screenshots
+
+      - name: Compare screenshots
+        run: |
+          cd client
+          npm run visual:compare
+
+      - name: Upload visual diffs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: client/screenshots/diffs || client/screenshots

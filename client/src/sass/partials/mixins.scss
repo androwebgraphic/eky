@@ -1,0 +1,36 @@
+@mixin gradient(){
+
+font-size: 2.8rem;
+ background: #42210B;
+ background: -webkit-linear-gradient(to top, #42210B 0%, #B16C2E 100%);
+ background: -moz-linear-gradient(to top, #42210B 0%, #B16C2E 100%);
+ background: linear-gradient(to top, #42210B 0%, #B16C2E 100%);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ 
+ // background: #A2E267;
+ //  background: -webkit-linear-gradient(to top, #A2E267 0%, #789617 100%);
+ //  background: -moz-linear-gradient(to top, #A2E267 0%, #789617 100%);
+ //  background: linear-gradient(to top, #A2E267 0%, #789617 100%);
+ //  -webkit-background-clip: text;
+ //  -webkit-text-fill-color: transparent;
+
+}
+
+@mixin gradientBg(){
+
+
+background: #A2E267;
+  background: -webkit-linear-gradient(to top, #7ab941 0%, #789617 100%);
+  background: -moz-linear-gradient(to top, #7AB941 0%, #789617 100%);
+  background: linear-gradient(to top, #7AB941 0%, #789617 100%);
+
+ // -webkit-text-fill-color: transparent;
+
+}
+
+@mixin btn_radius{
+   
+   border-radius: .8rem;
+   border: none;
+}

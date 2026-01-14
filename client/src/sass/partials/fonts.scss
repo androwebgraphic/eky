@@ -1,0 +1,173 @@
+@import "variables";
+@font-face {
+  font-family: "eky";
+  src: url("../styles/fonts/eky.eot?k6q6d7");
+  src: url("../styles/fonts/eky.eot?k6q6d7#iefix") format("embedded-opentype"),
+    url("../styles/fonts/eky.ttf?k6q6d7") format("truetype"),
+    url("../styles/fonts/eky.woff?k6q6d7") format("woff"),
+    url("../styles/fonts/eky.svg?k6q6d7#eky") format("svg");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+.eky-icon {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: "eky" !important;
+  // speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.eky-add-dog:before {
+  content: "\e900";
+}
+.eky-comment .path1:before {
+  content: "\e901";
+  color: rgb(0, 0, 0);
+}
+.eky-comment .path2:before {
+  content: "\e902";
+  margin-left: -0.93359375em;
+  color: rgb(255, 255, 255);
+}
+.eky-comment .path3:before {
+  content: "\e903";
+  margin-left: -0.93359375em;
+  color: rgb(255, 255, 255);
+}
+.eky-comment .path4:before {
+  content: "\e904";
+  margin-left: -0.93359375em;
+  color: rgb(255, 255, 255);
+}
+.eky-eky:before {
+  content: "\e905";
+}
+.eky-envelope:before {
+  content: "\e906";
+}
+.eky-female:before {
+  content: "\e908";
+}
+.eky-hamby:before {
+  content: "\e90a";
+}
+.eky-heart:before {
+  content: "\e90b";
+  color: red;
+}
+.eky-left-arrow:before {
+  content: "\e90c";
+}
+.eky-logout:before {
+  content: "\e90d";
+}
+.eky-male:before {
+  content: "\e90e";
+}
+.eky-map:before {
+  content: "\e90f";
+}
+.eky-message:before {
+  content: "\e910";
+}
+.eky-paw:before {
+  content: "\e911";
+}
+.eky-phone:before {
+  content: "\e912";
+}
+.eky-reply:before {
+  content: "\e913";
+}
+.eky-search:before {
+  content: "\e914";
+}
+.eky-share:before {
+  content: "\e915";
+}
+.eky-Symbols:before {
+  content: "\e916";
+}
+.eky-trash:before {
+  content: "\e917";
+}
+.eky-twitter:before {
+  content: "\e918";
+}
+.eky-user:before {
+  content: "\e919";
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  padding: 0;
+  // font-family: "Lao MN", serif;
+  text-align: center;
+  color: $txt-color;
+  font-family: "Nunito", sans-serif;
+  font-weight: bold;
+}
+p {
+  font-size: 1.6rem;
+  margin: 0 0 0.5rem 0;
+  line-height: 2.1rem;
+}
+
+h1 {
+  font-size: 3rem;
+}
+h2 {
+  font-size: 2.8rem;
+  background: #42210b;
+  background: -webkit-linear-gradient(to top, #42210b 0%, #b16c2e 100%);
+  background: -moz-linear-gradient(to top, #42210b 0%, #b16c2e 100%);
+  background: linear-gradient(to top, #42210b 0%, #b16c2e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+h3 {
+  font-size: 1.6rem;
+  // font-weight:normal;
+}
+header h1 {
+  margin-top: 1rem;
+}
+h1.extra-large {
+  margin: 0;
+  padding: 0;
+  font-size: 8.8rem;
+  font-family: "Lao MN", serif;
+  text-align: center;
+  background: #42210b;
+  background: -webkit-linear-gradient(to top, #42210b 0%, #b16c2e 100%);
+  background: -moz-linear-gradient(to top, #42210b 0%, #b16c2e 100%);
+  background: linear-gradient(to top, #42210b 0%, #b16c2e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.eky-icon {
+  padding: 0.5rem;
+  // font-size: 3rem;
+}
+.meta {
+  font-size: 1.8rem;
+  color: #666;
+}
+
+#footer-nav ul .eky-icon{
+  font-size: 2.5rem;
+}

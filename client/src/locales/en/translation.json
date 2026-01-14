@@ -1,0 +1,213 @@
+{
+  "Accept": "Accept",
+  "Close": "Close",
+  "terms_of_use_title": "Terms of Use for the Dog Adoption Application",
+  "unauth_subheading": "User must be logged in or registered to add a dog, add to wish list, or adopt.",
+  "terms_of_use": "1. General\nThis application (hereinafter 'Application') is owned by [Your App/Company Name] (hereinafter 'We' or 'Our'). By using this Application, you agree to all terms stated in this document. If you do not agree with these terms, do not use the Application.\n2. Definition of User\nA user is any person who uses the Application. Users can be divided into:\n• Associations/Shelters: Users representing associations or shelters for abandoned dogs.\n• Adopters: Individuals seeking a dog for adoption.\n3. Prohibition of Sale and Sale Advertisements\n• Strict Prohibition: It is strictly forbidden to use the Application for any form of sale, resale, or advertisement for the sale of dogs, cats, or any other animal.\n• Breeding Advertisements: Advertising the breeding of dogs or other animals is prohibited.\n• Penalties: Violation of this condition will result in immediate account ban and possible legal action.\n• Use of the Application: The Application is intended solely for connecting abandoned dogs with potential adopters and providing information about associations/shelters.\n4. Use of the Application\n• Timely Information Updates: Associations/Shelters are responsible for keeping dog profiles up to date.\n• Communication Rules: Using the Application for any form of inappropriate behavior, insults, or spamming is prohibited.\n• Privacy: We are committed to protecting user privacy in accordance with our privacy policy (link to privacy policy).\n• Copyright: All content on the Application is protected by copyright. Unauthorized use is prohibited.\n5. Liability\n• No Guarantees: We do not guarantee the success of adoption or any other outcome.\n• Limited Liability: We are not responsible for any damages or losses resulting from the use of the Application.\n• User Responsibility: Users are responsible for their actions and decisions.\n6. Changes to Terms of Use\n• We reserve the right to change these terms of use at any time.\n• Users are responsible for regularly checking the updated terms of use.\n• Continued use of the Application after changes means acceptance of the new terms.\n7. Legal Jurisdiction\nThese terms of use are subject to the laws of [Your country/state].",
+  "nav": {
+    "about": "About",
+    "login": "Login",
+    "register": "Register",
+    "dogs": "Dogs"
+  },
+  "button": {
+    "findFriend": "Find your forever friend",
+    "register": "Register",
+    "login": "Login",
+    "addDog": "Add dog",
+    "viewDetails": "View details",
+    "adopt": "Adopt",
+    "addToList": "Add to list",
+    "removeFromList": "Remove from list",
+    "edit": "Edit",
+    "remove": "Remove",
+    "save": "Save"
+  },
+  "heading": {
+    "loggedIn": "Welcome, {{name}} to Sharedog Homeless",
+    "title": "You must be logged in",
+    "subtitle": "to the dog adoption app"
+  },
+  "about": {
+    "p1": "The dog adoption app is a key to finding",
+    "p1strong": "your new best friend",
+    "founded": "EKY 2007-2020.",
+    "p2": "By adopting a dog you will give them a second chance and bring joy and love into your life.",
+    "p3": "Wishing you lots of happiness with your new friend"
+  },
+  "search": {
+    "placeholder": "Search by name, breed, or location...",
+    "allGenders": "All genders",
+    "allSizes": "All sizes",
+    "allLocations": "All locations",
+    "noResults": "No dogs match your search criteria.",
+    "showAdvanced": "Advanced Search",
+    "hideAdvanced": "Hide Advanced",
+    "gender": "Gender",
+    "size": "Size",
+    "location": "Location"
+  },
+  "doglist": {
+    "title": "Choose your forever friend",
+    "loading": "Loading dogs...",
+    "empty": "No dogs found.",
+    "addFirst": "Add your first dog",
+    "confirmRemove": "Are you sure you want to remove {{name}}?",
+    "failedToRemove": "Failed to remove dog",
+    "failedToLoad": "Failed to load dogs"
+  },
+  "register": {
+    "register": "Register",
+    "name": "Your name",
+    "username": "Username",
+    "email": "Email",
+    "phone": "Mobile phone",
+    "password": "Password",
+    "passwordAgain": "Repeat password",
+    "person": "Private person or Association?",
+    "remember": "Remember me",
+    "already": "Already a user?",
+    "altRegister": "Or register with your account..."
+  },
+  "registerOptions": {
+    "private": "Private person",
+    "organization": "Association"
+  },
+  "brand": {
+    "name": "Sharedog Homeless",
+    "logoAlt": "Sharedog Homeless logo"
+  },
+  "login": {
+    "title": "Log in",
+    "remember": "Remember me"
+  },
+  "validation": {
+    "emailRequired": "Email is required",
+    "emailInvalid": "Enter a valid email",
+    "passwordRequired": "Password is required",
+    "passwordMin": "Password must be at least {min} characters",
+    "required": "is required"
+  },
+  "adddog": {
+    "title": "Add dog",
+    "name": "Dog name",
+    "breed": "Dog breed",
+    "color": "Dog color",
+    "location": "Dog location",
+    "age": "Dog age",
+    "description": "About the dog",
+    "size": "Dog size",
+    "gender": "Gender",
+    "vaccinated": "Vaccinated?",
+    "neutered": "Neutered?",
+    "media": "Photos",
+    "saving": "Adding...",
+    "added": "Dog added successfully!",
+    "nameRequired": "Dog name is required",
+    "locationRequired": "Location is required",
+    "failed": "Failed to add dog"
+  },
+  "size": {
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female"
+  },
+  "adddogExtra": {
+    "ageNote": "You can enter a decimal value (eg. 3.6 years)"
+  },
+  "social": {
+    
+  },
+  "share": {
+    "title": "Share with others"
+  },
+  "userHeader": {
+    "avatarAlt": "user avatar",
+    "name": "{{name}}",
+    "followers": "Followers: {{count}}",
+    "following": "Following: {{count}}"
+  },
+  "userProfile": {
+    "title": "Edit Profile",
+    "wishlistTab": "Wishlist",
+    "profileTab": "Profile",
+    "wishlistEmpty": "Your wishlist is empty.",
+    "remove": "Remove",
+    "adopt": "Adopt",
+    "welcome": "Welcome",
+    "online": "Online",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "editProfile": "Edit Profile",
+    "deleting": "Deleting...",
+    "deleteAccount": "Delete Account",
+    "changePhoto": "Change Photo"
+  }
+  ,
+  "editdog": {
+    "title": "Edit {{name}}",
+    "newPhotos": "New photos selected (will replace existing):",
+    "currentPhotos": "Current photos:",
+    "noPhotos": "No photos selected",
+    "resetPhotos": "Reset Photos",
+    "saving": "Saving..."
+  },
+  "dogDetails": {
+    "imageAlt": "dog image",
+    "ageSuffix": "years",
+    "mixed": "mixed breed",
+    "p1": "Nany is a small sweet pup looking for a loving home.",
+    "p2": "Who wouldn't fall for such a charming creature. Please reach out and have a heart.",
+    "location": "Donji Miholjac",
+    "likes": "likes",
+    "vaccinated": "Vaccinated",
+    "notVaccinated": "Not vaccinated",
+    "neutered": "Neutered",
+    "notNeutered": "Not neutered",
+    "loadingMap": "Loading map…",
+    "approximateLocation": "Showing approximate location",
+    "searchBasedLocation": "Using search-based location",
+    "viewFullMap": "View Full Map",
+    "mapPreview": "Map Preview"
+  }
+  ,
+  "users": {
+    "title": "Users",
+    "empty": "No users found"
+  }
+  ,
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"  },
+  "fields": {
+    "name": "Name:",
+    "breed": "Breed:",
+    "age": "Age:",
+    "location": "Location:",
+    "color": "Color:",
+    "size": "Size:",
+    "gender": "Gender:",
+    "likes": "Likes:",
+    "vaccination": "Vaccination:",
+    "description": "Description:",
+    "phone": "Phone:",
+    "email": "Email:",
+    "userType": "User Type:",
+    "postedBy": "Posted by:",
+    "contactOwner": "Contact Owner"
+  },
+  "language": {
+    "selectAria": "Select language"
+  }
+}

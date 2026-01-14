@@ -1,0 +1,207 @@
+{
+  "Accept": "Akzeptieren",
+  "Close": "Schließen",
+  "terms_of_use_title": "Nutzungsbedingungen für die Hundeadoptionsanwendung",
+  "unauth_subheading": "Sie müssen angemeldet oder registriert sein, um einen Hund hinzuzufügen, zur Wunschliste hinzuzufügen oder zu adoptieren.",
+  "terms_of_use": "1. Allgemeines\nDiese Anwendung (im Folgenden 'Anwendung') ist Eigentum von [Name Ihrer App/Firma] (im Folgenden 'Wir' oder 'Unser'). Durch die Nutzung dieser Anwendung stimmen Sie allen in diesem Dokument aufgeführten Bedingungen zu. Wenn Sie mit diesen Bedingungen nicht einverstanden sind, nutzen Sie die Anwendung bitte nicht.\n2. Definition des Nutzers\nEin Nutzer ist jede Person, die die Anwendung verwendet. Nutzer können unterteilt werden in:\n• Vereine/Tierheime: Nutzer, die Vereine oder Tierheime für ausgesetzte Hunde vertreten.\n• Adoptierende: Personen, die einen Hund zur Adoption suchen.\n3. Verbot von Verkauf und Verkaufsanzeigen\n• Striktes Verbot: Es ist strengstens untersagt, die Anwendung für jegliche Form von Verkauf, Weiterverkauf oder Werbung für den Verkauf von Hunden, Katzen oder anderen Tieren zu nutzen.\n• Zuchtanzeigen: Werbung für die Zucht von Hunden oder anderen Tieren ist verboten.\n• Strafen: Ein Verstoß gegen diese Bedingung führt zur sofortigen Sperrung des Benutzerkontos und möglicherweise zu rechtlichen Schritten.\n• Nutzung der Anwendung: Die Anwendung dient ausschließlich der Vermittlung ausgesetzter Hunde an potenzielle Adoptierende und der Bereitstellung von Informationen über Vereine/Tierheime.\n4. Nutzung der Anwendung\n• Rechtzeitige Aktualisierung von Informationen: Vereine/Tierheime sind dafür verantwortlich, die Profile der Hunde aktuell zu halten.\n• Kommunikationsregeln: Die Nutzung der Anwendung für jegliches unangemessenes Verhalten, Beleidigungen oder Spam ist verboten.\n• Datenschutz: Wir verpflichten uns, die Privatsphäre der Nutzer gemäß unserer Datenschutzrichtlinie (Link zur Datenschutzrichtlinie) zu schützen.\n• Urheberrecht: Alle Inhalte der Anwendung sind urheberrechtlich geschützt. Unbefugte Nutzung ist verboten.\n5. Haftung\n• Keine Garantien: Wir garantieren nicht den Erfolg einer Adoption oder ein anderes Ergebnis.\n• Begrenzte Haftung: Wir übernehmen keine Verantwortung für Schäden oder Verluste, die durch die Nutzung der Anwendung entstehen.\n• Nutzerverantwortung: Nutzer sind für ihr eigenes Handeln und ihre Entscheidungen verantwortlich.\n6. Änderungen der Nutzungsbedingungen\n• Wir behalten uns das Recht vor, diese Nutzungsbedingungen jederzeit zu ändern.\n• Die Nutzer sind dafür verantwortlich, die aktualisierten Nutzungsbedingungen regelmäßig zu überprüfen.\n• Die fortgesetzte Nutzung der Anwendung nach Änderungen bedeutet die Annahme der neuen Bedingungen.\n7. Gerichtsstand\nDiese Nutzungsbedingungen unterliegen den Gesetzen von [Ihr Land/Bundesland].",
+  "nav": {
+    "about": "Über",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "dogs": "Hunde"
+  },
+  "button": {
+    "findFriend": "Finde deinen treuen Freund",
+    "register": "Registrieren",
+    "login": "Anmelden",
+    "addDog": "Hund hinzufügen",
+    "viewDetails": "Details anzeigen",
+    "adopt": "Adoptieren",
+    "addToList": "Zur Liste hinzufügen",    "removeFromList": "Von Liste entfernen",    "edit": "Bearbeiten",
+    "remove": "Entfernen",
+    "save": "Speichern"
+  },
+  "heading": {
+    "loggedIn": "Willkommen, {{name}} bei Sharedog Homeless",
+    "title": "Sie müssen angemeldet sein",
+    "subtitle": "zur Hunde-Adoptions-App"
+  },
+  "about": {
+    "p1": "Die Hunde-Adoptions-App ist der Schlüssel, um zu finden",
+    "p1strong": "deinen neuen besten Freund",
+    "founded": "EKY 2007-2020.",
+    "p2": "Durch die Adoption eines Hundes geben Sie ihm eine zweite Chance und bringen Freude und Liebe in Ihr Leben.",
+    "p3": "Ich wünsche Ihnen viel Freude mit Ihrem neuen Freund"
+  },
+  "search": {
+    "placeholder": "Suche deinen treuen Freund :)",
+    "allGenders": "Alle Geschlechter",
+    "allSizes": "Alle Größen",
+    "allLocations": "Alle Orte",
+    "noResults": "Keine Hunde entsprechen deinen Suchkriterien.",
+    "showAdvanced": "Erweiterte Suche",
+    "hideAdvanced": "Erweiterte Suche ausblenden",
+    "gender": "Geschlecht",
+    "size": "Größe",
+    "location": "Ort"
+  },
+  "doglist": {
+    "title": "Wähle deinen treuen Freund"
+  },
+  "register": {
+    "register": "Registrieren",
+    "name": "Ihr Name",
+    "username": "Benutzername",
+    "email": "E-Mail",
+    "phone": "Mobiltelefon",
+    "password": "Passwort",
+    "passwordAgain": "Passwort wiederholen",
+    "person": "Private Person oder Verein?",
+    "remember": "Erinnere dich an mich",
+    "already": "Schon ein Nutzer?",
+    "altRegister": "Oder registriere dich mit deinem Konto..."
+  },
+  "registerOptions": {
+    "private": "Private Person",
+    "organization": "Verein"
+  },
+  "brand": {
+    "name": "Sharedog Homeless",
+    "logoAlt": "Sharedog Homeless Logo"
+  },
+  "login": {
+    "title": "Anmelden",
+    "remember": "Erinnere dich an mich"
+  },
+  "validation": {
+    "emailRequired": "E-Mail ist erforderlich",
+    "emailInvalid": "Geben Sie eine gültige E-Mail-Adresse ein",
+    "passwordRequired": "Passwort ist erforderlich",
+    "passwordMin": "Das Passwort muss mindestens {min} Zeichen lang sein",
+    "required": "ist erforderlich"
+  },
+  "adddog": {
+    "title": "Hund hinzufügen",
+    "name": "Hundename",
+    "breed": "Rasse",
+    "color": "Farbe",
+    "location": "Ort",
+    "age": "Alter",
+    "description": "Über den Hund",
+    "size": "Größe",
+    "vaccinated": "Geimpft?",
+    "neutered": "Kastriert?",
+    "gender": "Geschlecht",
+    "media": "Fotos",
+    "saving": "Hinzufügen...",
+    "added": "Hund erfolgreich hinzugefügt!",
+    "nameRequired": "Hundename ist erforderlich",
+    "locationRequired": "Ort ist erforderlich",
+    "failed": "Hund konnte nicht hinzugefügt werden"
+  },
+  "gender": {
+    "male": "Männlich",
+    "female": "Weiblich"
+  },
+  "size": {
+    "small": "Klein",
+    "medium": "Mittel",
+    "large": "Groß"
+  },
+  "doglist": {
+    "title": "Wählen Sie Ihren Freund fürs Leben",
+    "loading": "Lade Hunde...",
+    "empty": "Keine Hunde.",
+    "addFirst": "Ersten Hund hinzufügen",
+    "confirmRemove": "Sind Sie sicher, dass Sie {{name}} entfernen möchten?",
+    "failedToRemove": "Hund konnte nicht entfernt werden",
+    "failedToLoad": "Hunde konnten nicht geladen werden"
+  },
+  "adddogExtra": {
+    "ageNote": "Sie können einen Dezimalwert eingeben (z. B. 3,6 Jahre)"
+  },
+  "social": {
+    
+  },
+  "share": {
+    "title": "Mit anderen teilen"
+  },
+  "userHeader": {
+    "avatarAlt": "Benutzer-Avatar",
+    "name": "{{name}}",
+    "followers": "Follower: {{count}}",
+    "following": "Folgt: {{count}}"
+  },
+  "userProfile": {
+    "title": "Profil bearbeiten",
+    "wishlistTab": "Wunschliste",
+    "profileTab": "Profil",
+    "wishlistEmpty": "Deine Wunschliste ist leer.",
+    "remove": "Entfernen",
+    "adopt": "Adoptieren",
+    "welcome": "Willkommen",
+    "online": "Online",
+    "saving": "Speichern...",
+    "saveChanges": "Änderungen speichern",
+    "cancel": "Abbrechen",
+    "editProfile": "Profil bearbeiten",
+    "deleting": "Löschen...",
+    "deleteAccount": "Konto löschen",
+    "changePhoto": "Foto ändern"
+  }
+  ,
+  "dogDetails": {
+    "imageAlt": "Hundebild",
+    "ageSuffix": "Jahre",
+    "mixed": "Mischling",
+    "p1": "Nany ist ein kleiner, süßer Welpe, der ein liebevolles Zuhause sucht.",
+    "p2": "Wer könnte einem so charmanten Wesen widerstehen? Bitte meldet euch.",
+    "location": "Donji Miholjac",
+    "likes": "likes",
+    "vaccinated": "Geimpft",
+    "notVaccinated": "Nicht geimpft",
+    "neutered": "Kastriert",
+    "notNeutered": "Nicht kastriert",
+    "approximateLocation": "Ungefähre Lage angezeigt",
+    "searchBasedLocation": "Standort basierend auf Suche",
+    "loadingMap": "Karte wird geladen...",
+    "mapPreview": "Kartenvorschau",
+    "viewFullMap": "Vollständige Karte anzeigen"
+  }
+  ,
+  "users": {
+    "title": "Benutzer",
+    "empty": "Keine Benutzer gefunden"
+  }
+  ,
+  "language": {
+    "selectAria": "Sprache auswählen"
+  },
+  "editdog": {
+    "title": "{{name}} bearbeiten",
+    "newPhotos": "Neue Fotos ausgewählt (ersetzen die vorhandenen):",
+    "currentPhotos": "Aktuelle Fotos:",
+    "noPhotos": "Keine Fotos ausgewählt",
+    "resetPhotos": "Fotos zurücksetzen",
+    "saving": "Speichern..."
+  },
+  "fields": {
+    "name": "Name:",
+    "breed": "Rasse:",
+    "gender": "Geschlecht:",
+    "age": "Alter:",
+    "location": "Ort:",
+    "color": "Farbe:",
+    "size": "Größe:",
+    "vaccination": "Impfung:",
+    "description": "Beschreibung:",
+    "phone": "Telefon:",
+    "email": "E-Mail:",
+    "userType": "Benutzertyp:",
+    "postedBy": "Veröffentlicht von:",
+    "contactOwner": "Besitzer kontaktieren"
+  },
+  "common": {
+    "close": "Schließen"
+  }
+}

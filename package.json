@@ -1,0 +1,20 @@
+{
+  "name": "eky-root",
+  "private": true,
+  "scripts": {
+    "server": "npm --prefix server start",
+    "server:dev": "npm --prefix server run dev",
+    "client": "npm --prefix client start",
+    "dev": "concurrently \"npm run server:dev\" \"npm run client\"",
+    "stop": "lsof -ti:3001 | xargs kill -9 2>/dev/null || true && lsof -ti:3000 | xargs kill -9 2>/dev/null || true"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "mongodb": "^7.0.0",
+    "react-leaflet": "^5.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "typescript": "^5.1.6"
+  }
+}

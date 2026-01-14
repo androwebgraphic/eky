@@ -1,0 +1,288 @@
+/* Mobile-First Responsive Fixes */
+/* These rules prevent viewport scaling issues on mobile devices */
+
+/* Improve viewport constraint */
+html {
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Fix main wrapper specifically for mobile */
+#Wrap {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  min-width: 320px !important;
+  height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Scrollable content area */
+.scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  padding-top: 60px; /* Space for fixed header */
+  padding-bottom: 50px; /* Space for fixed footer */
+}
+
+/* General header positioning */
+header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  width: 100vw !important;
+  background: #72211f;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Ensure nav stays visible and responsive to scrolling */
+nav#top {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+  z-index: 1000 !important;
+  background: #72211f !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
+
+nav#top ul, nav#top a, nav#top li {
+  pointer-events: auto !important;
+}
+
+/* Ensure footer is visible on mobile */
+footer, #footer-nav {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+  height: 50px !important;
+  z-index: 1100 !important;
+}
+
+#footer-nav ul {
+  width: 100vw !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+  list-style: none !important;
+}
+
+/* Ensure all elements respect viewport width */
+*, *::before, *::after {
+  box-sizing: border-box;
+  max-width: 100vw;
+}
+
+/* Responsive media */
+img, video, iframe, embed, object, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fix card grid layout for mobile */
+.grid-container, .card-grid, .dog-grid {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+/* Prevent text overflow */
+.container, main, section, article, div, p, h1, h2, h3, h4, h5, h6 {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Mobile form improvements */
+input, textarea, select, button {
+  max-width: 100%;
+  font-size: 16px; /* Prevents zoom on iOS Safari */
+  -webkit-appearance: none;
+  border-radius: 0;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+textarea {
+  -webkit-appearance: none;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+}
+
+/* Fix common layout issues */
+table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+pre {
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Prevent elements from causing horizontal overflow */
+.card, .modal, .popup, .tooltip {
+  max-width: calc(100vw - 20px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Mobile-specific grid fixes */
+.grid, .flex, .flexbox {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Header and navigation fixes */
+header, .header, .navbar, nav {
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+/* Navigation should be at very top */
+nav#top {
+  z-index: 1000 !important;
+  top: 0 !important;
+}
+
+/* Ensure header is always on top */
+header {
+  z-index: 1001 !important;
+  top: 0 !important;
+  margin-top: 0 !important;
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  /* Prevent flickering */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: auto;
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Ensure expanded user info doesn't get cut off */
+header div[style*="marginTop"] {
+  position: relative;
+  z-index: 2;
+  background: rgba(114, 33, 31, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Prevent profile image flickering */
+header img {
+  display: block;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: optimize-contrast;
+}
+
+/* Touch-friendly interactions */
+button, a, .clickable {
+  min-height: 44px; /* iOS recommended touch target size */
+  min-width: 44px;
+}
+
+/* Prevent zoom on focus for mobile */
+@media screen and (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+  
+  /* Additional mobile viewport fixes */
+  body {
+    position: relative;
+    transform: translateZ(0); /* Force hardware acceleration */
+  }
+  
+  /* Prevent horizontal scrolling on small screens */
+  * {
+    max-width: 100vw !important;
+  }
+
+  /* Mobile-specific footer and navigation visibility */
+  nav#top {
+    min-height: 50px !important;
+    padding: 0.5rem 0 !important;
+  }
+
+  #footer-nav ul {
+    min-height: 50px !important;
+    height: 50px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-around !important;
+  }
+
+  #footer-nav ul li {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 50px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #footer-nav ul a {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+    padding: 0 0.5rem !important;
+  }
+
+  #footer-nav ul .eky-icon {
+    font-size: 2rem !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+  }
+
+  /* Ensure main content doesn't get hidden behind footer on mobile */
+  main {
+    margin-bottom: 100px !important;
+  }
+}

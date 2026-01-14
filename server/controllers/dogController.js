@@ -1,0 +1,368 @@
+import Dog from '../models/dogModel.js';
+import path from 'path';
+import fs from 'fs';
+import sharp from 'sharp';
+
+// PATCH /api/dogs/:id
+export const updateDog = async (req, res) => {
+  try {
+    console.log('=== UPDATE DOG REQUEST ===');
+    console.log('Dog ID:', req.params.id);
+    console.log('Request body keys:', Object.keys(req.body));
+    console.log('Request files:', !!req.files);
+    if (req.files) {
+      console.log('Files keys:', Object.keys(req.files));
+      if (req.files.media) {
+        console.log('Media files count:', Array.isArray(req.files.media) ? req.files.media.length : 1);
+      }
+    }
+    console.log('keepImages in body:', req.body.keepImages);
+    console.log('========================');
+    
+    const dog = await Dog.findById(req.params.id);
+    if (!dog) return res.status(404).json({ message: 'Dog not found' });
+    
+    // Authorization check: only the user who created the dog or superadmin can update it
+    const isSuperAdmin = req.user.role === 'superadmin';
+    const isOwner = dog.user.toString() === req.user._id.toString();
+    
+    if (!isOwner && !isSuperAdmin) {
+      return res.status(403).json({ message: 'Not authorized to update this dog' });
+    }
+    
+    console.log('Found dog:', dog.name);
+    console.log('Dog current images count:', dog.images ? dog.images.length : 0);
+
+    // Update fields
+    const fields = ['name','breed','age','color','location','description','size','gender','vaccinated','neutered'];
+    fields.forEach(f => {
+      if (typeof req.body[f] !== 'undefined') dog[f] = req.body[f];
+    });
+
+    // Handle keepImages (array of URLs to keep)
+    let keepImages = [];
+    if (req.body.keepImages) {
+      try {
+        keepImages = JSON.parse(req.body.keepImages);
+      } catch (e) {
+        console.warn('Could not parse keepImages:', e);
+      }
+    }
+    
+    // Remove images not in keepImages
+    if (Array.isArray(dog.images) && keepImages.length >= 0) {
+      const removed = dog.images.filter(img => !keepImages.includes(img.url));
+      // Delete files for removed images
+      for (const img of removed) {
+        try {
+          const m = img.url.match(/\/uploads\/dogs\/([^/]+)\/(.*)/);
+          if (m) {
+            const filePath = path.join(process.cwd(), 'uploads', 'dogs', m[1], m[2]);
+            if (fs.existsSync(filePath)) {
+              fs.unlinkSync(filePath);
+            }
+          }
+        } catch (err) {
+          console.warn('Could not delete image file:', err);
+        }
+      }
+      dog.images = dog.images.filter(img => keepImages.includes(img.url));
+    }
+
+    // Handle new uploaded images (media)
+    if (req.files && req.files.media) {
+      console.log('Processing new media files...');
+      const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
+      console.log('Upload directory:', uploadDir);
+      fs.mkdirSync(uploadDir, { recursive: true });
+      const mediaArray = Array.isArray(req.files.media) ? req.files.media : [req.files.media];
+      console.log('Media array length:', mediaArray.length);
+      
+      for (const mediaFile of mediaArray) {
+        console.log('Processing file:', mediaFile.originalname, 'type:', mediaFile.mimetype);
+        if (mediaFile.mimetype.startsWith('image/')) {
+          // Add new image variants, auto-orient using EXIF
+          console.log('Creating image variants...');
+          await Promise.all(sizes.map(async (w) => {
+            const outName = `image-${w}-${Date.now()}-${Math.floor(Math.random()*10000)}.jpg`;
+            const outPath = path.join(uploadDir, outName);
+            console.log(`Creating ${w}px variant: ${outName}`);
+            const buffer = await sharp(mediaFile.buffer)
+              .rotate() // auto-orient based on EXIF
+              .resize({ width: w })
+              .jpeg({ quality: 80 })
+              .toBuffer();
+            fs.writeFileSync(outPath, buffer);
+            const imageUrl = `${req.protocol}://${req.get('host')}/uploads/dogs/${dog._id}/${outName}`;
+            console.log(`Added image URL: ${imageUrl}`);
+            dog.images.push({ url: imageUrl, width: w, size: `${w}` });
+          }));
+        }
+      }
+      
+      // Create thumbnail from the first uploaded image
+      if (mediaArray.length > 0) {
+        try {
+          const thumbName = `thumb-64.jpg`;
+          const thumbPath = path.join(uploadDir, thumbName);
+          const buffer = await sharp(mediaArray[0].buffer)
+            .rotate() // auto-orient based on EXIF
+            .resize({ width: 64 })
+            .jpeg({ quality: 80 })
+            .toBuffer();
+          fs.writeFileSync(thumbPath, buffer);
+          dog.thumbnail = { url: `${req.protocol}://${req.get('host')}/uploads/dogs/${dog._id}/${thumbName}`, width: 64, size: '64' };
+          console.log('Created new thumbnail:', dog.thumbnail.url);
+        } catch (thumbErr) {
+          console.warn('Thumbnail creation failed', thumbErr);
+        }
+      }
+      
+      console.log('Final images count:', dog.images.length);
+    } else {
+      console.log('No new media files to process');
+    }
+
+    await dog.save();
+    console.log('Dog saved successfully. Final images count:', dog.images ? dog.images.length : 0);
+    console.log('=== UPDATE COMPLETE ===');
+    // Re-fetch the updated dog with populated user info
+    const updatedDog = await Dog.findById(dog._id).populate('user', 'name username email phone person');
+    res.json(updatedDog);
+  } catch (err) {
+    console.error('UpdateDog error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+// DELETE /api/dogs/:id
+
+// DELETE /api/dogs/:id
+export const deleteDog = async (req, res) => {
+  try {
+    console.log('DELETE /api/dogs/:id called with id:', req.params.id);
+    const dog = await Dog.findById(req.params.id);
+    if (!dog) {
+      console.warn('Dog not found for id:', req.params.id);
+      return res.status(404).json({ message: 'Dog not found', id: req.params.id });
+    }
+    
+    // Authorization check: only the user who created the dog or superadmin can delete it
+    const isSuperAdmin = req.user.role === 'superadmin';
+    const isOwner = dog.user.toString() === req.user._id.toString();
+    
+    if (!isOwner && !isSuperAdmin) {
+      return res.status(403).json({ message: 'Not authorized to delete this dog' });
+    }
+    // Remove all files in uploads/dogs/<id>
+    const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
+    try {
+      if (fs.existsSync(uploadDir)) {
+        fs.readdirSync(uploadDir).forEach(f => {
+          try { fs.unlinkSync(path.join(uploadDir, f)); } catch (fileErr) { console.warn('Failed to delete file:', f, fileErr); }
+        });
+        try { fs.rmdirSync(uploadDir); } catch (dirErr) { console.warn('Failed to remove dir:', uploadDir, dirErr); }
+      } else {
+        console.log('Upload dir does not exist:', uploadDir);
+      }
+    } catch (e) {
+      console.warn('Error cleaning up files for dog:', dog._id, e);
+    }
+    await dog.deleteOne();
+    console.log('Dog deleted:', dog._id);
+    res.json({ message: 'Dog deleted', id: dog._id });
+  } catch (err) {
+    console.error('Error in deleteDog:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+const sizes = [320, 640, 1024];
+
+export const createDog = async (req, res) => {
+  try {
+    // expected fields: name, breed, age, description, location, color, size, gender, vaccinated, neutered
+    const { name, breed, age, description, location, color, size, gender, vaccinated, neutered } = req.body;
+
+    if (!name) return res.status(400).json({ message: 'Name required' });
+
+    // normalize booleans that may come as strings
+    const vaccinatedBool = vaccinated === 'true' || vaccinated === 'on' || vaccinated === true;
+    const neuteredBool = neutered === 'true' || neutered === 'on' || neutered === true;
+
+    // create doc to get id
+    const dog = new Dog({ 
+      name, 
+      breed, 
+      age, 
+      description, 
+      location, 
+      color, 
+      size, 
+      gender, 
+      vaccinated: vaccinatedBool, 
+      neutered: neuteredBool,
+      user: req.user._id
+    });
+    await dog.save();
+
+    const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
+    fs.mkdirSync(uploadDir, { recursive: true });
+
+    // files from multer (memory storage)
+    // image file field name: 'media' (image or video)
+    // optional poster image for videos: 'poster'
+    if (req.files && req.files.media) {
+      const mediaFile = req.files.media[0];
+
+      if (mediaFile.mimetype.startsWith('image/')) {
+        // generate resized variants using sharp
+        const imageVariants = [];
+        const ext = '.jpg';
+
+        await Promise.all(sizes.map(async (w) => {
+          const outName = `image-${w}${ext}`;
+          const outPath = path.join(uploadDir, outName);
+          const buffer = await sharp(mediaFile.buffer)
+            .resize({ width: w })
+            .jpeg({ quality: 80 })
+            .toBuffer();
+          fs.writeFileSync(outPath, buffer);
+          imageVariants.push({ url: `${req.protocol}://${req.get('host')}/uploads/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
+        }));
+
+        // create a tiny 64px thumbnail for list display
+        try {
+          const thumbName = `thumb-64${ext}`;
+          const thumbPath = path.join(uploadDir, thumbName);
+          const thumbBuffer = await sharp(mediaFile.buffer)
+            .resize({ width: 64 })
+            .jpeg({ quality: 70 })
+            .toBuffer();
+          fs.writeFileSync(thumbPath, thumbBuffer);
+          dog.thumbnail = { url: `${req.protocol}://${req.get('host')}/uploads/dogs/${dog._id}/${thumbName}`, width: 64, size: '64' };
+        } catch (thumbErr) {
+          console.warn('Thumbnail creation failed', thumbErr);
+        }
+
+        dog.images = imageVariants;
+      } else if (mediaFile.mimetype.startsWith('video/')) {
+        // save video file
+        const videoExt = path.extname(mediaFile.originalname) || '.mp4';
+        const videoName = `video${videoExt}`;
+        const videoPath = path.join(uploadDir, videoName);
+        fs.writeFileSync(videoPath, mediaFile.buffer);
+        dog.video = { url: `${req.protocol}://${req.get('host')}/uploads/dogs/${dog._id}/${videoName}`, poster: [] };
+
+        // process poster image if provided
+        if (req.files.poster && req.files.poster[0]) {
+          const posterFile = req.files.poster[0];
+          const posterVariants = [];
+          const ext = '.jpg';
+          await Promise.all(sizes.map(async (w) => {
+            const outName = `poster-${w}${ext}`;
+            const outPath = path.join(uploadDir, outName);
+            const buffer = await sharp(posterFile.buffer)
+              .resize({ width: w })
+              .jpeg({ quality: 80 })
+              .toBuffer();
+            fs.writeFileSync(outPath, buffer);
+            posterVariants.push({ url: `${req.protocol}://${req.get('host')}/uploads/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
+          }));
+          dog.video.poster = posterVariants;
+
+          // create a tiny 64px thumbnail from the poster for list display (if thumbnail not set)
+          if (!dog.thumbnail) {
+            try {
+              const thumbName = `thumb-64${ext}`;
+              const thumbPath = path.join(uploadDir, thumbName);
+              const thumbBuffer = await sharp(posterFile.buffer)
+                .resize({ width: 64 })
+                .jpeg({ quality: 70 })
+                .toBuffer();
+              fs.writeFileSync(thumbPath, thumbBuffer);
+              dog.thumbnail = { url: `${req.protocol}://${req.get('host')}/uploads/dogs/${dog._id}/${thumbName}`, width: 64, size: '64' };
+            } catch (thumbErr) {
+              console.warn('Thumbnail creation failed', thumbErr);
+            }
+          }
+        }
+      }
+    }
+
+    await dog.save();
+    // Re-fetch dog with populated user info
+    const populatedDog = await Dog.findById(dog._id).populate('user', 'name username email phone person');
+    res.status(201).json(populatedDog);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+export const listDogs = async (req, res) => {
+  try {
+    const dogs = await Dog.find()
+      .populate('user', 'name username email phone person')
+      .sort({ createdAt: -1 });
+    res.json(dogs);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const getDogById = async (req, res) => {
+  try {
+    const dog = await Dog.findById(req.params.id)
+      .populate('user', 'name username email phone person');
+    if (!dog) {
+      return res.status(404).json({ message: 'Dog not found' });
+    }
+    res.json(dog);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// POST /api/dogs/:id/like
+export const likeDog = async (req, res) => {
+  try {
+    const dog = await Dog.findById(req.params.id);
+    if (!dog) {
+      return res.status(404).json({ message: 'Dog not found' });
+    }
+
+    // Check if already liked
+    if (dog.likes.includes(req.user._id)) {
+      return res.status(400).json({ message: 'Already liked this dog' });
+    }
+
+    // Add user to likes array
+    dog.likes.push(req.user._id);
+    await dog.save();
+
+    res.json({ message: 'Dog liked', likesCount: dog.likes.length });
+  } catch (err) {
+    console.error('Like dog error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// DELETE /api/dogs/:id/like
+export const unlikeDog = async (req, res) => {
+  try {
+    const dog = await Dog.findById(req.params.id);
+    if (!dog) {
+      return res.status(404).json({ message: 'Dog not found' });
+    }
+
+    // Remove user from likes array
+    dog.likes = dog.likes.filter(userId => userId.toString() !== req.user._id.toString());
+    await dog.save();
+
+    res.json({ message: 'Dog unliked', likesCount: dog.likes.length });
+  } catch (err) {
+    console.error('Unlike dog error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

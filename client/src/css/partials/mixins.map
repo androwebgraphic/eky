@@ -1,0 +1,12 @@
+{
+	"version": 3,
+	"file": "mixins.css",
+	"sources": [
+		"../../sass/partials/mixins.scss"
+	],
+	"sourcesContent": [
+		"@mixin gradient(){\n\nfont-size: 2.8rem;\n background: #42210B;\n background: -webkit-linear-gradient(to top, #42210B 0%, #B16C2E 100%);\n background: -moz-linear-gradient(to top, #42210B 0%, #B16C2E 100%);\n background: linear-gradient(to top, #42210B 0%, #B16C2E 100%);\n -webkit-background-clip: text;\n -webkit-text-fill-color: transparent;\n \n // background: #A2E267;\n //  background: -webkit-linear-gradient(to top, #A2E267 0%, #789617 100%);\n //  background: -moz-linear-gradient(to top, #A2E267 0%, #789617 100%);\n //  background: linear-gradient(to top, #A2E267 0%, #789617 100%);\n //  -webkit-background-clip: text;\n //  -webkit-text-fill-color: transparent;\n\n}\n\n@mixin gradientBg(){\n\n\nbackground: #A2E267;\n  background: -webkit-linear-gradient(to top, #7ab941 0%, #789617 100%);\n  background: -moz-linear-gradient(to top, #7AB941 0%, #789617 100%);\n  background: linear-gradient(to top, #7AB941 0%, #789617 100%);\n\n // -webkit-text-fill-color: transparent;\n\n}\n\n@mixin btn_radius{\n   \n   border-radius: .8rem;\n   border: none;\n}"
+	],
+	"names": [],
+	"mappings": ""
+}

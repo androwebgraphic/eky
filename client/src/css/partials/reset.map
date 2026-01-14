@@ -1,0 +1,12 @@
+{
+	"version": 3,
+	"file": "reset.css",
+	"sources": [
+		"../../sass/partials/reset.scss"
+	],
+	"sourcesContent": [
+		"body {\n  height: 100%;\n\n  margin: 0;\n  padding: 0;\n}\nhtml {\n  height: 100%;\n  font-size: 62.5%;\n}\n*,\n*::after,\n*::before {\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n  user-select: none;\n}\n\nul {\n  list-style: none;\n}\na {\n  text-decoration: none;\n}\n"
+	],
+	"names": [],
+	"mappings": ";AAAA,AAAA,IAAI,CAAC;EACH,MAAM,EAAE,IAAI;EAEZ,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;CACX;;;AACD,AAAA,IAAI,CAAC;EACH,MAAM,EAAE,IAAI;EACZ,SAAS,EAAE,KAAK;CACjB;;;AACD,AAAA,CAAC;AACD,CAAC,AAAA,OAAO;AACR,CAAC,AAAA,QAAQ,CAAC;EACR,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,UAAU,EAAE,UAAU;EACtB,WAAW,EAAE,IAAI;CAClB;;;AAED,AAAA,EAAE,CAAC;EACD,UAAU,EAAE,IAAI;CACjB;;;AACD,AAAA,CAAC,CAAC;EACA,eAAe,EAAE,IAAI;CACtB"
+}

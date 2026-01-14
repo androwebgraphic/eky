@@ -1,0 +1,207 @@
+{
+  "Accept": "Elfogadom",
+  "Close": "Bezárás",
+  "terms_of_use_title": "Az Alkalmazás Használati Feltételei",
+  "unauth_subheading": "A kutya hozzáadásához, kívánságlistához adáshoz vagy örökbefogadáshoz be kell jelentkezned vagy regisztrálnod kell.",
+  "terms_of_use": "1. Általános\nEz az alkalmazás (a továbbiakban: \"Alkalmazás\") a(z) [Az Ön Alkalmazásának/Cégének Neve] tulajdona (a továbbiakban: \"Mi\" vagy \"Miénk\"). Az Alkalmazás használatával Ön elfogadja a jelen dokumentumban foglalt összes feltételt. Ha nem ért egyet ezekkel a feltételekkel, ne használja az Alkalmazást.\n2. Felhasználó meghatározása\nFelhasználó minden olyan személy, aki használja az Alkalmazást. A felhasználók a következőkre oszthatók:\n• Egyesületek/Menekülthelyek: Olyan felhasználók, akik egyesületeket vagy menhelyeket képviselnek elhagyott kutyák számára.\n• Örökbefogadók: Személyek, akik kutyát keresnek örökbefogadásra.\n3. Eladási és eladási hirdetések tilalma\n• Szigorú tilalom: Szigorúan tilos az Alkalmazást bármilyen eladás, viszonteladás vagy kutyák, macskák vagy bármely más állat eladásának hirdetésére használni.\n• Tenyésztési hirdetések: Kutyák vagy más állatok tenyésztésének hirdetése tilos.\n• Büntetések: E feltétel megsértése azonnali felhasználói fióktiltást és esetleges jogi lépéseket von maga után.\n• Az Alkalmazás használata: Az Alkalmazás kizárólag elhagyott kutyák örökbefogadókkal való összekapcsolására és egyesületek/menhelyek információinak nyújtására szolgál.\n4. Az Alkalmazás használata\n• Információk időszerű frissítése: Az egyesületek/menhelyek felelősek a kutyaprofilok naprakészen tartásáért.\n• Kommunikációs szabályok: Az Alkalmazás bármilyen nem megfelelő viselkedésre, sértegetésre vagy spamre való használata tilos.\n• Adatvédelem: Elkötelezettek vagyunk a felhasználók adatainak védelme mellett az adatvédelmi szabályzatunknak megfelelően (link az adatvédelmi szabályzathoz).\n• Szerzői jog: Az Alkalmazás minden tartalma szerzői jogvédelem alatt áll. Jogosulatlan felhasználás tilos.\n5. Felelősség\n• Nincs garancia: Nem garantáljuk az örökbefogadás sikerét vagy bármilyen más eredményt.\n• Korlátozott felelősség: Nem vállalunk felelősséget az Alkalmazás használatából eredő károkért vagy veszteségekért.\n• Felhasználói felelősség: A felhasználók felelősek saját cselekedeteikért és döntéseikért.\n6. A használati feltételek módosítása\n• Fenntartjuk a jogot, hogy bármikor módosítsuk ezeket a használati feltételeket.\n• A felhasználók felelősek a frissített feltételek rendszeres ellenőrzéséért.\n• Az Alkalmazás további használata a feltételek módosítása után az új feltételek elfogadását jelenti.\n7. Joghatóság\nEzek a használati feltételek [Az Ön országa/állama] joghatósága alá tartoznak.",
+  "nav": {
+    "about": "Rólunk",
+    "login": "Bejelentkezés",
+    "register": "Regisztráció",
+    "dogs": "Kutyák"
+  },
+  "button": {
+    "findFriend": "Találd meg örök barátod",
+    "register": "Regisztráció",
+    "login": "Bejelentkezés",
+    "addDog": "Kutya hozzáadása",
+    "viewDetails": "Részletek megtekintése",
+    "adopt": "Örökbefogadás",
+    "addToList": "Hozzáadás a listához",    "removeFromList": "Eltávolítás a listáról",    "edit": "Szerkesztés",
+    "remove": "Eltávolítás",
+    "save": "Mentés"
+  },
+  "heading": {
+    "loggedIn": "Üdvözlünk, {{name}} a Sharedog Homeless-ben",
+    "title": "Be kell jelentkezned",
+    "subtitle": "a kutya örökbefogadó alkalmazásba"
+  },
+  "about": {
+    "p1": "A kutya örökbefogadó alkalmazás kulcsa a megtalálásnak",
+    "p1strong": "az új legjobb barátod",
+    "founded": "EKY 2007-2020.",
+    "p2": "A kutya örökbefogadásával második esélyt adsz neki és örömet, szeretetet hozol az életedbe.",
+    "p3": "Sok boldogságot kívánok az új barátoddal"
+  },
+  "search": {
+    "placeholder": "Keresd meg örök barátod :)",
+    "allGenders": "Minden nem",
+    "allSizes": "Minden méret",
+    "allLocations": "Minden helyszín",
+    "noResults": "Nincs kutya, aki megfelel a keresési feltételeidnek.",
+    "showAdvanced": "Részletes keresés",
+    "hideAdvanced": "Részletes keresés elrejtése",
+    "gender": "Nem",
+    "size": "Méret",
+    "location": "Helyszín"
+  },
+  "doglist": {
+    "title": "Válaszd ki örök barátodat"
+  },
+  "register": {
+    "register": "Regisztráció",
+    "name": "Neved",
+    "username": "Felhasználónév",
+    "email": "E-mail",
+    "phone": "Mobiltelefo",
+    "password": "Jelszó",
+    "passwordAgain": "Jelszó újra",
+    "person": "Magánszemély vagy Egyesület?",
+    "remember": "Emlékezz rám",
+    "already": "Már regisztráltál?",
+    "altRegister": "Vagy regisztrálj fiókoddal..."
+  },
+  "registerOptions": {
+    "private": "Magánszemély",
+    "organization": "Egyesület"
+  },
+  "brand": {
+    "name": "Sharedog Homeless",
+    "logoAlt": "Sharedog Homeless logó"
+  },
+  "login": {
+    "title": "Bejelentkezés",
+    "remember": "Emlékezz rám"
+  },
+  "validation": {
+    "emailRequired": "A email cím megadása kötelező",
+    "emailInvalid": "Érvényes email címet adjon meg",
+    "passwordRequired": "A jelszó megadása kötelező",
+    "passwordMin": "A jelszónak legalább {min} karakter hosszúnak kell lennie",
+    "required": "megadása kötelező"
+  },
+  "adddog": {
+    "title": "Kutya hozzáadása",
+    "name": "Kutya neve",
+    "breed": "Fajta",
+    "color": "Szín",
+    "location": "Hely",
+    "age": "Kor",
+    "description": "A kutyáról",
+    "size": "Méret",
+    "vaccinated": "Oltott?",
+    "neutered": "Ivartalanított?",
+    "gender": "Nem",
+    "media": "Fotók",
+    "saving": "Hozzáadás...",
+    "added": "Kutya sikeresen hozzáadva!",
+    "nameRequired": "A kutya neve kötelező",
+    "locationRequired": "A hely megadása kötelező",
+    "failed": "A kutya hozzáadása sikertelen"
+  },
+  "gender": {
+    "male": "Hím",
+    "female": "Nőstény"
+  },
+  "size": {
+    "small": "Kicsi",
+    "medium": "Közepes",
+    "large": "Nagy"
+  },
+  "doglist": {
+    "title": "Válaszd ki örök barátodat",
+    "loading": "Kutyák betöltése...",
+    "empty": "Nincsenek kutyák.",
+    "addFirst": "Első kutya hozzáadása",
+    "confirmRemove": "Biztos, hogy el szeretnéd távolítani {{name}} kutyát?",
+    "failedToRemove": "A kutya eltávolítása sikertelen",
+    "failedToLoad": "A kutyák betöltése sikertelen"
+  },
+  "adddogExtra": {
+    "ageNote": "Megadhat egy tizedes értéket (pl. 3,6 év)"
+  },
+  "social": {
+    
+  },
+  "share": {
+    "title": "Ossza meg másokkal"
+  },
+  "userHeader": {
+    "avatarAlt": "felhasználói avatar",
+    "name": "{{name}}",
+    "followers": "Követők: {{count}}",
+    "following": "Követ: {{count}}"
+  },
+  "userProfile": {
+    "title": "Profil szerkesztése",
+    "wishlistTab": "Kívánságlista",
+    "profileTab": "Profil",
+    "wishlistEmpty": "A kívánságlistád üres.",
+    "remove": "Eltávolítás",
+    "adopt": "Örökbefogadás",
+    "welcome": "Üdvözlünk",
+    "online": "Online",
+    "saving": "Mentés...",
+    "saveChanges": "Változások mentése",
+    "cancel": "Mégse",
+    "editProfile": "Profil szerkesztése",
+    "deleting": "Törlés...",
+    "deleteAccount": "Fiók törlése",
+    "changePhoto": "Fénykép cseréje"
+  }
+  ,
+  "dogDetails": {
+    "imageAlt": "kutya kép",
+    "ageSuffix": "év",
+    "mixed": "keverék",
+    "p1": "Nany egy kicsi, édes kölyök, aki szerető otthont keres.",
+    "p2": "Ki tudna ellenállni egy ilyen bájos lénynek? Kérjük, jelentkezzenek.",
+    "location": "Donji Miholjac",
+    "likes": "kedvelés",
+    "vaccinated": "Oltott",
+    "notVaccinated": "Nem oltott",
+    "neutered": "Ivartalanított",
+    "notNeutered": "Nem ivartalanított",
+    "approximateLocation": "Hozzávetőleges hely megjelenítve",
+    "searchBasedLocation": "Keresés alapján meghatározott hely",
+    "loadingMap": "Térkép betöltése...",
+    "mapPreview": "Térkép előnézet",
+    "viewFullMap": "Teljes térkép megtekintése"
+  }
+  ,
+  "users": {
+    "title": "Felhasználók",
+    "empty": "Nincsenek található felhasználók"
+  }
+  ,
+  "language": {
+    "selectAria": "Nyelv kiválasztása"
+  },
+  "editdog": {
+    "title": "{{name}} szerkesztése",
+    "newPhotos": "Új fotók kiválasztva (lecserélik a meglévőket):",
+    "currentPhotos": "Jelenlegi fotók:",
+    "noPhotos": "Nincsenek fotók kiválasztva",
+    "resetPhotos": "Fotók visszaállítása",
+    "saving": "Mentés..."
+  },
+  "fields": {
+    "name": "Név:",
+    "breed": "Fajta:",
+    "gender": "Nem:",
+    "age": "Kor:",
+    "location": "Hely:",
+    "color": "Szín:",
+    "size": "Méret:",
+    "vaccination": "Oltás:",
+    "description": "Leírás:",
+    "phone": "Telefon:",
+    "email": "E-mail:",
+    "userType": "Felhasználó típusa:",
+    "postedBy": "Közzétette:",
+    "contactOwner": "Kapcsolatba lépés a tulajdonossal"
+  },
+  "common": {
+    "close": "Bezár"
+  }
+}

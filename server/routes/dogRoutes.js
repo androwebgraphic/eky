@@ -1,9 +1,12 @@
+
 import express from 'express';
 import multer from 'multer';
-import { createDog, listDogs, getDogById, updateDog, deleteDog, likeDog, unlikeDog } from '../controllers/dogController.js';
 import auth from '../middleware/auth.js';
+import { createDog, listDogs, getDogById, updateDog, deleteDog, likeDog, unlikeDog, requestAdoption, confirmAdoption, cancelAdoption } from '../controllers/dogController.js';
 
 const router = express.Router();
+
+
 
 // use memoryStorage to process with sharp
 const storage = multer.memoryStorage();
@@ -15,6 +18,11 @@ const cpUpload = upload.fields([
   { name: 'poster', maxCount: 1 }
 ]);
 
+
+
+router.post('/:id/adopt-cancel', auth, cancelAdoption);
+router.post('/:id/adopt-confirm', auth, confirmAdoption);
+router.post('/:id/adopt-request', auth, requestAdoption);
 
 router.post('/', auth, cpUpload, createDog);
 router.get('/', listDogs);

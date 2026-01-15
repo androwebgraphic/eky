@@ -1,3 +1,117 @@
+// POST /api/dogs/:id/adopt-cancel
+import nodemailer from 'nodemailer';
+export const cancelAdoption = async (req, res) => {
+  try {
+    const dog = await Dog.findById(req.params.id).populate('user', 'email name');
+    if (!dog) return res.status(404).json({ message: 'Dog not found' });
+    if (dog.adoptionStatus !== 'pending' || !dog.adoptionQueue) {
+      return res.status(400).json({ message: 'No pending adoption for this dog' });
+    }
+    const userId = req.user._id.toString();
+    const adopterId = dog.adoptionQueue.adopter?.toString();
+    if (userId !== adopterId) {
+      return res.status(403).json({ message: 'Only the adopter can cancel adoption' });
+    }
+    // Save reason if provided
+    const reason = req.body?.reason || '';
+    // Reset adoption fields
+    dog.adoptionStatus = 'available';
+    dog.adoptionQueue = undefined;
+    await dog.save();
+    // Send email to both users (owner and adopter)
+    try {
+      const transporter = nodemailer.createTransport({
+        sendmail: true,
+        newline: 'unix',
+        path: '/usr/sbin/sendmail'
+      });
+      const ownerEmail = dog.user?.email;
+      const adopterEmail = req.user.email;
+      const subject = `Adoption cancelled for dog: ${dog.name}`;
+      const text = `Adoption for dog ${dog.name} has been cancelled by the adopter.${reason ? '\nReason: ' + reason : ''}`;
+      if (ownerEmail) {
+        await transporter.sendMail({ from: 'noreply@eky.local', to: ownerEmail, subject, text });
+      }
+      if (adopterEmail) {
+        await transporter.sendMail({ from: 'noreply@eky.local', to: adopterEmail, subject, text });
+      }
+    } catch (mailErr) {
+      console.warn('Failed to send cancellation email:', mailErr);
+    }
+    res.json({ message: 'Adoption cancelled', reason });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+// POST /api/dogs/:id/adopt-confirm
+export const confirmAdoption = async (req, res) => {
+  try {
+    const dog = await Dog.findById(req.params.id);
+    if (!dog) return res.status(404).json({ message: 'Dog not found' });
+    if (dog.adoptionStatus !== 'pending' || !dog.adoptionQueue) {
+      return res.status(400).json({ message: 'No pending adoption for this dog' });
+    }
+    const userId = req.user._id.toString();
+    const ownerId = dog.user.toString();
+    const adopterId = dog.adoptionQueue.adopter?.toString();
+    if (userId === ownerId) {
+      dog.adoptionQueue.ownerConfirmed = true;
+    } else if (userId === adopterId) {
+      dog.adoptionQueue.adopterConfirmed = true;
+    } else {
+      return res.status(403).json({ message: 'Not authorized to confirm adoption' });
+    }
+    // If both confirmed, mark as adopted and remove from DB
+    if (dog.adoptionQueue.ownerConfirmed && dog.adoptionQueue.adopterConfirmed) {
+      dog.adoptionStatus = 'adopted';
+      await dog.deleteOne();
+      // TODO: optionally notify both users
+      return res.json({ message: 'Dog adopted and removed from database' });
+    } else {
+      await dog.save();
+      return res.json({ message: 'Adoption confirmation saved', adoptionQueue: dog.adoptionQueue });
+    }
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+// POST /api/dogs/:id/adopt-request
+export const requestAdoption = async (req, res) => {
+  try {
+    const dog = await Dog.findById(req.params.id).populate('user', 'email name');
+    if (!dog) return res.status(404).json({ message: 'Dog not found' });
+    if (dog.adoptionStatus !== 'available') {
+      return res.status(400).json({ message: 'Dog is not available for adoption' });
+    }
+    // Set adoption queue and status
+    dog.adoptionStatus = 'pending';
+    dog.adoptionQueue = {
+      adopter: req.user._id,
+      ownerConfirmed: false,
+      adopterConfirmed: false
+    };
+    await dog.save();
+    // Pošalji email vlasniku
+    try {
+      const transporter = nodemailer.createTransport({
+        sendmail: true,
+        newline: 'unix',
+        path: '/usr/sbin/sendmail'
+      });
+      const ownerEmail = dog.user?.email;
+      if (ownerEmail) {
+        const subject = `Zahtjev za posvajanje psa: ${dog.name}`;
+        const text = `Korisnik ${req.user.name || req.user.username || req.user.email} želi posvojiti psa ${dog.name}.\nPrijavite se na platformu za potvrdu ili odbijanje posvajanja.`;
+        await transporter.sendMail({ from: 'noreply@eky.local', to: ownerEmail, subject, text });
+      }
+    } catch (mailErr) {
+      console.warn('Failed to send adoption request email:', mailErr);
+    }
+    res.json({ message: 'Adoption request sent', dog });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
 import Dog from '../models/dogModel.js';
 import path from 'path';
 import fs from 'fs';
@@ -305,7 +419,14 @@ export const listDogs = async (req, res) => {
     const dogs = await Dog.find()
       .populate('user', 'name username email phone person')
       .sort({ createdAt: -1 });
-    res.json(dogs);
+    // Ensure adoptionStatus and adoptionQueue are always present
+    const dogsWithAdoption = dogs.map(dog => {
+      const obj = dog.toObject();
+      if (typeof obj.adoptionStatus === 'undefined') obj.adoptionStatus = 'available';
+      if (typeof obj.adoptionQueue === 'undefined') obj.adoptionQueue = null;
+      return obj;
+    });
+    res.json(dogsWithAdoption);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -318,7 +439,11 @@ export const getDogById = async (req, res) => {
     if (!dog) {
       return res.status(404).json({ message: 'Dog not found' });
     }
-    res.json(dog);
+    // Ensure adoptionStatus and adoptionQueue are always present
+    const obj = dog.toObject();
+    if (typeof obj.adoptionStatus === 'undefined') obj.adoptionStatus = 'available';
+    if (typeof obj.adoptionQueue === 'undefined') obj.adoptionQueue = null;
+    res.json(obj);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

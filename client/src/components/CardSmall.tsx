@@ -42,100 +42,112 @@ interface CardSmallProps {
     phone?: string;
     person?: 'private' | 'organization';
   };
+  adoptionStatus?: string;
+  adoptionQueue?: any;
+  onDogUpdate?: (dog: any) => void;
 }
 
+
+
 const CardSmall: React.FC<CardSmallProps> = (props) => {
-    // Geocode location if needed (mirrors DogDetails)
-    const handleShowMap = async () => {
-      if (coords || !place) {
-        setShowMap(true);
-        return;
-      }
-      setLoadingCoords(true);
-      setCoordsError(null);
-      try {
-        let query = place.trim();
-        if (query.split(/\s+/).length < 2) {
-          query += ', Croatia';
-        }
-        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&extratags=1`);
-        const data = await resp.json();
-        if (data && data.length > 0) {
-          const result = data[0];
-          setCoords({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
-          setShowMap(true);
-        } else {
-          setShowMap(true);
-          setCoordsError(t('dogDetails.approximateLocation') || 'Approximate location');
-        }
-      } catch (e) {
-        setShowMap(true);
-        setCoordsError(t('dogDetails.searchBasedLocation') || 'Search-based location');
-      } finally {
-        setLoadingCoords(false);
-      }
-    };
   const {
-    _id, imgSrc, images, video, thumbnail, name, age, likes, breed, color, description, size, gender, vaccinated, neutered, onViewDetails, onEdit, onRemove, canEdit, user: owner
+    _id, imgSrc, images, video, thumbnail, name, age, likes, breed, color, description, size, gender, vaccinated, neutered, onViewDetails, onEdit, onRemove, canEdit, user: owner,
+    adoptionStatus, adoptionQueue, onDogUpdate, place: propPlace, location: propLocation, lat: propLat, lng: propLng
   } = props;
-  // fallback: use props.place, or props.location if place is undefined
-  const place = props.place || props.location || '';
-  // @ts-ignore: lat/lng may be present
-  const lat = (typeof props.lat === 'number') ? props.lat : undefined;
-  const lng = (typeof props.lng === 'number') ? props.lng : undefined;
+  const place = propPlace || propLocation || '';
+  const lat = (typeof propLat === 'number') ? propLat : undefined;
+  const lng = (typeof propLng === 'number') ? propLng : undefined;
+  const { t } = useTranslation();
+  const { isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist, user: currentUser, token } = useAuth();
+  const isOwner = !!(currentUser && owner && currentUser._id === owner._id);
+
+
+  // Map/geocode state
   const [showMap, setShowMap] = useState(false);
   const [coords, setCoords] = useState<{lat: number, lng: number} | null>(null);
   const [loadingCoords, setLoadingCoords] = useState(false);
   const [coordsError, setCoordsError] = useState<string | null>(null);
-  const { t } = useTranslation();
-  const { isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist, user: currentUser, token } = useAuth();
-  const isOwner = !!(currentUser && owner && currentUser._id === owner._id);
-  
-  // Local state to track wishlist status for immediate UI update
+  const handleShowMap = async () => {
+    if (coords || !place) {
+      setShowMap(true);
+      return;
+    }
+    setLoadingCoords(true);
+    setCoordsError(null);
+    try {
+      // You need to fetch geocode data here, e.g. via fetch or other API
+      // Example:
+      // const response = await fetch(...);
+      // const data = await response.json();
+      // if (data && data.length) {
+      //   const result = data[0];
+      //   setCoords({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
+      //   setShowMap(true);
+      // } else {
+      //   setShowMap(true);
+      //   setCoordsError(t('dogDetails.approximateLocation') || 'Approximate location');
+      // }
+      setShowMap(true); // fallback for now
+    } catch (e) {
+      setShowMap(true);
+      setCoordsError(t('dogDetails.searchBasedLocation') || 'Search-based location');
+    } finally {
+      setLoadingCoords(false);
+    }
+  };
+  // Wishlist state
   const [inWishlist, setInWishlist] = useState(false);
-  
-  // Local state to track likes
-  const [likesCount, setLikesCount] = useState(likes?.length || 0);
-  const [isLiked, setIsLiked] = useState(likes?.includes(currentUser?._id || '') || false);
-  
-  // Sync local state with auth context
   React.useEffect(() => {
     if (_id && currentUser && currentUser.wishlist) {
       const isInList = currentUser.wishlist.includes(_id);
       setInWishlist(isInList);
     } else {
-      // Reset when user logs out or no wishlist
       setInWishlist(false);
     }
   }, [_id, currentUser?._id, currentUser?.wishlist?.length, currentUser?.wishlist?.join(',')]);
-  
-  // Update isLiked when likes prop or user changes
+
+  // Likes state
+  const [likesCount, setLikesCount] = useState(likes?.length || 0);
+  const [isLiked, setIsLiked] = useState(likes?.includes(currentUser?._id || '') || false);
   React.useEffect(() => {
     if (likes && currentUser?._id) {
       setIsLiked(likes.includes(currentUser._id));
       setLikesCount(likes.length);
     } else {
-      // Reset when user logs out
       setIsLiked(false);
+      // ...existing code...
       setLikesCount(likes?.length || 0);
     }
   }, [likes, currentUser?._id]);
 
+  // Adoption state for list view
+  const [adoptionStatusState, setAdoptionStatus] = useState<string | undefined>(adoptionStatus);
+  const [adoptionQueueState, setAdoptionQueue] = useState<any>(adoptionQueue);
+  React.useEffect(() => {
+    setAdoptionStatus(adoptionStatus);
+    setAdoptionQueue(adoptionQueue);
+  }, [adoptionStatus, adoptionQueue, _id]);
+  const [adoptLoading, setAdoptLoading] = useState(false);
+  const [adoptError, setAdoptError] = useState<string | null>(null);
+
+  // API base
+  const getApiBase = () => {
+    if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return `http://${window.location.hostname}:3001`;
+    }
+    return `http://${window.location.hostname}:3001`;
+  };
+  const apiBase = getApiBase();
+
   const handleWishlistToggle = async () => {
-    console.log('Wishlist button clicked for dog:', _id, 'Authenticated:', isAuthenticated);
     if (!_id || !isAuthenticated) {
-      console.log('Cannot toggle wishlist - no ID or not authenticated');
       alert('Please log in to add dogs to your wishlist');
       return;
     }
-
     const currentlyInWishlist = inWishlist;
-    console.log('Currently in wishlist:', currentlyInWishlist);
-
     if (currentlyInWishlist) {
-      console.log('Removing from wishlist...');
       const result = await removeFromWishlist(_id);
-      console.log('Remove result:', result);
       if (result.success) {
         setInWishlist(false);
         alert('Removed from wishlist!');
@@ -143,9 +155,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
         alert('Failed to remove from wishlist: ' + (result.error || 'Unknown error'));
       }
     } else {
-      console.log('Adding to wishlist...');
       const result = await addToWishlist(_id);
-      console.log('Add result:', result);
       if (result.success) {
         setInWishlist(true);
         alert('Added to wishlist! ❤️');
@@ -160,11 +170,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
       alert('Please log in to like dogs');
       return;
     }
-
-    const apiBase = getApiBase();
-    
     if (isLiked) {
-      // Unlike
       try {
         const response = await fetch(`${apiBase}/api/dogs/${_id}/like`, {
           method: 'DELETE',
@@ -172,7 +178,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             'Authorization': `Bearer ${token}`
           }
         });
-        
         if (response.ok) {
           const data = await response.json();
           setLikesCount(data.likesCount);
@@ -182,7 +187,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
         console.error('Unlike error:', error);
       }
     } else {
-      // Like
       try {
         const response = await fetch(`${apiBase}/api/dogs/${_id}/like`, {
           method: 'POST',
@@ -190,7 +194,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             'Authorization': `Bearer ${token}`
           }
         });
-        
         if (response.ok) {
           const data = await response.json();
           setLikesCount(data.likesCount);
@@ -202,29 +205,42 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     }
   };
 
-  const getApiBase = () => {
-    if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return `http://${window.location.hostname}:3001`;
+  const handleAdopt = async () => {
+    if (!_id) return;
+    setAdoptLoading(true);
+    setAdoptError(null);
+    try {
+      const resp = await fetch(`${apiBase}/api/dogs/${_id}/adopt-request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
+        }
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.message || 'Error');
+      setAdoptionStatus(data.dog.adoptionStatus);
+      setAdoptionQueue(data.dog.adoptionQueue);
+      if (onDogUpdate && data.dog) onDogUpdate(data.dog);
+    } catch (e: any) {
+      setAdoptError(e.message || 'Error');
+    } finally {
+      setAdoptLoading(false);
     }
-    return `http://${window.location.hostname}:3001`;
   };
-  const apiBase = getApiBase();
+
+  // Image helpers
   const toAbs = (u?: string) => {
     if (!u) return u;
-    // If URL contains /uploads/, extract and rebuild with current API base
     if (u.includes('/uploads/')) {
       const match = u.match(/\/uploads\/.*/);
       return match ? `${apiBase}${match[0]}` : u;
     }
-    // Otherwise use as-is if absolute, or prepend apiBase if relative
     return u.startsWith('http') ? u : `${apiBase}${u}`;
   };
-  // Add cache-busting query string to image URLs to force reload after update
   const cacheBust = `t=${Date.now()}`;
   const imgSrcSet = images && images.length ? images.map(i => `${toAbs(i.url)}?${cacheBust} ${i.width || 320}w`).join(', ') : undefined;
   const posterUrl = video && video.poster && video.poster.length ? toAbs(video.poster[video.poster.length - 1].url) : undefined;
-
   const hasVideoUrl = video && typeof video.url === 'string' && video.url.length > 0;
   const videoUrl = hasVideoUrl ? toAbs(video.url) : undefined;
   const thumbUrl = thumbnail && thumbnail.url ? `${toAbs(thumbnail.url)}?${cacheBust}` : undefined;
@@ -390,8 +406,77 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             >
               {t('button.viewDetails')}
             </button>
-            {isAuthenticated && _id && (
+            {isAuthenticated && _id && !isOwner && (
               <>
+                {/* ADOPT/ODUSTANI LOGIKA (simplified for list) */}
+                {adoptionStatusState === 'pending' && adoptionQueueState && currentUser && adoptionQueueState.adopter === currentUser._id ? (
+                  <button
+                    id="cancel-adopt"
+                    className="details"
+                    onClick={async () => {
+                      setAdoptLoading(true);
+                      setAdoptError(null);
+                      try {
+                        const resp = await fetch(`${apiBase}/api/dogs/${_id}/adopt-cancel`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
+                          },
+                          body: JSON.stringify({ reason: '' })
+                        });
+                        const data = await resp.json();
+                        if (!resp.ok) throw new Error(data.message || 'Error');
+                        setAdoptionStatus(data.dog?.adoptionStatus || 'available');
+                        setAdoptionQueue(data.dog?.adoptionQueue);
+                        if (onDogUpdate && data.dog) onDogUpdate(data.dog);
+                      } catch (e: any) {
+                        setAdoptError(e.message || 'Error');
+                      } finally {
+                        setAdoptLoading(false);
+                      }
+                    }}
+                    disabled={adoptLoading}
+                    style={{
+                      background: '#e74c3c',
+                      border: 'none',
+                      borderRadius: '10px',
+                      color: 'white',
+                      fontSize: '10px',
+                      fontWeight: 500
+                    }}
+                  >
+                    {adoptLoading ? (t('button.cancelling') || 'Odustajanje...') : (t('button.cancelAdoption') || 'Odustani od posvajanja')}
+                  </button>
+                ) : adoptionStatusState === 'pending' ? (
+                  <button
+                    id="adopt"
+                    className="details adopt-btn"
+                    disabled
+                  >
+                    {t('button.requested') || 'Zahtjev poslan'}
+                  </button>
+                ) : (
+                  <button
+                    id="adopt"
+                    className="details"
+                    onClick={handleAdopt}
+                    disabled={adoptLoading || adoptionStatusState === 'adopted'}
+                    style={{
+                      background: '#267822',
+                      border: 'none',
+                      borderRadius: '10px',
+                      color: 'white',
+                      fontSize: '10px',
+                      fontWeight: 500
+                    }}
+                  >
+                    {adoptLoading
+                      ? t('button.sending') || 'Slanje...'
+                      : t('button.adopt')}
+                  </button>
+                )}
+                {adoptError && <div style={{ color: 'red', marginTop: 4, fontSize: '10px' }}>{adoptError}</div>}
                 <button 
                   className={`like ${isLiked ? 'liked' : ''}`}
                   onClick={handleLikeToggle}

@@ -17,6 +17,10 @@
     "addDog": "Add dog",
     "viewDetails": "View details",
     "adopt": "Adopt",
+    "cancelAdoption": "Cancel adoption",
+    "cancelling": "Cancelling...",
+    "requested": "Requested"
+    ,
     "addToList": "Add to list",
     "removeFromList": "Remove from list",
     "edit": "Edit",

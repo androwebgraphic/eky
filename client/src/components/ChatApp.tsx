@@ -43,6 +43,13 @@ const ChatApp: React.FC = () => {
   const { user, token, updateUser } = useAuth();
   const userWithBlocks = user as UserWithBlocks | null;
   console.log('[ChatApp] user:', user);
+  // Profile picture logic
+  const getProfilePictureUrl = () => {
+    if (user && (user as any).profilePicture) {
+      return `${getApiUrl()}${(user as any).profilePicture}`;
+    }
+    return '../img/androcolored-80x80.jpg'; // Default profile picture
+  };
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [convoUsernames, setConvoUsernames] = useState<{[key: string]: string}>({});
   const [selectedConvo, setSelectedConvo] = useState<Conversation | null>(null);
@@ -311,6 +318,16 @@ const ChatApp: React.FC = () => {
 
   return (
     <div className="chat-app-container">
+      {/* User profile at top */}
+      <div className="chat-app-profile-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <img
+          src={getProfilePictureUrl()}
+          alt="Profile"
+          style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '2px solid #ddd', minWidth: '40px', minHeight: '40px', maxWidth: '60px', maxHeight: '60px' }}
+        />
+        <span style={{ fontWeight: 500, fontSize: 16 }}>{user?.username || 'Me'}</span>
+        <span style={{ color: '#4CAF50', fontSize: 13, marginTop: 4 }}>Online</span>
+      </div>
       <div className="chat-app-sidebar">
         <input
           className="chat-app-search"

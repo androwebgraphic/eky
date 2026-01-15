@@ -28,6 +28,16 @@ const dogSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   createdAt: { type: Date, default: Date.now }
+  ,adoptionStatus: {
+    type: String,
+    enum: ['available', 'pending', 'adopted'],
+    default: 'available'
+  },
+  adoptionQueue: {
+    adopter: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    ownerConfirmed: { type: Boolean, default: false },
+    adopterConfirmed: { type: Boolean, default: false }
+  }
 });
 
 const Dog = mongoose.model('Dog', dogSchema);

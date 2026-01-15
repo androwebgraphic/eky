@@ -128,6 +128,38 @@
     border-radius: 10px;
     box-shadow: 0 1px 4px rgba(33,150,243,0.10);
   }
+  /* Responsive profile row for mobile */
+  .chat-app-profile-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+  }
+  .chat-app-profile-row img {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+  }
+  .chat-app-profile-row span {
+    font-size: 14px !important;
+    margin-top: 0 !important;
+  }
+  .chat-app-actions-row {
+    flex-direction: row !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    margin-bottom: 8px !important;
+  }
+  .chat-app-action-btn {
+    min-width: 80px !important;
+    max-width: 120px !important;
+    margin-bottom: 0 !important;
+    display: inline-block !important;
+  }
 }
 
 .chat-app-sidebar {

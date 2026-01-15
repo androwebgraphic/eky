@@ -17,7 +17,12 @@
     "addDog": "Kutya hozzáadása",
     "viewDetails": "Részletek megtekintése",
     "adopt": "Örökbefogadás",
-    "addToList": "Hozzáadás a listához",    "removeFromList": "Eltávolítás a listáról",    "edit": "Szerkesztés",
+    "cancelAdoption": "Örökbefogadás visszavonása",
+    "cancelling": "Visszavonás...",
+    "requested": "Kérve",
+    "addToList": "Hozzáadás a listához",
+    "removeFromList": "Eltávolítás a listáról",
+    "edit": "Szerkesztés",
     "remove": "Eltávolítás",
     "save": "Mentés"
   },

@@ -33,6 +33,8 @@ interface Dog {
     phone?: string;
     person?: 'private' | 'organization';
   };
+  adoptionStatus?: string;
+  adoptionQueue?: any;
 }
 
 const DogList: React.FC = () => {
@@ -229,44 +231,50 @@ const DogList: React.FC = () => {
           const canEdit = Boolean(isAuthenticated && (isOwner || isSuperAdmin));
           
           return (
-          <CardSmall
-            key={d._id}
-            _id={d._id}
-            name={d.name}
-            breed={d.breed}
-            age={d.age}
-            likes={d.likes || []}
-            images={d.images}
-            video={d.video}
-            thumbnail={d.thumbnail}
-            color={d.color}
-            place={d.place || d.location}
-            description={d.description}
-            size={d.size}
-            gender={d.gender}
-            vaccinated={d.vaccinated}
-            neutered={d.neutered}
-            user={d.user}
-            canEdit={canEdit}
-            onViewDetails={(event) => {
-              const rect = event.currentTarget.getBoundingClientRect();
-              setModalPosition({
-                x: rect.left + rect.width / 2,
-                y: rect.top + rect.height / 2
-              });
-              setSelectedDog(d);
-            }}
-            onEdit={(event) => {
-              const rect = event.currentTarget.getBoundingClientRect();
-              setModalPosition({
-                x: rect.left + rect.width / 2,
-                y: rect.top + rect.height / 2
-              });
-              handleEditDog(d);
-            }}
-            onRemove={() => handleRemoveDog(d)}
-          />
-        );
+            <CardSmall
+              key={d._id}
+              _id={d._id}
+              name={d.name}
+              breed={d.breed}
+              age={d.age}
+              likes={d.likes || []}
+              images={d.images}
+              video={d.video}
+              thumbnail={d.thumbnail}
+              color={d.color}
+              place={d.place || d.location}
+              description={d.description}
+              size={d.size}
+              gender={d.gender}
+              vaccinated={d.vaccinated}
+              neutered={d.neutered}
+              user={d.user}
+              canEdit={canEdit}
+              adoptionStatus={d.adoptionStatus}
+              adoptionQueue={d.adoptionQueue}
+              onDogUpdate={updatedDog => {
+                setDogs(dogs => dogs.map(dog => dog._id === updatedDog._id ? updatedDog : dog));
+                if (selectedDog && selectedDog._id === updatedDog._id) setSelectedDog(updatedDog);
+              }}
+              onViewDetails={(event) => {
+                const rect = event.currentTarget.getBoundingClientRect();
+                setModalPosition({
+                  x: rect.left + rect.width / 2,
+                  y: rect.top + rect.height / 2
+                });
+                setSelectedDog(d);
+              }}
+              onEdit={(event) => {
+                const rect = event.currentTarget.getBoundingClientRect();
+                setModalPosition({
+                  x: rect.left + rect.width / 2,
+                  y: rect.top + rect.height / 2
+                });
+                handleEditDog(d);
+              }}
+              onRemove={() => handleRemoveDog(d)}
+            />
+          );
         })}
       </div>
 
@@ -344,10 +352,19 @@ const DogList: React.FC = () => {
                 ×
               </span>
             </button>
-            <DogDetails {...selectedDog} onClose={() => {
-              setSelectedDog(null);
-              setModalPosition(null);
-            }} />
+            <DogDetails
+              {...selectedDog}
+              adoptionStatus={selectedDog?.adoptionStatus}
+              adoptionQueue={selectedDog?.adoptionQueue}
+              onDogUpdate={updatedDog => {
+                setDogs(dogs => dogs.map(d => d._id === updatedDog._id ? updatedDog : d));
+                setSelectedDog(updatedDog);
+              }}
+              onClose={() => {
+                setSelectedDog(null);
+                setModalPosition(null);
+              }}
+            />
           </div>
         </div>,
         document.body

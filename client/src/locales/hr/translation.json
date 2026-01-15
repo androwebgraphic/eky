@@ -17,6 +17,10 @@
     "addDog": "Dodaj psa",
     "viewDetails": "Vidi detalje",
     "adopt": "Posvoji",
+    "cancelAdoption": "Odustani od posvajanja",
+    "cancelling": "Odustajanje...",
+    "requested": "Zahtjev poslan"
+    ,
     "addToList": "Dodaj u listu",
     "removeFromList": "Ukloni iz liste",
     "edit": "Uredi",

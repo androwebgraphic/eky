@@ -31,9 +31,15 @@ interface DogDetailsProps {
     phone?: string;
     person?: 'private' | 'organization';
   };
+  adoptionStatus?: string;
+  adoptionQueue?: any;
+  onDogUpdate?: (dog: any) => void;
 }
 
-const DogDetails: React.FC<DogDetailsProps> = ({ _id, name, breed, age, images, video, thumbnail, color, place, location, description, size, gender, vaccinated, neutered, onClose, user: owner }) => {
+const DogDetails: React.FC<DogDetailsProps> = ({
+  _id, name, breed, age, images, video, thumbnail, color, place, location, description, size, gender, vaccinated, neutered, onClose, user: owner,
+  adoptionStatus, adoptionQueue, onDogUpdate
+}) => {
   const [showMap, setShowMap] = useState(false);
   const [coords, setCoords] = useState<{lat: number, lng: number} | null>(null);
   const [loadingCoords, setLoadingCoords] = useState(false);
@@ -66,14 +72,73 @@ const DogDetails: React.FC<DogDetailsProps> = ({ _id, name, breed, age, images, 
     }
   };
 
-  const handleAdopt = () => {
-    if (!owner || !owner.email) {
-      alert('Contact information not available');
-      return;
+  // Adoption state
+  const [adoptionStatusState, setAdoptionStatus] = useState<string | undefined>(adoptionStatus);
+  const [adoptionQueueState, setAdoptionQueue] = useState<any>(adoptionQueue);
+
+  // Sync with props if dog changes
+  React.useEffect(() => {
+    setAdoptionStatus(adoptionStatus);
+    setAdoptionQueue(adoptionQueue);
+  }, [_id, adoptionStatus, adoptionQueue]);
+  const [adoptLoading, setAdoptLoading] = useState(false);
+  const [adoptError, setAdoptError] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [cancelSuccess, setCancelSuccess] = useState(false);
+    // Odustani handler
+    const handleCancelAdoption = async () => {
+      if (!_id) return;
+      setCancelLoading(true);
+      setCancelError(null);
+      setCancelSuccess(false);
+      try {
+        const resp = await fetch(`${apiBase}/api/dogs/${_id}/adopt-cancel`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
+          },
+          body: JSON.stringify({ reason: cancelReason })
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.message || 'Error');
+        setCancelSuccess(true);
+        setAdoptionStatus(data.dog?.adoptionStatus || 'available');
+        setAdoptionQueue(data.dog?.adoptionQueue);
+        setCancelReason('');
+        if (onDogUpdate && data.dog) onDogUpdate(data.dog);
+      } catch (e: any) {
+        setCancelError(e.message || 'Error');
+      } finally {
+        setCancelLoading(false);
+      }
+    };
+  // Optionally: fetch status from props if available
+
+  const handleAdopt = async () => {
+    if (!_id) return;
+    setAdoptLoading(true);
+    setAdoptError(null);
+    try {
+      const resp = await fetch(`${apiBase}/api/dogs/${_id}/adopt-request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
+        }
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.message || 'Error');
+      setAdoptionStatus(data.dog.adoptionStatus);
+      setAdoptionQueue(data.dog.adoptionQueue);
+      if (onDogUpdate && data.dog) onDogUpdate(data.dog);
+    } catch (e: any) {
+      setAdoptError(e.message || 'Error');
+    } finally {
+      setAdoptLoading(false);
     }
-    const subject = encodeURIComponent(`Interested in adopting ${name}`);
-    const body = encodeURIComponent(`Hi,\n\nI am interested in adopting ${name}.\n\nPlease contact me to discuss further.\n\nThank you!`);
-    window.location.href = `mailto:${owner.email}?subject=${subject}&body=${body}`;
   };
   const getApiBase = () => {
     if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
@@ -346,8 +411,6 @@ const DogDetails: React.FC<DogDetailsProps> = ({ _id, name, breed, age, images, 
               id="add-to-list" 
               className="details"
               onClick={() => {
-                // eslint-disable-next-line no-console
-                console.log('[DogDetails] addToList:', t('button.addToList'), '| removeFromList:', t('button.removeFromList'));
                 handleWishlistToggle();
               }}
               style={{
@@ -355,24 +418,59 @@ const DogDetails: React.FC<DogDetailsProps> = ({ _id, name, breed, age, images, 
                 color: 'white'
               }}
             >
-              {(() => {
-                const addToList = t('button.addToList');
-                const removeFromList = t('button.removeFromList');
-                // eslint-disable-next-line no-console
-                console.log('[DogDetails][render] addToList:', addToList, '| removeFromList:', removeFromList);
-                return isInWishlist(_id) ? '💔 ' + removeFromList : '❤️ ' + addToList;
-              })()}
+              {isInWishlist(_id) ? '💔 ' + t('button.removeFromList') : '❤️ ' + t('button.addToList')}
             </button>
-            <button id="adopt" className="details" onClick={() => {
-              // eslint-disable-next-line no-console
-              console.log('[DogDetails] adopt:', t('button.adopt'));
-              handleAdopt();
-            }}>{(() => {
-              const adopt = t('button.adopt');
-              // eslint-disable-next-line no-console
-              console.log('[DogDetails][render] adopt:', adopt);
-              return adopt;
-            })()}</button>
+            {/* ADOPT/ODUSTANI LOGIKA */}
+            {adoptionStatusState === 'pending' && adoptionQueueState && currentUser && adoptionQueueState.adopter === currentUser._id ? (
+              <div style={{ marginTop: 16 }}>
+                <textarea
+                  placeholder={t('dogDetails.cancelReasonPlaceholder') || 'Razlog odustajanja (opcionalno)'}
+                  value={cancelReason}
+                  onChange={e => setCancelReason(e.target.value)}
+                  rows={2}
+                  style={{ width: '100%', maxWidth: 320, marginBottom: 8 }}
+                  disabled={cancelLoading}
+                />
+                <button
+                  className="details"
+                  style={{ backgroundColor: '#e74c3c', color: 'white', marginLeft: 0 }}
+                  onClick={handleCancelAdoption}
+                  disabled={cancelLoading}
+                >
+                  {cancelLoading ? (t('button.cancelling') || 'Odustajanje...') : (t('button.cancelAdoption') || 'Odustani od posvajanja')}
+                </button>
+                {cancelError && <div style={{ color: 'red', marginTop: 8 }}>{cancelError}</div>}
+                {cancelSuccess && <div style={{ color: 'green', marginTop: 8 }}>{t('dogDetails.cancelSuccess') || 'Posvajanje je otkazano.'}</div>}
+              </div>
+            ) : adoptionStatusState === 'pending' ? (
+              <>
+                <button
+                  id="adopt"
+                  className="details"
+                  disabled
+                  style={{ marginLeft: 12, backgroundColor: '#aaa', color: 'white' }}
+                >
+                  {t('button.requested') || 'Zahtjev poslan'}
+                </button>
+                <div style={{ marginTop: 8, color: '#555' }}>{t('dogDetails.waitingForConfirmation') || 'Čeka potvrdu vlasnika.'}</div>
+              </>
+            ) : (
+              <button
+                id="adopt"
+                className="details"
+                onClick={handleAdopt}
+                disabled={adoptLoading || adoptionStatusState === 'adopted'}
+                style={{ marginLeft: 12, backgroundColor: '#007bff', color: 'white' }}
+              >
+                {adoptLoading
+                  ? t('button.sending') || 'Slanje...'
+                  : t('button.adopt')}
+              </button>
+            )}
+            {adoptError && <div style={{ color: 'red', marginTop: 8 }}>{adoptError}</div>}
+            {adoptionStatusState === 'pending' && (
+              <div style={{ marginTop: 8, color: '#555' }}>{t('dogDetails.waitingForConfirmation') || 'Čeka potvrdu vlasnika.'}</div>
+            )}
           </>
         )}
       </div>

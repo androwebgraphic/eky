@@ -17,6 +17,9 @@
     "addDog": "Hund hinzufügen",
     "viewDetails": "Details anzeigen",
     "adopt": "Adoptieren",
+      "cancelAdoption": "Adoption abbrechen",
+      "cancelling": "Wird abgebrochen...",
+      "requested": "Angefragt",
     "addToList": "Zur Liste hinzufügen",    "removeFromList": "Von Liste entfernen",    "edit": "Bearbeiten",
     "remove": "Entfernen",
     "save": "Speichern"

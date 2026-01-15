@@ -105,8 +105,21 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   }
 
   const handleAdopt = async (dogId: string) => {
-    // This could be expanded to actually handle adoption process
-    alert(`Adoption request sent for dog ${dogId}! The owner will be contacted.`);
+    try {
+      const API_URL = getApiUrl();
+      const resp = await fetch(`${API_URL}/api/dogs/${dogId}/adopt-request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        }
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.message || 'Error');
+      await loadWishlist();
+    } catch (e: any) {
+      alert(e.message || 'Error');
+    }
   };
 
   const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -714,33 +727,77 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       )}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <button
-                        onClick={() => {
-                          const adoptKey = t('userProfile.adopt');
-                          const fallbackAdopt = t('button.adopt');
-                          // eslint-disable-next-line no-console
-                          console.log('[UserProfileModal] adoptKey:', adoptKey, '| fallback:', fallbackAdopt);
-                          handleAdopt(dog._id);
-                        }}
-                        style={{
-                          padding: '8px 16px',
-                          backgroundColor: '#4CAF50',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        🏠 {(() => {
-                          const adoptKey = t('userProfile.adopt');
-                          const fallbackAdopt = t('button.adopt');
-                          // eslint-disable-next-line no-console
-                          console.log('[UserProfileModal][render] adoptKey:', adoptKey, '| fallback:', fallbackAdopt);
-                          return adoptKey !== 'userProfile.adopt' ? adoptKey : fallbackAdopt;
-                        })()}
-                      </button>
+                      {(dog.adoptionStatus === 'pending' && dog.adoptionQueue && user && dog.adoptionQueue.adopter === user._id) ? (
+                        <button
+                          onClick={async () => {
+                            // Odustani (cancel adoption)
+                            try {
+                              const API_URL = getApiUrl();
+                              const resp = await fetch(`${API_URL}/api/dogs/${dog._id}/adopt-cancel`, {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  'Authorization': token ? `Bearer ${token}` : ''
+                                },
+                                body: JSON.stringify({ reason: '' })
+                              });
+                              const data = await resp.json();
+                              if (!resp.ok) throw new Error(data.message || 'Error');
+                              await loadWishlist();
+                            } catch (e) {
+                              alert(e.message || 'Error');
+                            }
+                          }}
+                          style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#e74c3c',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {t('button.cancelAdoption') || 'Odustani od posvajanja'}
+                        </button>
+                      ) : dog.adoptionStatus === 'pending' ? (
+                        <button
+                          disabled
+                          style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#aaa',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'not-allowed',
+                            fontSize: '14px',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {t('button.requested') || 'Zahtjev poslan'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            const adoptKey = t('userProfile.adopt');
+                            const fallbackAdopt = t('button.adopt');
+                            handleAdopt(dog._id);
+                          }}
+                          style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#4CAF50',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          🏠 {t('button.adopt')}
+                        </button>
+                      )}
                       <button
                         onClick={async () => {
                           const removeKey = t('userProfile.remove');

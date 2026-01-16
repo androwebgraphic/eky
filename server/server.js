@@ -20,18 +20,8 @@ const app = express();
  const allowedOrigins = clientOriginEnv ? clientOriginEnv.split(',').map(s => s.trim()) : [];
  // Regex to match typical LAN/private IP ranges (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
  const lanOriginRegex = /^https?:\/\/(?:localhost|127\.0\.0\.1|10(?:\.\d{1,3}){3}|172\.(?:1[6-9]|2[0-9]|3[0-1])(?:\.\d{1,3}){2}|192\.168(?:\.\d{1,3}){2})(:\d+)?$/;
- app.use(cors({
-   origin: function(origin, callback) {
-     // allow non-browser requests (curl, server-to-server)
-     if (!origin) return callback(null, true);
-     // debug logging can be enabled via environment if needed
-     // allow configured origins
-     if (allowedOrigins.includes(origin)) return callback(null, true);
-     // allow any localhost or LAN IP (developer convenience)
-     if (lanOriginRegex.test(origin)) return callback(null, true);
-     return callback(new Error('Not allowed by CORS'));
-   }
- }));
+// TEMP: Allow all origins for debugging. REMOVE BEFORE PRODUCTION!
+app.use(cors({ origin: '*', credentials: true }));
  app.use(express.json({ limit: '100mb' }));//to parse  Json data in the req.body
 import chatRoutes from './routes/chatRoutes.js';
  app.use(express.urlencoded({ limit: '100mb', extended: true })); //to parse form data in the req.body

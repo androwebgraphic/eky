@@ -1,3 +1,7 @@
+// Optional: Add a GET /logiranje route for browser access
+app.get('/logiranje', (req, res) => {
+  res.json({ message: 'This endpoint is for POST login only. Use POST /api/users/logiranje for API login.' });
+});
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from './db/connectDB.js';

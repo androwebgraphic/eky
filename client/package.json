@@ -28,6 +28,7 @@
     "visual:compare": "node scripts/compare-screenshots.js",
     "visual:test": "npm run build && npm run screenshot-locales && npm run visual:compare",
     "test": "react-scripts test",
+    "stop": "pkill -f react-scripts || true",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

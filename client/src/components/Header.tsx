@@ -72,7 +72,7 @@ const Header: React.FC = () => {
     <>
       {isAuthenticated ? (
         <>
-        <header 
+        <header
           ref={headerRef}
           style={{
           position: 'fixed',
@@ -91,6 +91,7 @@ const Header: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
+          <h1>TEST APLIKACIJA</h1>
           {/* Left side: Navigation Links */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <Link to="/" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.about')}</Link>

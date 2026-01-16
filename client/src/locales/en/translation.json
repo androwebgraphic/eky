@@ -25,7 +25,9 @@
     "removeFromList": "Remove from list",
     "edit": "Edit",
     "remove": "Remove",
-    "save": "Save"
+    "save": "Save",
+    "chat": "Chat",
+    "submitting": "Submitting..."
   },
   "heading": {
     "loggedIn": "Welcome, {{name}} to Sharedog Homeless",

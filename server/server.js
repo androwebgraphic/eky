@@ -12,10 +12,6 @@ dotenv.config();
 connectDB();
 
 const app = express();
-// Optional: Add a GET /logiranje route for browser access
-app.get('/logiranje', (req, res) => {
-  res.json({ message: 'This endpoint is for POST login only. Use POST /api/users/logiranje for API login.' });
-});
  const PORT = process.env.PORT || 3001;
  
  //MIDDLEWARE

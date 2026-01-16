@@ -18,10 +18,12 @@ interface AddDogFormData {
 }
 
 // Simple, reliable API URL for mobile
-const API_URL = process.env.REACT_APP_API_URL || 
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? 'http://localhost:3001' 
-    : `http://${window.location.hostname}:3001`);
+const API_URL = process.env.REACT_APP_API_URL ||
+  (window.location.protocol === 'https:'
+    ? `https://${window.location.hostname}`
+    : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:3001'
+      : 'http://172.20.10.2:3001'));
 
 const AdddogForm: React.FC = () => {
   const { t } = useTranslation();

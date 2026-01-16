@@ -416,9 +416,11 @@ export const createDog = async (req, res) => {
 
 export const listDogs = async (req, res) => {
   try {
+    const dbName = Dog.db && Dog.db.name ? Dog.db.name : (Dog.db && Dog.db.databaseName ? Dog.db.databaseName : 'unknown');
     const dogs = await Dog.find()
       .populate('user', 'name username email phone person')
       .sort({ createdAt: -1 });
+    console.log(`[listDogs] Connected DB: ${dbName}, Dog count: ${dogs.length}`);
     // Ensure adoptionStatus and adoptionQueue are always present
     const dogsWithAdoption = dogs.map(dog => {
       const obj = dog.toObject();
@@ -428,6 +430,7 @@ export const listDogs = async (req, res) => {
     });
     res.json(dogsWithAdoption);
   } catch (err) {
+    console.error('[listDogs] Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };

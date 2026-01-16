@@ -22,7 +22,7 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "serve -s build",
     "build": "react-scripts build",
     "screenshot-locales": "node scripts/screenshot-locales.js",
     "visual:compare": "node scripts/compare-screenshots.js",

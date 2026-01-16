@@ -21,6 +21,7 @@ const app = express();
  // Regex to match typical LAN/private IP ranges (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
  const lanOriginRegex = /^https?:\/\/(?:localhost|127\.0\.0\.1|10(?:\.\d{1,3}){3}|172\.(?:1[6-9]|2[0-9]|3[0-1])(?:\.\d{1,3}){2}|192\.168(?:\.\d{1,3}){2})(:\d+)?$/;
 // TEMP: Allow all origins for debugging. REMOVE BEFORE PRODUCTION!
+console.log('CORS DEBUG: Allow all origins');
 app.use(cors({ origin: '*', credentials: true }));
  app.use(express.json({ limit: '100mb' }));//to parse  Json data in the req.body
 import chatRoutes from './routes/chatRoutes.js';

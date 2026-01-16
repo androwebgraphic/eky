@@ -1,22 +1,21 @@
 import express from "express";
-// Optional: Add a GET /logiranje route for browser access
-app.get('/logiranje', (req, res) => {
-  res.json({ message: 'This endpoint is for POST login only. Use POST /api/users/logiranje for API login.' });
-});
 import dotenv from "dotenv";
 import connectDB from './db/connectDB.js';
 import cookieParser from 'cookie-parser';
 import passport from './config/passport.js';
-import userRoutes from "./routes/userRoutes.js"
-import dogRoutes from "./routes/dogRoutes.js"
-import authRoutes from "./routes/authRoutes.js"
-import cors from 'cors'
+import userRoutes from "./routes/userRoutes.js";
+import dogRoutes from "./routes/dogRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import cors from 'cors';
 
 dotenv.config();
-
 connectDB();
 
- const app = express();
+const app = express();
+// Optional: Add a GET /logiranje route for browser access
+app.get('/logiranje', (req, res) => {
+  res.json({ message: 'This endpoint is for POST login only. Use POST /api/users/logiranje for API login.' });
+});
  const PORT = process.env.PORT || 3001;
  
  //MIDDLEWARE

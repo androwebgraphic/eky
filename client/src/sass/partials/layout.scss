@@ -184,14 +184,33 @@ button {
   justify-self: center;
   align-items: center;
 }
+
 #start_btn {
   width: auto;
   font-size: 1.8rem;
   padding: 1rem;
-  // margin-top: 1rem;
-  color: $offwhite;
-  @include gradientBg;
+  color: $primary-compl;
+  background: $secondary-color;
   @include btn_radius;
+  border: 2px solid $primary-color;
+  transition: background 0.2s, color 0.2s;
+}
+
+#start_btn:hover, #start_btn:focus {
+  background: $primary-color;
+  color: $secondary-color;
+}
+
+button, .button {
+  background: $primary-color;
+  color: $secondary-color;
+  border: 2px solid $primary-compl;
+  @include btn_radius;
+  transition: background 0.2s, color 0.2s;
+}
+button:hover, .button:hover, button:focus, .button:focus {
+  background: $primary-compl;
+  color: $secondary-compl;
 }
 
 #Search {

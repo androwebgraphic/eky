@@ -151,6 +151,11 @@
     "deleting": "Brisanje...",
     "deleteAccount": "Izbriši račun",
     "changePhoto": "Promijeni fotografiju"
+  ,
+    "fullName": "Puno ime",
+    "email": "E-mail",
+    "username": "Korisničko ime",
+    "phone": "Telefon"
   }
   ,
   "editdog": {
@@ -160,6 +165,8 @@
     "noPhotos": "Nema odabranih fotografija",
     "resetPhotos": "Resetiraj fotografije",
     "saving": "Snimanje..."
+  ,
+    "logout": "Odjava"
   },
   "fields": {
     "name": "Ime:",

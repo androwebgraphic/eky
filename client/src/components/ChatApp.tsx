@@ -392,10 +392,10 @@ const ChatApp: React.FC = () => {
         )}
         <div className="chat-app-messages">
           {messages.map(msg => (
-            <div key={msg._id} className={`chat-app-message${msg.sender === user._id ? ' self' : ''}`}>
-              <span className={`chat-app-bubble${msg.sender === user._id ? ' self' : ''}`}>{msg.message}</span>
-            </div>
-          ))}
+              <div key={msg._id} className={`chat-app-message${user && msg.sender === user._id ? ' self' : ''}`}>
+                <span className={`chat-app-bubble${user && msg.sender === user._id ? ' self' : ''}`}>{msg.message}</span>
+              </div>
+            ))}
           {typing && <div className="chat-app-typing">Typing...</div>}
         </div>
         {selectedConvo && (

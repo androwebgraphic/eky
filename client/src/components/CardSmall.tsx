@@ -75,24 +75,27 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     setLoadingCoords(true);
     setCoordsError(null);
     try {
-      // You need to fetch geocode data here, e.g. via fetch or other API
-      // Example:
-      // const response = await fetch(...);
-      // const data = await response.json();
-      // if (data && data.length) {
-      //   const result = data[0];
-      //   setCoords({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
-      //   setShowMap(true);
-      // } else {
-      //   setShowMap(true);
-      //   setCoordsError(t('dogDetails.approximateLocation') || 'Approximate location');
-      // }
-      setShowMap(true); // fallback for now
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'eky-app/1.0 (your@email.com)'
+          }
+        }
+      );
+      const data = await response.json();
+      if (data && data.length) {
+        const result = data[0];
+        setCoords({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
+      } else {
+        setCoordsError(t('dogDetails.approximateLocation') || 'Approximate location');
+      }
     } catch (e) {
-      setShowMap(true);
       setCoordsError(t('dogDetails.searchBasedLocation') || 'Search-based location');
     } finally {
       setLoadingCoords(false);
+      setShowMap(true);
     }
   };
   // Wishlist state
@@ -248,8 +251,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               >
                 {place}
               </span>
-              {loadingCoords && <span style={{ marginLeft: 8 }}>{t('dogDetails.loadingMap') || 'Loading map...'}</span>}
-              {coordsError && <span style={{ color: 'red', marginLeft: 8 }}>{coordsError}</span>}
             </p>
           )}
           {showMap && place && (
@@ -290,16 +291,22 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                   }}>×</span>
                 </button>
                 <h3 style={{ marginBottom: 10 }}>{place}</h3>
-                <iframe
-                  title="Map Preview"
-                  width="100%"
-                  height="400"
-                  style={{ border: 0, borderRadius: 8 }}
-                  src={coords
-                    ? `https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng-0.005},${coords.lat-0.005},${coords.lng+0.005},${coords.lat+0.005}&layer=mapnik&marker=${coords.lat},${coords.lng}`
-                    : `https://www.openstreetmap.org/export/embed.html?search=${encodeURIComponent(place)}`}
-                  allowFullScreen
-                />
+                {loadingCoords ? (
+                  <div style={{ textAlign: 'center', padding: 40 }}>
+                    <span>{t('dogDetails.loadingMap') || 'Loading map...'}</span>
+                  </div>
+                ) : coords ? (
+                  <iframe
+                    title="Map Preview"
+                    width="100%"
+                    height="400"
+                    style={{ border: 0, borderRadius: 8 }}
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng-0.005},${coords.lat-0.005},${coords.lng+0.005},${coords.lat+0.005}&layer=mapnik&marker=${coords.lat},${coords.lng}`}
+                    allowFullScreen
+                  />
+                ) : coordsError ? (
+                  <div style={{ color: 'red', textAlign: 'center', padding: 40 }}>{coordsError}</div>
+                ) : null}
               </div>
             </div>
           )}

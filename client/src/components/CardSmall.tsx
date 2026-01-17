@@ -165,46 +165,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     }
   };
 
-  const handleLikeToggle = async () => {
-    if (!_id || !isAuthenticated) {
-      alert('Please log in to like dogs');
-      return;
-    }
-    if (isLiked) {
-      try {
-        const response = await fetch(`${apiBase}/api/dogs/${_id}/like`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setLikesCount(data.likesCount);
-          setIsLiked(false);
-        }
-      } catch (error) {
-        console.error('Unlike error:', error);
-      }
-    } else {
-      try {
-        const response = await fetch(`${apiBase}/api/dogs/${_id}/like`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setLikesCount(data.likesCount);
-          setIsLiked(true);
-        }
-      } catch (error) {
-        console.error('Like error:', error);
-      }
-    }
-  };
-
   const handleAdopt = async () => {
     if (!_id) return;
     setAdoptLoading(true);
@@ -254,11 +214,11 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               <source src={videoUrl} />
             </video>
           ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
-            <img src={thumbUrl} alt={name} style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }} />
+            <img src={thumbUrl} alt={name} style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (images && images.length) ? (
-            <img src={`${toAbs(images[0].url)}?${cacheBust}`} srcSet={imgSrcSet} sizes="(max-width: 600px) 320px, (max-width: 1024px) 640px, 1024px" alt={name} />
+            <img src={`${toAbs(images[0].url)}?${cacheBust}`} srcSet={imgSrcSet} sizes="(max-width: 600px) 320px, (max-width: 1024px) 640px, 1024px" alt={name} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (
-            <img src={imgSrc || 'img/nany.jpg'} alt={name} />
+            <img src={imgSrc || '/img/nany.jpg'} alt={name} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           )}
         </div>
 
@@ -479,7 +439,42 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                 {adoptError && <div style={{ color: 'red', marginTop: 4, fontSize: '10px' }}>{adoptError}</div>}
                 <button 
                   className={`like ${isLiked ? 'liked' : ''}`}
-                  onClick={handleLikeToggle}
+                  onClick={async () => {
+                    if (!isAuthenticated || !_id) return;
+                    if (isLiked) {
+                      try {
+                        const response = await fetch(`${apiBase}/api/dogs/${_id}/unlike`, {
+                          method: 'POST',
+                          headers: {
+                            'Authorization': `Bearer ${token}`
+                          }
+                        });
+                        if (response.ok) {
+                          const data = await response.json();
+                          setLikesCount(data.likesCount);
+                          setIsLiked(false);
+                        }
+                      } catch (error) {
+                        console.error('Unlike error:', error);
+                      }
+                    } else {
+                      try {
+                        const response = await fetch(`${apiBase}/api/dogs/${_id}/like`, {
+                          method: 'POST',
+                          headers: {
+                            'Authorization': `Bearer ${token}`
+                          }
+                        });
+                        if (response.ok) {
+                          const data = await response.json();
+                          setLikesCount(data.likesCount);
+                          setIsLiked(true);
+                        }
+                      } catch (error) {
+                        console.error('Like error:', error);
+                      }
+                    }
+                  }}
                   style={{
                     backgroundColor: isLiked ? '#ff6b6b' : '#f0f0f0',
                     color: isLiked ? 'white' : '#333',
@@ -503,19 +498,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                     console.log('[CardSmall] addToList:', t('button.addToList'), '| removeFromList:', t('button.removeFromList'));
                     handleWishlistToggle();
                   }}
-                  style={{
-                    backgroundColor: inWishlist ? '#ff4444' : '#2196F3', // red for remove, app color for add
-                    color: 'white',
-                    border: 'none',
-                    padding: '2px 7px',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    fontSize: '10px',
-                    fontWeight: 500,
-                    whiteSpace: 'nowrap',
-                    minWidth: 'fit-content',
-                    boxShadow: inWishlist ? '0 1px 4px rgba(255,68,68,0.08)' : '0 1px 4px rgba(33,150,243,0.08)'
-                  }}
+
                   title={inWishlist ? t('button.removeFromList') : t('button.addToList')}
                 >
                   {(() => {
@@ -538,18 +521,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                 className="edit"
                 onClick={onEdit}
                 title={t('button.edit') || 'Edit'}
-                style={{
-                  padding: '2px 7px',
-                  border: 'none',
-                  borderRadius: '10px',
-                  background: '#FFC107',
-                  color: '#333',
-                  fontSize: '10px',
-                  fontWeight: 500,
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content',
-                  boxShadow: '0 1px 4px rgba(255,193,7,0.08)'
-                }}
+
               >
                 {t('button.edit') || 'Edit'}
               </button>
@@ -559,18 +531,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                 className="remove"
                 onClick={onRemove}
                 title={t('button.remove') || 'Remove'}
-                style={{
-                  padding: '2px 7px',
-                  border: 'none',
-                  borderRadius: '10px',
-                  background: '#e74c3c',
-                  color: 'white',
-                  fontSize: '10px',
-                  fontWeight: 500,
-                  whiteSpace: 'nowrap',
-                  minWidth: 'fit-content',
-                  boxShadow: '0 1px 4px rgba(231,76,60,0.08)'
-                }}
+
               >
                 {t('button.remove') || 'Remove'}
               </button>

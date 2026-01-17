@@ -1,16 +1,163 @@
-button.adopt-btn, .adopt-btn {
-  border: none;
-  border-radius: 10px;
-  background-color: #267822;
-  color: white;
-  font-size: 10px;
-  font-weight: 500;
-  box-shadow: 0 1px 4px rgba(38,120,34,0.08);
-  margin-left: 0;
-  padding: 4px 12px;
-  transition: background 0.2s;
+// Edit button style
+.edit {
+  border-radius: 15px !important;
+  padding: 0.2em 0.7em !important;
+  background: lighten($primary-color, 35%) !important;
+  color: $primary-color !important;
+  border: none !important;
 }
-button.adopt-btn:disabled, .adopt-btn:disabled {
-  background-color: #aaa;
+// Remove button style
+.remove {
+  border-radius: 15px !important;
+  padding: 0.2em 0.7em !important;
+}
+
+// EditDogModal button styles
+.editdog-close-btn {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  width: 3rem;
+  height: 3rem;
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 2.8rem;
+  font-weight: 300;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  cursor: pointer;
+  z-index: 2147483648;
+}
+
+.editdog-reset-photos-btn {
+  margin-left: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #6c757d;
   color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.editdog-delete-img-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 22px;
+  padding: 0;
+}
+
+.editdog-submit-btn {
+  padding: 1rem 2rem;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.editdog-submit-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+.view-details-btn {
+  background: $primary-color;
+  color: $secondary-color;
+  border: 2px solid $primary-compl;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  transition: background 0.2s, color 0.2s;
+}
+.view-details-btn:hover, .view-details-btn:focus {
+  background: $primary-compl;
+  color: $secondary-compl;
+}
+
+.adopt-btn {
+  background: $primary-color;
+  color: $secondary-color;
+  border: 2px solid $primary-compl;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  transition: background 0.2s, color 0.2s;
+}
+.adopt-btn:hover, .adopt-btn:focus {
+  background: $primary-compl;
+  color: $secondary-compl;
+}
+.adopt-btn:disabled {
+  background: #aaa;
+  color: white;
+}
+
+.cancel-adopt-btn {
+  background: #e74c3c;
+  color: #fff;
+  border: 2px solid #a11a1a;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  transition: background 0.2s, color 0.2s;
+}
+.cancel-adopt-btn:hover, .cancel-adopt-btn:focus {
+  background: #a11a1a;
+  color: #fff;
+}
+
+.like {
+  background: $secondary-color;
+  color: $primary-color;
+  border: 2px solid $primary-compl;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.like.liked {
+  background: $primary-compl;
+  color: $secondary-compl;
+}
+
+.wishlist {
+  background: $secondary-color;
+  color: $primary-color;
+  border: 2px solid $primary-compl;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.wishlist.in-wishlist {
+  background: #ff4444;
+  color: #fff;
+  border: 2px solid #a11a1a;
 }

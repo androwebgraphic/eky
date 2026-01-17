@@ -235,27 +235,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
         onClick={e => e.stopPropagation()}
       >
         <button 
-          style={{
-            position: window.innerWidth > 768 ? 'absolute' : 'fixed',
-            top: window.innerWidth > 768 ? '1.2rem' : '0.5rem',
-            right: window.innerWidth > 768 ? '1.2rem' : '0.5rem',
-            width: '3rem',
-            height: '3rem',
-            backgroundColor: '#e74c3c',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '50%',
-            fontSize: '2.8rem',
-            fontWeight: '300',
-            lineHeight: '1',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 0,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            cursor: 'pointer',
-            zIndex: 2147483648
-          }}
+          className="editdog-close-btn"
           onClick={onClose}
         >
           &times;
@@ -303,16 +283,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
                   setMediaPreviews([]);
                   setExistingImages(dog.images ? [...dog.images] : []);
                 }}
-                style={{
-                  marginLeft: '0.5rem',
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem'
-                }}
+                className="editdog-reset-photos-btn"
               >
                 {t('editdog.resetPhotos') || 'Reset Photos'}
               </button>
@@ -339,6 +310,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
                     <span key={idx} style={{ position: 'relative', display: 'inline-block', marginRight: 8 }}>
                       <img src={img.url} alt={`img-${idx}`} width={80} />
                       <button type="button" style={{ position: 'absolute', top: 0, right: 0, background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '50%', width: 22, height: 22, cursor: 'pointer', fontWeight: 'bold', fontSize: 16, lineHeight: '22px', padding: 0 }} onClick={() => setExistingImages(existingImages.filter((_, i) => i !== idx))} title="Delete">&times;</button>
+                                      <button type="button" className="editdog-delete-img-btn" onClick={() => setExistingImages(existingImages.filter((_, i) => i !== idx))} title="Delete">&times;</button>
                     </span>
                   ))}
                 </div>
@@ -609,17 +581,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
             <button 
               type="submit" 
               disabled={submitting}
-              style={{
-                padding: '1rem 2rem',
-                backgroundColor: submitting ? '#6c757d' : '#007bff',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '1.1rem',
-                fontWeight: 'bold',
-                cursor: submitting ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.2s'
-              }}
+              className="editdog-submit-btn"
             >
               {submitting ? t('editdog.saving') || 'Saving...' : t('button.save')}
             </button>

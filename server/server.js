@@ -12,7 +12,7 @@ dotenv.config();
 connectDB();
 
 const app = express();
- const PORT = process.env.PORT || 3001;
+ const PORT = process.env.PORT || 3002;
  
  //MIDDLEWARE
  // Allow the configured client origin(s) or accept localhost and LAN dev origins

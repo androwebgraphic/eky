@@ -10,29 +10,32 @@
 .chat-app-action-btn {
   padding: 3px 8px;
   font-size: 11px;
-  border-radius: 5px;
-  border: none;
+  border-radius: 8px;
+  border: 2px solid #72211f;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  background: #fbe1cd;
+  color: #72211f;
   min-width: 60px;
   max-width: 90px;
   white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
 }
 .chat-app-action-btn.delete {
-  background: #f44336;
-  color: #fff;
+  background: #72211f;
+  color: #fbe1cd;
 }
 .chat-app-action-btn.block {
-  background: #ff9800;
-  color: #fff;
+  background: #1f4b72;
+  color: #fbe1cd;
 }
 .chat-app-action-btn.unblock {
-  background: #4caf50;
-  color: #fff;
+  background: #cdf0fb;
+  color: #1f4b72;
 }
 .chat-app-action-btn:hover {
-  opacity: 0.92;
+  background: #1f4b72;
+  color: #cdf0fb;
 }
 .chat-app-online-dot {
   display: inline-block;
@@ -180,18 +183,23 @@
 
 .chat-app-convo-btn {
   width: 100%;
-  background: #fff;
-  border: none;
+  background: #fbe1cd;
+  border: 2px solid #72211f;
   border-radius: 8px;
   padding: 6px 0;
   font-size: 13px;
-  color: #2196f3;
+  color: #72211f;
   margin-bottom: 4px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
 .chat-app-convo-btn.selected {
-  background: #e3f2fd;
+  background: #cdf0fb;
+  color: #1f4b72;
+}
+.chat-app-convo-btn:hover {
+  background: #1f4b72;
+  color: #cdf0fb;
 }
 
 .chat-app-main {

@@ -501,13 +501,13 @@ button.view-full {
   box-shadow: -0.1rem 0.2rem 0.8rem #535151;
   background-color: rgba(255, 255, 255, 0.6);
   border-radius: 1.2rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     padding: 0.75rem;
     gap: 0.75rem;
   }
-  
+
   @media (max-width: 480px) {
     padding: 0.5rem;
     gap: 0.5rem;
@@ -521,10 +521,32 @@ button.view-full {
   margin: 0.3rem;
   text-align: left;
 }
+.card .img {
+  width: 100%;
+  height: min(40vw, 220px);
+  max-height: 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  .card .img {
+    height: 40vw;
+    max-height: 50vw;
+  }
+}
 .card img {
-  width: 70%;
-  border-radius: 50%;
-  // box-shadow: -.1rem .2rem .5rem #535151, .1rem -.2rem .5rem #535151;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 1rem;
+  display: block;
+  margin: 0;
+  padding: 0;
+  background: #eee;
 }
 .card .description {
   justify-self: left;
@@ -625,6 +647,11 @@ footer {
 
 .eky-icon {
   cursor: pointer;
+  color: $offwhite;
+}
+
+#footer-nav .eky-search {
+  color: $offwhite;
 }
 
 // li{

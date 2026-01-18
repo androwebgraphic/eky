@@ -388,16 +388,8 @@ const DogDetails: React.FC<DogDetailsProps> = ({
             {owner.phone && (
               <p className="meta" style={{ marginBottom: '0.75rem' }}>
                 <strong>{t('fields.phone') || 'Phone'}:</strong>
-                <a href={`tel:${owner.phone}`} style={{ color: '#007bff', textDecoration: 'none', marginLeft: '0.5rem', fontSize: '1.1rem', fontWeight: 'bold' }}>
+                <a href={`tel:${owner.phone}`} style={{ color: '#007bff', textDecoration: 'none', marginLeft: '0.5rem', fontSize: '1.35rem', fontWeight: 'bold' }}>
                   {owner.phone}
-                </a>
-              </p>
-            )}
-            {owner.email && (
-              <p className="meta">
-                <strong>{t('fields.email') || 'Email'}:</strong>
-                <a href={`mailto:${owner.email}`} style={{ color: '#007bff', textDecoration: 'none', marginLeft: '0.5rem' }}>
-                  {owner.email}
                 </a>
               </p>
             )}

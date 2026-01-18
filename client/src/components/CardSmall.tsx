@@ -202,7 +202,19 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     return u.startsWith('http') ? u : `${apiBase}${u}`;
   };
   const cacheBust = `t=${Date.now()}`;
-  const imgSrcSet = images && images.length ? images.map(i => `${toAbs(i.url)}?${cacheBust} ${i.width || 320}w`).join(', ') : undefined;
+  // Build srcSet with all available sizes, always including the largest/original
+  let imgSrcSet: string | undefined = undefined;
+  let largestImgUrl: string | undefined = undefined;
+  if (images && images.length) {
+    // Sort by width descending, fallback to original if no width
+    const sorted = [...images].sort((a, b) => (b.width || 0) - (a.width || 0));
+    largestImgUrl = toAbs(sorted[0].url);
+    imgSrcSet = images.map(i => `${toAbs(i.url)}?${cacheBust} ${i.width || 1024}w`).join(', ');
+    // Always add the largest/original as the last srcSet entry if not present
+    if (!imgSrcSet.includes(largestImgUrl)) {
+      imgSrcSet += `, ${largestImgUrl}?${cacheBust} 2000w`;
+    }
+  }
   const posterUrl = video && video.poster && video.poster.length ? toAbs(video.poster[video.poster.length - 1].url) : undefined;
   const hasVideoUrl = video && typeof video.url === 'string' && video.url.length > 0;
   const videoUrl = hasVideoUrl ? toAbs(video.url) : undefined;
@@ -217,11 +229,21 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               <source src={videoUrl} />
             </video>
           ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
-            <img src={thumbUrl} alt={name} style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+              <img src={largestImgUrl || thumbUrl}
+                alt={name}
+                srcSet={imgSrcSet}
+                sizes="(max-width: 600px) 100vw, 40vw"
+                onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (images && images.length) ? (
-            <img src={`${toAbs(images[0].url)}?${cacheBust}`} srcSet={imgSrcSet} sizes="(max-width: 600px) 320px, (max-width: 1024px) 640px, 1024px" alt={name} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+              <img src={largestImgUrl || `${toAbs(images[0].url)}?${cacheBust}`}
+                srcSet={imgSrcSet}
+                sizes="(max-width: 600px) 100vw, 40vw"
+                alt={name}
+                onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (
-            <img src={imgSrc || '/img/nany.jpg'} alt={name} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+              <img src={imgSrc || '/img/nany.jpg'}
+                alt={name}
+                onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           )}
         </div>
 
@@ -322,22 +344,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                   <strong>{t('fields.userType') || 'Type'}:</strong> {t(`registerOptions.${owner.person}`) || owner.person}
                 </p>
               )}
-              {owner.phone && (
-                <p className="meta" style={{ marginBottom: '0.5rem' }}>
-                  <strong>{t('fields.phone') || 'Phone'}:</strong> 
-                  <a href={`tel:${owner.phone}`} style={{ color: '#007bff', textDecoration: 'none', marginLeft: '0.5rem' }}>
-                    {owner.phone}
-                  </a>
-                </p>
-              )}
-              {owner.email && (
-                <p className="meta">
-                  <strong>{t('fields.email') || 'Email'}:</strong>
-                  <a href={`mailto:${owner.email}`} style={{ color: '#007bff', textDecoration: 'none', marginLeft: '0.5rem' }}>
-                    {owner.email}
-                  </a>
-                </p>
-              )}
+              {/* Phone and email hidden in dog list */}
             </div>
           )}
           

@@ -74,24 +74,9 @@ const Header: React.FC = () => {
         <>
         <header
           ref={headerRef}
-          style={{
-          position: 'fixed',
-          top: '0',
-          left: '0',
-          right: '0',
-          zIndex: '1000',
-          padding: '10px 20px',
-          backgroundColor: '#72211f',
-          color: '#f5f5f5',
-          fontSize: '20px',
-          fontWeight: 'bold',
-          boxSizing: 'border-box',
-          borderBottom: '2px solid #8a2419',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <h1>TEST APLIKACIJA</h1>
+          className="UserHeader"
+        >
+         
           {/* Left side: Navigation Links */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <Link to="/" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.about')}</Link>
@@ -250,8 +235,9 @@ const Header: React.FC = () => {
           top: '0',
           left: '0',
           right: '0',
+          minHeight: '7.5rem',
           zIndex: '1000',
-          padding: '10px 20px',
+          padding: '18px 20px 12px 20px',
           backgroundColor: '#72211f',
           color: '#f5f5f5',
           fontSize: '20px',
@@ -259,26 +245,86 @@ const Header: React.FC = () => {
           boxSizing: 'border-box',
           borderBottom: '2px solid #8a2419',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          flexDirection: 'column'
+          justifyContent: 'flex-start',
         }}>
-          <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '15px',
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+            }}
+          >
+            {/* Mobile: message above nav */}
+            <div
+              className="unauth-message-mobile"
+              style={{
+                width: '100%',
+                display: 'none',
+                justifyContent: 'center',
+                marginBottom: 6,
+              }}
+            >
+              <p
+                style={{
+                  margin: '0 0 0 0',
+                  position: 'absolute',
+                  top: '3px',
+                  fontWeight: 'normal',
+                  fontSize: '0.85em',
+                  color: 'orange',
+                  textAlign: 'center',
+                  maxWidth: '500px',
+                  wordBreak: 'break-word',
+                  lineHeight: 1.2,
+                  overflow: 'hidden',
+                  whiteSpace: 'normal',
+                  display: 'inline-block',
+                }}
+              >
+                Morate biti prijavljeni
+              </p>
+            </div>
+            {/* Desktop: message centered */}
+            <div
+              className="unauth-message-desktop"
+              style={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}
+            >
+              <p
+                style={{
+                  position: 'absolute',
+                  top: '3px',
+                  margin: 0,
+                  fontWeight: 'normal',
+                  fontSize: '0.85em',
+                  color: 'orange',
+                  textAlign: 'center',
+                  maxWidth: '500px',
+                  wordBreak: 'break-word',
+                  lineHeight: 1.2,
+                  overflow: 'hidden',
+                  whiteSpace: 'normal',
+                  display: 'inline-block',
+                }}
+              >
+                  Morate biti prijavljeni
+              </p>
+            </div>
             {/* Left side: Navigation Links */}
-            <nav style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '15px', flexShrink: 1 }}>
               <Link to="/" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.about')}</Link>
               <Link to="logiranje" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.login')}</Link>
               <Link to="registracija" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.register')}</Link>
             </nav>
-
             {/* Right side: Language Selector */}
-            <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto', flexShrink: 1 }}>
               <LanguageSelector />
             </div>
           </div>
-          <h5 style={{ margin: '10px 0 0 0', fontWeight: 'normal', fontSize: '1em', color: 'orange', textAlign: 'center' }}>
-            {t('unauth_subheading')}
-          </h5>
         </header>
       )}
       

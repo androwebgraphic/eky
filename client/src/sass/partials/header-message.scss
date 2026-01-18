@@ -1,0 +1,15 @@
+.unauth-message-mobile {
+  display: none;
+}
+.unauth-message-desktop {
+  display: flex;
+}
+
+@media (max-width: 600px) {
+  .unauth-message-mobile {
+    display: flex !important;
+  }
+  .unauth-message-desktop {
+    display: none !important;
+  }
+}

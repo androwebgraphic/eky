@@ -385,7 +385,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({
                 <strong>{t('fields.userType') || 'Type'}:</strong> {t(`registerOptions.${owner.person}`) || owner.person}
               </p>
             )}
-            {owner.phone && (
+            {isAuthenticated && owner.phone && (
               <p className="meta" style={{ marginBottom: '0.75rem' }}>
                 <strong>{t('fields.phone') || 'Phone'}:</strong>
                 <a href={`tel:${owner.phone}`} style={{ color: '#007bff', textDecoration: 'none', marginLeft: '0.5rem', fontSize: '1.35rem', fontWeight: 'bold' }}>

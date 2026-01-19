@@ -1,10 +1,12 @@
-
 import React, { useState } from 'react';
+import MultiPhotoIndicator from './MultiPhotoIndicator';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
+import DogImageSlider from './DogImageSlider';
+import { createPortal } from 'react-dom';
 
 // Geocode location if needed (mirrors DogDetails)
 // (handleShowMap will be defined inside the component, after imports)
@@ -118,7 +120,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
       setLikesCount(likes.length);
     } else {
       setIsLiked(false);
-      // ...existing code...
       setLikesCount(likes?.length || 0);
     }
   }, [likes, currentUser?._id]);
@@ -220,10 +221,29 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   const videoUrl = hasVideoUrl ? toAbs(video.url) : undefined;
   const thumbUrl = thumbnail && thumbnail.url ? `${toAbs(thumbnail.url)}?${cacheBust}` : undefined;
 
+  const [showSlider, setShowSlider] = useState(false);
+
+  // Prepare unique images for DogImageSlider (one per uploaded photo, pick only 1024px variant)
+  let uniqueImages: { url: string; width?: number }[] = [];
+  if (images && images.length > 0) {
+    // Only keep images with width 1024 (largest variant)
+    uniqueImages = images.filter(img => img.width === 1024).map(img => ({ url: toAbs(img.url), width: img.width }));
+    // Fallback: if no 1024px images, use the largest available per group of 3
+    if (uniqueImages.length === 0) {
+      for (let i = 0; i < images.length; i += 3) {
+        const group = images.slice(i, i + 3);
+        const largest = group.reduce((a, b) => (a.width || 0) > (b.width || 0) ? a : b, group[0]);
+        uniqueImages.push({ url: toAbs(largest.url), width: largest.width });
+      }
+    }
+  }
+
   return (
     <>
       <div className="card">
-        <div className="img">
+        <div className="img" style={{ position: 'relative', cursor: images && images.length > 0 ? 'pointer' : 'default' }}
+          onClick={images && images.length > 0 ? () => setShowSlider(true) : undefined}
+        >
           {hasVideoUrl ? (
             <video controls width="100%" poster={posterUrl}>
               <source src={videoUrl} />
@@ -245,7 +265,40 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                 alt={name}
                 onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           )}
+          {images && images.length > 1 && (
+            <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }}>
+              <MultiPhotoIndicator count={images.length} />
+            </div>
+          )}
         </div>
+
+        {/* Modal DogImageSlider */}
+        {uniqueImages.length > 0 && showSlider && createPortal(
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            // Remove onClick to prevent closing on swipe/drag
+          >
+            <div
+              style={{ maxWidth: 600, width: '90vw', maxHeight: '90vh', background: 'transparent', borderRadius: 16, overflow: 'hidden', position: 'relative' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <DogImageSlider images={uniqueImages} alt={name} />
+              <button onClick={() => setShowSlider(false)} style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, background: '#fff', border: 'none', borderRadius: '50%', width: 32, height: 32, fontSize: 20, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>×</button>
+            </div>
+          </div>,
+          document.body
+        )}
 
         <div className="description">
           <h3 style={{ color: '#751719', marginBottom: 4 }}>

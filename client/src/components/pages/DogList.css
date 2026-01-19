@@ -1,0 +1,18 @@
+#Doglist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 0 48px 0;
+  min-height: 60vh;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  #Doglist {
+    gap: 12px;
+    padding: 12px 0 24px 0;
+  }
+}

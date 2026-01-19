@@ -59,6 +59,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<any[]>(dog.images ? [...dog.images] : []);
+  const [selectedToDelete, setSelectedToDelete] = useState<Set<number>>(new Set());
 
   // Add modal-open class when component mounts, remove when unmounts
   useEffect(() => {
@@ -93,27 +94,10 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
     try {
       setSubmitting(true);
       setSubmitError(null);
-      console.log('Submitting with API_URL:', API_URL); // Debug
-      console.log('Dog ID:', dog._id); // Debug
-      console.log('Fields:', fields); // Debug
-      
       let resp;
       const hasNewFiles = mediaFiles.length > 0;
       const hasRemovedImages = existingImages.length !== (dog.images ? dog.images.length : 0);
       const hasPhotoChanges = hasNewFiles || hasRemovedImages;
-      
-      console.log('=== PHOTO UPDATE DEBUG ===');
-      console.log('mediaFiles:', mediaFiles);
-      console.log('mediaFiles.length:', mediaFiles.length);
-      console.log('existingImages:', existingImages);
-      console.log('existingImages.length:', existingImages.length);
-      console.log('dog.images:', dog.images);
-      console.log('dog.images.length:', dog.images ? dog.images.length : 0);
-      console.log('hasNewFiles:', hasNewFiles);
-      console.log('hasRemovedImages:', hasRemovedImages);
-      console.log('hasPhotoChanges:', hasPhotoChanges);
-      console.log('========================');
-      
       if (hasPhotoChanges) {
         // If media changed or images deleted, send as multipart/form-data
         const formData = new FormData();
@@ -123,69 +107,53 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
         // Send list of images to keep (by url)
         const keepImagesData = JSON.stringify(existingImages.map(img => img.url));
         formData.append('keepImages', keepImagesData);
-        
-        console.log('=== FORMDATA DEBUG ===');
-        console.log('keepImages data:', keepImagesData);
-        console.log('mediaFiles to upload:', mediaFiles);
-        
         mediaFiles.forEach((file, idx) => {
-          console.log(`Adding file ${idx}:`, file.name, file.type, file.size);
           formData.append('media', file, file.name);
         });
-        
-        // Log all FormData entries
-        Array.from(formData.entries()).forEach(pair => {
-          console.log(pair[0] + ':', pair[1]);
-        });
-        console.log('=====================');
-        
         const headers: any = {};
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
-        
-        resp = await fetch(`${API_URL}/api/dogs/${dog._id}`, {
-          method: 'PATCH',
-          body: formData,
-          headers
-        });
-        console.log('FormData response status:', resp.status); // Debug
+        try {
+          resp = await fetch(`${API_URL}/api/dogs/${dog._id}`, {
+            method: 'PATCH',
+            body: formData,
+            headers
+          });
+        } catch (fetchErr) {
+          setSubmitError('Failed to upload images. Please check your connection or try again.');
+          setSubmitting(false);
+          return;
+        }
       } else {
         // No media change, send as JSON
         const bodyData: any = {};
         Object.entries(fields).forEach(([k, v]) => {
           if (typeof v !== 'undefined' && v !== '') bodyData[k] = v;
         });
-        
         const headers: any = { 'Content-Type': 'application/json' };
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
-        
         resp = await fetch(`${API_URL}/api/dogs/${dog._id}`, {
           method: 'PATCH',
           headers,
           body: JSON.stringify(bodyData)
         });
-        console.log('JSON response status:', resp.status); // Debug
       }
       if (!resp.ok) {
-        console.error('Response not ok:', resp.status, resp.statusText); // Debug
         const errData = await resp.json().catch(() => ({}));
         throw new Error(errData.message || 'Failed to update dog');
       }
       const updatedDog = await resp.json();
-      console.log('=== UPDATE RESPONSE ===');
-      console.log('Updated dog received from server:', updatedDog);
-      console.log('Updated dog images count:', updatedDog.images ? updatedDog.images.length : 0);
-      console.log('Updated dog images:', updatedDog.images);
-      console.log('=====================');
       onSave(updatedDog);
       onClose();
     } catch (err: any) {
-      console.error('Fetch error:', err); // Debug
-      console.error('Update error:', err);
-      setSubmitError(err.message || 'Failed to update dog');
+      if (mediaFiles.length > 0 && (err.message === 'Failed to fetch' || err.message === 'NetworkError when attempting to fetch resource.')) {
+        setSubmitError('Failed to upload images. Please check your connection or try again.');
+      } else {
+        setSubmitError(err.message || 'Failed to update dog');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -267,12 +235,9 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
               multiple
               onChange={e => {
                 const files = Array.from(e.target.files || []);
-                setMediaFiles(files);
-                setMediaPreviews(files.map(f => URL.createObjectURL(f)));
-                // Clear existing images when new ones are selected
-                if (files.length > 0) {
-                  setExistingImages([]);
-                }
+                setMediaFiles(prev => [...prev, ...files]);
+                setMediaPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
+                // Do not clear existing images; allow appending
               }}
             />
             {mediaPreviews.length > 0 && (
@@ -281,18 +246,17 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
                 onClick={() => {
                   setMediaFiles([]);
                   setMediaPreviews([]);
-                  setExistingImages(dog.images ? [...dog.images] : []);
                 }}
                 className="editdog-reset-photos-btn"
               >
-                {t('editdog.resetPhotos') || 'Reset Photos'}
+                {t('editdog.resetPhotos') || 'Reset New Photos'}
               </button>
             )}
             {/* Show previews of new or current images */}
-            {mediaPreviews.length > 0 ? (
+            {mediaPreviews.length > 0 && (
               <div>
                 <p style={{ margin: '0.5rem 0', color: '#e74c3c', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                  {t('editdog.newPhotos') || 'New photos selected (will replace existing):'}
+                  {t('editdog.newPhotos') || 'New photos selected:'}
                 </p>
                 <div className="media-preview-list">
                   {mediaPreviews.map((url, idx) => (
@@ -300,7 +264,8 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
                   ))}
                 </div>
               </div>
-            ) : existingImages.length > 0 ? (
+            )}
+            {existingImages.length > 0 && (
               <div>
                 <p style={{ margin: '0.5rem 0', color: '#666', fontSize: '0.9rem' }}>
                   {t('editdog.currentPhotos') || 'Current photos:'}
@@ -308,14 +273,73 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
                 <div className="media-preview-list">
                   {existingImages.map((img: any, idx: number) => (
                     <span key={idx} style={{ position: 'relative', display: 'inline-block', marginRight: 8 }}>
-                      <img src={img.url} alt={`img-${idx}`} width={80} />
-                      <button type="button" style={{ position: 'absolute', top: 0, right: 0, background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '50%', width: 22, height: 22, cursor: 'pointer', fontWeight: 'bold', fontSize: 16, lineHeight: '22px', padding: 0 }} onClick={() => setExistingImages(existingImages.filter((_, i) => i !== idx))} title="Delete">&times;</button>
-                                      <button type="button" className="editdog-delete-img-btn" onClick={() => setExistingImages(existingImages.filter((_, i) => i !== idx))} title="Delete">&times;</button>
+                      <input
+                        type="checkbox"
+                        checked={selectedToDelete.has(idx)}
+                        onChange={e => {
+                          setSelectedToDelete(prev => {
+                            const next = new Set(prev);
+                            if (e.target.checked) next.add(idx);
+                            else next.delete(idx);
+                            return next;
+                          });
+                        }}
+                        style={{ position: 'absolute', top: 2, left: 2, zIndex: 3, width: 16, height: 16, accentColor: '#e74c3c', background: '#fff', border: '1px solid #e74c3c', borderRadius: 3 }}
+                        title="Select to delete"
+                      />
+                      <img src={img.url} alt={`img-${idx}`} width={80} style={{ opacity: selectedToDelete.has(idx) ? 0.5 : 1 }} />
+                      <button
+                        type="button"
+                        style={{ position: 'absolute', top: 2, right: 2, background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, minWidth: 20, minHeight: 20, maxWidth: 20, maxHeight: 20, cursor: 'pointer', fontWeight: 'bold', fontSize: 14, lineHeight: '20px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        onClick={() => {
+                          setExistingImages(existingImages.filter((_, i) => i !== idx));
+                          setSelectedToDelete(prev => {
+                            const next = new Set(prev);
+                            next.delete(idx);
+                            // Shift all indices above idx down by 1
+                            const shifted = new Set<number>();
+                            next.forEach(i => shifted.add(i > idx ? i - 1 : i));
+                            return shifted;
+                          });
+                        }}
+                        title="Delete this image"
+                      >
+                        &times;
+                      </button>
                     </span>
                   ))}
                 </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <span style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>Image actions:</span>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        type="button"
+                        style={{ background: '#e74c3c', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: 'bold' }}
+                        disabled={selectedToDelete.size === 0}
+                        onClick={() => {
+                          setExistingImages(existingImages.filter((_, i) => !selectedToDelete.has(i)));
+                          setSelectedToDelete(new Set());
+                        }}
+                      >
+                        Delete Selected
+                      </button>
+                      <button
+                        type="button"
+                        style={{ background: '#e67e22', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: 'bold' }}
+                        onClick={() => {
+                          setExistingImages([]);
+                          setSelectedToDelete(new Set());
+                        }}
+                      >
+                        Delete All
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-            ) : (
+            )}
+            {existingImages.length === 0 && mediaPreviews.length === 0 && (
               <p style={{ margin: '0.5rem 0', color: '#999', fontSize: '0.9rem' }}>
                 {t('editdog.noPhotos') || 'No photos selected'}
               </p>

@@ -119,6 +119,10 @@ import sharp from 'sharp';
 
 // PATCH /api/dogs/:id
 export const updateDog = async (req, res) => {
+    // Sanitize gender: treat 'null' (string) or null as undefined
+    if (req.body.gender === 'null' || req.body.gender === null) {
+      req.body.gender = undefined;
+    }
   try {
     console.log('=== UPDATE DOG REQUEST ===');
     console.log('Dog ID:', req.params.id);

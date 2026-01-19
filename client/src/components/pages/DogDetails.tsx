@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DogImageSlider from '../DogImageSlider';
 import { useTranslation } from 'react-i18next';
 // import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -159,22 +160,14 @@ const DogDetails: React.FC<DogDetailsProps> = ({
     return u.startsWith('http') ? u : `${apiBase}${u}`;
   };
 
-  // Prepare srcSet for responsive images
-  let mainImg: string = '';
-  let srcSet = '';
-  let sizes = '';
-  if (images && images.length > 0) {
-    // Sort by width if available, fallback to order
-    const sorted = [...images].sort((a, b) => (a.width || 0) - (b.width || 0));
-    srcSet = sorted.map(img => `${toAbs(img.url)} ${img.width || ''}w`).join(', ');
-    mainImg = toAbs(sorted[0].url);
-    sizes = '(max-width: 600px) 100vw, (max-width: 900px) 60vw, 40vw';
-  } else if (thumbnail?.url) {
-    mainImg = toAbs(thumbnail.url);
-  }
 
-  // Only show one image if only one is present
-  const showImageList = images && images.length > 1;
+  // Prepare images for DogImageSlider
+  let sliderImages: { url: string; width?: number }[] = [];
+  if (images && images.length > 0) {
+    sliderImages = images.map(img => ({ url: toAbs(img.url), width: img.width }));
+  } else if (thumbnail?.url) {
+    sliderImages = [{ url: toAbs(thumbnail.url) }];
+  }
 
   // Geocode location if needed
   const handleShowMap = async () => {
@@ -221,22 +214,8 @@ const DogDetails: React.FC<DogDetailsProps> = ({
   return (
     <div className="card-details">
       <div className="img">
-        {mainImg && (
-          <img
-            src={mainImg}
-            srcSet={srcSet || undefined}
-            sizes={srcSet ? sizes : undefined}
-            alt={name}
-            style={{ width: '80px', height: '80px', borderRadius: '8px', display: 'block', margin: '0 auto', objectFit: 'cover', transform: 'rotate(90deg)', transition: 'transform 0.3s' }}
-          />
-        )}
-        {/* Show all other images underneath only if more than one */}
-        {showImageList && (
-          <div className="img-list">
-            {images!.slice(1).map((img, idx) => (
-              <img key={idx} src={toAbs(img.url)} alt={`${name}-img-${idx+1}`} style={{ width: 80, margin: '0.5rem' }} />
-            ))}
-          </div>
+        {sliderImages.length > 0 && (
+          <DogImageSlider images={sliderImages} alt={name} />
         )}
       </div>
       <div className="description">

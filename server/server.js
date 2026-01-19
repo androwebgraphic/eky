@@ -15,14 +15,27 @@ const app = express();
  const PORT = process.env.PORT || 3002;
  
  //MIDDLEWARE
- // Allow the configured client origin(s) or accept localhost and LAN dev origins
- const clientOriginEnv = process.env.CLIENT_ORIGIN || '';
- const allowedOrigins = clientOriginEnv ? clientOriginEnv.split(',').map(s => s.trim()) : [];
- // Regex to match typical LAN/private IP ranges (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
- const lanOriginRegex = /^https?:\/\/(?:localhost|127\.0\.0\.1|10(?:\.\d{1,3}){3}|172\.(?:1[6-9]|2[0-9]|3[0-1])(?:\.\d{1,3}){2}|192\.168(?:\.\d{1,3}){2})(:\d+)?$/;
-// TEMP: Allow all origins for debugging. REMOVE BEFORE PRODUCTION!
-console.log('CORS DEBUG: Allow all origins');
-app.use(cors({ origin: '*', credentials: true }));
+ // (removed duplicate allowedOrigins and related unused code)
+// Allow both local and production frontends for CORS
+const allowedOrigins = [
+
+  'http://localhost:3000',
+  'http://172.20.10.2:3000', // <-- add this line
+  'https://eky-backend.onrender.com',
+];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
  app.use(express.json({ limit: '100mb' }));//to parse  Json data in the req.body
 import chatRoutes from './routes/chatRoutes.js';
  app.use(express.urlencoded({ limit: '100mb', extended: true })); //to parse form data in the req.body

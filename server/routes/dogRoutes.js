@@ -14,7 +14,7 @@ const upload = multer({ storage });
 
 // for media + optional poster
 const cpUpload = upload.fields([
-  { name: 'media', maxCount: 20 }, // allow up to 20 images
+  { name: 'media', maxCount: 50 }, // allow up to 50 images
   { name: 'poster', maxCount: 1 }
 ]);
 

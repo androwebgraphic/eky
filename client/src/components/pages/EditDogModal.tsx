@@ -255,8 +255,8 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
             {/* Show previews of new or current images */}
             {mediaPreviews.length > 0 && (
               <div>
-                <p style={{ margin: '0.5rem 0', color: '#e74c3c', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                  {t('editdog.newPhotos') || 'New photos selected:'}
+                <p style={{ margin: '0.5rem 0', color: '#e67e22', fontSize: '0.95rem', fontWeight: 'bold' }}>
+                  {t('editdog.newPhotos') || 'New photos selected (will be added to existing). To remove old photos, uncheck or delete them below.'}
                 </p>
                 <div className="media-preview-list">
                   {mediaPreviews.map((url, idx) => (

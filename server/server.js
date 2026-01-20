@@ -7,7 +7,7 @@ import userRoutes from "./routes/userRoutes.js";
 import dogRoutes from "./routes/dogRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import cors from 'cors';
-
+console.log("hello");
 dotenv.config();
 connectDB();
 
@@ -113,6 +113,18 @@ io.on('connection', (socket) => {
     socket.emit('onlineUsers', Array.from(onlineUsers.values()));
   });
 
+    app.use(cors({
+      origin: function(origin, callback) {
+        // allow requests with no origin (like mobile apps, curl, etc.)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        } else {
+          return callback(new Error('Not allowed by CORS'));
+        }
+      },
+      credentials: true
+    }));
   // Send message event
   socket.on('sendMessage', ({ conversationId, sender, recipient, message }) => {
     io.to(recipient).emit('receiveMessage', { conversationId, sender, message, sentAt: new Date().toISOString() });

@@ -157,7 +157,7 @@
   ,
   "editdog": {
     "title": "Edit {{name}}",
-    "newPhotos": "New photos selected (will replace existing):",
+    "newPhotos": "New photos selected (will be added to existing):",
     "currentPhotos": "Current photos:",
     "noPhotos": "No photos selected",
     "resetPhotos": "Reset Photos",

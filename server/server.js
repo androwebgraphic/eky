@@ -17,12 +17,12 @@ const app = express();
  //MIDDLEWARE
  // (removed duplicate allowedOrigins and related unused code)
 // Allow both local and production frontends for CORS
-const allowedOrigins = [
 
-   'http://localhost:3000',
+const allowedOrigins = [
+  'http://localhost:3000',
   'http://172.20.10.2:3000',
-  'https://sharedog-homeless-backend.onrender.com',
-'https://eky-frontend-m2ul.onrender.com/'];
+  'https://eky-frontend-m2ul.onrender.com'
+];
 
 app.use(cors({
   origin: function(origin, callback) {

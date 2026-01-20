@@ -22,8 +22,7 @@ const allowedOrigins = [
    'http://localhost:3000',
   'http://172.20.10.2:3000',
   'https://sharedog-homeless-backend.onrender.com',
-  'https://eky-frontend-nbpr.onrender.com', // <-- add this line
-];
+'https://eky-frontend-m2ul.onrender.com/'];
 
 app.use(cors({
   origin: function(origin, callback) {

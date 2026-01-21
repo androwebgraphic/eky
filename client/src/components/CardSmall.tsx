@@ -277,7 +277,19 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   return (
     <>
       <div className="card">
-        <div className="img" style={{ position: 'relative', cursor: images && images.length > 0 ? 'pointer' : 'default' }}
+        <div
+          className="img"
+          style={{
+            position: 'relative',
+            cursor: images && images.length > 0 ? 'pointer' : 'default',
+            width: '100%',
+            aspectRatio: '1/1',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#f8f8f8'
+          }}
           onClick={images && images.length > 0 ? () => setShowSlider(true) : undefined}
         >
           {hasVideoUrl ? (
@@ -289,11 +301,18 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                 ? React.createElement(AdvancedImage as any, {
                     cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(thumbnail.url).format('auto').quality('auto'),
                     alt: name,
-                    style: { width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 64 },
+                    style: {
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '1rem',
+                      objectFit: 'cover',
+                      aspectRatio: '1/1',
+                      display: 'block'
+                    },
                     id: 'dog-thumbnail',
                     name: 'dog-thumbnail'
                   })
-                : <img src={thumbUrl} alt={name} style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 64 }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+                : <img src={thumbUrl} alt={name} style={{ width: '100%', height: '100%', borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (validImages.length) ? (
               isCloudinaryId(validImages[0].url)
                 ? React.createElement(AdvancedImage as any, {
@@ -329,10 +348,21 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}
-            // Remove onClick to prevent closing on swipe/drag
           >
             <div
-              style={{ maxWidth: 600, width: '90vw', maxHeight: '90vh', background: 'transparent', borderRadius: 16, overflow: 'hidden', position: 'relative' }}
+              style={{
+                maxWidth: 600,
+                width: '90vw',
+                maxHeight: '90vw',
+                aspectRatio: '1/1',
+                background: 'transparent',
+                borderRadius: 16,
+                overflow: 'hidden',
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
               onClick={e => e.stopPropagation()}
             >
               <DogImageSlider images={uniqueImages} alt={name} />

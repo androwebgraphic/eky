@@ -12,7 +12,9 @@ import { createPortal } from 'react-dom';
 
 // Geocode location if needed (mirrors DogDetails)
 // (handleShowMap will be defined inside the component, after imports)
-
+// ...existing imports...
+const toHttps = (url?: string) =>
+  url && url.startsWith('http://') ? url.replace('http://', 'https://') : url;
 interface MediaVariant { url: string; width?: number; size?: string }
 interface CardSmallProps {
   _id?: string;

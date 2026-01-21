@@ -218,9 +218,9 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
       imgSrcSet += `, ${largestImgUrl} 2000w`;
     }
   }
-  const posterUrl = video && video.poster && video.poster.length ? toAbs(video.poster[video.poster.length - 1].url) : undefined;
+  const posterUrl = video && video.poster && video.poster.length ? toCloudinaryUrl(video.poster[video.poster.length - 1].url) : undefined;
   const hasVideoUrl = video && typeof video.url === 'string' && video.url.length > 0;
-  const videoUrl = hasVideoUrl ? toAbs(video.url) : undefined;
+  const videoUrl = hasVideoUrl ? toCloudinaryUrl(video.url) : undefined;
   const thumbUrl = thumbnail && thumbnail.url ? toCloudinaryUrl(thumbnail.url) : undefined;
   const isCloudinaryThumb = thumbnail && typeof thumbnail.url === 'string';
 

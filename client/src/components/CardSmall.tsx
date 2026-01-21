@@ -54,29 +54,28 @@ interface CardSmallProps {
 
 
 const CardSmall: React.FC<CardSmallProps> = (props) => {
-  const {
-    _id, imgSrc, images, video, thumbnail, name, age, likes, breed, color, description, size, gender, vaccinated, neutered, onViewDetails, onEdit, onRemove, canEdit, user: owner,
-    adoptionStatus, adoptionQueue, onDogUpdate, place: propPlace, location: propLocation, lat: propLat, lng: propLng
-  } = props;
-  const place = propPlace || propLocation || '';
-  const lat = (typeof propLat === 'number') ? propLat : undefined;
-  const lng = (typeof propLng === 'number') ? propLng : undefined;
-  const { t } = useTranslation();
-  const { isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist, user: currentUser, token } = useAuth();
-  const isOwner = !!(currentUser && owner && currentUser._id === owner._id);
-
-
-  // Map/geocode state
-  const [showMap, setShowMap] = useState(false);
-  const [coords, setCoords] = useState<{lat: number, lng: number} | null>(null);
-  const [loadingCoords, setLoadingCoords] = useState(false);
-  const [coordsError, setCoordsError] = useState<string | null>(null);
-  const handleShowMap = async () => {
-    if (coords || !place) {
-      setShowMap(true);
-      return;
-    }
-    setLoadingCoords(true);
+                    <img
+                      src={toCloudinaryUrl(thumbnail.url, { width: 1024 })}
+                      srcSet={[
+                        toCloudinaryUrl(thumbnail.url, { width: 320 }) + ' 320w',
+                        toCloudinaryUrl(thumbnail.url, { width: 640 }) + ' 640w',
+                        toCloudinaryUrl(thumbnail.url, { width: 1024 }) + ' 1024w',
+                        toCloudinaryUrl(thumbnail.url) + ' 2000w'
+                      ].join(', ')}
+                      sizes="(max-width: 480px) 100vw, (max-width: 900px) 50vw, 320px"
+                      alt={name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '1rem',
+                        objectFit: 'cover',
+                        aspectRatio: '1/1',
+                        display: 'block',
+                        imageRendering: 'auto',
+                      }}
+                      id="dog-thumbnail"
+                      onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }}
+                    />
     setCoordsError(null);
     try {
       const response = await fetch(

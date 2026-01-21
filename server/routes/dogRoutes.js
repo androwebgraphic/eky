@@ -10,7 +10,10 @@ const router = express.Router();
 
 // use memoryStorage to process with sharp
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB per file
+});
 
 // for media + optional poster
 const cpUpload = upload.fields([

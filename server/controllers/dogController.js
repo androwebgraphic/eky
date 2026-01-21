@@ -252,7 +252,8 @@ export const updateDog = async (req, res) => {
     res.json(updatedDog);
   } catch (err) {
     console.error('UpdateDog error:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    if (err && err.stack) console.error(err.stack);
+    res.status(500).json({ message: 'Server error', error: err.message, stack: err.stack });
   }
 };
 
@@ -415,8 +416,9 @@ export const createDog = async (req, res) => {
     const populatedDog = await Dog.findById(dog._id).populate('user', 'name username email phone person');
     res.status(201).json(populatedDog);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    console.error('CreateDog error:', err);
+    if (err && err.stack) console.error(err.stack);
+    res.status(500).json({ message: 'Server error', error: err.message, stack: err.stack });
   }
 };
 

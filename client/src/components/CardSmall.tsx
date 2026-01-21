@@ -260,19 +260,19 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               <source src={videoUrl} />
             </video>
           ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
-              isCloudinaryThumb ? (
-                React.createElement(AdvancedImage as any, {
-                  cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(thumbnail.url).format('auto').quality('auto'),
-                  alt: name,
-                  style: { width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 64 }
-                })
-              ) : (
-                <img src={largestImgUrl || thumbUrl}
-                  alt={name}
-                  srcSet={imgSrcSet}
-                  sizes="(max-width: 600px) 100vw, 40vw"
-                  onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
-              )
+              isCloudinaryThumb
+                ? React.createElement(AdvancedImage as any, {
+                    cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(thumbnail.url).format('auto').quality('auto'),
+                    alt: name,
+                    style: { width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 64 }
+                  })
+                : React.createElement('img', {
+                    src: largestImgUrl || thumbUrl,
+                    alt: name,
+                    srcSet: imgSrcSet,
+                    sizes: '(max-width: 600px) 100vw, 40vw',
+                    onError: (e: any) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }
+                  })
           ) : (images && images.length) ? (
               <img src={largestImgUrl || `${toAbs(images[0].url)}?${cacheBust}`}
                 srcSet={imgSrcSet}

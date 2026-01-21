@@ -306,16 +306,19 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
           ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
               isCloudinaryThumb
                 ? React.createElement(AdvancedImage as any, {
-                    cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(thumbnail.url).format('auto').quality('auto'),
+                    cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } })
+                      .image(thumbnail.url)
+                      .format('auto')
+                      .quality('auto:best'),
                     alt: name,
                     style: {
-                      width: thumbnail?.width ? `${thumbnail.width}px` : '100%',
-                      height: thumbnail?.width ? `${thumbnail.width}px` : '100%',
+                      width: '100%',
+                      height: '100%',
                       borderRadius: '1rem',
                       objectFit: 'cover',
                       aspectRatio: '1/1',
                       display: 'block',
-                      imageRendering: 'pixelated',
+                      imageRendering: 'auto',
                     },
                     id: 'dog-thumbnail',
                     name: 'dog-thumbnail'
@@ -324,23 +327,26 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
           ) : (largestImgUrl) ? (
               isCloudinaryId(largestImgUrl)
                     ? React.createElement(AdvancedImage as any, {
-                        cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(largestImgUrl).format('auto').quality('auto'),
+                        cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } })
+                          .image(largestImgUrl)
+                          .format('auto')
+                          .quality('auto:best'),
                         alt: name,
                         style: {
-                          width: largestImage?.width ? `${largestImage.width}px` : '100%',
-                          height: largestImage?.width ? `${largestImage.width}px` : '100%',
+                          width: '100%',
+                          height: '100%',
                           borderRadius: '1rem',
                           objectFit: 'cover',
                           aspectRatio: '1/1',
                           display: 'block',
-                          imageRendering: 'pixelated',
+                          imageRendering: 'auto',
                         }
                       })
-                    : <img src={largestImgUrl} alt={name} style={{ width: largestImage?.width ? `${largestImage.width}px` : '100%', height: largestImage?.width ? `${largestImage.width}px` : '100%', borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'pixelated' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+                    : <img src={largestImgUrl} alt={name} srcSet={imgSrcSet} sizes="(max-width: 320px) 100vw, 320px" style={{ width: '100%', height: '100%', borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (
               <img src={imgSrc || '/img/nany.jpg'}
                 alt={name}
-                style={{ width: '100%', height: '100%', borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'pixelated' }}
+                style={{ width: '100%', height: '100%', borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'auto' }}
                 onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           )}
           {images && images.length > 1 && (

@@ -21,7 +21,8 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:3000',
   'http://172.20.10.2:3000',
-  'https://eky-frontend-m2ul.onrender.com'
+  'https://eky-frontend-m2ul.onrender.com',
+  'https://sharedog-homeless-backend.onrender.com'
 ];
 
 app.use(cors({
@@ -47,9 +48,13 @@ import chatRoutes from './routes/chatRoutes.js';
 
 app.use('/api/chat', chatRoutes);
 
- // serve uploaded media
- app.use('/uploads', express.static('uploads'));
- 
+// serve uploaded media with CORS headers
+app.use('/uploads', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+}, express.static('uploads'));
 
 // User and other API routes
 app.use("/api/users", userRoutes);

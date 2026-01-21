@@ -353,8 +353,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               style={{
                 maxWidth: 600,
                 width: '90vw',
-                maxHeight: '90vw',
-                aspectRatio: '1/1',
+                height: '90vw',
                 background: 'transparent',
                 borderRadius: 16,
                 overflow: 'hidden',

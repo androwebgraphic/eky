@@ -209,12 +209,18 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   // Build srcSet with all available sizes, always including the largest/original
   let imgSrcSet: string | undefined = undefined;
   let largestImgUrl: string | undefined = undefined;
-  if (images && images.length) {
-    // Sort by width descending, fallback to original if no width
-    const sorted = [...images].sort((a, b) => (b.width || 0) - (a.width || 0));
-    largestImgUrl = toCloudinaryUrl(sorted[0].url, { width: sorted[0].width });
-    imgSrcSet = images.map(i => `${toCloudinaryUrl(i.url, { width: i.width })} ${i.width || 1024}w`).join(', ');
-    if (!imgSrcSet.includes(largestImgUrl)) {
+  // Filter images to only those with valid URLs
+  const validImages = (images || []).filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
+  if (validImages.length) {
+    // Only use Cloudinary for valid public IDs
+    const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
+    const firstValid = sorted.find(img => isCloudinaryId(img.url));
+    largestImgUrl = firstValid ? toCloudinaryUrl(firstValid.url, { width: firstValid.width }) : sorted[0].url;
+    imgSrcSet = sorted
+      .filter(i => isCloudinaryId(i.url))
+      .map(i => `${toCloudinaryUrl(i.url, { width: i.width })} ${i.width || 1024}w`)
+      .join(', ');
+    if (largestImgUrl && imgSrcSet && !imgSrcSet.includes(largestImgUrl)) {
       imgSrcSet += `, ${largestImgUrl} 2000w`;
     }
   }
@@ -283,16 +289,12 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                     name: 'dog-thumbnail'
                   })
                 : React.createElement('img', {
-                    src: largestImgUrl || thumbUrl,
+                    src: thumbUrl,
                     alt: name,
-                    srcSet: imgSrcSet,
-                    sizes: '(max-width: 600px) 100vw, 40vw',
                     onError: (e: any) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }
                   })
-          ) : (images && images.length) ? (
-              <img src={largestImgUrl || `${images[0].url}?${cacheBust}`}
-                srcSet={imgSrcSet}
-                sizes="(max-width: 600px) 100vw, 40vw"
+          ) : (validImages.length) ? (
+              <img src={largestImgUrl || validImages[0].url || '/img/nany.jpg'}
                 alt={name}
                 onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (

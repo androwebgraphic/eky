@@ -12,6 +12,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  currentUser?: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (userData: any) => Promise<{ success: boolean; error?: string }>;
@@ -19,7 +20,7 @@ interface AuthContextType {
   updateUser: (userData: User) => void;
   addToWishlist: (dogId: string) => Promise<{ success: boolean; error?: string }>;
   removeFromWishlist: (dogId: string) => Promise<{ success: boolean; error?: string }>;
-  getWishlist: () => Promise<any[]>;
+  getWishlist: () => Promise<string[]>;
   isInWishlist: (dogId: string) => boolean;
   isAuthenticated: boolean;
   loading: boolean;
@@ -220,19 +221,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const isAuthenticated = !!user && !!token;
 
   const value: AuthContextType = {
-    user,
-    token,
-    login,
-    register,
-    logout,
-    updateUser,
-    addToWishlist,
-    removeFromWishlist,
-    getWishlist,
-    isInWishlist,
-    isAuthenticated,
-    loading,
-  };
-
+  user,
+  currentUser: user, 
+  token,
+  login,
+  register,
+  logout,
+  updateUser,
+  addToWishlist,
+  removeFromWishlist,
+  getWishlist,
+  isInWishlist,
+  isAuthenticated,
+  loading,
+};
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

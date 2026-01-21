@@ -54,28 +54,50 @@ interface CardSmallProps {
 
 
 const CardSmall: React.FC<CardSmallProps> = (props) => {
-                    <img
-                      src={toCloudinaryUrl(thumbnail.url, { width: 1024 })}
-                      srcSet={[
-                        toCloudinaryUrl(thumbnail.url, { width: 320 }) + ' 320w',
-                        toCloudinaryUrl(thumbnail.url, { width: 640 }) + ' 640w',
-                        toCloudinaryUrl(thumbnail.url, { width: 1024 }) + ' 1024w',
-                        toCloudinaryUrl(thumbnail.url) + ' 2000w'
-                      ].join(', ')}
-                      sizes="(max-width: 480px) 100vw, (max-width: 900px) 50vw, 320px"
-                      alt={name}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        borderRadius: '1rem',
-                        objectFit: 'cover',
-                        aspectRatio: '1/1',
-                        display: 'block',
-                        imageRendering: 'auto',
-                      }}
-                      id="dog-thumbnail"
-                      onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }}
-                    />
+  // Destructure props for easier access
+  const {
+    _id,
+    imgSrc,
+    images,
+    video,
+    thumbnail,
+    name,
+    age,
+    likes,
+    breed,
+    color,
+    place,
+    location,
+    lat,
+    lng,
+    description,
+    size,
+    gender,
+    vaccinated,
+    neutered,
+    onViewDetails,
+    onEdit,
+    onRemove,
+    canEdit,
+    user: owner,
+    adoptionStatus,
+    adoptionQueue,
+    onDogUpdate,
+  } = props;
+
+  const { t } = useTranslation();
+  const { currentUser, isAuthenticated, token, addToWishlist, removeFromWishlist } = useAuth();
+  const [showMap, setShowMap] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [coordsError, setCoordsError] = useState<string | null>(null);
+  const [loadingCoords, setLoadingCoords] = useState(false);
+
+  const isOwner = currentUser && owner && currentUser._id === owner._id;
+
+  const handleShowMap = async () => {
+    if (!place) return;
+    setLoadingCoords(true);
+    setCoords(null);
     setCoordsError(null);
     try {
       const response = await fetch(

@@ -18,25 +18,15 @@ const app = express();
  // (removed duplicate allowedOrigins and related unused code)
 // Allow both local and production frontends for CORS
 
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://172.20.10.2:3000',
-  'https://eky-frontend-m2ul.onrender.com',
-  'https://sharedog-homeless-backend.onrender.com'
-];
-
+// Allow all origins for CORS (for development and deployment)
 app.use(cors({
-  origin: function(origin, callback) {
-    // allow requests with no origin (like mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: '*',
   credentials: true
 }));
+// Health check endpoint for Render.com
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
  app.use(express.json({ limit: '100mb' }));//to parse  Json data in the req.body
 import chatRoutes from './routes/chatRoutes.js';
  app.use(express.urlencoded({ limit: '100mb', extended: true })); //to parse form data in the req.body

@@ -190,23 +190,25 @@ export const updateDog = async (req, res) => {
       console.log('Processing new media files for Cloudinary...');
       const mediaArray = Array.isArray(req.files.media) ? req.files.media : [req.files.media];
       console.log('Media array length:', mediaArray.length);
+      const sharp = require('sharp');
       for (const mediaFile of mediaArray) {
         if (mediaFile.mimetype.startsWith('image/')) {
-          // Upload image variants to Cloudinary
+          // Remove metadata using sharp
           const imageVariants = [];
           await Promise.all(sizes.map(async (w) => {
             const publicId = `dogs/${dog._id}/image-${w}-${Date.now()}-${Math.floor(Math.random()*10000)}`;
+            // Remove metadata and resize
+            const bufferNoMeta = await sharp(mediaFile.buffer).resize({ width: w }).jpeg({ quality: 90 }).toBuffer();
             const result = await new Promise((resolve, reject) => {
               const stream = cloudinary.uploader.upload_stream({
                 public_id: publicId,
-                transformation: [{ width: w, crop: 'scale' }],
                 resource_type: 'image',
                 overwrite: true,
               }, (error, result) => {
                 if (error) reject(error);
                 else resolve(result);
               });
-              stream.end(mediaFile.buffer);
+              stream.end(bufferNoMeta);
             });
             imageVariants.push({ url: result.public_id, width: w, size: `${w}` });
           }));

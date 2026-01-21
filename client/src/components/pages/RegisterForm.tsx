@@ -131,7 +131,7 @@ const RegisterForm: React.FC = () => {
             {` ` + t('Accept')}
           </label>
         </div>
-        <button type="submit" id="register" className="details" disabled={isSubmitting || !acceptedTerms}>
+        <button type="submit" id="register" name="register" className="details" disabled={isSubmitting || !acceptedTerms}>
           {isSubmitting ? t('button.submitting') || 'Submitting...' : (t('button.register') || 'Register')}
         </button>
             <TermsModal

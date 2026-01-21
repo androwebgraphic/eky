@@ -16,6 +16,8 @@ const LanguageSelector: React.FC = () => {
 
   return (
     <select 
+      id="language-selector"
+      name="language-selector"
       value={i18n.language} 
       onChange={handleChange} 
       aria-label={t('language.selectAria')}

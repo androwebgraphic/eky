@@ -196,13 +196,14 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   };
 
   // Image helpers
-  const toAbs = (u?: string) => {
-    if (!u) return u;
-    if (u.includes('/uploads/')) {
-      const match = u.match(/\/uploads\/.*/);
-      return match ? `${apiBase}${match[0]}` : u;
-    }
-    return u.startsWith('http') ? u : `${apiBase}${u}`;
+  // Always use Cloudinary public_id for migrated images
+  const toCloudinaryUrl = (publicId?: string, options?: { width?: number }) => {
+    if (!publicId) return undefined;
+    // Replace with your actual cloud name
+    const cloudName = 'dtqzrm4by';
+    let url = `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`;
+    if (options?.width) url += `/w_${options.width}`;
+    return url;
   };
   const cacheBust = `t=${Date.now()}`;
   // Build srcSet with all available sizes, always including the largest/original
@@ -211,19 +212,17 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   if (images && images.length) {
     // Sort by width descending, fallback to original if no width
     const sorted = [...images].sort((a, b) => (b.width || 0) - (a.width || 0));
-    largestImgUrl = toAbs(sorted[0].url);
-    imgSrcSet = images.map(i => `${toAbs(i.url)}?${cacheBust} ${i.width || 1024}w`).join(', ');
-    // Always add the largest/original as the last srcSet entry if not present
+    largestImgUrl = toCloudinaryUrl(sorted[0].url, { width: sorted[0].width });
+    imgSrcSet = images.map(i => `${toCloudinaryUrl(i.url, { width: i.width })} ${i.width || 1024}w`).join(', ');
     if (!imgSrcSet.includes(largestImgUrl)) {
-      imgSrcSet += `, ${largestImgUrl}?${cacheBust} 2000w`;
+      imgSrcSet += `, ${largestImgUrl} 2000w`;
     }
   }
   const posterUrl = video && video.poster && video.poster.length ? toAbs(video.poster[video.poster.length - 1].url) : undefined;
   const hasVideoUrl = video && typeof video.url === 'string' && video.url.length > 0;
   const videoUrl = hasVideoUrl ? toAbs(video.url) : undefined;
-  const thumbUrl = thumbnail && thumbnail.url ? `${toAbs(thumbnail.url)}?${cacheBust}` : undefined;
-  // If thumbnail is a Cloudinary public ID, use Cloudinary rendering
-  const isCloudinaryThumb = thumbnail && typeof thumbnail.url === 'string' && !thumbnail.url.startsWith('http');
+  const thumbUrl = thumbnail && thumbnail.url ? toCloudinaryUrl(thumbnail.url) : undefined;
+  const isCloudinaryThumb = thumbnail && typeof thumbnail.url === 'string';
 
   const [showSlider, setShowSlider] = useState(false);
 
@@ -264,7 +263,9 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                 ? React.createElement(AdvancedImage as any, {
                     cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(thumbnail.url).format('auto').quality('auto'),
                     alt: name,
-                    style: { width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 64 }
+                    style: { width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 64 },
+                    id: 'dog-thumbnail',
+                    name: 'dog-thumbnail'
                   })
                 : React.createElement('img', {
                     src: largestImgUrl || thumbUrl,

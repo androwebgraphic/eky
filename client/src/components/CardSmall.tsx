@@ -218,11 +218,26 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
       imgSrcSet += `, ${largestImgUrl} 2000w`;
     }
   }
-  const posterUrl = video && video.poster && video.poster.length ? toCloudinaryUrl(video.poster[video.poster.length - 1].url) : undefined;
+  // Helper to check if a string is a Cloudinary public ID (not a URL)
+  const isCloudinaryId = (url?: string) => url && !url.startsWith('http') && !url.startsWith('/uploads/');
+
+  const posterUrl = video && video.poster && video.poster.length
+    ? (isCloudinaryId(video.poster[video.poster.length - 1].url)
+        ? toCloudinaryUrl(video.poster[video.poster.length - 1].url)
+        : video.poster[video.poster.length - 1].url)
+    : undefined;
   const hasVideoUrl = video && typeof video.url === 'string' && video.url.length > 0;
-  const videoUrl = hasVideoUrl ? toCloudinaryUrl(video.url) : undefined;
-  const thumbUrl = thumbnail && thumbnail.url ? toCloudinaryUrl(thumbnail.url) : undefined;
-  const isCloudinaryThumb = thumbnail && typeof thumbnail.url === 'string';
+  const videoUrl = hasVideoUrl
+    ? (isCloudinaryId(video.url)
+        ? toCloudinaryUrl(video.url)
+        : video.url)
+    : undefined;
+  const thumbUrl = thumbnail && thumbnail.url
+    ? (isCloudinaryId(thumbnail.url)
+        ? toCloudinaryUrl(thumbnail.url)
+        : thumbnail.url)
+    : undefined;
+  const isCloudinaryThumb = thumbnail && isCloudinaryId(thumbnail.url);
 
   const [showSlider, setShowSlider] = useState(false);
 

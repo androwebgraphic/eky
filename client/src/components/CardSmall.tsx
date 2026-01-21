@@ -306,20 +306,21 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                       borderRadius: '1rem',
                       objectFit: 'cover',
                       aspectRatio: '1/1',
-                      display: 'block'
+                      display: 'block',
+                      imageRendering: 'auto'
                     },
                     id: 'dog-thumbnail',
                     name: 'dog-thumbnail'
                   })
-                : <img src={thumbUrl} alt={name} style={{ width: '100%', height: '100%', borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+                : <img src={thumbUrl} alt={name} style={{ width: '100%', height: '100%', borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (validImages.length) ? (
               isCloudinaryId(validImages[0].url)
-                ? React.createElement(AdvancedImage as any, {
-                    cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(validImages[0].url).format('auto').quality('auto'),
-                    alt: name,
-                    style: { width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover' }
-                  })
-                : <img src={validImages[0].url} alt={name} style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+                    ? React.createElement(AdvancedImage as any, {
+                        cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(validImages[0].url).format('auto').quality('auto'),
+                        alt: name,
+                        style: { width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', imageRendering: 'auto' }
+                      })
+                    : <img src={validImages[0].url} alt={name} style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (
               <img src={imgSrc || '/img/nany.jpg'}
                 alt={name}
@@ -347,6 +348,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}
+            onClick={() => setShowSlider(false)}
           >
             <div
               style={{

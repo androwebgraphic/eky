@@ -3,9 +3,9 @@ import express from 'express';
 import multer from 'multer';
 import auth from '../middleware/auth.js';
 import { createDog, listDogs, getDogById, updateDog, deleteDog, likeDog, unlikeDog, requestAdoption, confirmAdoption, cancelAdoption } from '../controllers/dogController.js';
-
 const router = express.Router();
 
+router.patch('/:id', auth, updateDog);
 
 
 // use memoryStorage to process with sharp

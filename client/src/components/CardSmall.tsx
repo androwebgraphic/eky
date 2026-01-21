@@ -220,6 +220,8 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   const hasVideoUrl = video && typeof video.url === 'string' && video.url.length > 0;
   const videoUrl = hasVideoUrl ? toAbs(video.url) : undefined;
   const thumbUrl = thumbnail && thumbnail.url ? `${toAbs(thumbnail.url)}?${cacheBust}` : undefined;
+  // If thumbnail is a Cloudinary public ID, use Cloudinary rendering
+  const isCloudinaryThumb = thumbnail && typeof thumbnail.url === 'string' && !thumbnail.url.startsWith('http');
 
   const [showSlider, setShowSlider] = useState(false);
 
@@ -256,11 +258,19 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               <source src={videoUrl} />
             </video>
           ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
-              <img src={largestImgUrl || thumbUrl}
-                alt={name}
-                srcSet={imgSrcSet}
-                sizes="(max-width: 600px) 100vw, 40vw"
-                onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+              isCloudinaryThumb ? (
+                <AdvancedImage
+                  cldImg={new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(thumbnail.url).format('auto').quality('auto')}
+                  alt={name}
+                  style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 64 }}
+                />
+              ) : (
+                <img src={largestImgUrl || thumbUrl}
+                  alt={name}
+                  srcSet={imgSrcSet}
+                  sizes="(max-width: 600px) 100vw, 40vw"
+                  onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+              )
           ) : (images && images.length) ? (
               <img src={largestImgUrl || `${toAbs(images[0].url)}?${cacheBust}`}
                 srcSet={imgSrcSet}

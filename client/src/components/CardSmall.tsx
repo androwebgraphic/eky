@@ -275,7 +275,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                     onError: (e: any) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }
                   })
           ) : (images && images.length) ? (
-              <img src={largestImgUrl || `${toAbs(images[0].url)}?${cacheBust}`}
+              <img src={largestImgUrl || `${images[0].url}?${cacheBust}`}
                 srcSet={imgSrcSet}
                 sizes="(max-width: 600px) 100vw, 40vw"
                 alt={name}

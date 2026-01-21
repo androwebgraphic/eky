@@ -14,6 +14,9 @@ interface DogImageSliderProps {
 const DogImageSlider: React.FC<DogImageSliderProps> = ({ images, alt }) => {
   if (!images || images.length === 0) return null;
 
+  // Responsive maxHeight: 480px on desktop, 320px on mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const maxHeight = isMobile ? 320 : 480;
   return (
     <div className="dog-image-slider">
       <Swiper
@@ -23,14 +26,14 @@ const DogImageSlider: React.FC<DogImageSliderProps> = ({ images, alt }) => {
         loop={true}
         pagination={{ clickable: true }}
         navigation={true}
-        style={{ borderRadius: '1rem', maxHeight: 320 }}
+        style={{ borderRadius: '1rem', maxHeight }}
       >
         {images.map((img, idx) => (
           <SwiperSlide key={img.url}>
             <img
               src={img.url}
               alt={alt || `dog-image-${idx + 1}`}
-              style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 320 }}
+              style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight }}
               loading="lazy"
             />
           </SwiperSlide>

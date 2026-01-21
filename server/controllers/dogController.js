@@ -168,8 +168,20 @@ export const updateDog = async (req, res) => {
       }
     }
     
-    // Remove images not in keepImages
+    // Remove images not in keepImages and delete from Cloudinary if needed
     if (Array.isArray(dog.images) && keepImages.length >= 0) {
+      const removedImages = dog.images.filter(img => !keepImages.includes(img.url));
+      // Remove from Cloudinary
+      for (const img of removedImages) {
+        if (img.url && img.url.startsWith('dogs/')) { // Only delete Cloudinary images
+          try {
+            await cloudinary.uploader.destroy(img.url, { resource_type: 'image' });
+            console.log('Deleted Cloudinary image:', img.url);
+          } catch (err) {
+            console.warn('Failed to delete Cloudinary image:', img.url, err);
+          }
+        }
+      }
       dog.images = dog.images.filter(img => keepImages.includes(img.url));
     }
 

@@ -95,8 +95,8 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
                 <span className="eky-icon eky-eky"></span>
               </li>
             </Link>
-            <li title={t('button.chat') || 'Chat'} onClick={typeof onChatClick === 'function' ? onChatClick : undefined} style={{ cursor: 'pointer' }}>
-              <span className="eky-chat"></span>
+            <li title={t('button.chat') || 'Chat'} onClick={typeof onChatClick === 'function' ? onChatClick : undefined} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: 40 }}>
+              <img src="/img/paper-airplane.svg" alt="Chat" style={{ width: 28, height: 28, display: 'block', filter: 'drop-shadow(0 1px 2px #1976d2)', color: '#2196f3' }} />
             </li>
             <Link to="dodajpsa">
               <li title={t('adddog.title')}>

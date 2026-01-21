@@ -195,6 +195,8 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     }
   };
 
+  // Helper to check if a string is a Cloudinary public ID (not a URL)
+  const isCloudinaryId = (url?: string) => url && !url.startsWith('http') && !url.startsWith('/uploads/');
   // Image helpers
   // Always use Cloudinary public_id for migrated images
   const toCloudinaryUrl = (publicId?: string, options?: { width?: number }) => {
@@ -224,8 +226,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
       imgSrcSet += `, ${largestImgUrl} 2000w`;
     }
   }
-  // Helper to check if a string is a Cloudinary public ID (not a URL)
-  const isCloudinaryId = (url?: string) => url && !url.startsWith('http') && !url.startsWith('/uploads/');
 
   const posterUrl = video && video.poster && video.poster.length
     ? (isCloudinaryId(video.poster[video.poster.length - 1].url)
@@ -238,12 +238,17 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
         ? toCloudinaryUrl(video.url)
         : video.url)
     : undefined;
-  const thumbUrl = thumbnail && thumbnail.url
-    ? (isCloudinaryId(thumbnail.url)
-        ? toCloudinaryUrl(thumbnail.url)
-        : thumbnail.url)
-    : undefined;
-  const isCloudinaryThumb = thumbnail && isCloudinaryId(thumbnail.url);
+  let thumbUrl: string | undefined = undefined;
+  let isCloudinaryThumb = false;
+  if (thumbnail && thumbnail.url) {
+    if (isCloudinaryId(thumbnail.url)) {
+      thumbUrl = toCloudinaryUrl(thumbnail.url);
+      isCloudinaryThumb = true;
+    } else if (thumbnail.url.startsWith('http') || thumbnail.url.startsWith('/uploads/')) {
+      thumbUrl = thumbnail.url;
+      isCloudinaryThumb = false;
+    }
+  }
 
   const [showSlider, setShowSlider] = useState(false);
 
@@ -280,7 +285,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               <source src={videoUrl} />
             </video>
           ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
-              isCloudinaryThumb && thumbnail && isCloudinaryId(thumbnail.url)
+              isCloudinaryThumb
                 ? React.createElement(AdvancedImage as any, {
                     cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(thumbnail.url).format('auto').quality('auto'),
                     alt: name,
@@ -288,7 +293,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                     id: 'dog-thumbnail',
                     name: 'dog-thumbnail'
                   })
-                : <img src={thumbnail?.url} alt={name} style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 64 }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+                : <img src={thumbUrl} alt={name} style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 64 }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (validImages.length) ? (
               isCloudinaryId(validImages[0].url)
                 ? React.createElement(AdvancedImage as any, {

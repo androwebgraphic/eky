@@ -255,23 +255,22 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   // Prepare unique images for DogImageSlider (one per uploaded photo, pick only 1024px variant)
   let uniqueImages: { url: string; width?: number }[] = [];
   if (images && images.length > 0) {
-    // Only keep images with width 1024 (largest variant)
-    uniqueImages = images.filter(img => img.width === 1024).map(img => {
-      const cloudinaryMatch = img.url.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/([^\.]+)(\.[a-zA-Z]+)?$/);
-      return {
-        url: cloudinaryMatch ? cloudinaryMatch[1] : img.url,
-        width: img.width
-      };
-    });
-    // Fallback: if no 1024px images, use the largest available per group of 3
-    if (uniqueImages.length === 0) {
-      for (let i = 0; i < images.length; i += 3) {
-        const group = images.slice(i, i + 3);
-        const largest = group.reduce((a, b) => (a.width || 0) > (b.width || 0) ? a : b, group[0]);
-        const cloudinaryMatch = largest.url.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/([^\.]+)(\.[a-zA-Z]+)?$/);
-        uniqueImages.push({ url: cloudinaryMatch ? cloudinaryMatch[1] : largest.url, width: largest.width });
+    // Prefer 1024px images, fallback to all valid images
+    const preferred = images.filter(img => img.width === 1024 && img.url);
+    const fallback = images.filter(img => img.url);
+    const source = preferred.length > 0 ? preferred : fallback;
+    uniqueImages = source.map(img => {
+      // If Cloudinary public ID, use as is; if full Cloudinary URL, extract public ID; else use full URL
+      if (isCloudinaryId(img.url)) {
+        return { url: img.url, width: img.width };
       }
-    }
+      const cloudinaryMatch = img.url.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/([^\.]+)(\.[a-zA-Z]+)?$/);
+      if (cloudinaryMatch) {
+        return { url: cloudinaryMatch[1], width: img.width };
+      }
+      // Legacy or external URL
+      return { url: img.url, width: img.width };
+    });
   }
 
   return (

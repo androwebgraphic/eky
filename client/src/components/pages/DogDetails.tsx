@@ -237,7 +237,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({
 
   return (
     <div className="card-details">
-      <div className="img" style={{ width: '100%', aspectRatio: '1/1', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8f8' }}>
+      <div className="img" style={{ width: '100%', maxWidth: 400, margin: '0 auto', aspectRatio: '1/1', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8f8', minHeight: 0, maxHeight: 400, boxSizing: 'border-box', marginTop: 16, marginBottom: 16, borderRadius: 16 }}>
         {sliderImages.length > 0 && (
           <DogImageSlider images={sliderImages} alt={name} />
         )}

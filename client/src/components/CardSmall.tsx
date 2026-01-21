@@ -703,7 +703,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                     const addToList = t('button.addToList');
                     const removeFromList = t('button.removeFromList');
                     // eslint-disable-next-line no-console
-                    console.log('[CardSmall][render] addToList:', addToList, '| removeFromList:', removeFromList);
                     return inWishlist ? '💔 ' + removeFromList : '❤️ ' + addToList;
                   })()}
                 </button>

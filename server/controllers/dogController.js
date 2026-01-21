@@ -170,73 +170,61 @@ export const updateDog = async (req, res) => {
     
     // Remove images not in keepImages
     if (Array.isArray(dog.images) && keepImages.length >= 0) {
-      const removed = dog.images.filter(img => !keepImages.includes(img.url));
-      // Delete files for removed images
-      for (const img of removed) {
-        try {
-          const m = img.url.match(/\/uploads\/dogs\/([^/]+)\/(.*)/);
-          if (m) {
-            const filePath = path.join(process.cwd(), 'uploads', 'dogs', m[1], m[2]);
-            if (fs.existsSync(filePath)) {
-              fs.unlinkSync(filePath);
-            }
-          }
-        } catch (err) {
-          console.warn('Could not delete image file:', err);
-        }
-      }
       dog.images = dog.images.filter(img => keepImages.includes(img.url));
     }
 
-    // Handle new uploaded images (media)
+    // Handle new uploaded images (media) - upload to Cloudinary
     if (req.files && req.files.media) {
-      console.log('Processing new media files...');
-      const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
-      console.log('Upload directory:', uploadDir);
-      fs.mkdirSync(uploadDir, { recursive: true });
+      console.log('Processing new media files for Cloudinary...');
       const mediaArray = Array.isArray(req.files.media) ? req.files.media : [req.files.media];
       console.log('Media array length:', mediaArray.length);
-      
       for (const mediaFile of mediaArray) {
-        console.log('Processing file:', mediaFile.originalname, 'type:', mediaFile.mimetype);
         if (mediaFile.mimetype.startsWith('image/')) {
-          // Add new image variants, auto-orient using EXIF
-          console.log('Creating image variants...');
+          // Upload image variants to Cloudinary
+          const imageVariants = [];
           await Promise.all(sizes.map(async (w) => {
-            const outName = `image-${w}-${Date.now()}-${Math.floor(Math.random()*10000)}.jpg`;
-            const outPath = path.join(uploadDir, outName);
-            console.log(`Creating ${w}px variant: ${outName}`);
-            const buffer = await sharp(mediaFile.buffer)
-              .rotate() // auto-orient based on EXIF
-              .resize({ width: w })
-              .jpeg({ quality: 80 })
-              .toBuffer();
-            fs.writeFileSync(outPath, buffer);
-            const imageUrl = `${req.protocol}://${req.get('host')}/uploads/dogs/${dog._id}/${outName}`;
-            console.log(`Added image URL: ${imageUrl}`);
-            dog.images.push({ url: imageUrl, width: w, size: `${w}` });
+            const publicId = `dogs/${dog._id}/image-${w}-${Date.now()}-${Math.floor(Math.random()*10000)}`;
+            const result = await new Promise((resolve, reject) => {
+              const stream = cloudinary.uploader.upload_stream({
+                public_id: publicId,
+                transformation: [{ width: w, crop: 'scale' }],
+                resource_type: 'image',
+                overwrite: true,
+              }, (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              });
+              stream.end(mediaFile.buffer);
+            });
+            imageVariants.push({ url: result.public_id, width: w, size: `${w}` });
           }));
+          dog.images.push(...imageVariants);
         }
       }
-      
       // Create thumbnail from the first uploaded image
       if (mediaArray.length > 0) {
         try {
-          const thumbName = `thumb-64.jpg`;
-          const thumbPath = path.join(uploadDir, thumbName);
-          const buffer = await sharp(mediaArray[0].buffer)
-            .rotate() // auto-orient based on EXIF
-            .resize({ width: 64 })
-            .jpeg({ quality: 80 })
-            .toBuffer();
-          fs.writeFileSync(thumbPath, buffer);
-          dog.thumbnail = { url: `${req.protocol}://${req.get('host')}/uploads/dogs/${dog._id}/${thumbName}`, width: 64, size: '64' };
-          console.log('Created new thumbnail:', dog.thumbnail.url);
+          const thumbPublicId = `dogs/${dog._id}/thumb-64-${Date.now()}-${Math.floor(Math.random()*10000)}`;
+          await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream({
+              public_id: thumbPublicId,
+              transformation: [{ width: 64, crop: 'scale' }],
+              resource_type: 'image',
+              overwrite: true,
+            }, (error, result) => {
+              if (error) reject(error);
+              else {
+                dog.thumbnail = { url: result.public_id, width: 64, size: '64' };
+                resolve(result);
+              }
+            });
+            stream.end(mediaArray[0].buffer);
+          });
+          console.log('Created new Cloudinary thumbnail:', dog.thumbnail.url);
         } catch (thumbErr) {
-          console.warn('Thumbnail creation failed', thumbErr);
+          console.warn('Cloudinary thumbnail creation failed', thumbErr);
         }
       }
-      
       console.log('Final images count:', dog.images.length);
     } else {
       console.log('No new media files to process');

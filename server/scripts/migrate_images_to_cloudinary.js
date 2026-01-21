@@ -1,8 +1,16 @@
+
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '../.env') });
+
 import mongoose from 'mongoose';
 import Dog from '../models/dogModel.js';
 import fs from 'fs';
-import path from 'path';
 import cloudinary from '../utils/cloudinary.js';
+
+console.log('MONGO_URI:', process.env.MONGO_URI); // Debugging line
 
 // Connect to your MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });

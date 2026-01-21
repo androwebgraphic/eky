@@ -21,6 +21,8 @@ const app = express();
 // Allow all origins for CORS (for development and deployment)
 app.use(cors({
   origin: '*',
+   origin: 'https://eky-frontend-m2ul.onrender.com',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // <-- Make sure PATCH is included
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true

@@ -43,11 +43,11 @@ const DogImageSlider: React.FC<DogImageSliderProps> = ({ images, alt }) => {
           const cldImg = cld.image(publicId).format('auto').quality('auto');
           return (
             <SwiperSlide key={img.url}>
-              <AdvancedImage
-                cldImg={cldImg}
-                alt={alt || `dog-image-${idx + 1}`}
-                style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight }}
-              />
+              {React.createElement(AdvancedImage as any, {
+                cldImg,
+                alt: alt || `dog-image-${idx + 1}`,
+                style: { width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight }
+              })}
             </SwiperSlide>
           );
         })}

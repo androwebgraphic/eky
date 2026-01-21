@@ -161,16 +161,33 @@ const DogDetails: React.FC<DogDetailsProps> = ({
   };
 
 
-  // Prepare images for DogImageSlider
+  // Prepare images for DogImageSlider (always use largest available, prefer 1024px, always pass full Cloudinary URL)
+  const toCloudinaryUrl = (publicId?: string, options?: { width?: number }) => {
+    if (!publicId) return undefined;
+    const cloudName = 'dtqzrm4by';
+    let url = `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`;
+    if (options?.width) url += `/w_${options.width}`;
+    return url;
+  };
   let sliderImages: { url: string; width?: number }[] = [];
   if (images && images.length > 0) {
-    // If image URLs are Cloudinary, use public ID; else pass as-is
-    sliderImages = images.map(img => {
+    // Prefer 1024px, then largest available
+    const validImages = images.filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
+    const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
+    const preferred = sorted.filter(img => img.width === 1024);
+    const source = preferred.length > 0 ? preferred : sorted;
+    sliderImages = source.map(img => {
+      // If Cloudinary public ID, convert to full URL; if full Cloudinary URL, use as is; else use full URL
+      const isCloudinaryId = (url?: string) => url && !url.startsWith('http') && !url.startsWith('/uploads/');
+      if (isCloudinaryId(img.url)) {
+        return { url: toCloudinaryUrl(img.url, { width: img.width }) || '', width: img.width };
+      }
       const cloudinaryMatch = img.url.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/([^\.]+)(\.[a-zA-Z]+)?$/);
-      return {
-        url: cloudinaryMatch ? cloudinaryMatch[1] : img.url,
-        width: img.width
-      };
+      if (cloudinaryMatch) {
+        return { url: img.url, width: img.width };
+      }
+      // Legacy or external URL
+      return { url: toAbs(img.url), width: img.width };
     });
   } else if (thumbnail?.url) {
     sliderImages = [{ url: toAbs(thumbnail.url) }];
@@ -220,7 +237,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({
 
   return (
     <div className="card-details">
-      <div className="img">
+      <div className="img" style={{ width: '100%', aspectRatio: '1/1', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8f8' }}>
         {sliderImages.length > 0 && (
           <DogImageSlider images={sliderImages} alt={name} />
         )}

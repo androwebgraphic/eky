@@ -213,15 +213,20 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   let largestImgUrl: string | undefined = undefined;
   // Filter images to only those with valid URLs
   const validImages = (images || []).filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
+  let largestImage = undefined;
   if (validImages.length) {
-    // Only use Cloudinary for valid public IDs
+    // Prefer 1024px, then largest available
     const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
-    const firstValid = sorted.find(img => isCloudinaryId(img.url));
-    largestImgUrl = firstValid ? toCloudinaryUrl(firstValid.url, { width: firstValid.width }) : sorted[0].url;
+    largestImage = sorted.find(img => img.width === 1024) || sorted[0];
     imgSrcSet = sorted
       .filter(i => isCloudinaryId(i.url))
       .map(i => `${toCloudinaryUrl(i.url, { width: i.width })} ${i.width || 1024}w`)
       .join(', ');
+    if (largestImage && isCloudinaryId(largestImage.url)) {
+      largestImgUrl = toCloudinaryUrl(largestImage.url, { width: largestImage.width });
+    } else if (largestImage) {
+      largestImgUrl = largestImage.url;
+    }
     if (largestImgUrl && imgSrcSet && !imgSrcSet.includes(largestImgUrl)) {
       imgSrcSet += `, ${largestImgUrl} 2000w`;
     }
@@ -313,17 +318,18 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                     name: 'dog-thumbnail'
                   })
                 : <img src={thumbUrl} alt={name} style={{ width: '100%', height: '100%', borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
-          ) : (validImages.length) ? (
-              isCloudinaryId(validImages[0].url)
+          ) : (largestImgUrl) ? (
+              isCloudinaryId(largestImgUrl)
                     ? React.createElement(AdvancedImage as any, {
-                        cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(validImages[0].url).format('auto').quality('auto'),
+                        cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(largestImgUrl).format('auto').quality('auto'),
                         alt: name,
-                        style: { width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', imageRendering: 'auto' }
+                        style: { width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', display: 'block', imageRendering: 'auto' }
                       })
-                    : <img src={validImages[0].url} alt={name} style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+                    : <img src={largestImgUrl} alt={name} style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', display: 'block', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (
               <img src={imgSrc || '/img/nany.jpg'}
                 alt={name}
+                style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', display: 'block', imageRendering: 'auto' }}
                 onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           )}
           {images && images.length > 1 && (

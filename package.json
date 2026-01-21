@@ -9,6 +9,8 @@
     "stop": "lsof -ti:3001 | xargs kill -9 2>/dev/null || true && lsof -ti:3000 | xargs kill -9 2>/dev/null || true"
   },
   "dependencies": {
+    "@cloudinary/react": "^1.14.3",
+    "@cloudinary/url-gen": "^1.22.0",
     "embla-carousel-react": "^7.0.6",
     "leaflet": "^1.9.4",
     "mongodb": "^7.0.0",

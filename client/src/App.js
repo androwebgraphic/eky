@@ -6,40 +6,57 @@ import ErrorBoundary from './components/ErrorBoundary';
 import ChatApp from './components/ChatApp';
 import React, { useState, useEffect } from 'react';
 import "./css/mobile-fixes.css"; // Mobile viewport fixes
+import { Cloudinary } from '@cloudinary/url-gen';
+import { auto } from '@cloudinary/url-gen/actions/resize';
+import { autoGravity } from '@cloudinary/url-gen/qualifiers/gravity';
+import { AdvancedImage } from '@cloudinary/react';
 
 
 const App = () => {
-  const [showChatModal, setShowChatModal] = useState(false);
 
-  useEffect(() => {
-    const handler = () => setShowChatModal(false);
-    window.addEventListener('closeChatModal', handler);
-    return () => window.removeEventListener('closeChatModal', handler);
-  }, []);
+    const cld = new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } });
+    // Use this sample image or upload your own via the Media Library
+    const img = cld
+      .image('cld-sample-5')
+      .format('auto')
+      .quality('auto')
+      .resize(auto().gravity(autoGravity()).width(500).height(500));
 
-  return (
-    <ErrorBoundary>
-      <div id="Wrap">
-        <Header />
-        <Navbar />
-        <Footer onChatClick={() => setShowChatModal(true)} />
-      </div>
-      {showChatModal && (
-        <div style={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-          zIndex: 10010,
-          boxShadow: '0 4px 24px rgba(33,150,243,0.18)',
-          borderRadius: 16,
-        }}>
-          <div style={{ background: '#fff', borderRadius: 16, padding: 0, minWidth: 260, maxWidth: 340, position: 'relative' }} onClick={e => e.stopPropagation()}>
-            <ChatApp />
+    const [showChatModal, setShowChatModal] = useState(false);
+
+    useEffect(() => {
+      const handler = () => setShowChatModal(false);
+      window.addEventListener('closeChatModal', handler);
+      return () => window.removeEventListener('closeChatModal', handler);
+    }, []);
+
+    return (
+      <ErrorBoundary>
+        <div id="Wrap">
+          {/* Cloudinary image example */}
+          <div style={{ margin: '24px auto', textAlign: 'center' }}>
+            <AdvancedImage cldImg={img} />
           </div>
+          <Header />
+          <Navbar />
+          <Footer onChatClick={() => setShowChatModal(true)} />
         </div>
-      )}
-    </ErrorBoundary>
-  );
+        {showChatModal && (
+          <div style={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            zIndex: 10010,
+            boxShadow: '0 4px 24px rgba(33,150,243,0.18)',
+            borderRadius: 16,
+          }}>
+            <div style={{ background: '#fff', borderRadius: 16, padding: 0, minWidth: 260, maxWidth: 340, position: 'relative' }} onClick={e => e.stopPropagation()}>
+              <ChatApp />
+            </div>
+          </div>
+        )}
+      </ErrorBoundary>
+    );
 };
 
 export default App;

@@ -227,13 +227,20 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   let uniqueImages: { url: string; width?: number }[] = [];
   if (images && images.length > 0) {
     // Only keep images with width 1024 (largest variant)
-    uniqueImages = images.filter(img => img.width === 1024).map(img => ({ url: toAbs(img.url), width: img.width }));
+    uniqueImages = images.filter(img => img.width === 1024).map(img => {
+      const cloudinaryMatch = img.url.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/([^\.]+)(\.[a-zA-Z]+)?$/);
+      return {
+        url: cloudinaryMatch ? cloudinaryMatch[1] : img.url,
+        width: img.width
+      };
+    });
     // Fallback: if no 1024px images, use the largest available per group of 3
     if (uniqueImages.length === 0) {
       for (let i = 0; i < images.length; i += 3) {
         const group = images.slice(i, i + 3);
         const largest = group.reduce((a, b) => (a.width || 0) > (b.width || 0) ? a : b, group[0]);
-        uniqueImages.push({ url: toAbs(largest.url), width: largest.width });
+        const cloudinaryMatch = largest.url.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/([^\.]+)(\.[a-zA-Z]+)?$/);
+        uniqueImages.push({ url: cloudinaryMatch ? cloudinaryMatch[1] : largest.url, width: largest.width });
       }
     }
   }

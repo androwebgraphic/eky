@@ -164,7 +164,14 @@ const DogDetails: React.FC<DogDetailsProps> = ({
   // Prepare images for DogImageSlider
   let sliderImages: { url: string; width?: number }[] = [];
   if (images && images.length > 0) {
-    sliderImages = images.map(img => ({ url: toAbs(img.url), width: img.width }));
+    // If image URLs are Cloudinary, use public ID; else pass as-is
+    sliderImages = images.map(img => {
+      const cloudinaryMatch = img.url.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/([^\.]+)(\.[a-zA-Z]+)?$/);
+      return {
+        url: cloudinaryMatch ? cloudinaryMatch[1] : img.url,
+        width: img.width
+      };
+    });
   } else if (thumbnail?.url) {
     sliderImages = [{ url: toAbs(thumbnail.url) }];
   }

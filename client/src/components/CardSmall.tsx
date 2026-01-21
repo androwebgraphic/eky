@@ -280,7 +280,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               <source src={videoUrl} />
             </video>
           ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
-              isCloudinaryThumb
+              isCloudinaryThumb && thumbnail && isCloudinaryId(thumbnail.url)
                 ? React.createElement(AdvancedImage as any, {
                     cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(thumbnail.url).format('auto').quality('auto'),
                     alt: name,
@@ -288,15 +288,15 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                     id: 'dog-thumbnail',
                     name: 'dog-thumbnail'
                   })
-                : React.createElement('img', {
-                    src: thumbUrl,
-                    alt: name,
-                    onError: (e: any) => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }
-                  })
+                : <img src={thumbnail?.url} alt={name} style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 64 }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (validImages.length) ? (
-              <img src={largestImgUrl || validImages[0].url || '/img/nany.jpg'}
-                alt={name}
-                onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+              isCloudinaryId(validImages[0].url)
+                ? React.createElement(AdvancedImage as any, {
+                    cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(validImages[0].url).format('auto').quality('auto'),
+                    alt: name,
+                    style: { width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover' }
+                  })
+                : <img src={validImages[0].url} alt={name} style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (
               <img src={imgSrc || '/img/nany.jpg'}
                 alt={name}

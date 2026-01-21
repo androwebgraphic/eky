@@ -260,13 +260,13 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     const fallback = images.filter(img => img.url);
     const source = preferred.length > 0 ? preferred : fallback;
     uniqueImages = source.map(img => {
-      // If Cloudinary public ID, use as is; if full Cloudinary URL, extract public ID; else use full URL
+      // If Cloudinary public ID, convert to full URL; if full Cloudinary URL, use as is; else use full URL
       if (isCloudinaryId(img.url)) {
-        return { url: img.url, width: img.width };
+        return { url: toCloudinaryUrl(img.url) || '', width: img.width };
       }
       const cloudinaryMatch = img.url.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/([^\.]+)(\.[a-zA-Z]+)?$/);
       if (cloudinaryMatch) {
-        return { url: cloudinaryMatch[1], width: img.width };
+        return { url: img.url, width: img.width };
       }
       // Legacy or external URL
       return { url: img.url, width: img.width };

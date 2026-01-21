@@ -261,11 +261,11 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             </video>
           ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
               isCloudinaryThumb ? (
-                <AdvancedImage
-                  cldImg={new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(thumbnail.url).format('auto').quality('auto')}
-                  alt={name}
-                  style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 64 }}
-                />
+                React.createElement(AdvancedImage as any, {
+                  cldImg: new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } }).image(thumbnail.url).format('auto').quality('auto'),
+                  alt: name,
+                  style: { width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight: 64 }
+                })
               ) : (
                 <img src={largestImgUrl || thumbUrl}
                   alt={name}

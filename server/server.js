@@ -1,5 +1,3 @@
-// Serve legacy uploads with CORS headers for images still on disk
-app.use('/uploads', cors({ origin: '*' }), express.static('uploads'));
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from './db/connectDB.js';
@@ -31,33 +29,21 @@ app.get('/health', (req, res) => {
 });
  app.use(express.json({ limit: '100mb' }));//to parse  Json data in the req.body
 import chatRoutes from './routes/chatRoutes.js';
- app.use(express.urlencoded({ limit: '100mb', extended: true })); //to parse form data in the req.body
- app.use(cookieParser());
- 
- // Initialize Passport
- app.use(passport.initialize());
- 
+app.use(express.urlencoded({ limit: '100mb', extended: true })); //to parse form data in the req.body
+app.use(cookieParser());
+
+// Initialize Passport
+app.use(passport.initialize());
 
 app.use('/api/chat', chatRoutes);
 
-// serve uploaded media with CORS headers
-app.use('/uploads', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-}, express.static('uploads'));
+// Serve legacy uploads with CORS headers for images still on disk
+app.use('/uploads', cors({ origin: '*' }), express.static('uploads'));
 
 // User and other API routes
 app.use("/api/users", userRoutes);
 app.use("/api/dogs", dogRoutes)
 app.use("/api/auth", authRoutes)
-
- 
- // Simple health check endpoint
- app.get('/health', (req, res) => {
-   res.json({ status: 'ok', uptime: process.uptime() });
- });
  
  // Start server after all middleware and routes are set up
 

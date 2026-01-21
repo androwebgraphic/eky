@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import MultiPhotoIndicator from './MultiPhotoIndicator';
+import { AdvancedImage } from '@cloudinary/react';
+import { Cloudinary } from '@cloudinary/url-gen';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';

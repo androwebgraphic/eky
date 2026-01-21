@@ -1,3 +1,5 @@
+// Serve legacy uploads with CORS headers for images still on disk
+app.use('/uploads', cors({ origin: '*' }), express.static('uploads'));
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from './db/connectDB.js';

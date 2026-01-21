@@ -1,5 +1,6 @@
 // POST /api/dogs/:id/adopt-cancel
 import nodemailer from 'nodemailer';
+import cloudinary, { uploadImageVariant } from '../utils/cloudinary.js';
 export const cancelAdoption = async (req, res) => {
   try {
     const dog = await Dog.findById(req.params.id).populate('user', 'email name');
@@ -332,37 +333,36 @@ export const createDog = async (req, res) => {
     // optional poster image for videos: 'poster'
     if (req.files && req.files.media) {
       const mediaFile = req.files.media[0];
-
       if (mediaFile.mimetype.startsWith('image/')) {
-        // generate resized variants using sharp
+        // Upload image variants to Cloudinary
         const imageVariants = [];
-        const ext = '.jpg';
-
         await Promise.all(sizes.map(async (w) => {
-          const outName = `image-${w}${ext}`;
-          const outPath = path.join(uploadDir, outName);
-          const buffer = await sharp(mediaFile.buffer)
-            .resize({ width: w })
-            .jpeg({ quality: 80 })
-            .toBuffer();
-          fs.writeFileSync(outPath, buffer);
-          imageVariants.push({ url: `${req.protocol}://${req.get('host')}/uploads/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
+          const publicId = `dogs/${dog._id}/image-${w}`;
+          const result = await cloudinary.uploader.upload_stream({
+            public_id: publicId,
+            transformation: [{ width: w, crop: 'scale' }],
+            resource_type: 'image',
+            overwrite: true,
+          }, (error, result) => {
+            if (error) throw error;
+            imageVariants.push({ url: result.public_id, width: w, size: `${w}` });
+          }).end(mediaFile.buffer);
         }));
-
-        // create a tiny 64px thumbnail for list display
+        // Upload thumbnail (64px)
         try {
-          const thumbName = `thumb-64${ext}`;
-          const thumbPath = path.join(uploadDir, thumbName);
-          const thumbBuffer = await sharp(mediaFile.buffer)
-            .resize({ width: 64 })
-            .jpeg({ quality: 70 })
-            .toBuffer();
-          fs.writeFileSync(thumbPath, thumbBuffer);
-          dog.thumbnail = { url: `${req.protocol}://${req.get('host')}/uploads/dogs/${dog._id}/${thumbName}`, width: 64, size: '64' };
+          const thumbPublicId = `dogs/${dog._id}/thumb-64`;
+          await cloudinary.uploader.upload_stream({
+            public_id: thumbPublicId,
+            transformation: [{ width: 64, crop: 'scale' }],
+            resource_type: 'image',
+            overwrite: true,
+          }, (error, result) => {
+            if (error) throw error;
+            dog.thumbnail = { url: result.public_id, width: 64, size: '64' };
+          }).end(mediaFile.buffer);
         } catch (thumbErr) {
           console.warn('Thumbnail creation failed', thumbErr);
         }
-
         dog.images = imageVariants;
       } else if (mediaFile.mimetype.startsWith('video/')) {
         // save video file

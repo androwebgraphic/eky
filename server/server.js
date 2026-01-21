@@ -21,6 +21,8 @@ const app = express();
 // Allow all origins for CORS (for development and deployment)
 app.use(cors({
   origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 // Health check endpoint for Render.com

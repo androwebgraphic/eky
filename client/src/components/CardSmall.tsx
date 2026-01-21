@@ -326,7 +326,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                       imageRendering: 'auto',
                     }}
                     id="dog-thumbnail"
-                    name="dog-thumbnail"
                     onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }}
                   />
                 )

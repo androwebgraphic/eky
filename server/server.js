@@ -7,24 +7,21 @@ import userRoutes from "./routes/userRoutes.js";
 import dogRoutes from "./routes/dogRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import cors from 'cors';
-console.log("hello");
-dotenv.config();
-connectDB();
 
 const app = express();
- const PORT = process.env.PORT || 3002;
- 
- //MIDDLEWARE
- // (removed duplicate allowedOrigins and related unused code)
-// Allow both local and production frontends for CORS
-
-// Allow all origins for CORS (for development and deployment)
+// CORS middleware FIRST
 app.use(cors({
   origin: 'https://eky-frontend-m2ul.onrender.com',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
+
+console.log("hello");
+dotenv.config();
+connectDB();
+
+const PORT = process.env.PORT || 3002;
 // Health check endpoint for Render.com
 app.get('/health', (req, res) => {
   res.status(200).send('OK');

@@ -353,7 +353,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                     onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }}
                   />
                 )
-                : <img src={toHttps(thumbUrl)} alt={name} style={{ width: '100%', height: '100%', maxWidth: 320, maxHeight: 320, borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'crisp-edges' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+                : <img src={toHttps(thumbUrl)} alt={name} style={{ width: '100%', height: '100%', maxWidth: 320, maxHeight: 320, borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (largestImgUrl) ? (
               isCloudinaryId(largestImgUrl)
                 ? (

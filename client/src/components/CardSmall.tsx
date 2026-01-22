@@ -49,8 +49,6 @@ interface CardSmallProps {
   onDogUpdate?: (dog: any) => void;
 }
 
-
-
 const CardSmall: React.FC<CardSmallProps> = (props) => {
   // Destructure props for easier access
   const {
@@ -299,14 +297,13 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             width: '100%',
             height: 'auto',
             aspectRatio: '1/1',
-            // overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             background: '#f8f8f8',
             minHeight: 0,
             boxSizing: 'border-box',
-            border: '1px solid #eee', // for debug
+            border: '1px solid #eee'
           }}
           onClick={images && images.length > 0 ? () => setShowSlider(true) : undefined}
         >
@@ -367,39 +364,10 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                     onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }}
                   />
                 )
-                : <img src={toHttps(thumbUrl)} alt={name} style={{ width: '100%', height: '100%', maxWidth: 320, maxHeight: 320, borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
-          ) : null
-              isCloudinaryId(largestImgUrl)
-                ? (
-                  <img
-                    src={toCloudinaryUrl(largestImgUrl, { width: 1024 })}
-                    srcSet={[
-                      toCloudinaryUrl(largestImgUrl, { width: 320 }) + ' 320w',
-                      toCloudinaryUrl(largestImgUrl, { width: 640 }) + ' 640w',
-                      toCloudinaryUrl(largestImgUrl, { width: 1024 }) + ' 1024w',
-                      toCloudinaryUrl(largestImgUrl) + ' 2000w'
-                    ].join(', ')}
-                    sizes="(max-width: 480px) 100vw, (max-width: 900px) 50vw, 320px"
-                    alt={name}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: '1rem',
-                      objectFit: 'cover',
-                      aspectRatio: '1/1',
-                      display: 'block',
-                      imageRendering: 'auto',
-                    }}
-                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }}
-                  />
-                )
-                : <img src={toHttps(largestImgUrl)} alt={name} srcSet={imgSrcSet} sizes="(max-width: 480px) 100vw, (max-width: 900px) 50vw, 320px" style={{ width: '100%', height: '100%', borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'pixelated' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
-          ) : (
-              <img src={imgSrc || '/img/nany.jpg'}
-                alt={name}
-                style={{ width: '100%', height: '100%', borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'auto' }}
-                onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
-          )}
+                : (
+                  <img src={toHttps(thumbUrl)} alt={name} style={{ width: '100%', height: '100%', maxWidth: 320, maxHeight: 320, borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+                    )
+                  ) : null}
           {images && images.length > 1 && (
             <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }}>
               <MultiPhotoIndicator count={images.length} />
@@ -531,9 +499,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               </div>
             </div>
           )}
-        {/* ...existing code... */}
-          
-          {owner && !isOwner && (
+        {owner && !isOwner && (
             <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #ddd' }}>
               <p className="meta" style={{ marginBottom: '0.5rem' }}>
                 <strong>{t('fields.postedBy') || 'Posted by'}:</strong> {owner.name}
@@ -552,8 +518,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             flexWrap: 'wrap',
             gap: '4px',
             marginTop: '6px',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
             width: '100%',
             rowGap: '4px',
             columnGap: '4px',

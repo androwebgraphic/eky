@@ -184,11 +184,398 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
             gap: '1rem'
           }}
         >
-          {/* Add your form fields and media preview logic here, as previously implemented. */}
-          <div style={{ color: '#e74c3c', fontWeight: 'bold', textAlign: 'center' }}>{submitError}</div>
-          <button type="submit" disabled={submitting} className="editdog-submit-btn">
-            {submitting ? t('editdog.saving') || 'Saving...' : t('button.save')}
-          </button>
+          {/* Media preview and upload */}
+          <label>{t('adddog.media') || 'Photos'}</label>
+          <div className="media-input-row">
+            <input
+              id="editdog-media"
+              name="media"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={e => {
+                const files = Array.from(e.target.files || []);
+                setMediaFiles(prev => [...prev, ...files]);
+                setMediaPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
+              }}
+            />
+            {mediaPreviews.length > 0 && (
+              <button 
+                type="button" 
+                onClick={() => {
+                  setMediaFiles([]);
+                  setMediaPreviews([]);
+                }}
+                className="editdog-reset-photos-btn"
+              >
+                {t('editdog.resetPhotos') || 'Reset New Photos'}
+              </button>
+            )}
+            {mediaPreviews.length > 0 && (
+              <div>
+                <p style={{ margin: '0.5rem 0', color: '#e67e22', fontSize: '0.95rem', fontWeight: 'bold' }}>
+                  {t('editdog.newPhotos') || 'New photos selected (will be added to existing). To remove old photos, uncheck or delete them below.'}
+                </p>
+                <div className="media-preview-list">
+                  {mediaPreviews.map((url, idx) => (
+                    <img key={idx} src={url} alt={`preview-${idx}`} width={80} />
+                  ))}
+                </div>
+              </div>
+            )}
+            {existingImages.length > 0 && (
+              <div>
+                <p style={{ margin: '0.5rem 0', color: '#666', fontSize: '0.9rem' }}>
+                  {t('editdog.currentPhotos') || 'Current photos:'}
+                </p>
+                <div className="media-preview-list">
+                  {existingImages.map((img: any, idx: number) => (
+                    <span key={idx} style={{ position: 'relative', display: 'inline-block', marginRight: 8 }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedToDelete.has(idx)}
+                        onChange={e => {
+                          setSelectedToDelete(prev => {
+                            const next = new Set(prev);
+                            if (e.target.checked) next.add(idx);
+                            else next.delete(idx);
+                            return next;
+                          });
+                        }}
+                        style={{ position: 'absolute', top: 2, left: 2, zIndex: 3, width: 16, height: 16, accentColor: '#e74c3c', background: '#fff', border: '1px solid #e74c3c', borderRadius: 3 }}
+                        title="Select to delete"
+                      />
+                      <img src={img.url} alt={`img-${idx}`} width={80} style={{ opacity: selectedToDelete.has(idx) ? 0.5 : 1 }} />
+                      <button
+                        type="button"
+                        style={{ position: 'absolute', top: 2, right: 2, background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, minWidth: 20, minHeight: 20, maxWidth: 20, maxHeight: 20, cursor: 'pointer', fontWeight: 'bold', fontSize: 14, lineHeight: '20px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        onClick={() => {
+                          setExistingImages(existingImages.filter((_, i) => i !== idx));
+                          setSelectedToDelete(prev => {
+                            const next = new Set(prev);
+                            next.delete(idx);
+                            // Shift all indices above idx down by 1
+                            const shifted = new Set<number>();
+                            next.forEach(i => shifted.add(i > idx ? i - 1 : i));
+                            return shifted;
+                          });
+                        }}
+                        title="Delete this image"
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <span style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>Image actions:</span>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        type="button"
+                        style={{ background: '#e74c3c', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: 'bold' }}
+                        disabled={selectedToDelete.size === 0}
+                        onClick={() => {
+                          setExistingImages(existingImages.filter((_, i) => !selectedToDelete.has(i)));
+                          setSelectedToDelete(new Set());
+                        }}
+                      >
+                        Delete Selected
+                      </button>
+                      <button
+                        type="button"
+                        style={{ background: '#e67e22', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: 'bold' }}
+                        onClick={() => {
+                          setExistingImages([]);
+                          setSelectedToDelete(new Set());
+                        }}
+                      >
+                        Delete All
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {existingImages.length === 0 && mediaPreviews.length === 0 && (
+              <p style={{ margin: '0.5rem 0', color: '#999', fontSize: '0.9rem' }}>
+                {t('editdog.noPhotos') || 'No photos selected'}
+              </p>
+            )}
+          </div>
+
+          {/* Dog name */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="editdog-name" style={{ fontWeight: 'bold' }}>{t('adddog.name')}</label>
+            <input 
+              id="editdog-name"
+              name="name"
+              type="text" 
+              autoComplete="name"
+              {...register('name', { required: true })} 
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '2px solid #ddd',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                boxSizing: 'border-box'
+              }}
+            />
+            {errors.name && <div className="error" style={{ color: '#e74c3c', fontSize: '0.875rem' }}>{t('adddog.name')} is required</div>}
+          </div>
+
+          {/* Breed and Color */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: window.innerWidth > 768 ? 'repeat(2, 1fr)' : '1fr',
+            gap: '1rem'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label htmlFor="editdog-breed" style={{ fontWeight: 'bold' }}>{t('adddog.breed')}</label>
+              <input 
+                id="editdog-breed"
+                name="breed"
+                type="text" 
+                autoComplete="off"
+                {...register('breed')} 
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '2px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label htmlFor="editdog-color" style={{ fontWeight: 'bold' }}>{t('adddog.color')}</label>
+              <input 
+                id="editdog-color"
+                name="color"
+                type="text" 
+                autoComplete="off"
+                {...register('color')} 
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '2px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Location and Age */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: window.innerWidth > 768 ? 'repeat(2, 1fr)' : '1fr',
+            gap: '1rem'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label htmlFor="editdog-location" style={{ fontWeight: 'bold' }}>{t('adddog.location')}</label>
+              <input 
+                id="editdog-location"
+                name="location"
+                type="text" 
+                autoComplete="address-level2"
+                {...register('location')} 
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '2px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label htmlFor="editdog-age" style={{ fontWeight: 'bold' }}>{t('adddog.age')}</label>
+              <input 
+                id="editdog-age"
+                name="age"
+                type="number" 
+                autoComplete="off"
+                {...register('age', { valueAsNumber: true })} 
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '2px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Description */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="editdog-description" style={{ fontWeight: 'bold' }}>{t('adddog.description')}</label>
+            <textarea 
+              id="editdog-description"
+              name="description"
+              rows={3} 
+              autoComplete="off"
+              {...register('description')} 
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '2px solid #ddd',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontFamily: 'inherit',
+                resize: 'vertical',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
+
+          {/* Size */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label htmlFor="editdog-size" style={{ fontWeight: 'bold' }}>{t('adddog.size')}</label>
+            <select 
+              id="editdog-size"
+              name="size"
+              autoComplete="off"
+              {...register('size')}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '2px solid #ddd',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                backgroundColor: '#fff',
+                boxSizing: 'border-box'
+              }}
+            >
+              <option value="small">{t('size.small')}</option>
+              <option value="medium">{t('size.medium')}</option>
+              <option value="large">{t('size.large')}</option>
+            </select>
+          </div>
+
+          {/* Gender */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <label style={{ fontWeight: 'bold' }}>{t('adddog.gender')}</label>
+            <div style={{ 
+              display: 'flex',
+              flexDirection: window.innerWidth > 768 ? 'row' : 'column',
+              gap: '1rem',
+              padding: '0.75rem',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '8px',
+              border: '2px solid #e9ecef'
+            }}>
+              <label htmlFor="editdog-gender-male" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>
+                <input 
+                  id="editdog-gender-male"
+                  name="gender"
+                  type="radio" 
+                  {...register('gender')} 
+                  value="male"
+                  style={{
+                    width: '1.25rem',
+                    height: '1.25rem',
+                    cursor: 'pointer'
+                  }}
+                />
+                <span>{t('gender.male')}</span>
+              </label>
+              <label htmlFor="editdog-gender-female" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>
+                <input 
+                  id="editdog-gender-female"
+                  name="gender"
+                  type="radio" 
+                  {...register('gender')} 
+                  value="female"
+                  style={{
+                    width: '1.25rem',
+                    height: '1.25rem',
+                    cursor: 'pointer'
+                  }}
+                />
+                <span>{t('gender.female')}</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Health */}
+          <div 
+            id="health" 
+            style={{
+              display: 'flex',
+              flexDirection: window.innerWidth > 768 ? 'row' : 'column',
+              gap: '1rem',
+              padding: '1rem',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '8px',
+              border: '2px solid #e9ecef'
+            }}
+          >
+            <label htmlFor="editdog-vaccinated" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>
+              <input 
+                id="editdog-vaccinated"
+                name="vaccinated"
+                type="checkbox" 
+                {...register('vaccinated')} 
+                style={{
+                  width: '1.25rem',
+                  height: '1.25rem',
+                  cursor: 'pointer'
+                }}
+              />
+              <span>{t('adddog.vaccinated')}</span>
+            </label>
+            <label htmlFor="editdog-neutered" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>
+              <input 
+                id="editdog-neutered"
+                name="neutered"
+                type="checkbox" 
+                {...register('neutered')} 
+                style={{
+                  width: '1.25rem',
+                  height: '1.25rem',
+                  cursor: 'pointer'
+                }}
+              />
+              <span>{t('adddog.neutered')}</span>
+            </label>
+          </div>
+
+          {/* Submit and error */}
+          <div 
+            className="form-actions" 
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              marginTop: '1.5rem',
+              paddingTop: '1rem',
+              position: window.innerWidth <= 768 ? 'fixed' : 'static',
+              bottom: window.innerWidth <= 768 ? '0' : 'auto',
+              left: window.innerWidth <= 768 ? '0' : 'auto',
+              right: window.innerWidth <= 768 ? '0' : 'auto',
+              padding: window.innerWidth <= 768 ? '1rem' : '1rem 0',
+              backgroundColor: 'white',
+              borderTop: window.innerWidth <= 768 ? '1px solid #ddd' : 'none',
+              boxShadow: window.innerWidth <= 768 ? '0 -2px 10px rgba(0,0,0,0.1)' : 'none',
+              zIndex: window.innerWidth <= 768 ? 1000 : 'auto'
+            }}
+          >
+            <button 
+              type="submit" 
+              disabled={submitting}
+              className="editdog-submit-btn"
+            >
+              {submitting ? t('editdog.saving') || 'Saving...' : t('button.save')}
+            </button>
+            {submitError && <div className="error" style={{ color: '#e74c3c', fontSize: '0.875rem', textAlign: 'center' }}>{submitError}</div>}
+          </div>
         </form>
       </div>
     </div>

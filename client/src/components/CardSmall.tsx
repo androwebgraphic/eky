@@ -312,7 +312,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             width: '200px',
             height: '200px',
             aspectRatio: '1/1',
-            overflow: 'hidden',
+            // overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

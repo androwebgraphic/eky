@@ -472,7 +472,8 @@ export const listDogs = async (req, res) => {
     res.json(dogsWithAdoption);
   } catch (err) {
     console.error('[listDogs] Error:', err);
-    res.status(500).json({ message: 'Server error' });
+    if (err && err.stack) console.error('[listDogs] Stack:', err.stack);
+    res.status(500).json({ message: 'Server error', error: err.message, stack: err.stack });
   }
 };
 
@@ -489,7 +490,9 @@ export const getDogById = async (req, res) => {
     if (typeof obj.adoptionQueue === 'undefined') obj.adoptionQueue = null;
     res.json(obj);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('[getDogById] Error:', err);
+    if (err && err.stack) console.error('[getDogById] Stack:', err.stack);
+    res.status(500).json({ message: 'Server error', error: err.message, stack: err.stack });
   }
 };
 

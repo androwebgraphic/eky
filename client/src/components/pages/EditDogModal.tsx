@@ -91,6 +91,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
   }, [dog, setValue]);
 
   const onSubmit: SubmitHandler<EditDogFormData> = async (fields) => {
+    console.log(" SUBMITTIMG")
     try {
       setSubmitting(true);
       setSubmitError(null);

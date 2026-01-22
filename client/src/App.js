@@ -6,21 +6,12 @@ import ErrorBoundary from './components/ErrorBoundary';
 import ChatApp from './components/ChatApp';
 import React, { useState, useEffect } from 'react';
 import "./css/mobile-fixes.css"; // Mobile viewport fixes
-import { Cloudinary } from '@cloudinary/url-gen';
-import { auto } from '@cloudinary/url-gen/actions/resize';
-import { autoGravity } from '@cloudinary/url-gen/qualifiers/gravity';
-import { AdvancedImage } from '@cloudinary/react';
+
 
 
 const App = () => {
 
-    const cld = new Cloudinary({ cloud: { cloudName: 'dtqzrm4by' } });
-    // Use this sample image or upload your own via the Media Library
-    const img = cld
-      .image('cld-sample-5')
-      .format('auto')
-      .quality('auto')
-      .resize(auto().gravity(autoGravity()).width(500).height(500));
+
 
     const [showChatModal, setShowChatModal] = useState(false);
 
@@ -33,10 +24,7 @@ const App = () => {
     return (
       <ErrorBoundary>
         <div id="Wrap">
-          {/* Cloudinary image example */}
-          <div style={{ margin: '24px auto', textAlign: 'center' }}>
-            <AdvancedImage cldImg={img} />
-          </div>
+
           <Header />
           <Navbar />
           <Footer onChatClick={() => setShowChatModal(true)} />

@@ -167,3 +167,4 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
     </div>
     );
   }
+  export default EditDogModal;

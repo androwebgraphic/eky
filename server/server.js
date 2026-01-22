@@ -11,7 +11,7 @@ import cors from 'cors';
 const app = express();
 // CORS middleware FIRST
 app.use(cors({
-  origin: 'https://eky-frontend-m2ul.onrender.com',
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true

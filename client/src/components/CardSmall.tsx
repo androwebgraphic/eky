@@ -408,7 +408,34 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               onClick={e => e.stopPropagation()}
             >
               <DogImageSlider images={uniqueImages} alt={name} />
-              <button onClick={() => setShowSlider(false)} style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, background: '#fff', border: 'none', borderRadius: '50%', width: 32, height: 32, fontSize: 20, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>×</button>
+              <button
+                onClick={() => setShowSlider(false)}
+                aria-label="Close slider"
+                style={{
+                  position: 'absolute',
+                  top: 12,
+                  right: 12,
+                  zIndex: 10000,
+                  background: '#e74c3c',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 48,
+                  height: 48,
+                  fontSize: 32,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  outline: '3px solid #fff',
+                  transition: 'background 0.2s',
+                  userSelect: 'none',
+                }}
+              >
+                ×
+              </button>
             </div>
           </div>,
           document.body

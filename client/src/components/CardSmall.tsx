@@ -314,6 +314,33 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             <video controls width="100%" height="auto" poster={posterUrl}>
               <source src={videoUrl} />
             </video>
+          ) : (largestImgUrl) ? (
+              isCloudinaryId(largestImgUrl)
+                ? (
+                  <img
+                    src={toCloudinaryUrl(largestImgUrl, { width: 1024 })}
+                    srcSet={[
+                      toCloudinaryUrl(largestImgUrl, { width: 320 }) + ' 320w',
+                      toCloudinaryUrl(largestImgUrl, { width: 640 }) + ' 640w',
+                      toCloudinaryUrl(largestImgUrl, { width: 1024 }) + ' 1024w',
+                      toCloudinaryUrl(largestImgUrl) + ' 2000w'
+                    ].join(', ')}
+                    sizes="(max-width: 480px) 100vw, (max-width: 900px) 50vw, 320px"
+                    alt={name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '1rem',
+                      objectFit: 'cover',
+                      aspectRatio: '1/1',
+                      display: 'block',
+                      imageRendering: 'auto',
+                    }}
+                    id="dog-thumbnail"
+                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }}
+                  />
+                )
+                : <img src={toHttps(largestImgUrl)} alt={name} style={{ width: '100%', height: '100%', maxWidth: 320, maxHeight: 320, borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
               isCloudinaryThumb
                 ? (
@@ -341,7 +368,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                   />
                 )
                 : <img src={toHttps(thumbUrl)} alt={name} style={{ width: '100%', height: '100%', maxWidth: 320, maxHeight: 320, borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
-          ) : (largestImgUrl) ? (
+          ) : null
               isCloudinaryId(largestImgUrl)
                 ? (
                   <img

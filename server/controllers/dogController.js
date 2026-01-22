@@ -133,6 +133,7 @@ export const updateDog = async (req, res) => {
       console.log('Files keys:', Object.keys(req.files));
       if (req.files.media) {
         console.log('Media files count:', Array.isArray(req.files.media) ? req.files.media.length : 1);
+        console.log('Media file details:', req.files.media.map(f => ({ originalname: f.originalname, mimetype: f.mimetype, size: f.size })));
       }
     }
     console.log('keepImages in body:', req.body.keepImages);
@@ -246,9 +247,12 @@ export const updateDog = async (req, res) => {
 
     await dog.save();
     console.log('Dog saved successfully. Final images count:', dog.images ? dog.images.length : 0);
+    console.log('Dog images:', dog.images);
+    console.log('Dog thumbnail:', dog.thumbnail);
     console.log('=== UPDATE COMPLETE ===');
     // Re-fetch the updated dog with populated user info
     const updatedDog = await Dog.findById(dog._id).populate('user', 'name username email phone person');
+    console.log('UpdatedDog response images:', updatedDog.images);
     res.json(updatedDog);
   } catch (err) {
     console.error('UpdateDog error:', err);

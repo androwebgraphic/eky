@@ -95,6 +95,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
       setSubmitting(true);
       setSubmitError(null);
       let resp;
+      console.log('[EditDogModal] Submitting form. mediaFiles:', mediaFiles);
       const hasNewFiles = mediaFiles.length > 0;
       const hasRemovedImages = existingImages.length !== (dog.images ? dog.images.length : 0);
       const hasPhotoChanges = hasNewFiles || hasRemovedImages;
@@ -115,6 +116,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
           headers['Authorization'] = `Bearer ${token}`;
         }
         try {
+          console.log('[EditDogModal] Sending PATCH with FormData:', formData);
           resp = await fetch(`${API_URL}/api/dogs/${dog._id}`, {
             method: 'PATCH',
             body: formData,
@@ -146,6 +148,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
         throw new Error(errData.message || 'Failed to update dog');
       }
       const updatedDog = await resp.json();
+      console.log('[EditDogModal] PATCH response updatedDog:', updatedDog);
       onSave(updatedDog);
       onClose();
     } catch (err: any) {

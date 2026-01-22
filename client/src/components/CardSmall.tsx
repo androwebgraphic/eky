@@ -310,6 +310,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             position: 'relative',
             cursor: images && images.length > 0 ? 'pointer' : 'default',
             width: '100%',
+            height: 'auto',
             aspectRatio: '1/1',
             overflow: 'hidden',
             display: 'flex',

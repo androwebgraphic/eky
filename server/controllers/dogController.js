@@ -306,6 +306,14 @@ export const deleteDog = async (req, res) => {
 const sizes = [320, 640, 1024];
 
 export const createDog = async (req, res) => {
+    console.log('=== [createDog] Incoming request ===');
+    console.log('req.body:', req.body);
+    console.log('req.files:', req.files);
+    if (req.files && req.files.media) {
+      console.log('req.files.media:', req.files.media);
+    } else {
+      console.warn('No media files received in req.files.media');
+    }
   try {
     // expected fields: name, breed, age, description, location, color, size, gender, vaccinated, neutered
     const { name, breed, age, description, location, color, size, gender, vaccinated, neutered } = req.body;
@@ -328,7 +336,8 @@ export const createDog = async (req, res) => {
       gender, 
       vaccinated: vaccinatedBool, 
       neutered: neuteredBool,
-      user: req.user._id
+      user: req.user._id,
+      images: []
     });
     await dog.save();
 
@@ -338,40 +347,60 @@ export const createDog = async (req, res) => {
     // files from multer (memory storage)
     // image file field name: 'media' (image or video)
     // optional poster image for videos: 'poster'
-    if (req.files && req.files.media) {
+    if (req.files && req.files.media && req.files.media.length > 0) {
       const mediaFile = req.files.media[0];
       if (mediaFile.mimetype.startsWith('image/')) {
         // Upload image variants to Cloudinary
         const imageVariants = [];
         await Promise.all(sizes.map(async (w) => {
           const publicId = `dogs/${dog._id}/image-${w}`;
-          const result = await cloudinary.uploader.upload_stream({
-            public_id: publicId,
-            transformation: [{ width: w, crop: 'scale' }],
-            resource_type: 'image',
-            overwrite: true,
-          }, (error, result) => {
-            if (error) throw error;
-            imageVariants.push({ url: result.public_id, width: w, size: `${w}` });
-          }).end(mediaFile.buffer);
+          await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream({
+              public_id: publicId,
+              transformation: [{ width: w, crop: 'scale' }],
+              resource_type: 'image',
+              overwrite: true,
+            }, (error, result) => {
+              if (error) reject(error);
+              else {
+                imageVariants.push({ url: result.public_id, width: w, size: `${w}` });
+                resolve(result);
+              }
+            });
+            stream.end(mediaFile.buffer);
+          });
         }));
         // Upload thumbnail (64px)
         try {
           const thumbPublicId = `dogs/${dog._id}/thumb-64`;
-          await cloudinary.uploader.upload_stream({
-            public_id: thumbPublicId,
-            transformation: [{ width: 64, crop: 'scale' }],
-            resource_type: 'image',
-            overwrite: true,
-          }, (error, result) => {
-            if (error) throw error;
-            dog.thumbnail = { url: result.public_id, width: 64, size: '64' };
-          }).end(mediaFile.buffer);
+          await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream({
+              public_id: thumbPublicId,
+              transformation: [{ width: 64, crop: 'scale' }],
+              resource_type: 'image',
+              overwrite: true,
+            }, (error, result) => {
+              if (error) reject(error);
+              else {
+                dog.thumbnail = { url: result.public_id, width: 64, size: '64' };
+                resolve(result);
+              }
+            });
+            stream.end(mediaFile.buffer);
+          });
         } catch (thumbErr) {
           console.warn('Thumbnail creation failed', thumbErr);
         }
         dog.images = imageVariants;
       } else if (mediaFile.mimetype.startsWith('video/')) {
+          console.log('=== [updateDog] Incoming request ===');
+          console.log('req.body:', req.body);
+          console.log('req.files:', req.files);
+          if (req.files && req.files.media) {
+            console.log('req.files.media:', req.files.media);
+          } else {
+            console.warn('No media files received in req.files.media');
+          }
         // save video file
         const videoExt = path.extname(mediaFile.originalname) || '.mp4';
         const videoName = `video${videoExt}`;

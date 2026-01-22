@@ -14,7 +14,7 @@ const dogSchema = new mongoose.Schema({
   color: String,
   location: String,
   description: String,
-  size: { type: String, enum: ['small','medium','large'], default: 'medium' },
+  size: { type: String, enum: ['small','medium','large'], default: 'large' },
   gender: { type: String, enum: ['male', 'female'] },
   vaccinated: { type: Boolean, default: false },
   neutered: { type: Boolean, default: false },

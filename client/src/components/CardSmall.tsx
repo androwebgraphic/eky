@@ -309,8 +309,8 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
           style={{
             position: 'relative',
             cursor: images && images.length > 0 ? 'pointer' : 'default',
-            width: '200px',
-            height: '200px',
+            width: '100%',
+            height: 'auto',
             aspectRatio: '1/1',
             // overflow: 'hidden',
             display: 'flex',
@@ -324,7 +324,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
           onClick={images && images.length > 0 ? () => setShowSlider(true) : undefined}
         >
           {hasVideoUrl ? (
-            <video controls width="200px" height="200px" poster={posterUrl}>
+            <video controls width="100%" height="auto" poster={posterUrl}>
               <source src={videoUrl} />
             </video>
           ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (

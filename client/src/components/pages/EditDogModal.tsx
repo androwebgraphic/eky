@@ -112,6 +112,9 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
         mediaFiles.forEach((file, idx) => {
           formData.append('media', file, file.name);
         });
+        // Log FormData contents for debugging
+        const mediaAppended = formData.getAll('media');
+        console.log('[EditDogModal] FormData media files:', mediaAppended);
         const headers: any = {};
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;

@@ -109,7 +109,9 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
         // Send list of images to keep (by url)
         const keepImagesData = JSON.stringify(existingImages.map(img => img.url));
         formData.append('keepImages', keepImagesData);
+        console.log('[EditDogModal] mediaFiles before append:', mediaFiles);
         mediaFiles.forEach((file, idx) => {
+          console.log(`[EditDogModal] Appending file to FormData:`, file, 'instanceof File:', file instanceof File);
           formData.append('media', file, file.name);
         });
         // Log FormData contents for debugging

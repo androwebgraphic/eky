@@ -149,7 +149,21 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, onClose, onSave, modal
       }
       const updatedDog = await resp.json();
       console.log('[EditDogModal] PATCH response updatedDog:', updatedDog);
-      onSave(updatedDog);
+      // After save, clear local mediaFiles and previews
+      setMediaFiles([]);
+      setMediaPreviews([]);
+      // Refetch the updated dog from the server to ensure images are fresh
+      try {
+        const freshResp = await fetch(`${API_URL}/api/dogs/${dog._id}`);
+        if (freshResp.ok) {
+          const freshDog = await freshResp.json();
+          onSave(freshDog);
+        } else {
+          onSave(updatedDog); // fallback
+        }
+      } catch (e) {
+        onSave(updatedDog); // fallback
+      }
       onClose();
     } catch (err: any) {
       if (mediaFiles.length > 0 && (err.message === 'Failed to fetch' || err.message === 'NetworkError when attempting to fetch resource.')) {

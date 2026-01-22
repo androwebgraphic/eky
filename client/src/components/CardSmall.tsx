@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import MultiPhotoIndicator from './MultiPhotoIndicator';
-import { AdvancedImage } from '@cloudinary/react';
-import { Cloudinary } from '@cloudinary/url-gen';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import { useNavigate } from 'react-router-dom';
+// Removed unused imports
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import DogImageSlider from './DogImageSlider';
@@ -64,19 +60,10 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     video,
     thumbnail,
     name,
-    age,
     likes,
     breed,
-    color,
     place,
-    location,
-    lat,
-    lng,
-    description,
-    size,
     gender,
-    vaccinated,
-    neutered,
     onViewDetails,
     onEdit,
     onRemove,
@@ -134,7 +121,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     } else {
       setInWishlist(false);
     }
-  }, [_id, currentUser?._id, currentUser?.wishlist?.length, currentUser?.wishlist?.join(',')]);
+  }, [_id, currentUser]);
 
   // Likes state
   const [likesCount, setLikesCount] = useState(likes?.length || 0);
@@ -292,7 +279,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
       if (isCloudinaryId(img.url)) {
         return { url: toCloudinaryUrl(img.url) || '', width: img.width };
       }
-      const cloudinaryMatch = img.url.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/([^\.]+)(\.[a-zA-Z]+)?$/);
+      const cloudinaryMatch = img.url.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/([^.]+)(\.[a-zA-Z]+)?$/);
       if (cloudinaryMatch) {
         return { url: img.url, width: img.width };
       }

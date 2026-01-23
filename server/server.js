@@ -7,6 +7,13 @@ import userRoutes from "./routes/userRoutes.js";
 import dogRoutes from "./routes/dogRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import cors from 'cors';
+import { v2 as cloudinary } from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: 'dtqzrm4by',
+  api_key: '825833956321891', 
+  api_secret: 'JeJHLrdbKvflIMxlxZq3TW-2VJ8'
+});
 
 
 const app = express();

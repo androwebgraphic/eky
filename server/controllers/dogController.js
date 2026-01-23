@@ -342,8 +342,7 @@ export const createDog = async (req, res) => {
     await dog.save();
 
     const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
-    fs.mkdirSync(uploadDir, { recursive: true });
-
+      // Removed local uploadDir creation for images. Images will only be uploaded to Cloudinary.
     // files from multer (memory storage)
     // image file field name: 'media' (image or video)
     // optional poster image for videos: 'poster'
@@ -394,6 +393,9 @@ export const createDog = async (req, res) => {
         dog.images = imageVariants;
       } else if (mediaFile.mimetype.startsWith('video/')) {
           console.log('=== [updateDog] Incoming request ===');
+          // Video files are still saved locally. If you want to use Cloudinary for videos, update this logic.
+          const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
+          fs.mkdirSync(uploadDir, { recursive: true });
           console.log('req.body:', req.body);
           console.log('req.files:', req.files);
           if (req.files && req.files.media) {

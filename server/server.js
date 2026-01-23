@@ -35,6 +35,10 @@ connectDB();
 const PORT = process.env.PORT || 3002;
 // Health check endpoint for Render.com
 app.get('/health', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
   res.status(200).send('OK');
 });
  app.use(express.json({ limit: '100mb' }));//to parse  Json data in the req.body

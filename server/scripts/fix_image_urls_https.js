@@ -30,10 +30,10 @@ async function fixDogImageUrls() {
       newImages = dog.images.map(img => {
         if (img.url) {
           let newUrl = img.url;
-          // Replace any http://... with https://sharedog-homeless-backend.onrender.com + path
+          // Replace any http://... with http://localhost:3001 + path
           newUrl = newUrl.replace(
             /^http:\/\/[^/]+(\/uploads\/dogs\/.*)$/,
-            'https://sharedog-homeless-backend.onrender.com$1'
+            'http://localhost:3001$1'
           );
           if (newUrl !== img.url) changed = true;
           return { ...img, url: newUrl };
@@ -45,7 +45,7 @@ async function fixDogImageUrls() {
       let newThumbUrl = dog.thumbnail.url;
       newThumbUrl = newThumbUrl.replace(
         /^http:\/\/[^/]+(\/uploads\/dogs\/.*)$/,
-        'https://sharedog-homeless-backend.onrender.com$1'
+        'http://localhost:3001$1'
       );
       if (newThumbUrl !== dog.thumbnail.url) {
         changed = true;

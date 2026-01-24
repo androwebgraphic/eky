@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
@@ -24,9 +24,17 @@ interface EditDogModalProps {
   modalPosition?: {x: number, y: number};
 }
 
-const API_URL = process.env.REACT_APP_API_URL || '';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const getImageUrl = (url: string) => {
+  if (!url) return '';
+  if (url.startsWith('/uploads/')) {
+    return `${API_URL}${url}`;
+  }
+  return url;
+};
 
 function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps) {
+  const isMounted = useRef(true);
   const { t } = useTranslation();
   const { token } = useAuth();
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
@@ -37,15 +45,21 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
   const [submitError, setSubmitError] = useState<string | null>(null);
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<EditDogFormData>({ defaultValues: dog });
 
+
   useEffect(() => {
+    isMounted.current = true;
     Object.entries(dog).forEach(([key, value]) => {
       setValue(key as any, value);
     });
     setExistingImages(dog.images ? [...dog.images] : []);
+    return () => {
+      isMounted.current = false;
+    };
   }, [dog, setValue]);
 
   const onSubmit: SubmitHandler<EditDogFormData> = async (fields) => {
     try {
+      if (!isMounted.current) return;
       setSubmitting(true);
       setSubmitError(null);
       let resp;
@@ -73,8 +87,10 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
             headers
           });
         } catch (fetchErr) {
-          setSubmitError('Failed to upload images. Please check your connection or try again.');
-          setSubmitting(false);
+          if (isMounted.current) {
+            setSubmitError('Failed to upload images. Please check your connection or try again.');
+            setSubmitting(false);
+          }
           return;
         }
       } else {
@@ -96,29 +112,34 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
         const errData = await resp.json().catch(() => ({}));
         throw new Error(errData.message || 'Failed to update dog');
       }
-      const updatedDog = await resp.json();
-      setMediaFiles([]);
-      setMediaPreviews([]);
+      // Always fetch the latest dog data after update
+      if (isMounted.current) {
+        setMediaFiles([]);
+        setMediaPreviews([]);
+      }
       try {
-        const freshResp = await fetch(`${API_URL}/api/dogs/${dog._id}`);
+        const freshResp = await fetch(`${API_URL}/api/dogs/${dog._id}?cb=${Date.now()}`);
         if (freshResp.ok) {
           const freshDog = await freshResp.json();
-          onSave(freshDog);
+          if (isMounted.current) onSave(freshDog);
         } else {
-          onSave(updatedDog);
+          const updatedDog = await resp.json();
+          if (isMounted.current) onSave(updatedDog);
         }
       } catch (e) {
-        onSave(updatedDog);
+        const updatedDog = await resp.json();
+        if (isMounted.current) onSave(updatedDog);
       }
-      onClose();
+      if (isMounted.current) onClose();
     } catch (err: any) {
+      if (!isMounted.current) return;
       if (mediaFiles.length > 0 && (err.message === 'Failed to fetch' || err.message === 'NetworkError when attempting to fetch resource.')) {
         setSubmitError('Failed to upload images. Please check your connection or try again.');
       } else {
         setSubmitError(err.message || 'Failed to update dog');
       }
     } finally {
-      setSubmitting(false);
+      if (isMounted.current) setSubmitting(false);
     }
   };
 
@@ -245,7 +266,7 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
                         style={{ position: 'absolute', top: 2, left: 2, zIndex: 3, width: 16, height: 16, accentColor: '#e74c3c', background: '#fff', border: '1px solid #e74c3c', borderRadius: 3 }}
                         title="Select to delete"
                       />
-                      <img src={img.url} alt={`img-${idx}`} width={80} style={{ opacity: selectedToDelete.has(idx) ? 0.5 : 1 }} />
+                      <img src={getImageUrl(img.url)} alt={`img-${idx}`} width={80} style={{ opacity: selectedToDelete.has(idx) ? 0.5 : 1 }} />
                       <button
                         type="button"
                         style={{ position: 'absolute', top: 2, right: 2, background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '50%', width: 20, height: 20, minWidth: 20, minHeight: 20, maxWidth: 20, maxHeight: 20, cursor: 'pointer', fontWeight: 'bold', fontSize: 14, lineHeight: '20px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}

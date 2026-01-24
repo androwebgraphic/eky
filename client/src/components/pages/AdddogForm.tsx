@@ -17,13 +17,8 @@ interface AddDogFormData {
   neutered?: boolean;
 }
 
-// Simple, reliable API URL for mobile
-const API_URL = process.env.REACT_APP_API_URL ||
-  (window.location.protocol === 'https:'
-    ? `https://${window.location.hostname}`
-    : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:3001'
-      : 'http://172.20.10.2:3001'));
+// Use API URL from environment, fallback to localhost:3002
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
 
 const AdddogForm: React.FC = () => {
   const { t } = useTranslation();
@@ -240,33 +235,6 @@ const AdddogForm: React.FC = () => {
         body: formData,
         signal: abortControllerRef.current.signal,
         headers
-      }).catch(async (firstError) => {
-        // If initial fetch fails on mobile, try fallback URLs
-        console.warn('First fetch failed, trying fallback:', firstError.message);
-        
-        const fallbackUrls = [
-          'http://172.20.10.2:3001/api/dogs',  // Direct IP
-          'http://localhost:3001/api/dogs'      // Localhost fallback
-        ];
-        
-        for (const fallbackUrl of fallbackUrls) {
-          try {
-            console.log('Trying fallback URL:', fallbackUrl);
-            const fallbackResp = await fetch(fallbackUrl, {
-              method: 'POST',
-              body: formData,
-              signal: abortControllerRef.current.signal,
-              headers
-            });
-            console.log('Fallback succeeded:', fallbackUrl);
-            return fallbackResp;
-          } catch (fallbackError) {
-            console.warn('Fallback failed:', fallbackUrl, fallbackError.message);
-          }
-        }
-        
-        // If all fallbacks fail, throw the original error
-        throw firstError;
       });
 
       if (!resp.ok) {

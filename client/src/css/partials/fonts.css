@@ -1,193 +1,47 @@
-@font-face {
-  font-family: "eky";
-  src: url("../styles/fonts/eky.eot?k6q6d7");
-  src: url("../styles/fonts/eky.eot?k6q6d7#iefix") format("embedded-opentype"), url("../styles/fonts/eky.ttf?k6q6d7") format("truetype"), url("../styles/fonts/eky.woff?k6q6d7") format("woff"), url("../styles/fonts/eky.svg?k6q6d7#eky") format("svg");
-  font-weight: normal;
-  font-style: normal;
-  font-display: block; }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000314}}
-.eky-icon {
-  /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: "eky" !important;
-  speak: never;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-  /* Better Font Rendering =========== */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale; }
+/*
+Error: Invalid CSS after "  color: variables": expected ";", was ".$txt-color;"
+        on line 108 of /Applications/MAMP/htdocs/eky/client/src/sass/partials/fonts.scss
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000329}}
-.eky-add-dog:before {
-  content: "\e900"; }
+103: h6 {
+104:   margin: 0;
+105:   padding: 0;
+106:   // font-family: "Lao MN", serif;
+107:   text-align: center;
+108:   color: variables.$txt-color;
+109:   font-family: "Nunito", sans-serif;
+110:   font-weight: bold;
+111: }
+112: p {
+113:   font-size: 1.6rem;
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000332}}
-.eky-comment .path1:before {
-  content: "\e901";
-  color: black; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000336}}
-.eky-comment .path2:before {
-  content: "\e902";
-  margin-left: -0.93359375em;
-  color: white; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000341}}
-.eky-comment .path3:before {
-  content: "\e903";
-  margin-left: -0.93359375em;
-  color: white; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000346}}
-.eky-comment .path4:before {
-  content: "\e904";
-  margin-left: -0.93359375em;
-  color: white; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000351}}
-.eky-eky:before {
-  content: "\e905"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000354}}
-.eky-envelope:before {
-  content: "\e906"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000357}}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000360}}
-.eky-female:before {
-  content: "\e908"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000363}}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000366}}
-.eky-hamby:before {
-  content: "\e90a"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000369}}
-.eky-heart:before {
-  content: "\e90b";
-  color: red; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000373}}
-.eky-left-arrow:before {
-  content: "\e90c"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000376}}
-.eky-logout:before {
-  content: "\e90d"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000379}}
-.eky-male:before {
-  content: "\e90e"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000382}}
-.eky-map:before {
-  content: "\e90f"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000385}}
-.eky-message:before {
-  content: "\e910"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000388}}
-.eky-paw:before {
-  content: "\e911"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000391}}
-.eky-phone:before {
-  content: "\e912"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000394}}
-.eky-reply:before {
-  content: "\e913"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\0000397}}
-.eky-search:before {
-  content: "\e914"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003100}}
-.eky-share:before {
-  content: "\e915"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003103}}
-.eky-Symbols:before {
-  content: "\e916"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003106}}
-.eky-trash:before {
-  content: "\e917"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003109}}
-.eky-twitter:before {
-  content: "\e918"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003112}}
-.eky-user:before {
-  content: "\e919"; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003115}}
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin: 0;
-  padding: 0;
-  text-align: center;
-  color: #2E3B5D;
-  font-family: "Nunito", sans-serif;
-  font-weight: bold; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003129}}
-p {
-  font-size: 1.6rem;
-  margin: 0 0 0.5rem 0;
-  line-height: 2.1rem; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003135}}
-h1 {
-  font-size: 3rem; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003138}}
-h2 {
-  font-size: 2.8rem;
-  background: #42210b;
-  background: -webkit-gradient(linear, left bottom, left top, from(#42210b), to(#b16c2e));
-  background: linear-gradient(to top, #42210b 0%, #b16c2e 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003147}}
-h3 {
-  font-size: 1.6rem; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003151}}
-header h1 {
-  margin-top: 1rem; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003154}}
-h1.extra-large {
-  margin: 0;
-  padding: 0;
-  font-size: 8.8rem;
-  font-family: "Lao MN", serif;
-  text-align: center;
-  background: #42210b;
-  background: -webkit-gradient(linear, left bottom, left top, from(#42210b), to(#b16c2e));
-  background: linear-gradient(to top, #42210b 0%, #b16c2e 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003168}}
-.eky-icon {
-  padding: 0.5rem; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003172}}
-.meta {
-  font-size: 1.8rem;
-  color: #666; }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/fonts\.scss}line{font-family:\00003177}}
-#footer-nav ul .eky-icon {
-  font-size: 2.5rem; }
+Backtrace:
+/Applications/MAMP/htdocs/eky/client/src/sass/partials/fonts.scss:108
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:1278:in `expected'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:1208:in `expected'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:1203:in `tok!'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:804:in `block in try_declaration'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:1254:in `rethrow'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:809:in `try_declaration'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:732:in `declaration_or_ruleset'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:697:in `block_child'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:689:in `block_contents'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:678:in `block'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:670:in `ruleset'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:696:in `block_child'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:689:in `block_contents'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:137:in `stylesheet'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:41:in `parse'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/engine.rb:414:in `_to_tree'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/engine.rb:290:in `render'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/exec/sass_scss.rb:400:in `run'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/exec/sass_scss.rb:63:in `process_result'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/exec/base.rb:52:in `parse'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/exec/base.rb:19:in `parse!'
+/Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/bin/sass:13:in `<top (required)>'
+/Applications/Koala.app/Contents/Resources/app.nw/bin/sass:22:in `load'
+/Applications/Koala.app/Contents/Resources/app.nw/bin/sass:22:in `<main>'
+*/
+body:before {
+  white-space: pre;
+  font-family: monospace;
+  content: "Error: Invalid CSS after \"  color: variables\": expected \";\", was \".$txt-color;\"\A         on line 108 of /Applications/MAMP/htdocs/eky/client/src/sass/partials/fonts.scss\A \A 103: h6 {\A 104:   margin: 0;\A 105:   padding: 0;\A 106:   // font-family: \"Lao MN\", serif;\A 107:   text-align: center;\A 108:   color: variables.$txt-color;\A 109:   font-family: \"Nunito\", sans-serif;\A 110:   font-weight: bold;\A 111: }\A 112: p {\A 113:   font-size: 1.6rem;"; }

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import '../css/chat-app.css';
-import io, { Socket } from 'socket.io-client';
+import io from 'socket.io-client';
 import { useAuth } from '../contexts/AuthContext';
 
 interface UserWithBlocks {
@@ -67,10 +67,30 @@ const ChatApp: React.FC = () => {
   const [notification, setNotification] = useState<string | null>(null);
   const [userSearch, setUserSearch] = useState('');
   const [searchResults, setSearchResults] = useState<{_id: string, userName: string}[]>([]);
+  const [pendingAdoptions, setPendingAdoptions] = useState<any[]>([]);
   useEffect(() => {
     console.log('[ChatApp] onlineUsers state updated:', onlineUsers);
   }, [onlineUsers]);
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
+
+  const fetchPendingAdoptions = useCallback(async () => {
+    if (!token) return;
+    console.log('[ChatApp] Fetching pending adoptions...');
+    try {
+      const res = await fetch(`${getApiUrl()}/api/dogs/pending-adoptions`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('[ChatApp] Pending adoptions:', data);
+        setPendingAdoptions(data);
+      } else {
+        console.error('[ChatApp] Failed to fetch pending adoptions:', res.status);
+      }
+    } catch (err) {
+      console.error('[ChatApp] Error fetching pending adoptions:', err);
+    }
+  }, [token]);
 
   // Setup socket connection and listeners only once per user/token
   useEffect(() => {
@@ -79,28 +99,54 @@ const ChatApp: React.FC = () => {
       fetch(`${getApiUrl()}/api/chat/conversations/${user._id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+          return res.json();
+        })
         .then(async data => {
+          console.log('[ChatApp] Conversations fetched:', data);
           setConversations(Array.isArray(data) ? data : []);
           // Fetch usernames for each conversation's other participant
           const usernames: {[key: string]: string} = {};
-          for (const convo of Array.isArray(data) ? data : []) {
-            const otherId = convo.participants.find((id: string) => id !== user._id);
-            if (otherId) {
-              const res = await fetch(`${getApiUrl()}/api/users/${otherId}`);
-              if (res.ok) {
-                const u = await res.json();
-                usernames[convo._id] = u.username || u.name || otherId;
-              } else {
-                usernames[convo._id] = otherId;
-              }
-            }
-          }
+         for (const convo of Array.isArray(data) ? data : []) {
+  const otherId = convo.participants.find((id: string) => id !== user._id);
+  if (otherId) {
+    try {
+      const res = await fetch(`${getApiUrl()}/api/users/${otherId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.status === 404) {
+        usernames[convo._id] = '[Deleted User]';
+      } else if (res.ok) {
+        const u = await res.json();
+        usernames[convo._id] = u.username || u.name || otherId;
+      } else {
+        usernames[convo._id] = otherId;
+      }
+    } catch (err) {
+      usernames[convo._id] = '[Error]';
+    }
+  }
+}
           setConvoUsernames(usernames);
-        });
+          await fetchPendingAdoptions();
+        })
       if (!socketRef.current) {
         socketRef.current = io(getApiUrl());
         console.log('[ChatApp] Socket.IO connecting to', getApiUrl());
+        
+        socketRef.current.on('connect', () => {
+          console.log('[ChatApp] Socket connected successfully');
+        });
+        
+        socketRef.current.on('connect_error', (error) => {
+          console.error('[ChatApp] Socket connection error:', error);
+        });
+        
         socketRef.current.emit('join', user._id);
         console.log('[ChatApp] Emitted join for user:', user._id);
         socketRef.current.emit('getOnlineUsers');
@@ -161,18 +207,24 @@ const ChatApp: React.FC = () => {
           setTimeout(() => setNotification(null), 3000);
         });
         socketRef.current.on('refreshConversations', () => {
+          console.log('[ChatApp] refreshConversations event received');
           fetch(`${getApiUrl()}/api/chat/conversations/${user._id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
           })
-            .then(res => res.json())
-            .then(data => setConversations(Array.isArray(data) ? data : []));
-          if (selectedConvo) {
-            fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
-              headers: { 'Authorization': `Bearer ${token}` }
+            .then(res => {
+              if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+              }
+              return res.json();
             })
-              .then(res => res.json())
-              .then(setMessages);
-          }
+            .then(data => {
+              console.log('[ChatApp] Conversations refreshed:', data);
+              setConversations(Array.isArray(data) ? data : []);
+            })
+            .catch(err => {
+              console.error('[ChatApp] Error refreshing conversations:', err);
+            });
+          fetchPendingAdoptions();
         });
       }
     }
@@ -180,7 +232,7 @@ const ChatApp: React.FC = () => {
       socketRef.current?.disconnect();
       socketRef.current = null;
     };
-  }, [user, token]);
+  }, [user, token, selectedConvo, fetchPendingAdoptions]);
 
   useEffect(() => {
     if (selectedConvo && token) {
@@ -191,6 +243,15 @@ const ChatApp: React.FC = () => {
         .then(setMessages);
     }
   }, [selectedConvo, token]);
+  useEffect(() => {
+    if (selectedConvo && token) {
+      fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(setMessages);
+    }
+  }, [user, token, selectedConvo]);
 
   const startConversation = async (otherUserId: string) => {
     if (!otherUserId || !token) return;
@@ -249,7 +310,11 @@ const ChatApp: React.FC = () => {
     setUserSearch(e.target.value);
     if (e.target.value.length > 1) {
       try {
-        const res = await fetch(`${getApiUrl()}/api/users/search?query=${encodeURIComponent(e.target.value)}`);
+        const res = await fetch(`${getApiUrl()}/api/users/search?query=${encodeURIComponent(e.target.value)}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         if (!res.ok) {
           console.error('User search failed:', res.status, await res.text());
           setSearchResults([]);
@@ -320,6 +385,31 @@ const ChatApp: React.FC = () => {
     }
   };
 
+  // Handler for confirming adoption
+  const handleConfirmAdoption = async (dogId: string, isOwner: boolean) => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${getApiUrl()}/api/dogs/confirm-adoption`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ dogId, isOwner })
+      });
+      if (res.ok) {
+        fetchPendingAdoptions(); // Refresh pending adoptions
+        // Refresh messages to show confirmation message
+        if (selectedConvo) {
+          fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+            .then(res => res.json())
+            .then(setMessages);
+        }
+      }
+    } catch (err) {
+      console.error('Confirm adoption error:', err);
+    }
+  };
+
   return (
     <div className="chat-app-container">
       {/* User profile at top */}
@@ -357,12 +447,23 @@ const ChatApp: React.FC = () => {
             {onlineUsers.length === 0 && (
               <li style={{ color: '#aaa', fontSize: 12 }}>No users online</li>
             )}
-            {onlineUsers.map(u => (
-              <li key={u._id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span className="chat-app-online-dot" />
-                <button className="chat-app-convo-btn" onClick={() => startConversation(u._id)}>{u.userName}</button>
-              </li>
-            ))}
+            {onlineUsers.map(u => {
+              let displayName = '';
+              if (typeof u === 'string') {
+                displayName = u;
+              } else if (u && typeof u === 'object') {
+                // Only access properties that exist on the type
+                displayName = u.userName || u._id || 'Unknown';
+              } else {
+                displayName = 'Unknown';
+              }
+              return (
+                <li key={typeof u === 'string' ? u : u._id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span className="chat-app-online-dot" />
+                  <button className="chat-app-convo-btn" onClick={() => startConversation(typeof u === 'string' ? u : u._id)}>{displayName}</button>
+                </li>
+              );
+            })}
           </ul>
         </div>
 
@@ -383,11 +484,57 @@ const ChatApp: React.FC = () => {
         </div>
       </div>
       <div className="chat-app-main">
+        {/* DEBUG: Show pending adoptions */}
+        {pendingAdoptions.length > 0 && (
+          <div style={{ background: '#fff3cd', padding: '8px', marginBottom: '8px', border: '1px solid #ffeaa7', borderRadius: '4px' }}>
+            <strong>DEBUG - Pending Adoptions:</strong>
+            <ul style={{ margin: 0, paddingLeft: '20px' }}>
+              {pendingAdoptions.map(dog => {
+                let adopter = 'None';
+                const a = dog.adoptionQueue?.adopter;
+                if (a) {
+                  if (typeof a === 'string') {
+                    adopter = a;
+                  } else if (typeof a === 'object') {
+                    adopter = a.name || a.username || a._id || 'Unknown';
+                  }
+                }
+                return (
+                  <li key={dog._id}>
+                    {dog.name} - Owner: {dog.user.name} ({dog.user._id === user._id ? 'You' : 'Other'}) - Adopter: {adopter}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
         {/* Conversation actions always at top for all devices */}
         {selectedConvo && (
           <div className="chat-app-actions-row">
             <button className="chat-app-action-btn delete" onClick={handleDeleteConversation}>Delete</button>
             <button className={`chat-app-action-btn ${isBlocked ? 'unblock' : 'block'}`} onClick={handleBlockUnblock}>{isBlocked ? 'Unblock' : 'Block'}</button>
+            {(() => {
+              const otherUserId = selectedConvo.participants.find(id => id !== user._id);
+              const filtered = pendingAdoptions.filter(dog => {
+                const isCurrentUserOwner = String(dog.user._id) === String(user._id);
+                if (isCurrentUserOwner) {
+                  return String(dog.adoptionQueue?.adopter?._id) === String(otherUserId);
+                } else {
+                  return String(dog.user._id) === String(otherUserId);
+                }
+              });
+              console.log('[ChatApp] Selected convo:', selectedConvo._id, 'Other user:', otherUserId, 'Pending adoptions:', pendingAdoptions.length, 'Filtered:', filtered.length);
+              return filtered.map(dog => (
+                <button
+                  key={dog._id}
+                  className="chat-app-action-btn confirm"
+                  onClick={() => handleConfirmAdoption(dog._id, dog.user._id === user._id)}
+                >
+                  Confirm Adoption: {dog.name}
+                </button>
+              ));
+            })()}
           </div>
         )}
         <div className="chat-app-messages">
@@ -422,8 +569,38 @@ const ChatApp: React.FC = () => {
       {/* Close button at top right (desktop), static on mobile) */}
       <button
         onClick={() => window.dispatchEvent(new CustomEvent('closeChatModal'))}
-        className="chat-app-close-btn"
-      >Close</button>
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          width: 56,
+          height: 56,
+          backgroundColor: '#e74c3c',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          cursor: 'pointer',
+          zIndex: 2147483647,
+          padding: 0
+        }}
+        title="Close"
+        aria-label="Close"
+      >
+        <span style={{
+          fontSize: 40,
+          fontWeight: 900,
+          lineHeight: '56px',
+          width: '100%',
+          textAlign: 'center',
+          display: 'block',
+          userSelect: 'none',
+          letterSpacing: 2
+        }}>×</span>
+      </button>
     </div>
   );
 };

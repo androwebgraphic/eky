@@ -5,7 +5,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../contexts/AuthContext';
+// import { useAuth } from '../../contexts/AuthContext';
 
 interface RegisterFormData {
   person: 'private' | 'organization';
@@ -26,7 +26,7 @@ const RegisterForm: React.FC = () => {
   const [showTerms, setShowTerms] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-  const { register: registerUser } = useAuth();
+  // const { register: registerUser } = useAuth();
 
   const schema = yup.object().shape({
     name: yup.string().required(t('register.name') + ' ' + t('validation.emailRequired')),

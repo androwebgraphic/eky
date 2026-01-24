@@ -14,9 +14,14 @@ export const searchUsers = async (req, res) => {
 		const query = req.query.query || '';
 		if (!query.trim()) return res.json([]);
 		const users = await User.find({
-			$or: [
-				{ username: { $regex: query, $options: 'i' } },
-				{ name: { $regex: query, $options: 'i' } }
+			$and: [
+				{ _id: { $ne: req.user._id } }, // Exclude current user
+				{
+					$or: [
+						{ username: { $regex: query, $options: 'i' } },
+						{ name: { $regex: query, $options: 'i' } }
+					]
+				}
 			]
 		})
 		.limit(10)

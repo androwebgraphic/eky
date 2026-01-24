@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables";
 
 .eky-icon {
   /* use !important to prevent issues with browser extensions that change fonts */
@@ -105,7 +105,7 @@ h6 {
   padding: 0;
   // font-family: "Lao MN", serif;
   text-align: center;
-  color: $txt-color;
+  color: variables.$txt-color;
   font-family: "Nunito", sans-serif;
   font-weight: bold;
 }

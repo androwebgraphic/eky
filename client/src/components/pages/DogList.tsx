@@ -72,7 +72,7 @@ const DogList: React.FC = () => {
     if (params.toString() !== searchParams.toString()) {
       setSearchParams(params);
     }
-  }, [searchTerm, genderFilter, sizeFilter, setSearchParams]);
+  }, [searchTerm, genderFilter, sizeFilter, setSearchParams, searchParams]);
 
   // Listen for URL parameter changes (e.g., from search modal)
   useEffect(() => {
@@ -83,7 +83,7 @@ const DogList: React.FC = () => {
     if (search !== searchTerm) setSearchTerm(search);
     if (gender !== genderFilter) setGenderFilter(gender);
     if (size !== sizeFilter) setSizeFilter(size);
-  }, [searchParams]);
+  }, [searchParams, searchTerm, genderFilter, sizeFilter]);
   
   // Filter dogs based on search criteria
   const filteredDogs = dogs.filter(dog => {
@@ -106,14 +106,7 @@ const DogList: React.FC = () => {
   });
   
   // Debug logging to help identify the issue
-  console.log('🐕 DogList render - Auth state:');
-  console.log('  - isAuthenticated:', isAuthenticated);
-  console.log('  - hasUser:', !!user);
-  console.log('  - userId:', user?._id);
-  console.log('  - userName:', user?.name);
-  console.log('  - hasToken:', !!token);
   
-  console.log('🔍 Search - totalDogs:', dogs.length, 'filteredDogs:', filteredDogs.length);
 
   // Add/remove modal-open class when modal state changes
   useEffect(() => {
@@ -132,13 +125,7 @@ const DogList: React.FC = () => {
   useEffect(() => {
     const getApiUrl = () => {
       if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-      if (window.location.protocol === 'https:') {
-        return `https://${window.location.hostname}`;
-      }
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return `http://${window.location.hostname}:3001`;
-      }
-      return `http://172.20.10.2:3001`;
+      return 'http://localhost:3001';
     };
     const API_URL = getApiUrl();
     let mounted = true;
@@ -160,6 +147,7 @@ const DogList: React.FC = () => {
           throw new Error(txt || `Request failed (${res.status})`);
         }
         const data = await res.json();
+        // Debug: log images array for each dog
         if (mounted) setDogs(data);
       } catch (err: any) {
         console.error('Failed to fetch dogs', err);
@@ -255,9 +243,14 @@ const DogList: React.FC = () => {
               canEdit={canEdit}
               adoptionStatus={d.adoptionStatus}
               adoptionQueue={d.adoptionQueue}
-              onDogUpdate={updatedDog => {
-                setDogs(dogs => dogs.map(dog => dog._id === updatedDog._id ? updatedDog : dog));
-                if (selectedDog && selectedDog._id === updatedDog._id) setSelectedDog(updatedDog);
+              onDogUpdate={update => {
+                if (update.remove) {
+                  setDogs(dogs => dogs.filter(dog => dog._id !== update.id));
+                  if (selectedDog && selectedDog._id === update.id) setSelectedDog(null);
+                } else {
+                  setDogs(dogs => dogs.map(dog => dog._id === update._id ? update : dog));
+                  if (selectedDog && selectedDog._id === update._id) setSelectedDog(update);
+                }
               }}
               onViewDetails={(event) => {
                 const rect = event.currentTarget.getBoundingClientRect();
@@ -359,9 +352,14 @@ const DogList: React.FC = () => {
               {...selectedDog}
               adoptionStatus={selectedDog?.adoptionStatus}
               adoptionQueue={selectedDog?.adoptionQueue}
-              onDogUpdate={updatedDog => {
-                setDogs(dogs => dogs.map(d => d._id === updatedDog._id ? updatedDog : d));
-                setSelectedDog(updatedDog);
+              onDogUpdate={update => {
+                if (update.remove) {
+                  setDogs(dogs => dogs.filter(d => d._id !== update.id));
+                  setSelectedDog(null);
+                } else {
+                  setDogs(dogs => dogs.map(d => d._id === update._id ? update : d));
+                  setSelectedDog(update);
+                }
               }}
               onClose={() => {
                 setSelectedDog(null);
@@ -394,8 +392,27 @@ const DogList: React.FC = () => {
   }
 
   // Handler for saving an edited dog
-  function handleSaveEditDog(updatedDog: Dog) {
-    setDogs(dogs => dogs.map(d => d._id === updatedDog._id ? updatedDog : d));
+  async function handleSaveEditDog(updatedDog: Dog) {
+    // Re-fetch the full dog list after editing
+    const getApiUrl = () => {
+      if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+      return 'http://localhost:3001';
+    };
+    const API_URL = getApiUrl();
+    setLoading(true);
+    setError(null);
+    try {
+      const headers: any = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(`${API_URL}/api/dogs`, { cache: 'no-store', headers });
+      if (!res.ok) throw new Error(await res.text() || `Request failed (${res.status})`);
+      const data = await res.json();
+      setDogs(data);
+    } catch (err: any) {
+      setError(err.message || t('doglist.failedToLoad'));
+    } finally {
+      setLoading(false);
+    }
   }
 
   // Handler for removing a dog
@@ -413,10 +430,7 @@ const DogList: React.FC = () => {
       
       const getApiUrl = () => {
         if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-          return `http://${window.location.hostname}:3001`;
-        }
-        return `http://${window.location.hostname}:3001`;
+        return 'http://localhost:3001';
       };
       const API_URL = getApiUrl();
       

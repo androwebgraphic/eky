@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DogImageSlider from '../DogImageSlider';
 import { useTranslation } from 'react-i18next';
@@ -34,7 +35,7 @@ interface DogDetailsProps {
   };
   adoptionStatus?: string;
   adoptionQueue?: any;
-  onDogUpdate?: (dog: any) => void;
+  onDogUpdate?: (update: any) => void;
 }
 
 const DogDetails: React.FC<DogDetailsProps> = ({
@@ -151,47 +152,30 @@ const DogDetails: React.FC<DogDetailsProps> = ({
   const apiBase = getApiBase();
   const toAbs = (u?: string) => {
     if (!u) return u;
-    // If URL contains /uploads/, extract and rebuild with current API base
-    if (u.includes('/uploads/')) {
-      const match = u.match(/\/uploads\/.*/);
-      return match ? `${apiBase}${match[0]}` : u;
-    }
-    // Otherwise use as-is if absolute, or prepend apiBase if relative
-    return u.startsWith('http') ? u : `${apiBase}${u}`;
+    // If already absolute (http/https), use as is
+    if (/^https?:\/\//.test(u)) return u;
+    // If starts with /u/dogs/ or /uploads/, prepend apiBase
+    if (u.startsWith('/u/dogs/') || u.startsWith('/uploads/')) return apiBase + u;
+    // If starts with u/dogs/ or uploads/ (missing leading slash), add it and prepend apiBase
+    if (u.startsWith('u/dogs/') || u.startsWith('uploads/')) return apiBase + '/' + u;
+    // Otherwise, treat as relative to apiBase
+    return apiBase + '/' + u.replace(/^\/+/, '');
   };
 
 
   // Prepare images for DogImageSlider (always use largest available, prefer 1024px, always pass full Cloudinary URL)
-  const toCloudinaryUrl = (publicId?: string, options?: { width?: number }) => {
-    if (!publicId) return undefined;
-    const cloudName = 'dtqzrm4by';
-    let url = `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`;
-    if (options?.width) url += `/w_${options.width}`;
-    return url;
-  };
-  let sliderImages: { url: string; width?: number }[] = [];
-  if (images && images.length > 0) {
-    // Prefer 1024px, then largest available
-    const validImages = images.filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
-    const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
-    const preferred = sorted.filter(img => img.width === 1024);
-    const source = preferred.length > 0 ? preferred : sorted;
-    sliderImages = source.map(img => {
-      // If Cloudinary public ID, convert to full URL; if full Cloudinary URL, use as is; else use full URL
-      const isCloudinaryId = (url?: string) => url && !url.startsWith('http') && !url.startsWith('/uploads/');
-      if (isCloudinaryId(img.url)) {
-        return { url: toCloudinaryUrl(img.url, { width: img.width }) || '', width: img.width };
-      }
-      const cloudinaryMatch = img.url.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/([^\.]+)(\.[a-zA-Z]+)?$/);
-      if (cloudinaryMatch) {
-        return { url: img.url, width: img.width };
-      }
-      // Legacy or external URL
-      return { url: toAbs(img.url), width: img.width };
-    });
-  } else if (thumbnail?.url) {
-    sliderImages = [{ url: toAbs(thumbnail.url) }];
-  }
+  const sliderImages: { url: string; width?: number }[] = React.useMemo(() => {
+    if (images && images.length > 0) {
+      const validImages = images.filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
+      const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
+      const preferred = sorted.filter(img => img.width === 1024);
+      const source = preferred.length > 0 ? preferred : sorted;
+      return source.map(img => ({ url: toAbs(img.url), width: img.width }));
+    } else if (thumbnail && thumbnail.url) {
+      return [{ url: toAbs(thumbnail.url) }];
+    }
+    return [];
+  }, [images, thumbnail, apiBase]);
 
   // Geocode location if needed
   const handleShowMap = async () => {
@@ -199,6 +183,9 @@ const DogDetails: React.FC<DogDetailsProps> = ({
       setShowMap(true);
       return;
     }
+
+  // Debug log for sliderImages
+  console.log('DogDetails sliderImages:', sliderImages);
     setLoadingCoords(true);
     setCoordsError(null);
     try {

@@ -1,7 +1,7 @@
-@import "reset";
-@import "mixins";
-@import "variables";
-@import "header-message";
+@use "reset";
+@use "mixins";
+@use "variables";
+@use "header-message";
 
 // #root{
 //
@@ -46,7 +46,7 @@
   align-items: center;
   gap: 2rem;
   background-color: #72211f;
-  color: $offwhite;
+  color: variables.$offwhite;
 
   img {
     width: 4rem;
@@ -94,7 +94,7 @@ nav#top ul {
 
 a {
   font-size:2rem;
-  color: $offwhite;
+  color: variables.$offwhite;
   padding: 0.5rem 0.7rem;
   white-space: nowrap;
   text-decoration: none;
@@ -166,7 +166,7 @@ main {
 }
 main p {
   // margin-top: 1rem;
-  color: $txt-color;
+  color: variables.$txt-color;
   text-align: left;
   font-size: 1.8rem;
 }
@@ -178,7 +178,7 @@ main p {
 }
 
 h1 {
-  @include gradient;
+  @include mixins.gradient();
 }
 img.welcome {
   width: 50%;
@@ -195,21 +195,21 @@ button {
   width: auto;
   font-size: 1.8rem;
   padding: 1rem;
-  color: $primary-compl;
-  background: $secondary-color;
-  @include btn_radius;
-  border: 2px solid $primary-color;
+  color: variables.$primary-compl;
+  background: variables.$secondary-color;
+  @include mixins.btn_radius();
+  border: 2px solid variables.$primary-color;
   transition: background 0.2s, color 0.2s;
 }
 
 #start_btn:hover, #start_btn:focus {
-  background: $primary-color;
-  color: $secondary-color;
+  background: variables.$primary-color;
+  color: variables.$secondary-color;
 }
 
 button, .button {
-  background: $primary-color;
-  color: $secondary-color;
+  background: variables.$primary-color;
+  color: variables.$secondary-color;
   border: none;
   border-radius: 15px;
   padding: 0.2em 0.7em;
@@ -218,8 +218,8 @@ button, .button {
   transition: background 0.2s, color 0.2s;
 }
 button:hover, .button:hover, button:focus, .button:focus {
-  background: $primary-compl;
-  color: $secondary-compl;
+  background: variables.$primary-compl;
+  color: variables.$secondary-compl;
 }
 
 #Search {
@@ -653,11 +653,11 @@ footer {
 
 .eky-icon {
   cursor: pointer;
-  color: $offwhite;
+  color: variables.$offwhite;
 }
 
 #footer-nav .eky-search {
-  color: $offwhite;
+  color: variables.$offwhite;
 }
 
 // li{

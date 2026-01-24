@@ -1,4 +1,6 @@
+
 import express from "express";
+import http from 'http';
 import dotenv from "dotenv";
 import connectDB from './db/connectDB.js';
 import cookieParser from 'cookie-parser';
@@ -7,17 +9,13 @@ import userRoutes from "./routes/userRoutes.js";
 import dogRoutes from "./routes/dogRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import cors from 'cors';
-import { v2 as cloudinary } from 'cloudinary';
+import chatRoutes from './routes/chatRoutes.js'; // <-- Add this here
 
-cloudinary.config({
-  cloud_name: 'dtqzrm4by',
-  api_key: '825833956321891', 
-  api_secret: 'JeJHLrdbKvflIMxlxZq3TW-2VJ8'
-});
-
+// 2. Create the Express app FIRST
 
 const app = express();
-// CORS middleware ABSOLUTELY FIRST
+
+// 3. Set up middleware AFTER app is created
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
@@ -28,60 +26,76 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+// 4. Load environment variables
+dotenv.config({ path: '.env' });
 
-console.log("hello");
-dotenv.config();
+// 5. Connect to DB
 connectDB();
 
-const PORT = process.env.PORT || 3002;
-// Health check endpoint for Render.com
+
+
+// 7. Health check
 app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', uptime: process.uptime() });
+});
+
+// 8. Set up body parsers
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
+app.use(cookieParser());
+
+// 9. Initialize Passport
+app.use(passport.initialize());
+
+// 10. Use routes
+app.use('/api/chat', chatRoutes);
+app.use('/u', cors({ origin: '*' }), express.static('uploads'));
+app.use("/api/users", userRoutes);
+app.use("/api/dogs", dogRoutes);
+app.use("/api/auth", authRoutes);
+
+// ... rest of your Socket.IO code
+
+app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');
-  res.status(200).send('OK');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
 });
- app.use(express.json({ limit: '100mb' }));//to parse  Json data in the req.body
-import chatRoutes from './routes/chatRoutes.js';
-app.use(express.urlencoded({ limit: '100mb', extended: true })); //to parse form data in the req.body
-app.use(cookieParser());
-
-// Initialize Passport
-app.use(passport.initialize());
-
-app.use('/api/chat', chatRoutes);
-
-// Serve legacy uploads with CORS headers for images still on disk
-app.use('/uploads', cors({ origin: '*' }), express.static('uploads'));
-
-// User and other API routes
-app.use("/api/users", userRoutes);
-app.use("/api/dogs", dogRoutes)
-app.use("/api/auth", authRoutes)
  
  // Start server after all middleware and routes are set up
 
-const httpServer = app.listen(PORT, '0.0.0.0', () => {
+const PORT = process.env.PORT || 3001;
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://172.20.10.2:3000', 'http://localhost:3002', 'http://127.0.0.1:3002', 'http://172.20.10.2:3002'];
+const httpServer = http.createServer({ maxHeaderSize: 1024 * 1024 }, app);
+httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`Server started at:`);
   console.log(`  Local:   http://localhost:${PORT}`);
   console.log(`  Network: http://172.20.10.2:${PORT}`);
 });
 
-// Socket.IO setup
 import { Server as SocketIOServer } from 'socket.io';
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: '*',
+    origin: function(origin, callback) {
+      // allow requests with no origin (like mobile apps, curl, etc.)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST']
   }
 });
+
+import { setIo } from './socket.js';
+setIo(io);
 
 // --- Online users tracking ---
 const onlineUsers = new Map(); // userId -> { _id, userName, socketId }
@@ -169,6 +183,3 @@ io.on('connection', (socket) => {
    }
    process.exit(1);
  });
- 
- // Set higher header size limits to prevent 431 errors
- httpServer.maxHeaderSize = 16 * 1024; // 16KB for headers

@@ -1,9 +1,11 @@
+@use 'sass:color';
+@use './variables' as variables;
 // Edit button style
 .edit {
   border-radius: 15px !important;
   padding: 0.2em 0.7em !important;
-  background: lighten($primary-color, 35%) !important;
-  color: $primary-color !important;
+  background: color.adjust(variables.$primary-color, $lightness: 35%) !important;
+  color: variables.$primary-color !important;
   border: none !important;
 }
 // Remove button style
@@ -79,9 +81,9 @@
   cursor: not-allowed;
 }
 .view-details-btn {
-  background: $primary-color;
-  color: $secondary-color;
-  border: 2px solid $primary-compl;
+  background: variables.$primary-color;
+  color: variables.$secondary-color;
+  border: 2px solid variables.$primary-compl;
   border-radius: 15px;
   font-size: 12px;
   font-weight: 600;
@@ -89,14 +91,14 @@
   transition: background 0.2s, color 0.2s;
 }
 .view-details-btn:hover, .view-details-btn:focus {
-  background: $primary-compl;
-  color: $secondary-compl;
+  background: variables.$primary-compl;
+  color: variables.$secondary-compl;
 }
 
 .adopt-btn {
-  background: $primary-color;
-  color: $secondary-color;
-  border: 2px solid $primary-compl;
+  background: variables.$primary-color;
+  color: variables.$secondary-color;
+  border: 2px solid variables.$primary-compl;
   border-radius: 15px;
   font-size: 12px;
   font-weight: 600;
@@ -104,8 +106,8 @@
   transition: background 0.2s, color 0.2s;
 }
 .adopt-btn:hover, .adopt-btn:focus {
-  background: $primary-compl;
-  color: $secondary-compl;
+  background: variables.$primary-compl;
+  color: variables.$secondary-compl;
 }
 .adopt-btn:disabled {
   background: #aaa;
@@ -128,9 +130,9 @@
 }
 
 .like {
-  background: $secondary-color;
-  color: $primary-color;
-  border: 2px solid $primary-compl;
+  background: variables.$secondary-color;
+  color: variables.$primary-color;
+  border: 2px solid variables.$primary-compl;
   border-radius: 15px;
   font-size: 12px;
   font-weight: 600;
@@ -140,14 +142,14 @@
   transition: background 0.2s, color 0.2s;
 }
 .like.liked {
-  background: $primary-compl;
-  color: $secondary-compl;
+  background: variables.$primary-compl;
+  color: variables.$secondary-compl;
 }
 
 .wishlist {
-  background: $secondary-color;
-  color: $primary-color;
-  border: 2px solid $primary-compl;
+  background: variables.$secondary-color;
+  color: variables.$primary-color;
+  border: 2px solid variables.$primary-compl;
   border-radius: 15px;
   font-size: 12px;
   font-weight: 600;

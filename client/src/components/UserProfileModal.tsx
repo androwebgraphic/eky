@@ -36,6 +36,20 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+
+
+
+
+
+
+
+  const loadWishlist = React.useCallback(async () => {
+    setLoadingWishlist(true);
+    const wishlistData = await getWishlist();
+    setWishlist(wishlistData);
+    setLoadingWishlist(false);
+  }, [getWishlist]);
+
   // Load wishlist when modal opens and wishlist tab is active
   React.useEffect(() => {
     if (isOpen && activeTab === 'wishlist') {
@@ -54,7 +68,15 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       setError(null);
       setSuccess(null);
     }
-  }, [isOpen, activeTab, user]); // Added loadWishlist dependency is handled by calling it directly
+  }, [isOpen, activeTab, user, loadWishlist, typedUser.email, typedUser.name, typedUser.phone, typedUser.username]);
+
+  const handleModalClose = React.useCallback(() => {
+    console.log('handleModalClose called');
+    setIsEditing(false);
+    setError(null);
+    setSuccess(null);
+    onClose();
+  }, [onClose]);
 
   // Handle escape key to close modal
   React.useEffect(() => {
@@ -71,7 +93,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         document.removeEventListener('keydown', handleEscapeKey);
       };
     }
-  }, [isOpen]);
+  }, [isOpen, handleModalClose]);
 
   // Reset state when modal closes
   React.useEffect(() => {
@@ -84,20 +106,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     }
   }, [isOpen]);
 
-  const handleModalClose = () => {
-    console.log('handleModalClose called');
-    setIsEditing(false);
-    setError(null);
-    setSuccess(null);
-    onClose();
-  };
-
-  const loadWishlist = React.useCallback(async () => {
-    setLoadingWishlist(true);
-    const wishlistData = await getWishlist();
-    setWishlist(wishlistData);
-    setLoadingWishlist(false);
-  }, [getWishlist]);
 
   // Don't render if modal is not open - MOVED AFTER ALL HOOKS
   if (!isOpen) {
@@ -425,8 +433,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
             <div style={{ marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
                 <img 
-                  src={profilePicturePreview || ((user as any)?.profilePicture ? `${getApiUrl()}${(user as any).profilePicture}` : "../img/androcolored-80x80.jpg")} 
-                  alt="Profile" 
+                  src={profilePicturePreview || ((user as any)?.profilePicture ? `${getApiUrl()}/u${(user as any).profilePicture.replace('/uploads', '')}` : "../img/androcolored-80x80.jpg")} 
+                   alt={user.username ? `${user.username}'s profile` : 'User profile'} 
                   style={{ 
                     width: '60px', 
                     height: '60px', 
@@ -448,8 +456,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                 <div style={{ marginBottom: '20px', textAlign: 'center' }}>
                   <div style={{ marginBottom: '15px' }}>
                     <img 
-                      src={profilePicturePreview || ((user as any)?.profilePicture ? `${getApiUrl()}${(user as any).profilePicture}` : "../img/androcolored-80x80.jpg")} 
-                      alt="Profile Picture" 
+                      src={profilePicturePreview || ((user as any)?.profilePicture ? `${getApiUrl()}/u${(user as any).profilePicture.replace('/uploads', '')}` : "../img/androcolored-80x80.jpg")} 
+                      alt={user.username ? `${user.username}'s profile` : 'User profile'}
                       style={{ 
                         width: '100px', 
                         height: '100px', 
@@ -780,8 +788,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       ) : (
                         <button
                           onClick={() => {
-                            const adoptKey = t('userProfile.adopt');
-                            const fallbackAdopt = t('button.adopt');
                             handleAdopt(dog._id);
                           }}
                           style={{

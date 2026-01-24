@@ -22,6 +22,8 @@ const App = () => {
     }, []);
 
     return (
+
+      
       <ErrorBoundary>
         <div id="Wrap">
 
@@ -44,6 +46,7 @@ const App = () => {
           </div>
         )}
       </ErrorBoundary>
+    
     );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import MultiPhotoIndicator from './MultiPhotoIndicator';
+// import MultiPhotoIndicator from './MultiPhotoIndicator';
 // Removed unused imports
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,12 +9,10 @@ import { createPortal } from 'react-dom';
 // Geocode location if needed (mirrors DogDetails)
 // (handleShowMap will be defined inside the component, after imports)
 // ...existing imports...
-const toHttps = (url?: string) =>
-  url && url.startsWith('http://') ? url.replace('http://', 'https://') : url;
+const toHttps = (url?: string) => url;
 interface MediaVariant { url: string; width?: number; size?: string }
 interface CardSmallProps {
   _id?: string;
-  imgSrc?: string;
   images?: MediaVariant[];
   video?: { url: string; poster?: MediaVariant[] };
   thumbnail?: MediaVariant;
@@ -46,14 +44,13 @@ interface CardSmallProps {
   };
   adoptionStatus?: string;
   adoptionQueue?: any;
-  onDogUpdate?: (dog: any) => void;
+  onDogUpdate?: (update: any) => void;
 }
 
 const CardSmall: React.FC<CardSmallProps> = (props) => {
   // Destructure props for easier access
   const {
     _id,
-    imgSrc,
     images,
     video,
     thumbnail,
@@ -154,6 +151,16 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   };
   const apiBase = getApiBase();
 
+  // Image base
+  const getImageBase = () => {
+    if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return `http://${window.location.hostname}:3001`;
+    }
+    return `http://${window.location.hostname}:3001`;
+  };
+  const imageBase = getImageBase();
+
   const handleWishlistToggle = async () => {
     if (!_id || !isAuthenticated) {
       alert('Please log in to add dogs to your wishlist');
@@ -176,6 +183,36 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
       } else {
         alert('Failed to add to wishlist: ' + (result.error || 'Unknown error'));
       }
+    }
+  };
+
+  const handleConfirm = async () => {
+    if (!_id) return;
+    setAdoptLoading(true);
+    setAdoptError(null);
+    try {
+      const resp = await fetch(`${apiBase}/api/dogs/${_id}/adopt-confirm`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
+        }
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.message || 'Error');
+      if (data.message.includes('removed')) {
+        // Dog adopted and removed
+        alert('Dog has been successfully adopted!');
+        // Optionally refresh or remove from list
+        if (onDogUpdate) onDogUpdate({ remove: true, id: _id }); // Remove from list
+      } else {
+        setAdoptionQueue(data.adoptionQueue);
+        alert('Confirmation saved. Waiting for the other party.');
+      }
+    } catch (e: any) {
+      setAdoptError(e.message || 'Error');
+    } finally {
+      setAdoptLoading(false);
     }
   };
 
@@ -203,64 +240,37 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     }
   };
 
-  // Helper to check if a string is a Cloudinary public ID (not a URL)
-  const isCloudinaryId = (url?: string) => url && !url.startsWith('http') && !url.startsWith('/uploads/');
-  // Image helpers
-  // Always use Cloudinary public_id for migrated images
-  const toCloudinaryUrl = (publicId?: string, options?: { width?: number }) => {
-    if (!publicId) return undefined;
-    // Replace with your actual cloud name
-    const cloudName = 'dtqzrm4by';
-    let url = `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`;
-    if (options?.width) url += `/w_${options.width}`;
-    return url;
+
+  // Helper to get absolute URL for images
+  const toAbsUrl = (url?: string) => {
+    if (!url) return url;
+    // If already absolute (http/https), use as is
+    if (/^https?:\/\//.test(url)) return url;
+    // If starts with /uploads/ or /u/dogs/, prepend imageBase
+    if (url.startsWith('/uploads/') || url.startsWith('/u/dogs/')) return imageBase + url;
+    // If starts with uploads/ or u/dogs/ (missing leading slash), add it and prepend imageBase
+    if (url.startsWith('uploads/') || url.startsWith('u/dogs/')) return imageBase + '/' + url;
+    // Otherwise, treat as relative to imageBase
+    return imageBase + '/' + url.replace(/^\/+/, '');
   };
-  const cacheBust = `t=${Date.now()}`;
-  // Build srcSet with all available sizes, always including the largest/original
-  let imgSrcSet: string | undefined = undefined;
+
+  // Only use local or external image URLs
   let largestImgUrl: string | undefined = undefined;
-  // Filter images to only those with valid URLs
   const validImages = (images || []).filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
-  let largestImage = undefined;
   if (validImages.length) {
-    // Prefer original (no width param) for Cloudinary, else largest available
+    // Prefer largest available
     const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
-    largestImage = sorted[0];
-    imgSrcSet = sorted
-      .filter(i => isCloudinaryId(i.url))
-      .map(i => `${toCloudinaryUrl(i.url)} ${i.width || 2000}w`)
-      .join(', ');
-    if (largestImage && isCloudinaryId(largestImage.url)) {
-      largestImgUrl = toCloudinaryUrl(largestImage.url); // no width param: original
-    } else if (largestImage) {
-      largestImgUrl = largestImage.url;
-    }
-    if (largestImgUrl && imgSrcSet && !imgSrcSet.includes(largestImgUrl)) {
-      imgSrcSet += `, ${largestImgUrl} 2000w`;
-    }
+    largestImgUrl = toAbsUrl(sorted[0].url);
   }
 
   const posterUrl = video && video.poster && video.poster.length
-    ? (isCloudinaryId(video.poster[video.poster.length - 1].url)
-        ? toCloudinaryUrl(video.poster[video.poster.length - 1].url)
-        : video.poster[video.poster.length - 1].url)
+    ? toAbsUrl(video.poster[video.poster.length - 1].url)
     : undefined;
   const hasVideoUrl = video && typeof video.url === 'string' && video.url.length > 0;
-  const videoUrl = hasVideoUrl
-    ? (isCloudinaryId(video.url)
-        ? toCloudinaryUrl(video.url)
-        : video.url)
-    : undefined;
+  const videoUrl = hasVideoUrl ? toAbsUrl(video.url) : undefined;
   let thumbUrl: string | undefined = undefined;
-  let isCloudinaryThumb = false;
   if (thumbnail && thumbnail.url) {
-    if (isCloudinaryId(thumbnail.url)) {
-      thumbUrl = toCloudinaryUrl(thumbnail.url);
-      isCloudinaryThumb = true;
-    } else if (thumbnail.url.startsWith('http') || thumbnail.url.startsWith('/uploads/')) {
-      thumbUrl = thumbnail.url;
-      isCloudinaryThumb = false;
-    }
+    thumbUrl = toAbsUrl(thumbnail.url);
   }
 
   const [showSlider, setShowSlider] = useState(false);
@@ -272,18 +282,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     const preferred = images.filter(img => img.width === 1024 && img.url);
     const fallback = images.filter(img => img.url);
     const source = preferred.length > 0 ? preferred : fallback;
-    uniqueImages = source.map(img => {
-      // If Cloudinary public ID, convert to full URL; if full Cloudinary URL, use as is; else use full URL
-      if (isCloudinaryId(img.url)) {
-        return { url: toCloudinaryUrl(img.url) || '', width: img.width };
-      }
-      const cloudinaryMatch = img.url.match(/res\.cloudinary\.com\/[^/]+\/image\/upload\/([^.]+)(\.[a-zA-Z]+)?$/);
-      if (cloudinaryMatch) {
-        return { url: img.url, width: img.width };
-      }
-      // Legacy or external URL
-      return { url: img.url, width: img.width };
-    });
+    uniqueImages = source.map(img => ({ url: toAbsUrl(img.url), width: img.width }));
   }
 
   return (
@@ -295,15 +294,15 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             position: 'relative',
             cursor: images && images.length > 0 ? 'pointer' : 'default',
             width: '100%',
-            height: 'auto',
             aspectRatio: '1/1',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            height: 0,
+            paddingBottom: '100%',
+            display: 'block',
             background: '#f8f8f8',
-            minHeight: 0,
             boxSizing: 'border-box',
-            border: '1px solid #eee'
+            border: '1px solid #eee',
+            overflow: 'hidden',
+            borderRadius: '1rem'
           }}
           onClick={images && images.length > 0 ? () => setShowSlider(true) : undefined}
         >
@@ -312,65 +311,13 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               <source src={videoUrl} />
             </video>
           ) : (largestImgUrl) ? (
-              isCloudinaryId(largestImgUrl)
-                ? (
-                  <img
-                    src={toCloudinaryUrl(largestImgUrl, { width: 1024 }) + '?cb=' + Date.now()}
-                    srcSet={[
-                      toCloudinaryUrl(largestImgUrl, { width: 320 }) + ' 320w',
-                      toCloudinaryUrl(largestImgUrl, { width: 640 }) + ' 640w',
-                      toCloudinaryUrl(largestImgUrl, { width: 1024 }) + ' 1024w',
-                      toCloudinaryUrl(largestImgUrl) + ' 2000w'
-                    ].join(', ')}
-                    sizes="(max-width: 480px) 100vw, (max-width: 900px) 50vw, 320px"
-                    alt={name}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: '1rem',
-                      objectFit: 'cover',
-                      aspectRatio: '1/1',
-                      display: 'block',
-                      imageRendering: 'auto',
-                    }}
-                    id="dog-thumbnail"
-                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }}
-                  />
-                )
-                : <img src={toHttps(largestImgUrl) + '?cb=' + Date.now()} alt={name} style={{ width: 200, height: 200, borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+              <img src={largestImgUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', position: 'absolute', top: 0, left: 0, borderRadius: '1rem', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
           ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
-              isCloudinaryThumb
-                ? (
-                  <img
-                    src={toCloudinaryUrl(thumbnail.url, { width: 1024 }) + '?cb=' + Date.now()}
-                    srcSet={[
-                      toCloudinaryUrl(thumbnail.url, { width: 320 }) + ' 320w',
-                      toCloudinaryUrl(thumbnail.url, { width: 640 }) + ' 640w',
-                      toCloudinaryUrl(thumbnail.url, { width: 1024 }) + ' 1024w',
-                      toCloudinaryUrl(thumbnail.url) + ' 2000w'
-                    ].join(', ')}
-                    sizes="(max-width: 480px) 100vw, (max-width: 900px) 50vw, 320px"
-                    alt={name}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: '1rem',
-                      objectFit: 'cover',
-                      aspectRatio: '1/1',
-                      display: 'block',
-                      imageRendering: 'auto',
-                    }}
-                    id="dog-thumbnail"
-                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }}
-                  />
-                )
-                : (
-                  <img src={toHttps(thumbUrl) + '?cb=' + Date.now()} alt={name} style={{ width: 200, height: 200, borderRadius: '1rem', objectFit: 'cover', aspectRatio: '1/1', display: 'block', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
-                    )
-                  ) : null}
+              <img src={thumbUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', position: 'absolute', top: 0, left: 0, borderRadius: '1rem', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
+          ) : null}
           {images && images.length > 1 && (
             <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }}>
-              <MultiPhotoIndicator count={images.length} />
+              {/* Removed MultiPhotoIndicator to hide image count */}
             </div>
           )}
         </div>
@@ -570,48 +517,61 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             >
               {t('button.viewDetails')}
             </button>
-            {isAuthenticated && _id && !isOwner && (
+            {isAuthenticated && _id && (
               <>
                 {/* ADOPT/ODUSTANI LOGIKA (simplified for list) */}
                 {adoptionStatusState === 'pending' && adoptionQueueState && currentUser && adoptionQueueState.adopter === currentUser._id ? (
-                  <button
-                    id="cancel-adopt"
-                    className="details"
-                    onClick={async () => {
-                      setAdoptLoading(true);
-                      setAdoptError(null);
-                      try {
-                        const resp = await fetch(`${apiBase}/api/dogs/${_id}/adopt-cancel`, {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
-                          },
-                          body: JSON.stringify({ reason: '' })
-                        });
-                        const data = await resp.json();
-                        if (!resp.ok) throw new Error(data.message || 'Error');
-                        setAdoptionStatus(data.dog?.adoptionStatus || 'available');
-                        setAdoptionQueue(data.dog?.adoptionQueue);
-                        if (onDogUpdate && data.dog) onDogUpdate(data.dog);
-                      } catch (e: any) {
-                        setAdoptError(e.message || 'Error');
-                      } finally {
-                        setAdoptLoading(false);
-                      }
-                    }}
-                    disabled={adoptLoading}
-                    style={{
-                      background: '#e74c3c',
-                      border: 'none',
-                      borderRadius: '10px',
-                      color: 'white',
-                      fontSize: '10px',
-                      fontWeight: 500
-                    }}
-                  >
-                    {adoptLoading ? (t('button.cancelling') || 'Odustajanje...') : (t('button.cancelAdoption') || 'Odustani od posvajanja')}
-                  </button>
+                  adoptionQueueState.adopterConfirmed ? (
+                    <button
+                      className="details"
+                      disabled
+                    >
+                      {t('button.waiting') || 'Waiting for owner confirmation'}
+                    </button>
+                  ) : (
+                    <button
+                      id="confirm-adopt"
+                      className="details"
+                      onClick={handleConfirm}
+                      disabled={adoptLoading}
+                      style={{
+                        background: '#28a745',
+                        border: 'none',
+                        borderRadius: '10px',
+                        color: 'white',
+                        fontSize: '10px',
+                        fontWeight: 500
+                      }}
+                    >
+                      {adoptLoading ? (t('button.confirming') || 'Confirming...') : (t('button.confirmAdoption') || 'Confirm Adoption')}
+                    </button>
+                  )
+                ) : adoptionStatusState === 'pending' && isOwner ? (
+                  adoptionQueueState?.ownerConfirmed ? (
+                    <button
+                      className="details"
+                      disabled
+                    >
+                      {t('button.waiting') || 'Waiting for adopter confirmation'}
+                    </button>
+                  ) : (
+                    <button
+                      id="confirm-adopt"
+                      className="details"
+                      onClick={handleConfirm}
+                      disabled={adoptLoading}
+                      style={{
+                        background: '#28a745',
+                        border: 'none',
+                        borderRadius: '10px',
+                        color: 'white',
+                        fontSize: '10px',
+                        fontWeight: 500
+                      }}
+                    >
+                      {adoptLoading ? (t('button.confirming') || 'Confirming...') : (t('button.confirmAdoption') || 'Confirm Adoption')}
+                    </button>
+                  )
                 ) : adoptionStatusState === 'pending' ? (
                   <button
                     id="adopt"
@@ -699,7 +659,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                   className={`wishlist ${inWishlist ? 'in-wishlist' : ''}`}
                   onClick={() => {
                     // eslint-disable-next-line no-console
-                    console.log('[CardSmall] addToList:', t('button.addToList'), '| removeFromList:', t('button.removeFromList'));
+                      // Removed debug log for addToList and removeFromList
                     handleWishlistToggle();
                   }}
 

@@ -17,7 +17,7 @@
   background: #fbe1cd;
   color: #72211f;
   min-width: 60px;
-  max-width: 90px;
+  max-width: 150px;
   white-space: nowrap;
   transition: background 0.2s, color 0.2s;
 }
@@ -32,6 +32,11 @@
 .chat-app-action-btn.unblock {
   background: #cdf0fb;
   color: #1f4b72;
+}
+.chat-app-action-btn.confirm {
+  background: #28a745;
+  color: #fff;
+  border-color: #28a745;
 }
 .chat-app-action-btn:hover {
   background: #1f4b72;

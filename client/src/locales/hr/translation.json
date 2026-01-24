@@ -19,8 +19,9 @@
     "adopt": "Posvoji",
     "cancelAdoption": "Odustani od posvajanja",
     "cancelling": "Odustajanje...",
-    "requested": "Zahtjev poslan"
-    ,
+    "requested": "Zahtjev poslan",
+    "confirmAdoption": "Potvrdi posvajanje",
+    "confirming": "Potvrđivanje...",
     "addToList": "Dodaj u listu",
     "removeFromList": "Ukloni iz liste",
     "edit": "Uredi",

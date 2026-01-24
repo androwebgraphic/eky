@@ -18,10 +18,7 @@ const Header: React.FC = () => {
   // Get API URL for profile pictures
   const getApiUrl = () => {
     if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return `http://${window.location.hostname}:3001`;
-    }
-    return `http://172.20.10.2:3001`;
+    return 'http://localhost:3001';
   };
 
   const checkHealth = useCallback(async () => {
@@ -63,7 +60,7 @@ const Header: React.FC = () => {
     };
   }, [isExpanded]);
 
-  const profileImageUrl = user?.profilePicture ? `${getApiUrl()}${user.profilePicture}` : "../img/androcolored-80x80.jpg";
+  const profileImageUrl = user?.profilePicture ? `${getApiUrl()}/u${user.profilePicture.replace('/uploads', '')}` : "../img/androcolored-80x80.jpg";
   
   // Calculate dropdown position based on header height
   const dropdownTop = headerRef.current ? `${headerRef.current.offsetHeight}px` : '60px';

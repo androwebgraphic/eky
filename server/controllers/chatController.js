@@ -32,6 +32,7 @@ export async function unblockUser(req, res) {
 import ChatMessage from '../models/chatMessageModel.js';
 import ChatConversation from '../models/chatConversationModel.js';
 import User from '../models/userModel.js';
+import { io } from '../socket.js';
 
 // Create or get a conversation between two users
 export async function getOrCreateConversation(req, res) {
@@ -50,6 +51,8 @@ export async function sendMessage(req, res) {
   if (!conversationId || !sender || !recipient || !message) return res.status(400).json({ error: 'Missing fields' });
   const msg = await ChatMessage.create({ conversationId, sender, recipient, message });
   await ChatConversation.findByIdAndUpdate(conversationId, { updatedAt: Date.now() });
+  // Emit to recipient
+  io.to(recipient).emit('receiveMessage', { conversationId, sender, message, sentAt: msg.sentAt });
   res.json(msg);
 }
 

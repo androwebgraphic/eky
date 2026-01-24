@@ -19,16 +19,6 @@ const LoginForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState<string>('');
 
-  const getApiUrl = () => {
-    if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-    if (window.location.protocol === 'https:') {
-      return `https://${window.location.hostname}`;
-    }
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return `http://${window.location.hostname}:3001`;
-    }
-    return `http://172.20.10.2:3001`;
-  };
 
   // ...removed social login handler...
 

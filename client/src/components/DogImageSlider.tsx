@@ -33,7 +33,7 @@ const DogImageSlider: React.FC<DogImageSliderProps> = ({ images, alt }) => {
             <img
               src={img.url}
               alt={alt || `dog-image-${idx + 1}`}
-              style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'cover', maxHeight }}
+              style={{ width: '100%', height: 'auto', borderRadius: '1rem', objectFit: 'contain', background: '#111', maxHeight }}
               onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }}
             />
           </SwiperSlide>

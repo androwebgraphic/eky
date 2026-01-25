@@ -166,8 +166,10 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
       alert('Please log in to add dogs to your wishlist');
       return;
     }
+    const latestToken = localStorage.getItem('token') || token;
     const currentlyInWishlist = inWishlist;
     if (currentlyInWishlist) {
+      // Pass latestToken to removeFromWishlist if needed
       const result = await removeFromWishlist(_id);
       if (result.success) {
         setInWishlist(false);
@@ -176,6 +178,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
         alert('Failed to remove from wishlist: ' + (result.error || 'Unknown error'));
       }
     } else {
+      // Pass latestToken to addToWishlist if needed
       const result = await addToWishlist(_id);
       if (result.success) {
         setInWishlist(true);
@@ -606,6 +609,9 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                   onClick={async () => {
                     if (!isAuthenticated || !_id) return;
                     if (isLiked) {
+                      // Optimistically update UI
+                      setIsLiked(false);
+                      setLikesCount(prev => Math.max(0, prev - 1));
                       try {
                         const response = await fetch(`${apiBase}/api/dogs/${_id}/unlike`, {
                           method: 'POST',
@@ -616,12 +622,14 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                         if (response.ok) {
                           const data = await response.json();
                           setLikesCount(data.likesCount);
-                          setIsLiked(false);
                         }
                       } catch (error) {
                         console.error('Unlike error:', error);
                       }
                     } else {
+                      // Optimistically update UI
+                      setIsLiked(true);
+                      setLikesCount(prev => prev + 1);
                       try {
                         const response = await fetch(`${apiBase}/api/dogs/${_id}/like`, {
                           method: 'POST',
@@ -632,26 +640,12 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                         if (response.ok) {
                           const data = await response.json();
                           setLikesCount(data.likesCount);
-                          setIsLiked(true);
                         }
                       } catch (error) {
                         console.error('Like error:', error);
                       }
                     }
                   }}
-                  style={{
-                    backgroundColor: isLiked ? '#ff6b6b' : '#f0f0f0',
-                    color: isLiked ? 'white' : '#333',
-                    border: '1px solid #ddd',
-                    padding: '8px 12px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                  title={isLiked ? 'Unlike' : 'Like'}
                 >
                   👍 {likesCount}
                 </button>

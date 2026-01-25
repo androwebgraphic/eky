@@ -66,6 +66,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     setLoading(false);
   }, []);
+  // Helper to always get latest token from localStorage
+  const getLatestToken = () => localStorage.getItem('token') || token;
+
+  // Refresh auth state from localStorage on mount and window focus
+  useEffect(() => {
+    const refreshAuth = () => {
+      const storedToken = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      if (storedToken && storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setToken(storedToken);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error('AuthContext: Error parsing stored user:', error);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+      }
+      setLoading(false);
+    };
+    refreshAuth();
+    window.addEventListener('focus', refreshAuth);
+    return () => window.removeEventListener('focus', refreshAuth);
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {
@@ -127,11 +152,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const addToWishlist = async (dogId: string) => {
     try {
+      const latestToken = getLatestToken();
       const response = await fetch(`${API_URL}/api/users/wishlist`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${latestToken}`
         },
         body: JSON.stringify({ dogId }),
       });
@@ -157,10 +183,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const removeFromWishlist = async (dogId: string) => {
     try {
+      const latestToken = getLatestToken();
       const response = await fetch(`${API_URL}/api/users/wishlist/${dogId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${latestToken}`
         },
       });
 
@@ -184,10 +211,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const getWishlist = async () => {
     try {
+      const latestToken = getLatestToken();
       const response = await fetch(`${API_URL}/api/users/wishlist`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${latestToken}`
         },
       });
 

@@ -1,21 +1,21 @@
 /*
 Error: Invalid CSS after "  color: variables": expected ";", was ".$offwhite;"
-        on line 49 of /Applications/MAMP/htdocs/eky/client/src/sass/partials/layout.scss
+        on line 204 of /Applications/MAMP/htdocs/eky/client/src/sass/partials/layout.scss
 
-44:   flex-wrap: wrap;
-45:   justify-content: space-around;
-46:   align-items: center;
-47:   gap: 2rem;
-48:   background-color: #72211f;
-49:   color: variables.$offwhite;
-50: 
-51:   img {
-52:     width: 4rem;
-53:     height: 4rem;
-54:     border-radius: 50%;
+199:   flex-wrap: wrap;
+200:   justify-content: space-around;
+201:   align-items: center;
+202:   gap: 2rem;
+203:   background-color: #72211f;
+204:   color: variables.$offwhite;
+205: 
+206:   img {
+207:     width: 4rem;
+208:     height: 4rem;
+209:     border-radius: 50%;
 
 Backtrace:
-/Applications/MAMP/htdocs/eky/client/src/sass/partials/layout.scss:49
+/Applications/MAMP/htdocs/eky/client/src/sass/partials/layout.scss:204
 /Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:1278:in `expected'
 /Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:1208:in `expected'
 /Applications/Koala.app/Contents/Resources/app.nw/rubygems/gems/sass-3.5.2/lib/sass/scss/parser.rb:1203:in `tok!'
@@ -44,4 +44,4 @@ Backtrace:
 body:before {
   white-space: pre;
   font-family: monospace;
-  content: "Error: Invalid CSS after \"  color: variables\": expected \";\", was \".$offwhite;\"\A         on line 49 of /Applications/MAMP/htdocs/eky/client/src/sass/partials/layout.scss\A \A 44:   flex-wrap: wrap;\A 45:   justify-content: space-around;\A 46:   align-items: center;\A 47:   gap: 2rem;\A 48:   background-color: #72211f;\A 49:   color: variables.$offwhite;\A 50: \A 51:   img {\A 52:     width: 4rem;\A 53:     height: 4rem;\A 54:     border-radius: 50%;"; }
+  content: "Error: Invalid CSS after \"  color: variables\": expected \";\", was \".$offwhite;\"\A         on line 204 of /Applications/MAMP/htdocs/eky/client/src/sass/partials/layout.scss\A \A 199:   flex-wrap: wrap;\A 200:   justify-content: space-around;\A 201:   align-items: center;\A 202:   gap: 2rem;\A 203:   background-color: #72211f;\A 204:   color: variables.$offwhite;\A 205: \A 206:   img {\A 207:     width: 4rem;\A 208:     height: 4rem;\A 209:     border-radius: 50%;"; }

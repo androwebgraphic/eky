@@ -396,17 +396,67 @@ const ChatApp: React.FC = () => {
       });
       if (res.ok) {
         fetchPendingAdoptions(); // Refresh pending adoptions
-        // Refresh messages to show confirmation message
-        if (selectedConvo) {
-          fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          })
-            .then(res => res.json())
-            .then(setMessages);
-        }
+        setNotification('Adoption confirmed!');
+        // Always refresh conversations
+        fetch(`${getApiUrl()}/api/chat/conversations/${user._id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+          .then(res => res.json())
+          .then(data => {
+            setConversations(Array.isArray(data) ? data : []);
+            // If selected convo is gone, clear selection and messages
+            if (selectedConvo && !data.find((c: any) => c._id === selectedConvo._id)) {
+              setSelectedConvo(null);
+              setMessages([]);
+              setNotification('Adoption completed. Conversation closed.');
+            } else if (selectedConvo) {
+              // Refresh messages if convo still exists
+              fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              })
+                .then(res => res.json())
+                .then(setMessages);
+            }
+          });
       }
     } catch (err) {
       console.error('Confirm adoption error:', err);
+    }
+  };
+
+  // Handler for canceling adoption
+  const handleCancelAdoption = async (dogId: string) => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${getApiUrl()}/api/dogs/${dogId}/adopt-cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ reason: '' })
+      });
+      if (res.ok) {
+        fetchPendingAdoptions();
+        setNotification('Adoption canceled!');
+        fetch(`${getApiUrl()}/api/chat/conversations/${user._id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+          .then(res => res.json())
+          .then(data => {
+            setConversations(Array.isArray(data) ? data : []);
+            if (selectedConvo && !data.find((c: any) => c._id === selectedConvo._id)) {
+              setSelectedConvo(null);
+              setMessages([]);
+              setNotification('Adoption canceled. Conversation closed.');
+            } else if (selectedConvo) {
+              fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              })
+                .then(res => res.json())
+                .then(setMessages);
+            }
+          });
+      }
+    } catch (err) {
+      console.error('Cancel adoption error:', err);
     }
   };
 
@@ -526,13 +576,21 @@ const ChatApp: React.FC = () => {
               });
               console.log('[ChatApp] Selected convo:', selectedConvo._id, 'Other user:', otherUserId, 'Pending adoptions:', pendingAdoptions.length, 'Filtered:', filtered.length);
               return filtered.map(dog => (
-                <button
-                  key={dog._id}
-                  className="chat-app-action-btn confirm"
-                  onClick={() => handleConfirmAdoption(dog._id, dog.user._id === user._id)}
-                >
-                  Confirm Adoption: {dog.name}
-                </button>
+                <span key={dog._id} style={{ display: 'inline-flex', gap: 8 }}>
+                  <button
+                    className="chat-app-action-btn confirm"
+                    onClick={() => handleConfirmAdoption(dog._id, dog.user._id === user._id)}
+                  >
+                    Confirm Adoption: {dog.name}
+                  </button>
+                  <button
+                    className="chat-app-action-btn cancel"
+                    onClick={() => handleCancelAdoption(dog._id)}
+                    style={{ background: '#e74c3c', color: 'white' }}
+                  >
+                    Cancel Adoption
+                  </button>
+                </span>
               ));
             })()}
           </div>

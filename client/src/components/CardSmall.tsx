@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 // import MultiPhotoIndicator from './MultiPhotoIndicator';
 // Removed unused imports
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import DogImageSlider from './DogImageSlider';
 import { createPortal } from 'react-dom';
+
+
 
 // Geocode location if needed (mirrors DogDetails)
 // (handleShowMap will be defined inside the component, after imports)
@@ -277,6 +279,18 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   }
 
   const [showSlider, setShowSlider] = useState(false);
+  const sliderContentRef = useRef<HTMLDivElement>(null);
+  const sliderModalRef = useRef<HTMLDivElement>(null);
+
+  // Close modal on Escape key
+  useEffect(() => {
+    if (!showSlider) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowSlider(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showSlider]);
 
   // Prepare unique images for DogImageSlider (one per uploaded photo, pick only 1024px variant)
   let uniqueImages: { url: string; width?: number }[] = [];
@@ -289,42 +303,34 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   }
 
   return (
-    <>
-      <div className="card">
-        <div
-          className="img"
-          style={{
-            position: 'relative',
-            cursor: images && images.length > 0 ? 'pointer' : 'default',
-            width: '100%',
-            aspectRatio: '1/1',
-            height: 0,
-            paddingBottom: '100%',
-            display: 'block',
-            background: '#f8f8f8',
-            boxSizing: 'border-box',
-            border: '1px solid #eee',
-            overflow: 'hidden',
-            borderRadius: '1rem'
-          }}
-          onClick={images && images.length > 0 ? () => setShowSlider(true) : undefined}
-        >
-          {hasVideoUrl ? (
-            <video controls width="100%" height="auto" poster={posterUrl}>
-              <source src={videoUrl} />
-            </video>
-          ) : (largestImgUrl) ? (
-              <img src={largestImgUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', position: 'absolute', top: 0, left: 0, borderRadius: '1rem', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
-          ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
-              <img src={thumbUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', position: 'absolute', top: 0, left: 0, borderRadius: '1rem', imageRendering: 'auto' }} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/img/nany.jpg'; }} />
-          ) : null}
-          {images && images.length > 1 && (
-            <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }}>
-              {/* Removed MultiPhotoIndicator to hide image count */}
-            </div>
-          )}
-        </div>
-
+    <div className="card">
+      <div
+        className="img"
+        style={{
+          position: 'relative',
+          cursor: images && images.length > 0 ? 'pointer' : 'default',
+          width: '100%',
+          aspectRatio: '1/1',
+          height: 0,
+          paddingBottom: '100%',
+          display: 'block',
+          background: '#f8f8f8',
+          boxSizing: 'border-box',
+          border: '1px solid #eee',
+          overflow: 'hidden',
+          borderRadius: '1rem'
+        }}
+        onClick={images && images.length > 0 ? () => setShowSlider(true) : undefined}
+      >
+        {hasVideoUrl ? (
+          <video controls width="100%" height="auto" poster={posterUrl}>
+            <source src={videoUrl} />
+          </video>
+        ) : (largestImgUrl) ? (
+            <img src={largestImgUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', position: 'absolute', top: 0, left: 0, borderRadius: '1rem', imageRendering: 'auto' }} onError={e => { (e.target as HTMLImageElement).src = '/img/nany.jpg'; }} />
+        ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
+            <img src={thumbUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', position: 'absolute', top: 0, left: 0, borderRadius: '1rem', imageRendering: 'auto' }} onError={e => { (e.target as HTMLImageElement).src = '/img/nany.jpg'; }} />
+        ) : null}
         {/* Modal DogImageSlider */}
         {uniqueImages.length > 0 && showSlider && createPortal(
           <div
@@ -339,59 +345,75 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              flexDirection: 'column',
+              padding: '6vw 0', // More vertical padding for overlay
+              boxSizing: 'border-box',
             }}
-            onClick={() => setShowSlider(false)}
+            onClick={e => {
+              if (e.target === e.currentTarget) setShowSlider(false);
+            }}
+            aria-modal="true"
+            role="dialog"
+            tabIndex={-1}
           >
             <div
               style={{
+                position: 'relative',
                 maxWidth: 600,
                 width: '90vw',
-                height: '90vw',
+                height: 'auto',
+                maxHeight: '80vh',
                 background: 'transparent',
                 borderRadius: 16,
                 overflow: 'hidden',
-                position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                flexDirection: 'column',
+                boxSizing: 'border-box',
               }}
               onClick={e => e.stopPropagation()}
+              tabIndex={-1}
+              ref={sliderContentRef}
             >
-              <DogImageSlider images={uniqueImages} alt={name} />
               <button
-                onClick={() => setShowSlider(false)}
+                type="button"
+                onClick={e => { e.stopPropagation(); setShowSlider(false); }}
                 aria-label="Close slider"
                 style={{
                   position: 'absolute',
-                  top: 12,
-                  right: 12,
+                  top: 8,
+                  right: 8,
                   zIndex: 10000,
                   background: '#e74c3c',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '50%',
-                  width: 48,
-                  height: 48,
-                  fontSize: 32,
+                  width: 40,
+                  height: 40,
+                  fontSize: 28,
                   fontWeight: 900,
                   cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  outline: '3px solid #fff',
                   transition: 'background 0.2s',
                   userSelect: 'none',
+                  touchAction: 'manipulation',
                 }}
+                tabIndex={0}
+                autoFocus
               >
                 ×
               </button>
+              <DogImageSlider images={uniqueImages} alt={name} />
             </div>
           </div>,
           document.body
         )}
-
-        <div className="description">
+      </div>
+      <div className="description">
           <h3 style={{ color: '#751719', marginBottom: 4 }}>
             <strong>{t('fields.name')}</strong> {name}
           </h3>
@@ -696,8 +718,10 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
           </div>
         </div>
       </div>
-    </>
+
   );
 };
 
 export default CardSmall;
+
+

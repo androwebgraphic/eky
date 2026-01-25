@@ -1,5 +1,7 @@
 // POST /api/dogs/:id/adopt-cancel
 import nodemailer from 'nodemailer';
+import { heicBufferToJpeg } from '../utils/heicToJpeg.js';
+import { getOrientationTransform } from '../utils/orientation.js';
 import { getOrCreateConversation, sendMessage } from './chatController.js';
 import ChatConversation from '../models/chatConversationModel.js';
 import ChatMessage from '../models/chatMessageModel.js';
@@ -23,6 +25,7 @@ export const cancelAdoption = async (req, res) => {
     dog.adoptionStatus = 'available';
     dog.adoptionQueue = undefined;
     await dog.save();
+    console.log(`[CANCEL ADOPTION] Dog ${dog._id} cancelled by adopter ${adopterId}. Status now: ${dog.adoptionStatus}`);
     // Send email to both users (owner and adopter)
     try {
       const transporter = nodemailer.createTransport({
@@ -43,7 +46,15 @@ export const cancelAdoption = async (req, res) => {
     } catch (mailErr) {
       console.warn('Failed to send cancellation email:', mailErr);
     }
-    res.json({ message: 'Adoption cancelled', reason });
+    // Return updated pending adoptions for debugging
+    const userIdForQuery = req.user._id;
+    const dogs = await Dog.find({
+      $or: [
+        { user: userIdForQuery, adoptionStatus: 'pending' },
+        { 'adoptionQueue.adopter': userIdForQuery, adoptionStatus: 'pending' }
+      ]
+    });
+    res.json({ message: 'Adoption cancelled', reason, pendingAdoptions: dogs });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
@@ -107,8 +118,16 @@ export const confirmAdoption = async (req, res) => {
         console.warn('Failed to send adoption confirmation message:', msgErr);
       }
       await dog.deleteOne();
-      // TODO: optionally notify both users
-      return res.json({ message: 'Dog adopted and removed from database' });
+      console.log(`[CONFIRM ADOPTION] Dog ${dogId} adopted and removed. Both confirmed.`);
+      // Return updated pending adoptions for debugging
+      const userIdForQuery = req.user._id;
+      const dogs = await Dog.find({
+        $or: [
+          { user: userIdForQuery, adoptionStatus: 'pending' },
+          { 'adoptionQueue.adopter': userIdForQuery, adoptionStatus: 'pending' }
+        ]
+      });
+      return res.json({ message: 'Dog adopted and removed from database', pendingAdoptions: dogs });
     } else {
       await dog.save();
       // Emit socket events to refresh conversations and pending adoptions for both users
@@ -116,7 +135,16 @@ export const confirmAdoption = async (req, res) => {
         io.to(ownerId).emit('refreshConversations');
         io.to(adopterId).emit('refreshConversations');
       }
-      return res.json({ message: 'Adoption confirmation saved', adoptionQueue: dog.adoptionQueue });
+      console.log(`[CONFIRM ADOPTION] Dog ${dogId} confirmation saved. Status: ${dog.adoptionStatus}`);
+      // Return updated pending adoptions for debugging
+      const userIdForQuery = req.user._id;
+      const dogs = await Dog.find({
+        $or: [
+          { user: userIdForQuery, adoptionStatus: 'pending' },
+          { 'adoptionQueue.adopter': userIdForQuery, adoptionStatus: 'pending' }
+        ]
+      });
+      return res.json({ message: 'Adoption confirmation saved', adoptionQueue: dog.adoptionQueue, pendingAdoptions: dogs });
     }
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -258,24 +286,78 @@ export const updateDog = async (req, res) => {
       const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
       if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
       for (const mediaFile of mediaArray) {
+          console.log(`[UPLOAD-DEBUG] Processing file: ${mediaFile.originalname}, mimetype: ${mediaFile.mimetype}, size: ${mediaFile.size}`);
+        // Log mimetype and extension for debugging
+        console.log(`[UPLOAD] File: ${mediaFile.originalname}, mimetype: ${mediaFile.mimetype}`);
+        // Always extract EXIF orientation from the original upload buffer (before any conversion)
+        const orientationTransform = getOrientationTransform(mediaFile.buffer);
+        console.log(`[ORIENTATION] ${mediaFile.originalname}: Detected orientation transform:`, orientationTransform);
+        // Detect HEIC/HEIF and convert to JPEG buffer if needed
+        let processedBuffer = mediaFile.buffer;
+        if (
+          mediaFile.mimetype === 'image/heic' ||
+          mediaFile.mimetype === 'image/heif' ||
+          (mediaFile.originalname && /\.heic|\.heif$/i.test(mediaFile.originalname))
+        ) {
+          try {
+            processedBuffer = await heicBufferToJpeg(mediaFile.buffer);
+            console.log(`[HEIC/HEIF] heic-convert: Converted ${mediaFile.originalname} to JPEG for processing.`);
+          } catch (err) {
+            console.warn(`[HEIC/HEIF] heic-convert failed for ${mediaFile.originalname}. Rejecting upload.`);
+            throw new Error('HEIC/HEIF images are not supported on this server. Please export as JPEG and try again.');
+          }
+        }
         if (mediaFile.mimetype.startsWith('image/')) {
           const imageVariants = [];
           const ext = '.jpg';
           const baseName = path.parse(mediaFile.originalname).name.replace(/[^a-zA-Z0-9_-]/g, '');
           for (const w of [320, 640, 1024]) {
-            const outName = `${baseName}-${w}${ext}`;
+            const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+            const outName = `${baseName}-${uniqueSuffix}-${w}${ext}`;
             const outPath = path.join(uploadDir, outName);
-            const buffer = await sharp(mediaFile.buffer)
+            let sharpInstance = sharp(processedBuffer);
+            if (orientationTransform.rotate) {
+              console.log(`[ORIENTATION] ${mediaFile.originalname}: Applying rotate(${orientationTransform.rotate})`);
+              sharpInstance = sharpInstance.rotate(orientationTransform.rotate);
+            }
+            if (orientationTransform.flip) {
+              console.log(`[ORIENTATION] ${mediaFile.originalname}: Applying flip()`);
+              sharpInstance = sharpInstance.flip();
+            }
+            if (orientationTransform.flop) {
+              console.log(`[ORIENTATION] ${mediaFile.originalname}: Applying flop()`);
+              sharpInstance = sharpInstance.flop();
+            }
+            const buffer = await sharpInstance
               .resize({ width: w })
               .jpeg({ quality: 90 })
+              .withMetadata()
               .toBuffer();
             fs.writeFileSync(outPath, buffer);
             imageVariants.push({ url: `/u/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
           }
-          // Save original
-          const origName = `${baseName}-orig${ext}`;
+          // Save original buffer as-is (converted and oriented)
+          const origUniqueSuffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+          const origName = `${baseName}-${origUniqueSuffix}-orig.jpg`;
           const origPath = path.join(uploadDir, origName);
-          fs.writeFileSync(origPath, mediaFile.buffer);
+          let sharpOrig = sharp(processedBuffer);
+          if (orientationTransform.rotate) {
+            console.log(`[ORIENTATION] ${mediaFile.originalname} (orig): Applying rotate(${orientationTransform.rotate})`);
+            sharpOrig = sharpOrig.rotate(orientationTransform.rotate);
+          }
+          if (orientationTransform.flip) {
+            console.log(`[ORIENTATION] ${mediaFile.originalname} (orig): Applying flip()`);
+            sharpOrig = sharpOrig.flip();
+          }
+          if (orientationTransform.flop) {
+            console.log(`[ORIENTATION] ${mediaFile.originalname} (orig): Applying flop()`);
+            sharpOrig = sharpOrig.flop();
+          }
+          const origBuffer = await sharpOrig
+            .jpeg({ quality: 95 })
+            .withMetadata()
+            .toBuffer();
+          fs.writeFileSync(origPath, origBuffer);
           imageVariants.push({ url: `/u/dogs/${dog._id}/${origName}`, width: null, size: 'orig' });
           dog.images.push(...imageVariants);
         }
@@ -286,8 +368,10 @@ export const updateDog = async (req, res) => {
           const thumbName = `thumb-64.jpg`;
           const thumbPath = path.join(uploadDir, thumbName);
           const thumbBuffer = await sharp(mediaArray[0].buffer)
+            .rotate()
             .resize({ width: 64 })
             .jpeg({ quality: 70 })
+            .withMetadata()
             .toBuffer();
           fs.writeFileSync(thumbPath, thumbBuffer);
           dog.thumbnail = { url: `/u/dogs/${dog._id}/${thumbName}`, width: 64, size: '64' };
@@ -415,7 +499,9 @@ export const createDog = async (req, res) => {
             const outName = `${baseName}-${w}${ext}`;
             const outPath = path.join(uploadDir, outName);
             const buffer = await sharp(mediaFile.buffer)
+              .rotate()
               .resize({ width: w })
+              .withMetadata()
               .jpeg({ quality: 90 })
               .toBuffer();
             fs.writeFileSync(outPath, buffer);
@@ -444,7 +530,9 @@ export const createDog = async (req, res) => {
               const outName = `poster-${w}${ext}`;
               const outPath = path.join(uploadDir, outName);
               const buffer = await sharp(posterFile.buffer)
+                .rotate()
                 .resize({ width: w })
+                .withMetadata()
                 .jpeg({ quality: 80 })
                 .toBuffer();
               fs.writeFileSync(outPath, buffer);
@@ -457,7 +545,9 @@ export const createDog = async (req, res) => {
                 const thumbName = `thumb-64${ext}`;
                 const thumbPath = path.join(uploadDir, thumbName);
                 const thumbBuffer = await sharp(posterFile.buffer)
+                  .rotate()
                   .resize({ width: 64 })
+                  .withMetadata()
                   .jpeg({ quality: 70 })
                   .toBuffer();
                 fs.writeFileSync(thumbPath, thumbBuffer);
@@ -476,7 +566,9 @@ export const createDog = async (req, res) => {
           const thumbName = `thumb-64.jpg`;
           const thumbPath = path.join(uploadDir, thumbName);
           const thumbBuffer = await sharp(firstImageFile.buffer)
+            .rotate()
             .resize({ width: 64 })
+            .withMetadata()
             .jpeg({ quality: 70 })
             .toBuffer();
           fs.writeFileSync(thumbPath, thumbBuffer);

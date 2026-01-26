@@ -60,6 +60,12 @@ const DogList: React.FC = () => {
       .filter(Boolean)
       .sort()
   ));
+  // Store availableLocations in localStorage for Footer search modal
+  React.useEffect(() => {
+    if (availableLocations.length > 0) {
+      localStorage.setItem('availableLocations', JSON.stringify(availableLocations));
+    }
+  }, [availableLocations]);
   
   // Update URL parameters when search filters change
   useEffect(() => {

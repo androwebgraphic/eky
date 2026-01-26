@@ -7,7 +7,6 @@
     "start": "node server.js",
     "stop": "pkill -f 'node server.js' || pkill -f nodemon || true"
   },
-  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",

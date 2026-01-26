@@ -1,8 +1,8 @@
 
-import express from 'express';
-import multer from 'multer';
-import auth from '../middleware/auth.js';
-import { createDog, listDogs, getDogById, updateDog, deleteDog, likeDog, unlikeDog, requestAdoption, confirmAdoption, cancelAdoption, getPendingAdoptions } from '../controllers/dogController.js';
+const express = require('express');
+const multer = require('multer');
+const auth = require('../middleware/auth.js');
+const { createDog, listDogs, getDogById, updateDog, deleteDog, likeDog, unlikeDog, requestAdoption, confirmAdoption, cancelAdoption, getPendingAdoptions } = require('../controllers/dogController.js');
 const router = express.Router();
 
 // Remove PATCH route without cpUpload (multer)
@@ -23,6 +23,7 @@ const cpUpload = upload.fields([
 
 
 
+
 router.post('/:id/adopt-cancel', auth, cancelAdoption);
 router.post('/:id/adopt-confirm', auth, confirmAdoption);
 router.post('/confirm-adoption', auth, confirmAdoption); // New route for body-based confirm
@@ -37,4 +38,4 @@ router.delete('/:id', auth, deleteDog);
 router.post('/:id/like', auth, likeDog);
 router.delete('/:id/like', auth, unlikeDog);
 
-export default router;
+module.exports = router;

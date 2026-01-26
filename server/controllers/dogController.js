@@ -1,13 +1,15 @@
 // POST /api/dogs/:id/adopt-cancel
-import nodemailer from 'nodemailer';
-import { heicBufferToJpeg } from '../utils/heicToJpeg.js';
-import { getOrientationTransform } from '../utils/orientation.js';
-import { getOrCreateConversation, sendMessage } from './chatController.js';
-import ChatConversation from '../models/chatConversationModel.js';
-import ChatMessage from '../models/chatMessageModel.js';
-import { io } from '../socket.js';
+const nodemailer = require('nodemailer');
+const { heicBufferToJpeg } = require('../utils/heicToJpeg.js');
+const { getOrientationTransform } = require('../utils/orientation.js');
+const { getOrCreateConversation, sendMessage } = require('./chatController.js');
+const ChatConversation = require('../models/chatConversationModel.js');
+const ChatMessage = require('../models/chatMessageModel.js');
+const { io } = require('../socket.js');
+const Dog = require('../models/dogModel.js');
+const User = require('../models/userModel.js');
 // Removed Cloudinary imports
-export const cancelAdoption = async (req, res) => {
+const cancelAdoption = async (req, res) => {
   try {
     const dog = await Dog.findById(req.params.id).populate('user', 'email name');
     if (!dog) return res.status(404).json({ message: 'Dog not found' });
@@ -27,6 +29,24 @@ export const cancelAdoption = async (req, res) => {
     await dog.save();
     console.log(`[CANCEL ADOPTION] Dog ${dog._id} cancelled by adopter ${adopterId}. Status now: ${dog.adoptionStatus}`);
     // Send email to both users (owner and adopter)
+    // Send chat message to both users
+try {
+  const ownerId = dog.user?._id ? dog.user._id.toString() : dog.user.toString();
+  const adopterIdStr = adopterId;
+  let convo = await ChatConversation.findOne({ participants: { $all: [ownerId, adopterIdStr] } });
+  if (convo) {
+    const cancelMsg = `Adoption for dog ${dog.name} has been cancelled by the adopter.${reason ? '\nReason: ' + reason : ''}`;
+    await ChatMessage.create({ conversationId: convo._id, sender: adopterIdStr, recipient: ownerId, message: cancelMsg });
+    await ChatMessage.create({ conversationId: convo._id, sender: null, recipient: null, message: `Adoption for dog ${dog.name} has been cancelled.` });
+    await ChatConversation.findByIdAndUpdate(convo._id, { updatedAt: Date.now() });
+    if (io) {
+      io.to(ownerId).emit('receiveMessage', { conversationId: convo._id, sender: null, message: `Adoption for dog ${dog.name} has been cancelled.` });
+      io.to(adopterIdStr).emit('receiveMessage', { conversationId: convo._id, sender: null, message: `Adoption for dog ${dog.name} has been cancelled.` });
+    }
+  }
+} catch (msgErr) {
+  console.warn('Failed to send cancellation chat message:', msgErr);
+}
     try {
       const transporter = nodemailer.createTransport({
         sendmail: true,
@@ -60,7 +80,7 @@ export const cancelAdoption = async (req, res) => {
   }
 };
 // POST /api/dogs/:id/adopt-confirm
-export const confirmAdoption = async (req, res) => {
+const confirmAdoption = async (req, res) => {
   try {
     const dogId = req.params.id || req.body.dogId;
     const dog = await Dog.findById(dogId);
@@ -82,36 +102,25 @@ export const confirmAdoption = async (req, res) => {
     if (dog.adoptionQueue.ownerConfirmed && dog.adoptionQueue.adopterConfirmed) {
       dog.adoptionStatus = 'adopted';
       // Send message to both users that dog is adopted
+      // Send chat messages to both users
       try {
         const ownerId = dog.user.toString();
         const adopterId = dog.adoptionQueue.adopter.toString();
-        // Message to owner
         let convo = await ChatConversation.findOne({ participants: { $all: [ownerId, adopterId] } });
         if (convo) {
-          const messageText = `Congratulations! Your dog ${dog.name} has been adopted.`;
-          const msg = await ChatMessage.create({ 
-            conversationId: convo._id, 
-            sender: ownerId, 
-            recipient: adopterId, 
-            message: messageText 
-          });
+          // Message to owner
+          const ownerMsg = `Congratulations! Your dog ${dog.name} has been adopted.`;
+          await ChatMessage.create({ conversationId: convo._id, sender: ownerId, recipient: adopterId, message: ownerMsg });
+          // Message to adopter
+          const adopterMsg = `Congratulations! You have successfully adopted the dog ${dog.name}.`;
+          await ChatMessage.create({ conversationId: convo._id, sender: adopterId, recipient: ownerId, message: adopterMsg });
+          // System message to both
+          const sysMsg = `Adoption of dog ${dog.name} is now complete.`;
+          await ChatMessage.create({ conversationId: convo._id, sender: null, recipient: null, message: sysMsg });
           await ChatConversation.findByIdAndUpdate(convo._id, { updatedAt: Date.now() });
           if (io) {
-            io.to(adopterId).emit('receiveMessage', { conversationId: convo._id, sender: ownerId, message: messageText, sentAt: msg.sentAt });
-          }
-        }
-        // Message to adopter
-        if (convo) {
-          const messageText = `Congratulations! You have successfully adopted the dog ${dog.name}.`;
-          const msg = await ChatMessage.create({ 
-            conversationId: convo._id, 
-            sender: adopterId, 
-            recipient: ownerId, 
-            message: messageText 
-          });
-          await ChatConversation.findByIdAndUpdate(convo._id, { updatedAt: Date.now() });
-          if (io) {
-            io.to(ownerId).emit('receiveMessage', { conversationId: convo._id, sender: adopterId, message: messageText, sentAt: msg.sentAt });
+            io.to(ownerId).emit('receiveMessage', { conversationId: convo._id, sender: null, message: sysMsg });
+            io.to(adopterId).emit('receiveMessage', { conversationId: convo._id, sender: null, message: sysMsg });
           }
         }
       } catch (msgErr) {
@@ -119,7 +128,6 @@ export const confirmAdoption = async (req, res) => {
       }
       await dog.deleteOne();
       console.log(`[CONFIRM ADOPTION] Dog ${dogId} adopted and removed. Both confirmed.`);
-      // Return updated pending adoptions for debugging
       const userIdForQuery = req.user._id;
       const dogs = await Dog.find({
         $or: [
@@ -130,31 +138,37 @@ export const confirmAdoption = async (req, res) => {
       return res.json({ message: 'Dog adopted and removed from database', pendingAdoptions: dogs });
     } else {
       await dog.save();
-      // Emit socket events to refresh conversations and pending adoptions for both users
       if (io) {
         io.to(ownerId).emit('refreshConversations');
         io.to(adopterId).emit('refreshConversations');
       }
       console.log(`[CONFIRM ADOPTION] Dog ${dogId} confirmation saved. Status: ${dog.adoptionStatus}`);
-      // Return updated pending adoptions for debugging
-      const userIdForQuery = req.user._id;
-      const dogs = await Dog.find({
+      const userIdForQuery2 = req.user._id;
+      const dogs2 = await Dog.find({
         $or: [
-          { user: userIdForQuery, adoptionStatus: 'pending' },
-          { 'adoptionQueue.adopter': userIdForQuery, adoptionStatus: 'pending' }
+          { user: userIdForQuery2, adoptionStatus: 'pending' },
+          { 'adoptionQueue.adopter': userIdForQuery2, adoptionStatus: 'pending' }
         ]
       });
-      return res.json({ message: 'Adoption confirmation saved', adoptionQueue: dog.adoptionQueue, pendingAdoptions: dogs });
+      return res.json({ message: 'Adoption confirmation saved', adoptionQueue: dog.adoptionQueue, pendingAdoptions: dogs2 });
     }
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };;
 // POST /api/dogs/:id/adopt-request
-export const requestAdoption = async (req, res) => {
+const requestAdoption = async (req, res) => {
   try {
     const dog = await Dog.findById(req.params.id).populate('user', 'email name');
     if (!dog) return res.status(404).json({ message: 'Dog not found' });
+    if (dog.adoptionStatus === 'pending' && dog.adoptionQueue && dog.adoptionQueue.adopter) {
+      // If already pending with this adopter, do not reset
+      if (dog.adoptionQueue.adopter.toString() === req.user._id.toString()) {
+        return res.status(400).json({ message: 'Adoption request already pending confirmation.' });
+      } else {
+        return res.status(400).json({ message: 'Dog is already pending adoption by another user.' });
+      }
+    }
     if (dog.adoptionStatus !== 'available') {
       return res.status(400).json({ message: 'Dog is not available for adoption' });
     }
@@ -175,8 +189,15 @@ export const requestAdoption = async (req, res) => {
       if (!convo) {
         convo = await ChatConversation.create({ participants: [adopterId, ownerId] });
       }
-      // Send message from adopter to owner
-      const messageText = `I would like to adopt your dog ${dog.name}. Please confirm the adoption.`;
+      // Send improved message from adopter to owner
+      const adopterUser = await User.findById(adopterId);
+      const dogDetails = [
+        `Dog: ${dog.name}`,
+        dog.breed ? `Breed: ${dog.breed}` : '',
+        dog.age ? `Age: ${dog.age}` : ''
+      ].filter(Boolean).join(', ');
+      const adopterDetails = adopterUser ? `Adopter: ${adopterUser.name} (${adopterUser.username})` : `Adopter: ${adopterId}`;
+      const messageText = `Adoption Request\n${dogDetails}\n${adopterDetails}\n\nPlease confirm the adoption in your chat window by clicking the 'Confirm Adoption' button.`;
       const msg = await ChatMessage.create({ 
         conversationId: convo._id, 
         sender: adopterId, 
@@ -202,62 +223,63 @@ export const requestAdoption = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
-};
-import Dog from '../models/dogModel.js';
-import path from 'path';
-import fs from 'fs';
-import sharp from 'sharp';
-
-// PATCH /api/dogs/:id
-export const updateDog = async (req, res) => {
-    // Sanitize gender: treat 'null' (string) or null as undefined
-    if (req.body.gender === 'null' || req.body.gender === null) {
-      req.body.gender = undefined;
-    }
-  try {
-    console.log('=== UPDATE DOG REQUEST ===');
-    console.log('Dog ID:', req.params.id);
-    console.log('Request body keys:', Object.keys(req.body));
-    console.log('Request files:', !!req.files);
-    if (req.files) {
-      console.log('Files keys:', Object.keys(req.files));
-      if (req.files.media) {
-        console.log('Media files count:', Array.isArray(req.files.media) ? req.files.media.length : 1);
-        console.log('Media file details:', req.files.media.map(f => ({ originalname: f.originalname, mimetype: f.mimetype, size: f.size })));
-      }
-    }
-    console.log('keepImages in body:', req.body.keepImages);
-    console.log('========================');
-    
-    const dog = await Dog.findById(req.params.id);
-    if (!dog) return res.status(404).json({ message: 'Dog not found' });
-    
-    // Authorization check: only the user who created the dog or superadmin can update it
-    const isSuperAdmin = req.user.role === 'superadmin';
-    const isOwner = dog.user.toString() === req.user._id.toString();
-    
-    if (!isOwner && !isSuperAdmin) {
-      return res.status(403).json({ message: 'Not authorized to update this dog' });
-    }
-    
-    console.log('Found dog:', dog.name);
-    console.log('Dog current images count:', dog.images ? dog.images.length : 0);
-
-    // Update fields
-    const fields = ['name','breed','age','color','location','description','size','gender','vaccinated','neutered'];
-    fields.forEach(f => {
-      if (typeof req.body[f] !== 'undefined') dog[f] = req.body[f];
-    });
-
-    // Handle keepImages (array of URLs to keep)
-    let keepImages = [];
-    if (req.body.keepImages) {
-      try {
-        keepImages = JSON.parse(req.body.keepImages);
-      } catch (e) {
-        console.warn('Could not parse keepImages:', e);
-      }
-    }
+          if (dog.adoptionQueue.ownerConfirmed && dog.adoptionQueue.adopterConfirmed) {
+            dog.adoptionStatus = 'adopted';
+            // Send message to both users that dog is adopted
+            // Send chat messages to both users
+            try {
+              const ownerId = dog.user.toString();
+              const adopterId = dog.adoptionQueue.adopter.toString();
+              let convo = await ChatConversation.findOne({ participants: { $all: [ownerId, adopterId] } });
+              if (convo) {
+                // Message to owner
+                const ownerMsg = `Congratulations! Your dog ${dog.name} has been adopted.`;
+                await ChatMessage.create({ conversationId: convo._id, sender: ownerId, recipient: adopterId, message: ownerMsg });
+                // Message to adopter
+                const adopterMsg = `Congratulations! You have successfully adopted the dog ${dog.name}.`;
+                await ChatMessage.create({ conversationId: convo._id, sender: adopterId, recipient: ownerId, message: adopterMsg });
+                // System message to both
+                const sysMsg = `Adoption of dog ${dog.name} is now complete.`;
+                await ChatMessage.create({ conversationId: convo._id, sender: null, recipient: null, message: sysMsg });
+                await ChatConversation.findByIdAndUpdate(convo._id, { updatedAt: Date.now() });
+                if (io) {
+                  io.to(ownerId).emit('receiveMessage', { conversationId: convo._id, sender: null, message: sysMsg });
+                  io.to(adopterId).emit('receiveMessage', { conversationId: convo._id, sender: null, message: sysMsg });
+                }
+              }
+            } catch (msgErr) {
+              console.warn('Failed to send adoption confirmation message:', msgErr);
+            }
+            await dog.deleteOne();
+            console.log(`[CONFIRM ADOPTION] Dog ${dogId} adopted and removed. Both confirmed.`);
+            // Return updated pending adoptions for debugging
+            const userIdForQuery = req.user._id;
+            const dogs = await Dog.find({
+              $or: [
+                { user: userIdForQuery, adoptionStatus: 'pending' },
+                { 'adoptionQueue.adopter': userIdForQuery, adoptionStatus: 'pending' }
+              ]
+            });
+            return res.json({ message: 'Dog adopted and removed from database', pendingAdoptions: dogs });
+          } else {
+            // If not both confirmed, save and emit events
+            await dog.save();
+            // Emit socket events to refresh conversations and pending adoptions for both users
+            if (io) {
+              io.to(ownerId).emit('refreshConversations');
+              io.to(adopterId).emit('refreshConversations');
+            }
+            console.log(`[CONFIRM ADOPTION] Dog ${dogId} confirmation saved. Status: ${dog.adoptionStatus}`);
+            // Return updated pending adoptions for debugging
+            const userIdForQuery2 = req.user._id;
+            const dogs2 = await Dog.find({
+              $or: [
+                { user: userIdForQuery2, adoptionStatus: 'pending' },
+                { 'adoptionQueue.adopter': userIdForQuery2, adoptionStatus: 'pending' }
+              ]
+            });
+            return res.json({ message: 'Adoption confirmation saved', adoptionQueue: dog.adoptionQueue, pendingAdoptions: dogs2 });
+          }
     
     // Remove images not in keepImages and delete from local uploads if needed
     if (Array.isArray(dog.images) && keepImages.length >= 0) {
@@ -593,24 +615,7 @@ export const createDog = async (req, res) => {
   }
 };
 
-export const listDogs = async (req, res) => {
-  try {
-    const dbName = Dog.db && Dog.db.name ? Dog.db.name : (Dog.db && Dog.db.databaseName ? Dog.db.databaseName : 'unknown');
-    const dogs = await Dog.find()
-      .populate('user', 'name username email phone person')
-      .sort({ createdAt: -1 });
-    console.log(`[listDogs] Connected DB: ${dbName}, Dog count: ${dogs.length}`);
-    // Patch image URLs to be local if they point to render.com
-    // const fixUrl = url => {
-    //   if (!url) return url;
-    //   if (url.startsWith('https://sharedog-homeless-backend.onrender.com/uploads')) {
-    //     return url.replace('https://sharedog-homeless-backend.onrender.com', '');
-    //   }
-    //   return url;
-    // };
-    function fixUrl(url) {
-  if (!url) return url;
-  if (url.startsWith('https://sharedog-homeless-backend.onrender.com/uploads')) {
+};
     return url.replace('https://sharedog-homeless-backend.onrender.com', '');
   }
   return url;
@@ -709,16 +714,27 @@ export const unlikeDog = async (req, res) => {
 
 // GET /api/dogs/pending-adoptions
 export const getPendingAdoptions = async (req, res) => {
+    console.log('[getPendingAdoptions] userId:', req.user._id);
   try {
     const userId = req.user._id;
+    // Find all dogs with pending adoption where user is owner or adopter
     const dogs = await Dog.find({
+      adoptionStatus: 'pending',
       $or: [
-        { user: userId, adoptionStatus: 'pending' },
-        { 'adoptionQueue.adopter': userId, adoptionStatus: 'pending' }
+        { user: userId },
+        { 'adoptionQueue.adopter': userId }
       ]
-    }).populate('user', 'name username').populate('adoptionQueue.adopter', 'name username');
+    })
+    .populate({ path: 'user', select: 'name username _id' })
+    .populate({ path: 'adoptionQueue.adopter', select: 'name username _id' });
     res.json(dogs);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
+};
+
+module.exports = {
+  cancelAdoption,
+  confirmAdoption,
+  requestAdoption
 };

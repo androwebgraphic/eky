@@ -402,27 +402,107 @@ const DogDetails: React.FC<DogDetailsProps> = ({
             >
               {isInWishlist(_id) ? '💔 ' + t('button.removeFromList') : '❤️ ' + t('button.addToList')}
             </button>
-            {/* ADOPT/ODUSTANI LOGIKA */}
-            {adoptionStatusState === 'pending' && adoptionQueueState && currentUser && adoptionQueueState.adopter === currentUser._id ? (
+            {/* ADOPT/CONFIRM/CANCEL LOGIC (improved for both adopter and owner) */}
+            {adoptionStatusState === 'pending' && adoptionQueueState && currentUser ? (
               <div style={{ marginTop: 16 }}>
-                <textarea
-                  placeholder={t('dogDetails.cancelReasonPlaceholder') || 'Razlog odustajanja (opcionalno)'}
-                  value={cancelReason}
-                  onChange={e => setCancelReason(e.target.value)}
-                  rows={2}
-                  style={{ width: '100%', maxWidth: 320, marginBottom: 8 }}
-                  disabled={cancelLoading}
-                />
-                <button
-                  className="details"
-                  style={{ backgroundColor: '#e74c3c', color: 'white', marginLeft: 0 }}
-                  onClick={handleCancelAdoption}
-                  disabled={cancelLoading}
-                >
-                  {cancelLoading ? (t('button.cancelling') || 'Odustajanje...') : (t('button.cancelAdoption') || 'Odustani od posvajanja')}
-                </button>
+                {/* Adopter: can confirm or cancel if not yet confirmed */}
+                {adoptionQueueState.adopter === currentUser._id && !adoptionQueueState.adopterConfirmed && (
+                  <>
+                    <button
+                      className="details"
+                      style={{ backgroundColor: '#28a745', color: 'white', marginRight: 8 }}
+                      onClick={async () => {
+                        setAdoptLoading(true);
+                        setAdoptError(null);
+                        try {
+                          const resp = await fetch(`${apiBase}/api/dogs/confirm-adoption`, {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
+                            },
+                            body: JSON.stringify({ dogId: _id, isOwner: false })
+                          });
+                          const data = await resp.json();
+                          if (!resp.ok) throw new Error(data.message || 'Error');
+                          setAdoptionStatus(data.dog?.adoptionStatus || 'available');
+                          setAdoptionQueue(data.dog?.adoptionQueue);
+                          if (onDogUpdate && data.dog) onDogUpdate(data.dog);
+                        } catch (e: any) {
+                          setAdoptError(e.message || 'Error');
+                        } finally {
+                          setAdoptLoading(false);
+                        }
+                      }}
+                      disabled={adoptLoading}
+                    >
+                      {adoptLoading ? (t('button.confirming') || 'Potvrđujem...') : (t('button.confirmAdoption') || 'Potvrdi posvajanje')}
+                    </button>
+                    <textarea
+                      placeholder={t('dogDetails.cancelReasonPlaceholder') || 'Razlog odustajanja (opcionalno)'}
+                      value={cancelReason}
+                      onChange={e => setCancelReason(e.target.value)}
+                      rows={2}
+                      style={{ width: '100%', maxWidth: 320, marginBottom: 8 }}
+                      disabled={cancelLoading}
+                    />
+                    <button
+                      className="details"
+                      style={{ backgroundColor: '#e74c3c', color: 'white', marginLeft: 0 }}
+                      onClick={handleCancelAdoption}
+                      disabled={cancelLoading}
+                    >
+                      {cancelLoading ? (t('button.cancelling') || 'Odustajanje...') : (t('button.cancelAdoption') || 'Odustani od posvajanja')}
+                    </button>
+                  </>
+                )}
+                {/* Owner: can confirm if not yet confirmed */}
+                {owner && owner._id === currentUser._id && !adoptionQueueState.ownerConfirmed && (
+                  <button
+                    className="details"
+                    style={{ backgroundColor: '#28a745', color: 'white', marginRight: 8 }}
+                    onClick={async () => {
+                      setAdoptLoading(true);
+                      setAdoptError(null);
+                      try {
+                        const resp = await fetch(`${apiBase}/api/dogs/confirm-adoption`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
+                          },
+                          body: JSON.stringify({ dogId: _id, isOwner: true })
+                        });
+                        const data = await resp.json();
+                        if (!resp.ok) throw new Error(data.message || 'Error');
+                        setAdoptionStatus(data.dog?.adoptionStatus || 'available');
+                        setAdoptionQueue(data.dog?.adoptionQueue);
+                        if (onDogUpdate && data.dog) onDogUpdate(data.dog);
+                      } catch (e: any) {
+                        setAdoptError(e.message || 'Error');
+                      } finally {
+                        setAdoptLoading(false);
+                      }
+                    }}
+                    disabled={adoptLoading}
+                  >
+                    {adoptLoading ? (t('button.confirming') || 'Potvrđujem...') : (t('button.confirmAdoption') || 'Potvrdi posvajanje')}
+                  </button>
+                )}
+                {/* Status messages */}
+                {adoptError && <div style={{ color: 'red', marginTop: 8 }}>{adoptError}</div>}
                 {cancelError && <div style={{ color: 'red', marginTop: 8 }}>{cancelError}</div>}
                 {cancelSuccess && <div style={{ color: 'green', marginTop: 8 }}>{t('dogDetails.cancelSuccess') || 'Posvajanje je otkazano.'}</div>}
+                {/* Waiting for confirmation message */}
+                {adoptionQueueState.adopterConfirmed && !adoptionQueueState.ownerConfirmed && owner && owner._id === currentUser._id && (
+                  <div style={{ marginTop: 8, color: '#555' }}>{t('dogDetails.waitingForOwner') || 'Čeka potvrdu vlasnika.'}</div>
+                )}
+                {adoptionQueueState.ownerConfirmed && !adoptionQueueState.adopterConfirmed && adoptionQueueState.adopter === currentUser._id && (
+                  <div style={{ marginTop: 8, color: '#555' }}>{t('dogDetails.waitingForAdopter') || 'Čeka potvrdu posvojitelja.'}</div>
+                )}
+                {adoptionQueueState.ownerConfirmed && adoptionQueueState.adopterConfirmed && (
+                  <div style={{ marginTop: 8, color: 'green' }}>{t('dogDetails.adoptionComplete') || 'Posvajanje završeno!'}</div>
+                )}
               </div>
             ) : adoptionStatusState === 'pending' ? (
               <>
@@ -448,10 +528,6 @@ const DogDetails: React.FC<DogDetailsProps> = ({
                   ? t('button.sending') || 'Slanje...'
                   : t('button.adopt')}
               </button>
-            )}
-            {adoptError && <div style={{ color: 'red', marginTop: 8 }}>{adoptError}</div>}
-            {adoptionStatusState === 'pending' && (
-              <div style={{ marginTop: 8, color: '#555' }}>{t('dogDetails.waitingForConfirmation') || 'Čeka potvrdu vlasnika.'}</div>
             )}
           </>
         )}

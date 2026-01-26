@@ -19,11 +19,22 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGender, setSelectedGender] = useState('');
   const [selectedSize, setSelectedSize] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
   const [searchHistory, setSearchHistory] = useState<string[]>(() => {
     // Load search history from localStorage
     const saved = localStorage.getItem('searchHistory');
     return saved ? JSON.parse(saved) : [];
   });
+
+  // Get available locations from localStorage or fallback
+  const [availableLocations, setAvailableLocations] = useState<string[]>([]);
+  React.useEffect(() => {
+    // Try to get from localStorage (set by DogList or elsewhere)
+    const stored = localStorage.getItem('availableLocations');
+    if (stored) {
+      setAvailableLocations(JSON.parse(stored));
+    }
+  }, []);
 
   const handleUserIconClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -50,22 +61,21 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
     if (searchTerm.trim()) {
       addToSearchHistory(searchTerm.trim());
     }
-    
     // Build search query parameters
     const params = new URLSearchParams();
     if (searchTerm.trim()) params.append('search', searchTerm.trim());
     if (selectedGender) params.append('gender', selectedGender);
     if (selectedSize) params.append('size', selectedSize);
-    
+    if (selectedLocation) params.append('location', selectedLocation);
     // Navigate to dogs page with search parameters
     const queryString = params.toString();
     navigate(`/psi${queryString ? `?${queryString}` : ''}`);
-    
     // Close modal and reset form (but keep history)
     setShowSearchModal(false);
     setSearchTerm(''); // Clear input field
     setSelectedGender('');
     setSelectedSize('');
+    setSelectedLocation('');
   };
 
   const handleFilterClick = (filterType: string, value: string) => {
@@ -252,6 +262,7 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
               </div>
             )}
 
+
             {/* Quick Filters */}
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '1rem' }}>
               <button
@@ -326,6 +337,28 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
               >
                 {t('dog.large') || 'Large'}
               </button>
+            </div>
+
+            {/* Location Filter */}
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ fontWeight: 500, color: '#666', marginRight: 8 }}>{t('search.location') || 'Location'}:</label>
+              <select
+                value={selectedLocation}
+                onChange={e => setSelectedLocation(e.target.value)}
+                style={{
+                  padding: '8px 16px',
+                  border: '1px solid #ddd',
+                  borderRadius: '25px',
+                  fontSize: '14px',
+                  minWidth: '120px',
+                  marginLeft: 8
+                }}
+              >
+                <option value="">{t('search.allLocations') || 'All Locations'}</option>
+                {availableLocations.map(loc => (
+                  <option key={loc} value={loc}>{loc}</option>
+                ))}
+              </select>
             </div>
 
             {/* Search Button */}

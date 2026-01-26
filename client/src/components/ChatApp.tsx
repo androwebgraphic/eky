@@ -41,6 +41,9 @@ const getApiUrl = () => {
 };
 
 const ChatApp: React.FC = () => {
+    useEffect(() => {
+      console.log('[ChatApp] Initial mount. User:', user, 'Token:', token);
+    }, []);
   const selectedConvoRef = useRef<Conversation | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<{_id: string, userName: string}[]>([]);
 
@@ -95,6 +98,7 @@ const ChatApp: React.FC = () => {
   // Setup socket connection and listeners only once per user/token
   useEffect(() => {
     if (user?._id && token) {
+      console.log('[ChatApp] useEffect: user._id and token present.');
       console.log('[ChatApp] Connecting socket for user:', user._id);
       fetch(`${getApiUrl()}/api/chat/conversations/${user._id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -138,6 +142,18 @@ const ChatApp: React.FC = () => {
       if (!socketRef.current) {
         socketRef.current = io(getApiUrl());
         console.log('[ChatApp] Socket.IO connecting to', getApiUrl());
+        socketRef.current.on('connect', () => {
+          console.log('[ChatApp] Socket connected');
+        });
+        socketRef.current.on('connect_error', (error) => {
+          console.error('[ChatApp] Socket connection error:', error);
+        });
+        socketRef.current.on('receiveMessage', (msg) => {
+          console.log('[ChatApp] receiveMessage event:', msg);
+        });
+        socketRef.current.on('refreshConversations', () => {
+          console.log('[ChatApp] refreshConversations event received');
+        });
         
         socketRef.current.on('connect', () => {
           console.log('[ChatApp] Socket connected successfully');
@@ -167,6 +183,7 @@ const ChatApp: React.FC = () => {
         });
         socketRef.current.on('receiveMessage', (msg) => {
           // Always refresh conversations list
+          console.log('[ChatApp] receiveMessage event:', msg);
           fetch(`${getApiUrl()}/api/chat/conversations/${user._id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
           })
@@ -236,6 +253,7 @@ const ChatApp: React.FC = () => {
 
   useEffect(() => {
     if (selectedConvo && token) {
+      console.log('[ChatApp] Fetching messages for selectedConvo:', selectedConvo._id);
       fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -245,6 +263,7 @@ const ChatApp: React.FC = () => {
   }, [selectedConvo, token]);
   useEffect(() => {
     if (selectedConvo && token) {
+      console.log('[ChatApp] Fetching messages for selectedConvo (user/token change):', selectedConvo._id);
       fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -395,7 +414,7 @@ const ChatApp: React.FC = () => {
         body: JSON.stringify({ dogId, isOwner })
       });
       if (res.ok) {
-        fetchPendingAdoptions(); // Refresh pending adoptions
+        await fetchPendingAdoptions();
         setNotification('Adoption confirmed!');
         // Always refresh conversations
         fetch(`${getApiUrl()}/api/chat/conversations/${user._id}`, {
@@ -434,7 +453,7 @@ const ChatApp: React.FC = () => {
         body: JSON.stringify({ reason: '' })
       });
       if (res.ok) {
-        fetchPendingAdoptions();
+        await fetchPendingAdoptions();
         setNotification('Adoption canceled!');
         fetch(`${getApiUrl()}/api/chat/conversations/${user._id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -564,22 +583,12 @@ const ChatApp: React.FC = () => {
           <div className="chat-app-actions-row">
             <button className="chat-app-action-btn delete" onClick={handleDeleteConversation}>Delete</button>
             <button className={`chat-app-action-btn ${isBlocked ? 'unblock' : 'block'}`} onClick={handleBlockUnblock}>{isBlocked ? 'Unblock' : 'Block'}</button>
-            {(() => {
-              const otherUserId = selectedConvo.participants.find(id => id !== user._id);
-              const filtered = pendingAdoptions.filter(dog => {
-                const isCurrentUserOwner = String(dog.user._id) === String(user._id);
-                if (isCurrentUserOwner) {
-                  return String(dog.adoptionQueue?.adopter?._id) === String(otherUserId);
-                } else {
-                  return String(dog.user._id) === String(otherUserId);
-                }
-              });
-              console.log('[ChatApp] Selected convo:', selectedConvo._id, 'Other user:', otherUserId, 'Pending adoptions:', pendingAdoptions.length, 'Filtered:', filtered.length);
-              return filtered.map(dog => (
+            {pendingAdoptions.length > 0 ? (
+              pendingAdoptions.map(dog => (
                 <span key={dog._id} style={{ display: 'inline-flex', gap: 8 }}>
                   <button
                     className="chat-app-action-btn confirm"
-                    onClick={() => handleConfirmAdoption(dog._id, dog.user._id === user._id)}
+                    onClick={() => handleConfirmAdoption(dog._id, String(dog.user._id || dog.user) === String(user._id))}
                   >
                     Confirm Adoption: {dog.name}
                   </button>
@@ -591,8 +600,10 @@ const ChatApp: React.FC = () => {
                     Cancel Adoption
                   </button>
                 </span>
-              ));
-            })()}
+              ))
+            ) : (
+              <span style={{ color: '#c00', fontSize: '12px' }}>No pending adoptions found.</span>
+            )}
           </div>
         )}
         <div className="chat-app-messages">

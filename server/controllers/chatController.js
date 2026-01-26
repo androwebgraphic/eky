@@ -35,9 +35,20 @@ import User from '../models/userModel.js';
 import { io } from '../socket.js';
 
 // Create or get a conversation between two users
+import mongoose from 'mongoose';
 export async function getOrCreateConversation(req, res) {
-  const { userId, otherUserId } = req.body;
+  let { userId, otherUserId } = req.body;
   if (!userId || !otherUserId) return res.status(400).json({ error: 'Missing user IDs' });
+  // Ensure both are strings (ObjectId hex) and not objects
+  if (typeof userId === 'object' && userId._id) userId = userId._id;
+  if (typeof otherUserId === 'object' && otherUserId._id) otherUserId = otherUserId._id;
+  // Ensure both are ObjectId
+  try {
+    userId = new mongoose.Types.ObjectId(userId);
+    otherUserId = new mongoose.Types.ObjectId(otherUserId);
+  } catch (e) {
+    return res.status(400).json({ error: 'Invalid user ID format' });
+  }
   let convo = await ChatConversation.findOne({ participants: { $all: [userId, otherUserId] } });
   if (!convo) {
     convo = await ChatConversation.create({ participants: [userId, otherUserId] });

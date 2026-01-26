@@ -6,7 +6,7 @@ import auth from "../middleware/auth.js";
 const router = express.Router();
 
 // Get user by ID (for chat block/unblock and profile fetch)
-router.get(":id", auth, getUserById);
+router.get("/:id", auth, getUserById);
 router.get("/search", auth, searchUsers);
 
 // Configure multer for profile picture uploads

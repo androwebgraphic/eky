@@ -26,6 +26,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   const [loadingWishlist, setLoadingWishlist] = useState(false);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>('');
+  // Helper to get full image URL
+  const getProfileImageUrl = (profilePicture: string | undefined) => {
+    if (!profilePicture) return "../img/androcolored-80x80.jpg";
+    let url = profilePicture.startsWith('/') ? profilePicture : '/' + profilePicture;
+    // Use /u/ for compatibility if needed
+    url = url.replace('/uploads', '/u');
+    return getApiUrl() + url;
+  };
   const [formData, setFormData] = useState({
      name: typedUser?.name || '',
      email: typedUser?.email || '',
@@ -34,6 +42,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Used to force re-render after profile update
+  const [profilePicKey, setProfilePicKey] = useState(0);
   const [success, setSuccess] = useState<string | null>(null);
 
 
@@ -188,6 +199,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
+    console.log('[PROFILE UPDATE DEBUG] handleUpdateProfile called');
+    if (profilePicture) {
+      console.log('[PROFILE UPDATE DEBUG] Uploading file:', profilePicture.name, 'type:', profilePicture.type);
+    }
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -216,17 +231,26 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         hasProfilePicture: !!profilePicture
       });
       
-      const response = await fetch(`${API_URL}/api/users/profile`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: uploadFormData,
-      });
-
-      console.log('Response status:', response.status);
-      const data = await response.json();
-      console.log('Server response:', data);
+      let response, data;
+      try {
+        response = await fetch(`${API_URL}/api/users/profile`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: uploadFormData,
+        });
+        console.log('Response status:', response.status);
+        data = await response.json();
+        console.log('[PROFILE UPDATE DEBUG] Full server response:', data);
+        if (data && data.user) {
+          console.log('[PROFILE UPDATE DEBUG] Returned user.profilePicture:', data.user.profilePicture);
+          alert('Backend response profilePicture: ' + data.user.profilePicture);
+        }
+      } catch (err) {
+        console.error('[PROFILE UPDATE DEBUG] Error during fetch:', err);
+        return;
+      }
 
       if (response.ok) {
         setSuccess('Profile updated successfully!');
@@ -241,10 +265,20 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
           ...(data.user.profilePicture && { profilePicture: data.user.profilePicture })
         } as any;
         
-        console.log('Updated user data:', updatedUser);
-        console.log('Profile picture URL:', data.user.profilePicture);
-        updateUser(updatedUser);
-        
+
+        // Extract timestamp from filename for cache busting
+        let cacheBuster = '';
+        if (data.user.profilePicture) {
+          const match = data.user.profilePicture.match(/profile-(\d+)/);
+          if (match && match[1]) {
+            cacheBuster = match[1];
+          }
+        }
+        console.log('[PROFILE UPDATE DEBUG] Using cacheBuster:', cacheBuster);
+
+        updateUser({ ...updatedUser, _profilePicCacheBuster: cacheBuster });
+        setProfilePicKey(prev => prev + 1); // Force re-render
+
         // Reset profile picture state but keep the new image visible
         setProfilePicture(null);
         setProfilePicturePreview('');
@@ -427,14 +461,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
           </div>
         )}
 
-        {/* Profile Tab Content */}
         {activeTab === 'profile' && (
           <>
             <div style={{ marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
                 <img 
-                  src={profilePicturePreview || ((user as any)?.profilePicture ? `${getApiUrl()}/u${(user as any).profilePicture.replace('/uploads', '')}` : "../img/androcolored-80x80.jpg")} 
-                   alt={user.username ? `${user.username}'s profile` : 'User profile'} 
+                  key={profilePicKey}
+                  src={profilePicturePreview || getProfileImageUrl((user as any)?.profilePicture)}
+                  alt={user.username ? `${user.username}'s profile` : 'User profile'} 
                   style={{ 
                     width: '60px', 
                     height: '60px', 
@@ -456,7 +490,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                 <div style={{ marginBottom: '20px', textAlign: 'center' }}>
                   <div style={{ marginBottom: '15px' }}>
                     <img 
-                      src={profilePicturePreview || ((user as any)?.profilePicture ? `${getApiUrl()}/u${(user as any).profilePicture.replace('/uploads', '')}` : "../img/androcolored-80x80.jpg")} 
+                      key={profilePicKey}
+                      src={profilePicturePreview || getProfileImageUrl((user as any)?.profilePicture)}
                       alt={user.username ? `${user.username}'s profile` : 'User profile'}
                       style={{ 
                         width: '100px', 
@@ -468,14 +503,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                     />
                   </div>
                   <div style={{ marginBottom: '15px' }}>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleProfilePictureChange}
-                      style={{ display: 'none' }}
-                      id="profilePictureInput"
-                    />
-                    <label 
+                    <label
                       htmlFor="profilePictureInput"
                       style={{
                         display: 'inline-block',
@@ -485,10 +513,24 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                         borderRadius: '20px',
                         cursor: 'pointer',
                         fontSize: '14px',
-                        color: '#333'
+                        color: '#333',
+                        width: '100%',
+                        textAlign: 'center'
                       }}
+                      tabIndex={0}
                     >
-                      📷 {t('userProfile.changePhoto')}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfilePictureChange}
+                        style={{ display: 'none' }}
+                        id="profilePictureInput"
+                        aria-label="Profile picture"
+                        autoComplete="photo"
+                      />
+                      <span role="button" style={{fontSize: '18px', verticalAlign: 'middle'}}>
+                        📷 {t('userProfile.changePhoto')}
+                      </span>
                     </label>
                   </div>
                 </div>
@@ -499,6 +541,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   </label>
                   <input
                     type="text"
+                    id="profileNameInput"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
@@ -510,6 +553,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       fontSize: '14px'
                     }}
                     required
+                    autoComplete="name"
                   />
                 </div>
 
@@ -519,6 +563,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   </label>
                   <input
                     type="email"
+                    id="profileEmailInput"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
@@ -530,6 +575,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       fontSize: '14px'
                     }}
                     required
+                    autoComplete="email"
                   />
                 </div>
 
@@ -539,6 +585,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   </label>
                   <input
                     type="text"
+                    id="profileUsernameInput"
                     name="username"
                     value={formData.username}
                     onChange={handleInputChange}
@@ -550,6 +597,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       fontSize: '14px'
                     }}
                     required
+                    autoComplete="username"
                   />
                 </div>
 
@@ -559,6 +607,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   </label>
                   <input
                     type="tel"
+                    id="profilePhoneInput"
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
@@ -570,6 +619,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       fontSize: '14px'
                     }}
                     required
+                    autoComplete="tel"
                   />
                 </div>
                 {/* Password Change Section */}

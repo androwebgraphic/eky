@@ -1,16 +1,20 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import en from './locales/en/translation.json';
-import de from './locales/de/translation.json';
-import hr from './locales/hr/translation.json';
-import hu from './locales/hu/translation.json';
+import enTrans from './locales/en/translation.json';
+import enChat from './locales/en/chat.json';
+import deTrans from './locales/de/translation.json';
+import deChat from './locales/de/chat.json';
+import hrTrans from './locales/hr/translation.json';
+import hrChat from './locales/hr/chat.json';
+import huTrans from './locales/hu/translation.json';
+import huChat from './locales/hu/chat.json';
 
 const resources = {
-  en: { translation: en },
-  de: { translation: de },
-  hr: { translation: hr },
-  hu: { translation: hu },
+  en: { translation: { ...enTrans, ...enChat } },
+  de: { translation: { ...deTrans, ...deChat } },
+  hr: { translation: { ...hrTrans, ...hrChat } },
+  hu: { translation: { ...huTrans, ...huChat } },
 };
 
 const initialLng = localStorage.getItem('i18nextLng') || 'hr';

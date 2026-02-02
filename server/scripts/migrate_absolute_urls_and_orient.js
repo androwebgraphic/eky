@@ -1,10 +1,10 @@
 // Usage: node scripts/migrate_absolute_urls_and_orient.js
 // Updates all Dog docs to use absolute URLs and auto-rotates all images using EXIF
-import mongoose from 'mongoose';
-import fs from 'fs';
-import path from 'path';
-import sharp from 'sharp';
-import dotenv from 'dotenv';
+const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
+const sharp = require('sharp');
+const dotenv = require('dotenv');
 dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 const MONGO_URI = process.env.MONGO_URI;

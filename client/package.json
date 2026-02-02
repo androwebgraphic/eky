@@ -35,7 +35,7 @@
     "eject": "react-scripts eject",
     "postbuild": "cp public/_redirects build/_redirects"
   },
-  "proxy": "http://localhost:3001",
+
   
   "eslintConfig": {
     "extends": [

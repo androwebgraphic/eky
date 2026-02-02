@@ -1,8 +1,7 @@
-import express from 'express';
-import multer from 'multer';
-import { createDog, listDogs, updateDog, deleteDog } from '../controllers/dogController.js';
-import auth from '../middleware/auth.js';
-
+const express = require('express');
+const multer = require('multer');
+const { createDog, listDogs, updateDog, deleteDog } = require('../controllers/dogController.js');
+const auth = require('../middleware/auth.js');
 const router = express.Router();
 
 // use memoryStorage to process with sharp
@@ -21,4 +20,4 @@ router.get('/', listDogs);
 router.patch('/:id', auth, cpUpload, updateDog);
 router.delete('/:id', auth, deleteDog);
 
-export default router;
+module.exports = router;

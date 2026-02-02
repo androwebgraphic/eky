@@ -1,0 +1,19 @@
+{
+  "adoptionConfirmed": "Örökbefogadás megerősítve!",
+  "adoptionCompletedClosed": "Az örökbefogadás befejeződött. A beszélgetés lezárva.",
+  "adoptionCanceled": "Örökbefogadás törölve!",
+  "adoptionCanceledClosed": "Az örökbefogadás törölve. A beszélgetés lezárva.",
+  "searchUsersPlaceholder": "Felhasználók keresése név vagy felhasználónév alapján...",
+  "noUsersOnline": "Nincsenek online felhasználók",
+  "pendingAdoptions": "Függő örökbefogadások:",
+  "noPendingAdoptions": "Nincsenek függő örökbefogadások a fiókjában.",
+  "deleteConversation": "Törlés",
+  "unblock": "Feloldás",
+  "block": "Blokkolás",
+  "confirmAdoption": "Örökbefogadás megerősítése",
+  "cancelAdoption": "Örökbefogadás törlése",
+  "noPendingAdoptionsFound": "Nincsenek függő örökbefogadások.",
+  "typing": "Gépel...",
+  "typeMessagePlaceholder": "Írjon üzenetet...",
+  "send": "Küldés"
+}

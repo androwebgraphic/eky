@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const userSchema = mongoose.Schema({
 		blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', default: [] }],
@@ -98,6 +98,5 @@ const userSchema = mongoose.Schema({
 	
 });
 
-const User = mongoose.model("User", userSchema);
-
-export default User;
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+module.exports = User;

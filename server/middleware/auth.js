@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/userModel.js';
+const jwt = require('jsonwebtoken');
+const User = require('../models/userModel');
 
 const auth = async (req, res, next) => {
 	try {
@@ -36,16 +36,14 @@ const auth = async (req, res, next) => {
 };
 
 // Middleware to check if user is admin or superadmin
-export const isAdmin = async (req, res, next) => {
+const isAdmin = async (req, res, next) => {
 	try {
 		if (!req.user) {
 			return res.status(401).json({ message: 'Authentication required.' });
 		}
-		
 		if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
 			return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
 		}
-		
 		next();
 	} catch (error) {
 		console.error('isAdmin middleware - Error:', error.message);
@@ -54,16 +52,14 @@ export const isAdmin = async (req, res, next) => {
 };
 
 // Middleware to check if user is superadmin
-export const isSuperAdmin = async (req, res, next) => {
+const isSuperAdmin = async (req, res, next) => {
 	try {
 		if (!req.user) {
 			return res.status(401).json({ message: 'Authentication required.' });
 		}
-		
 		if (req.user.role !== 'superadmin') {
 			return res.status(403).json({ message: 'Access denied. Superadmin privileges required.' });
 		}
-		
 		next();
 	} catch (error) {
 		console.error('isSuperAdmin middleware - Error:', error.message);
@@ -71,4 +67,6 @@ export const isSuperAdmin = async (req, res, next) => {
 	}
 };
 
-export default auth;
+module.exports = auth;
+module.exports.isAdmin = isAdmin;
+module.exports.isSuperAdmin = isSuperAdmin;

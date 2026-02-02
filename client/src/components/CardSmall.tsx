@@ -1,17 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-// import MultiPhotoIndicator from './MultiPhotoIndicator';
-// Removed unused imports
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import DogImageSlider from './DogImageSlider';
 import { createPortal } from 'react-dom';
-
-
-
-// Geocode location if needed (mirrors DogDetails)
-// (handleShowMap will be defined inside the component, after imports)
-// ...existing imports...
-const toHttps = (url?: string) => url;
+declare global {
+  interface Window {
+    __EKY_IMAGE_CB?: number;
+  }
+}
 interface MediaVariant { url: string; width?: number; size?: string }
 interface CardSmallProps {
   _id?: string;
@@ -47,9 +43,12 @@ interface CardSmallProps {
   adoptionStatus?: string;
   adoptionQueue?: any;
   onDogUpdate?: (update: any) => void;
+  createdAt?: string;
 }
 
 const CardSmall: React.FC<CardSmallProps> = (props) => {
+  // Debug: log images prop for each card
+  console.log('[CardSmall DEBUG] Dog', props._id, 'images:', props.images);
   // Destructure props for easier access
   const {
     _id,
@@ -69,6 +68,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     adoptionStatus,
     adoptionQueue,
     onDogUpdate,
+    createdAt,
   } = props;
 
   const { t } = useTranslation();
@@ -168,7 +168,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
       alert('Please log in to add dogs to your wishlist');
       return;
     }
-    const latestToken = localStorage.getItem('token') || token;
+    // Removed unused latestToken variable
     const currentlyInWishlist = inWishlist;
     if (currentlyInWishlist) {
       // Pass latestToken to removeFromWishlist if needed
@@ -191,38 +191,11 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     }
   };
 
-  const handleConfirm = async () => {
-    if (!_id) return;
-    setAdoptLoading(true);
-    setAdoptError(null);
-    try {
-      const resp = await fetch(`${apiBase}/api/dogs/${_id}/adopt-confirm`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
-        }
-      });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.message || 'Error');
-      if (data.message.includes('removed')) {
-        // Dog adopted and removed
-        alert('Dog has been successfully adopted!');
-        // Optionally refresh or remove from list
-        if (onDogUpdate) onDogUpdate({ remove: true, id: _id }); // Remove from list
-      } else {
-        setAdoptionQueue(data.adoptionQueue);
-        alert('Confirmation saved. Waiting for the other party.');
-      }
-    } catch (e: any) {
-      setAdoptError(e.message || 'Error');
-    } finally {
-      setAdoptLoading(false);
-    }
-  };
 
   const handleAdopt = async () => {
     if (!_id) return;
+    // Notify ChatApp to set adoptionDogId
+    window.dispatchEvent(new CustomEvent('dog-adopt-initiate', { detail: { dogId: _id } }));
     setAdoptLoading(true);
     setAdoptError(null);
     try {
@@ -249,14 +222,16 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   // Helper to get absolute URL for images
   const toAbsUrl = (url?: string) => {
     if (!url) return url;
-    // If already absolute (http/https), use as is
-    if (/^https?:\/\//.test(url)) return url;
-    // If starts with /uploads/ or /u/dogs/, prepend imageBase
-    if (url.startsWith('/uploads/') || url.startsWith('/u/dogs/')) return imageBase + url;
-    // If starts with uploads/ or u/dogs/ (missing leading slash), add it and prepend imageBase
-    if (url.startsWith('uploads/') || url.startsWith('u/dogs/')) return imageBase + '/' + url;
-    // Otherwise, treat as relative to imageBase
-    return imageBase + '/' + url.replace(/^\/+/, '');
+    // Use a global cache-busting timestamp for all images in this render
+    const cacheBuster = window.__EKY_IMAGE_CB || (window.__EKY_IMAGE_CB = Date.now());
+    // If already absolute (http/https), add cache-busting param
+    if (/^https?:\/\//.test(url)) return url + (url.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
+    // If starts with /uploads/ or /u/dogs/, prepend imageBase and add cache-busting
+    if (url.startsWith('/uploads/') || url.startsWith('/u/dogs/')) return imageBase + url + '?cb=' + cacheBuster;
+    // If starts with uploads/ or u/dogs/ (missing leading slash), add it and prepend imageBase and add cache-busting
+    if (url.startsWith('uploads/') || url.startsWith('u/dogs/')) return imageBase + '/' + url + '?cb=' + cacheBuster;
+    // Otherwise, treat as relative to imageBase and add cache-busting
+    return imageBase + '/' + url.replace(/^\/+/,'') + '?cb=' + cacheBuster;
   };
 
   // Only use local or external image URLs
@@ -266,6 +241,8 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     // Prefer largest available
     const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
     largestImgUrl = toAbsUrl(sorted[0].url);
+    // Debug: log the URL being rendered
+    console.log('[CardSmall DEBUG] Rendering image URL:', largestImgUrl);
   }
 
   const posterUrl = video && video.poster && video.poster.length
@@ -280,7 +257,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 
   const [showSlider, setShowSlider] = useState(false);
   const sliderContentRef = useRef<HTMLDivElement>(null);
-  const sliderModalRef = useRef<HTMLDivElement>(null);
+  // Removed unused sliderModalRef
 
   // Close modal on Escape key
   useEffect(() => {
@@ -327,9 +304,59 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             <source src={videoUrl} />
           </video>
         ) : (largestImgUrl) ? (
-            <img src={largestImgUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', position: 'absolute', top: 0, left: 0, borderRadius: '1rem', imageRendering: 'auto' }} onError={e => { (e.target as HTMLImageElement).src = '/img/nany.jpg'; }} />
+            <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
+              <img src={largestImgUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', borderRadius: '1rem', imageRendering: 'auto', position: 'relative', zIndex: 1 }} onError={e => { (e.target as HTMLImageElement).src = '/img/nany.jpg'; }} />
+              {adoptionStatusState === 'pending' && (
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'rgba(0,0,0,0.45)',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  borderRadius: '1rem',
+                  zIndex: 2,
+                  textShadow: '0 2px 8px #000',
+                  pointerEvents: 'none'
+                }}>
+                  In adoption process
+                </div>
+              )}
+            </div>
         ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
-            <img src={thumbUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', position: 'absolute', top: 0, left: 0, borderRadius: '1rem', imageRendering: 'auto' }} onError={e => { (e.target as HTMLImageElement).src = '/img/nany.jpg'; }} />
+            <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
+              <img src={thumbUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', borderRadius: '1rem', imageRendering: 'auto', position: 'relative', zIndex: 1 }} onError={e => { (e.target as HTMLImageElement).src = '/img/nany.jpg'; }} />
+              {adoptionStatusState === 'pending' && (
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  background: 'rgba(0,0,0,0.45)',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  borderRadius: '1rem',
+                  zIndex: 2,
+                  textShadow: '0 2px 8px #000',
+                  pointerEvents: 'none'
+                }}>
+                  In adoption process
+                </div>
+              )}
+            </div>
         ) : null}
         {/* Modal DogImageSlider */}
         {uniqueImages.length > 0 && showSlider && createPortal(
@@ -498,10 +525,15 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               </div>
             </div>
           )}
-        {owner && !isOwner && (
+        {owner && (
             <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #ddd' }}>
               <p className="meta" style={{ marginBottom: '0.5rem' }}>
                 <strong>{t('fields.postedBy') || 'Posted by'}:</strong> {owner.name}
+                {createdAt && (
+                  <span style={{ marginLeft: 8, color: '#888', fontSize: '11px' }}>
+                    • {new Date(createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </span>
+                )}
               </p>
               {owner.person && (
                 <p className="meta" style={{ marginBottom: '0.5rem' }}>
@@ -542,25 +574,32 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             >
               {t('button.viewDetails')}
             </button>
-            {isAuthenticated && _id && (
+            {isAuthenticated && _id && adoptionStatusState !== 'adopted' && (
               <>
                 {/* ADOPT/ODUSTANI LOGIKA (simplified for list) */}
-                {adoptionStatusState === 'pending' && adoptionQueueState && currentUser && adoptionQueueState.adopter === currentUser._id ? (
-                  adoptionQueueState.adopterConfirmed ? (
+                {adoptionStatusState === 'pending' && adoptionQueueState && currentUser ? (
+                  adoptionQueueState.adopter === currentUser._id ? (
                     <button
-                      className="details"
+                      id="adopt"
+                      className="details adopt-btn"
                       disabled
                     >
-                      {t('button.waiting') || 'Waiting for owner confirmation'}
+                      {t('button.requested') || 'Requested'}
                     </button>
+                  ) : isOwner ? (
+                    adoptionQueueState.ownerConfirmed ? (
+                      <button className="details" disabled>
+                        {t('button.waiting') || 'Waiting for adopter confirmation'}
+                      </button>
+                    ) : null
                   ) : (
                     <button
-                      id="confirm-adopt"
+                      id="adopt"
                       className="details"
-                      onClick={handleConfirm}
+                      onClick={handleAdopt}
                       disabled={adoptLoading}
                       style={{
-                        background: '#28a745',
+                        background: '#267822',
                         border: 'none',
                         borderRadius: '10px',
                         color: 'white',
@@ -568,43 +607,11 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                         fontWeight: 500
                       }}
                     >
-                      {adoptLoading ? (t('button.confirming') || 'Confirming...') : (t('button.confirmAdoption') || 'Confirm Adoption')}
+                      {adoptLoading
+                        ? t('button.sending') || 'Slanje...'
+                        : t('button.adopt')}
                     </button>
                   )
-                ) : adoptionStatusState === 'pending' && isOwner ? (
-                  adoptionQueueState?.ownerConfirmed ? (
-                    <button
-                      className="details"
-                      disabled
-                    >
-                      {t('button.waiting') || 'Waiting for adopter confirmation'}
-                    </button>
-                  ) : (
-                    <button
-                      id="confirm-adopt"
-                      className="details"
-                      onClick={handleConfirm}
-                      disabled={adoptLoading}
-                      style={{
-                        background: '#28a745',
-                        border: 'none',
-                        borderRadius: '10px',
-                        color: 'white',
-                        fontSize: '10px',
-                        fontWeight: 500
-                      }}
-                    >
-                      {adoptLoading ? (t('button.confirming') || 'Confirming...') : (t('button.confirmAdoption') || 'Confirm Adoption')}
-                    </button>
-                  )
-                ) : adoptionStatusState === 'pending' ? (
-                  <button
-                    id="adopt"
-                    className="details adopt-btn"
-                    disabled
-                  >
-                    {t('button.requested') || 'Zahtjev poslan'}
-                  </button>
                 ) : (
                   <button
                     id="adopt"

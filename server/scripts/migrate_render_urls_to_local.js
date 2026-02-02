@@ -1,12 +1,8 @@
 // Script to migrate all Dog image, thumbnail, and video URLs from absolute render.com URLs to local relative URLs
-import mongoose from 'mongoose';
-import Dog from '../models/dogModel.js';
-
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const mongoose = require('mongoose');
+const Dog = require('../models/dogModel');
+const dotenv = require('dotenv');
+const path = require('path');
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const RENDER_PREFIX = 'https://sharedog-homeless-backend.onrender.com';

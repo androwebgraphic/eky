@@ -1,0 +1,149 @@
+/* Wrapper to enforce fixed width and prevent parent flex/grid from causing blinking */
+
+/* Prevent modal from shrinking when images are deleted */
+.media-preview-list-wrapper {
+  width: 100%;
+  height: 96px;
+  min-height: 96px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: #fafbfc;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  box-sizing: border-box;
+}
+
+.media-preview-list {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 80px;
+  gap: 12px;
+  padding: 8px 0 8px 0;
+  box-sizing: border-box;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: #fff;
+}
+
+.media-preview-list > div {
+  display: inline-block;
+  vertical-align: top;
+  width: 80px;
+  height: 80px;
+  margin-right: 8px;
+  box-sizing: border-box;
+  position: relative;
+}
+.editdog-radio-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  margin-right: 18px;
+}
+
+.editdog-radio-custom {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #3498db;
+  border-radius: 50%;
+  background: #fff;
+  display: inline-block;
+  position: relative;
+  margin-right: 6px;
+  box-shadow: 0 0 0 2px #b2d7f7;
+}
+
+.editdog-radio:checked + .editdog-radio-custom {
+  background: #3498db;
+  border-color: #3498db;
+}
+
+.editdog-radio:checked + .editdog-radio-custom::after {
+  content: '';
+  display: block;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  left: 4px;
+  top: 4px;
+}
+.editdog-radio:checked + .editdog-radio-label {
+  color: #3498db;
+  font-weight: bold;
+  text-decoration: underline;
+}
+.editdog-radio:checked {
+  box-shadow: 0 0 0 2px #3498db;
+}
+.editdog-radio-female:checked + .editdog-radio-label {
+  color: #e67e22;
+  font-weight: bold;
+  text-decoration: underline;
+}
+.editdog-radio-female:checked {
+  box-shadow: 0 0 0 2px #e67e22;
+}
+.editdog-checkbox:checked + .editdog-checkbox-label {
+  color: #27ae60;
+  font-weight: bold;
+  text-decoration: underline;
+}
+.editdog-checkbox-neutered:checked + .editdog-checkbox-label-neutered {
+  color: #8e44ad;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.editdog-checkbox,
+.editdog-radio {
+  accent-color: inherit;
+  position: absolute;
+  opacity: 0;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  z-index: 2;
+}
+
+.editdog-checkbox-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  margin-right: 18px;
+}
+
+.editdog-checkbox-custom {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #27ae60;
+  border-radius: 6px;
+  background: #fff;
+  display: inline-block;
+  position: relative;
+  margin-right: 6px;
+  box-shadow: 0 0 0 2px #b2f7c1;
+}
+
+.editdog-checkbox:checked + .editdog-checkbox-custom {
+  background: #27ae60;
+  border-color: #27ae60;
+}
+
+.editdog-checkbox:checked + .editdog-checkbox-custom::after {
+  content: '\2713';
+  color: #fff;
+  font-size: 1.2rem;
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  font-weight: bold;
+  line-height: 22px;
+}

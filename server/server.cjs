@@ -1,13 +1,17 @@
 
-const express = require("express");
-const http = require('http');
 const dotenv = require("dotenv");
+dotenv.config({ path: __dirname + '/.env' });
+
+const express = require("express");
+const path = require('path');
+const http = require('http');
 const connectDB = require('./db/connectDB.js');
 const cookieParser = require('cookie-parser');
 const passport = require('./config/passport.js');
 const userRoutes = require("./routes/userRoutes.js");
 const dogRoutes = require("./routes/dogRoutes.js");
 const authRoutes = require("./routes/authRoutes.js");
+const auth = require('./middleware/auth.js');
 const cors = require('cors');
 const chatRoutes = require('./routes/chatRoutes.js'); // <-- Add this here
 
@@ -49,10 +53,24 @@ app.use(passport.initialize());
 
 // 10. Use routes
 app.use('/api/chat', chatRoutes);
-app.use('/u', cors({ origin: '*' }), express.static('uploads'));
+const uploadsPath = path.join(__dirname, 'uploads');
+console.log('[STATIC DEBUG] uploadsPath resolved to:', uploadsPath);
+// Add CORS headers for all /uploads and /u responses (before static middleware)
+function setUploadsCORS(req, res, next) {
+  console.log('[CORS DEBUG] /uploads CORS middleware triggered for:', req.originalUrl);
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  next();
+}
+app.use('/uploads', setUploadsCORS, express.static(uploadsPath));
+app.use('/u', setUploadsCORS, express.static(uploadsPath));
 app.use("/api/users", userRoutes);
 app.use("/api/dogs", dogRoutes);
 app.use("/api/auth", authRoutes);
+// If you want to use the auth middleware globally, use ONLY the function, not the module object:
+// const auth = require('./middleware/auth.js');
+// app.use(auth); // Uncomment if you want global auth protection
 
 // ... rest of your Socket.IO code
 
@@ -107,17 +125,24 @@ io.on('connection', (socket) => {
     socket.join(userId);
     // Fetch userName from DB for display (async)
     import('./models/userModel.js').then(({ default: User }) => {
-      User.findById(userId).select('_id username name email').then(userDoc => {
+      // Always fetch latest profilePicture from DB before emitting online users
+      User.findById(userId).select('_id username name email profilePicture').lean().then(userDoc => {
         if (userDoc) {
           let userName = userDoc.name;
           if (!userName || userName.trim() === '') userName = userDoc.username;
           if (!userName || userName.trim() === '') userName = userDoc.email;
           if (!userName || userName.trim() === '') userName = 'User';
-          onlineUsers.set(userId, { _id: userId, userName, socketId: socket.id });
-          console.log('[Socket.IO] User joined and set online:', { _id: userId, userName });
-          // Notify all clients
-          io.emit('onlineUsers', Array.from(onlineUsers.values()));
-          io.emit('userOnline', { _id: userId, userName });
+          const profilePicture = userDoc.profilePicture || '';
+          onlineUsers.set(userId, { _id: userId, userName, profilePicture, socketId: socket.id });
+          console.log('[Socket.IO] User joined and set online:', { _id: userId, userName, profilePicture });
+          // Always fetch latest profilePicture for all online users before emitting
+          Promise.all(Array.from(onlineUsers.values()).map(async u => {
+            const freshUser = await User.findById(u._id).select('profilePicture').lean();
+            return { ...u, profilePicture: freshUser?.profilePicture || '' };
+          })).then(freshOnlineUsers => {
+            io.emit('onlineUsers', freshOnlineUsers);
+            io.emit('userOnline', { _id: userId, userName, profilePicture });
+          });
         } else {
           console.log('[Socket.IO] No user found for userId:', userId);
         }

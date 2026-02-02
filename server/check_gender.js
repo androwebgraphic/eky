@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 // Connect to MongoDB
 const DB_URI = 'mongodb+srv://eckys:A7Fhh7WQadRpBTsz@cluster0.zw3yij8.mongodb.net/eky?retryWrites=true&w=majority';

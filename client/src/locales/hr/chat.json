@@ -1,0 +1,19 @@
+{
+  "adoptionConfirmed": "Posvajanje potvrđeno!",
+  "adoptionCompletedClosed": "Posvajanje završeno. Razgovor je zatvoren.",
+  "adoptionCanceled": "Posvajanje otkazano!",
+  "adoptionCanceledClosed": "Posvajanje otkazano. Razgovor je zatvoren.",
+  "searchUsersPlaceholder": "Pretraži korisnike po imenu ili korisničkom imenu...",
+  "noUsersOnline": "Nema korisnika online",
+  "pendingAdoptions": "Posvajanja na čekanju:",
+  "noPendingAdoptions": "Nemate posvajanja na čekanju.",
+  "deleteConversation": "Obriši",
+  "unblock": "Deblokiraj",
+  "block": "Blokiraj",
+  "confirmAdoption": "Potvrdi posvajanje",
+  "cancelAdoption": "Otkaži posvajanje",
+  "noPendingAdoptionsFound": "Nema posvajanja na čekanju.",
+  "typing": "Piše...",
+  "typeMessagePlaceholder": "Upišite poruku...",
+  "send": "Pošalji"
+}

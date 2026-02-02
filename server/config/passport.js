@@ -1,4 +1,4 @@
-import passport from 'passport';
+const passport = require('passport');
 // ...existing code...
 
-export default passport;
+module.exports = passport;

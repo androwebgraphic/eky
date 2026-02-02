@@ -1,7 +1,10 @@
 let io;
 
-export const setIo = (socketIo) => {
+const setIo = (socketIo) => {
   io = socketIo;
 };
 
-export { io };
+module.exports = {
+  setIo,
+  get io() { return io; }
+};

@@ -36,11 +36,13 @@ interface DogDetailsProps {
   adoptionStatus?: string;
   adoptionQueue?: any;
   onDogUpdate?: (update: any) => void;
+  onDogChanged?: () => void;
+  createdAt?: string;
 }
 
 const DogDetails: React.FC<DogDetailsProps> = ({
   _id, name, breed, age, images, video, thumbnail, color, place, location, description, size, gender, vaccinated, neutered, onClose, user: owner,
-  adoptionStatus, adoptionQueue, onDogUpdate
+  adoptionStatus, adoptionQueue, onDogUpdate, onDogChanged, createdAt
 }) => {
   const [showMap, setShowMap] = useState(false);
   const [coords, setCoords] = useState<{lat: number, lng: number} | null>(null);
@@ -105,12 +107,19 @@ const DogDetails: React.FC<DogDetailsProps> = ({
           body: JSON.stringify({ reason: cancelReason })
         });
         const data = await resp.json();
-        if (!resp.ok) throw new Error(data.message || 'Error');
+        if (!resp.ok) {
+          setCancelError(data.message || 'Error');
+          throw new Error(data.message || 'Error');
+        }
         setCancelSuccess(true);
         setAdoptionStatus(data.dog?.adoptionStatus || 'available');
         setAdoptionQueue(data.dog?.adoptionQueue);
         setCancelReason('');
         if (onDogUpdate && data.dog) onDogUpdate(data.dog);
+        if (onDogChanged) onDogChanged();
+        // Force state refresh after cancel
+        setAdoptionStatus(data.dog?.adoptionStatus);
+        setAdoptionQueue(data.dog?.adoptionQueue);
       } catch (e: any) {
         setCancelError(e.message || 'Error');
       } finally {
@@ -121,6 +130,8 @@ const DogDetails: React.FC<DogDetailsProps> = ({
 
   const handleAdopt = async () => {
     if (!_id) return;
+    // Notify ChatApp to set adoptionDogId
+    window.dispatchEvent(new CustomEvent('dog-adopt-initiate', { detail: { dogId: _id } }));
     setAdoptLoading(true);
     setAdoptError(null);
     try {
@@ -132,10 +143,17 @@ const DogDetails: React.FC<DogDetailsProps> = ({
         }
       });
       const data = await resp.json();
-      if (!resp.ok) throw new Error(data.message || 'Error');
+      if (!resp.ok) {
+        setAdoptError(data.message || 'Error');
+        throw new Error(data.message || 'Error');
+      }
       setAdoptionStatus(data.dog.adoptionStatus);
       setAdoptionQueue(data.dog.adoptionQueue);
       if (onDogUpdate && data.dog) onDogUpdate(data.dog);
+      if (onDogChanged) onDogChanged();
+      // Force state refresh after adoption
+      setAdoptionStatus(data.dog?.adoptionStatus);
+      setAdoptionQueue(data.dog?.adoptionQueue);
     } catch (e: any) {
       setAdoptError(e.message || 'Error');
     } finally {
@@ -150,21 +168,21 @@ const DogDetails: React.FC<DogDetailsProps> = ({
     return `http://${window.location.hostname}:3001`;
   };
   const apiBase = getApiBase();
-  const toAbs = (u?: string) => {
-    if (!u) return u;
-    // If already absolute (http/https), use as is
-    if (/^https?:\/\//.test(u)) return u;
-    // If starts with /u/dogs/ or /uploads/, prepend apiBase
-    if (u.startsWith('/u/dogs/') || u.startsWith('/uploads/')) return apiBase + u;
-    // If starts with u/dogs/ or uploads/ (missing leading slash), add it and prepend apiBase
-    if (u.startsWith('u/dogs/') || u.startsWith('uploads/')) return apiBase + '/' + u;
-    // Otherwise, treat as relative to apiBase
-    return apiBase + '/' + u.replace(/^\/+/, '');
-  };
 
 
   // Prepare images for DogImageSlider (always use largest available, prefer 1024px, always pass full Cloudinary URL)
   const sliderImages: { url: string; width?: number }[] = React.useMemo(() => {
+    const toAbs = (u?: string) => {
+      if (!u) return u;
+      // If already absolute (http/https), add cache-busting param
+      if (/^https?:\/\//.test(u)) return u + (u.includes('?') ? '&' : '?') + 'cb=' + Date.now();
+      // If starts with /u/dogs/ or /uploads/, prepend apiBase and add cache-busting
+      if (u.startsWith('/u/dogs/') || u.startsWith('/uploads/')) return apiBase + u + '?cb=' + Date.now();
+      // If starts with u/dogs/ or uploads/ (missing leading slash), add it and prepend apiBase and add cache-busting
+      if (u.startsWith('u/dogs/') || u.startsWith('uploads/')) return apiBase + '/' + u + '?cb=' + Date.now();
+      // Otherwise, treat as relative to apiBase and add cache-busting
+      return apiBase + '/' + u.replace(/^\/+/,'') + '?cb=' + Date.now();
+    };
     if (images && images.length > 0) {
       const validImages = images.filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
       const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
@@ -364,27 +382,56 @@ const DogDetails: React.FC<DogDetailsProps> = ({
           </p>
         )}
         
-        {owner && !isOwner && (
-          <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '2px solid #ddd' }}>
-            <h4 style={{ marginBottom: '1rem' }}>{t('fields.contactOwner') || 'Contact Owner'}</h4>
-            <p className="meta" style={{ marginBottom: '0.75rem' }}>
-              <strong>{t('fields.name') || 'Name'}:</strong> {owner.name}
-            </p>
-            {owner.person && (
+          {owner && (
+            <div style={{ marginTop: isOwner ? '1.5rem' : '2rem', paddingTop: isOwner ? '1rem' : '1.5rem', borderTop: '2px solid #ddd' }}>
+              {!isOwner && <h4 style={{ marginBottom: '1rem' }}>{t('fields.contactOwner') || 'Contact Owner'}</h4>}
               <p className="meta" style={{ marginBottom: '0.75rem' }}>
-                <strong>{t('fields.userType') || 'Type'}:</strong> {t(`registerOptions.${owner.person}`) || owner.person}
+                <strong>{t('fields.name') || 'Name'}:</strong>
+                <button
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#007bff',
+                    textDecoration: 'underline',
+                    fontWeight: 'bold',
+                    fontSize: '1.1rem',
+                    cursor: 'pointer',
+                    padding: 0,
+                    marginLeft: 4
+                  }}
+                  onClick={() => {
+                    // Open chat with owner
+                    window.dispatchEvent(new CustomEvent('open-chat-with-user', { detail: { userId: owner._id } }));
+                    // If adoption is pending, show confirm/cancel buttons
+                    if (adoptionStatusState === 'pending') {
+                      window.dispatchEvent(new CustomEvent('dog-adopt-initiate', { detail: { dogId: _id } }));
+                    }
+                  }}
+                  aria-label={t('fields.contactOwner') || 'Contact Owner'}
+                >
+                  {owner.name}
+                </button>
+                {typeof createdAt !== 'undefined' && (
+                  <span style={{ marginLeft: 8, color: '#888', fontSize: '11px' }}>
+                    • {new Date(createdAt as string).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </span>
+                )}
               </p>
-            )}
-            {isAuthenticated && owner.phone && (
-              <p className="meta" style={{ marginBottom: '0.75rem' }}>
-                <strong>{t('fields.phone') || 'Phone'}:</strong>
-                <a href={`tel:${owner.phone}`} style={{ color: '#007bff', textDecoration: 'none', marginLeft: '0.5rem', fontSize: '1.35rem', fontWeight: 'bold' }}>
-                  {owner.phone}
-                </a>
-              </p>
-            )}
-          </div>
-        )}
+              {owner.person && (
+                <p className="meta" style={{ marginBottom: '0.75rem' }}>
+                  <strong>{t('fields.userType') || 'Type'}:</strong> {t(`registerOptions.${owner.person}`) || owner.person}
+                </p>
+              )}
+              {!isOwner && isAuthenticated && owner.phone && (
+                <p className="meta" style={{ marginBottom: '0.75rem' }}>
+                  <strong>{t('fields.phone') || 'Phone'}:</strong>
+                  <a href={`tel:${owner.phone}`} style={{ color: '#007bff', textDecoration: 'none', marginLeft: '0.5rem', fontSize: '1.35rem', fontWeight: 'bold' }}>
+                    {owner.phone}
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
       </div>
       <div className="call-to-action">
         {isAuthenticated && _id && !isOwner && (
@@ -403,6 +450,7 @@ const DogDetails: React.FC<DogDetailsProps> = ({
               {isInWishlist(_id) ? '💔 ' + t('button.removeFromList') : '❤️ ' + t('button.addToList')}
             </button>
             {/* ADOPT/CONFIRM/CANCEL LOGIC (improved for both adopter and owner) */}
+            {/* Adoption UI logic fallback: if state is ambiguous, show info */}
             {adoptionStatusState === 'pending' && adoptionQueueState && currentUser ? (
               <div style={{ marginTop: 16 }}>
                 {/* Adopter: can confirm or cancel if not yet confirmed */}
@@ -516,18 +564,30 @@ const DogDetails: React.FC<DogDetailsProps> = ({
                 </button>
                 <div style={{ marginTop: 8, color: '#555' }}>{t('dogDetails.waitingForConfirmation') || 'Čeka potvrdu vlasnika.'}</div>
               </>
+            ) : adoptionStatusState === 'pending' && !adoptionQueueState ? (
+                <div style={{ color: 'orange', marginTop: 12 }}>
+                  {t('dogDetails.ambiguousAdoptionState') || 'Adoption is pending, but details are unavailable. Please refresh or contact support.'}
+                </div>
             ) : (
-              <button
-                id="adopt"
-                className="details"
-                onClick={handleAdopt}
-                disabled={adoptLoading || adoptionStatusState === 'adopted'}
-                style={{ marginLeft: 12, backgroundColor: '#007bff', color: 'white' }}
-              >
-                {adoptLoading
-                  ? t('button.sending') || 'Slanje...'
-                  : t('button.adopt')}
-              </button>
+              <>
+                <button
+                  id="adopt"
+                  className="details"
+                  onClick={handleAdopt}
+                  disabled={adoptLoading || adoptionStatusState === 'adopted'}
+                  style={{ marginLeft: 12, backgroundColor: '#007bff', color: 'white' }}
+                >
+                  {adoptLoading
+                    ? t('button.sending') || 'Slanje...'
+                    : t('button.adopt')}
+                </button>
+                {/* Fallback: if adoption state is not available, show info */}
+                {adoptionStatusState === undefined && (
+                  <div style={{ color: 'orange', marginTop: 12 }}>
+                    {t('dogDetails.noAdoptionInfo') || 'No adoption information available for this dog.'}
+                  </div>
+                )}
+              </>
             )}
           </>
         )}

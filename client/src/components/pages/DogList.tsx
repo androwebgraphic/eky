@@ -38,6 +38,49 @@ interface Dog {
 }
 
 const DogList: React.FC = () => {
+      // Helper to get API URL
+      const getApiUrl = () => {
+        if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+        return 'http://localhost:3001';
+      };
+    // Helper to refetch dogs after adoption actions
+    const refetchDogs = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const headers: any = { 'Content-Type': 'application/json' };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        const res = await fetch(`${getApiUrl()}/api/dogs`, { 
+          cache: 'no-store',
+          headers 
+        });
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error(txt || `Request failed (${res.status})`);
+        }
+        const data = await res.json();
+        // Debug: log images array for each dog
+        if (Array.isArray(data)) {
+          data.forEach(dog => {
+            console.log(`[DogList DEBUG] Dog ${dog._id} images:`, dog.images);
+          });
+        }
+        // Debug: log full dog object and images property after fetch
+        if (Array.isArray(data)) {
+          data.forEach(dog => {
+            console.log('[DogList DEBUG] Dog', dog._id, 'images:', dog.images);
+          });
+        }
+        setDogs(data);
+      } catch (err: any) {
+        console.error('Failed to fetch dogs', err);
+        setError(err.message || t('doglist.failedToLoad'));
+      } finally {
+        setLoading(false);
+      }
+    };
   const { t } = useTranslation();
   const { user, token, isAuthenticated } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -47,6 +90,17 @@ const DogList: React.FC = () => {
   const [selectedDog, setSelectedDog] = useState<Dog | null>(null);
   const [editDog, setEditDog] = useState<Dog | null>(null);
   const [modalPosition, setModalPosition] = useState<{x: number, y: number} | null>(null);
+
+  // Debug: log editDog and modal state changes
+  useEffect(() => {
+    console.log('[DogList] editDog state changed:', editDog);
+  }, [editDog]);
+  useEffect(() => {
+    console.log('[DogList] selectedDog state changed:', selectedDog);
+  }, [selectedDog]);
+  useEffect(() => {
+    console.log('[DogList] modalPosition state changed:', modalPosition);
+  }, [modalPosition]);
   
   // Search filters - initialize from URL parameters
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
@@ -54,6 +108,7 @@ const DogList: React.FC = () => {
   const [sizeFilter, setSizeFilter] = useState(searchParams.get('size') || '');
   const [locationFilter, setLocationFilter] = useState('');
   
+
   // Get unique locations for dropdown
   const availableLocations = Array.from(new Set(
     dogs.map(dog => dog.location || dog.place)
@@ -153,8 +208,7 @@ const DogList: React.FC = () => {
           throw new Error(txt || `Request failed (${res.status})`);
         }
         const data = await res.json();
-        // Debug: log images array for each dog
-        if (mounted) setDogs(data);
+        setDogs(data);
       } catch (err: any) {
         console.error('Failed to fetch dogs', err);
         if (mounted) setError(err.message || t('doglist.failedToLoad'));
@@ -250,12 +304,20 @@ const DogList: React.FC = () => {
               adoptionStatus={d.adoptionStatus}
               adoptionQueue={d.adoptionQueue}
               onDogUpdate={update => {
-                if (update.remove) {
-                  setDogs(dogs => dogs.filter(dog => dog._id !== update.id));
+                console.log('[DogList] onDogUpdate received:', update);
+                if (update && update.remove && update.id) {
+                  setDogs(prev => {
+                    console.log('[DogList] Dog list before removal:', prev);
+                    const filtered = prev.filter(dog => dog._id !== update.id);
+                    console.log('[DogList] Dog list after removal:', filtered);
+                    return filtered;
+                  });
                   if (selectedDog && selectedDog._id === update.id) setSelectedDog(null);
+                  // Always refetch dogs after adoption actions to ensure correct state
+                  refetchDogs();
                 } else {
-                  setDogs(dogs => dogs.map(dog => dog._id === update._id ? update : dog));
-                  if (selectedDog && selectedDog._id === update._id) setSelectedDog(update);
+                  refetchDogs();
+                  if (selectedDog && update && selectedDog._id === update._id) setSelectedDog(update);
                 }
               }}
               onViewDetails={(event) => {
@@ -358,13 +420,60 @@ const DogList: React.FC = () => {
               {...selectedDog}
               adoptionStatus={selectedDog?.adoptionStatus}
               adoptionQueue={selectedDog?.adoptionQueue}
-              onDogUpdate={update => {
-                if (update.remove) {
-                  setDogs(dogs => dogs.filter(d => d._id !== update.id));
-                  setSelectedDog(null);
-                } else {
-                  setDogs(dogs => dogs.map(d => d._id === update._id ? update : d));
-                  setSelectedDog(update);
+              onDogUpdate={async update => {
+                // Always reload the full dog list and update selected dog with latest from backend
+                const getApiUrl = () => {
+                  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+                  return 'http://localhost:3001';
+                };
+                const API_URL = getApiUrl();
+                setLoading(true);
+                setError(null);
+                try {
+                  const headers = { 'Content-Type': 'application/json' };
+                  if (token) headers['Authorization'] = `Bearer ${token}`;
+                  const res = await fetch(`${API_URL}/api/dogs`, { cache: 'no-store', headers });
+                  if (!res.ok) throw new Error(await res.text() || `Request failed (${res.status})`);
+                  const data = await res.json();
+                  setDogs(data);
+                  // Update selected dog with latest data
+                  if (update && update._id) {
+                    const latest = data.find((d: any) => d._id === update._id);
+                    setSelectedDog(latest || null);
+                  } else if (update && update.remove) {
+                    setSelectedDog(null);
+                  }
+                } catch (err: any) {
+                  setError(err.message || t('doglist.failedToLoad'));
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              onDogChanged={async () => {
+                // Also reload the full dog list after adoption actions
+                const getApiUrl = () => {
+                  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+                  return 'http://localhost:3001';
+                };
+                const API_URL = getApiUrl();
+                setLoading(true);
+                setError(null);
+                try {
+                  const headers = { 'Content-Type': 'application/json' };
+                  if (token) headers['Authorization'] = `Bearer ${token}`;
+                  const res = await fetch(`${API_URL}/api/dogs`, { cache: 'no-store', headers });
+                  if (!res.ok) throw new Error(await res.text() || `Request failed (${res.status})`);
+                  const data = await res.json();
+                  setDogs(data);
+                  // If a dog is selected, update it
+                  if (selectedDog && selectedDog._id) {
+                    const latest = data.find((d: any) => d._id === selectedDog._id);
+                    setSelectedDog(latest || null);
+                  }
+                } catch (err: any) {
+                  setError(err.message || t('doglist.failedToLoad'));
+                } finally {
+                  setLoading(false);
                 }
               }}
               onClose={() => {
@@ -381,12 +490,44 @@ const DogList: React.FC = () => {
         <EditDogModal
           dog={editDog}
           onClose={() => {
+            console.log('[DogList] EditDogModal closed by user');
             setEditDog(null);
             setModalPosition(null);
           }}
-          onSave={handleSaveEditDog}
+          onSave={async (updatedDog) => {
+            console.log('[DogList] onSave called from EditDogModal', updatedDog);
+            // Update the dog list and also update editDog so modal receives new images
+            await handleSaveEditDog(updatedDog);
+            // Force refresh the full dog list after save to ensure images update everywhere
+            const getApiUrl = () => {
+              if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+              return 'http://localhost:3001';
+            };
+            const API_URL = getApiUrl();
+            let latestDog = updatedDog;
+            try {
+              // Fetch the latest dog data for the edited dog
+              const res = await fetch(`${API_URL}/api/dogs/${updatedDog._id}`);
+              if (res.ok) {
+                latestDog = await res.json();
+              }
+              // Fetch the full dog list and update state
+              const listRes = await fetch(`${API_URL}/api/dogs`, { cache: 'no-store' });
+              if (listRes.ok) {
+                const data = await listRes.json();
+                setDogs(data);
+              }
+            } catch (err) {
+              console.error('DogList: Failed to refresh dog list after save', err);
+            }
+            // Always keep modal open with updated dog after save
+            setEditDog(latestDog);
+            setModalPosition(modalPosition); // keep modal position unchanged
+            // Never set selectedDog here; only update editDog and refresh list
+            console.log('[DogList] setEditDog called with latestDog (modal stays open)', latestDog);
+          }}
           modalPosition={modalPosition}
-        />,
+        />, 
         document.body
       )}
     </main>
@@ -410,10 +551,12 @@ const DogList: React.FC = () => {
     try {
       const headers: any = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
+      // Always fetch the latest dog data after update
       const res = await fetch(`${API_URL}/api/dogs`, { cache: 'no-store', headers });
       if (!res.ok) throw new Error(await res.text() || `Request failed (${res.status})`);
       const data = await res.json();
       setDogs(data);
+      // Do not set selectedDog here; only update editDog and refresh dog list
     } catch (err: any) {
       setError(err.message || t('doglist.failedToLoad'));
     } finally {

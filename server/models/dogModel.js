@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const mediaVariantSchema = new mongoose.Schema({
   url: { type: String, required: true },
@@ -41,4 +41,4 @@ const dogSchema = new mongoose.Schema({
 });
 
 const Dog = mongoose.model('Dog', dogSchema);
-export default Dog;
+module.exports = Dog;

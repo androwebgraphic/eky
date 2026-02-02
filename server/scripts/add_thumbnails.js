@@ -1,8 +1,8 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import path from 'path';
-import fs from 'fs';
-import Dog from '../models/dogModel.js';
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const path = require('path');
+const fs = require('fs');
+const Dog = require('../models/dogModel');
 
 dotenv.config();
 

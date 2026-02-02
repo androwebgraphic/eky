@@ -1,6 +1,8 @@
-import express from 'express';
-import { getOrCreateConversation, sendMessage, getMessages, getUserConversations, deleteChatHistory, blockUser, unblockUser } from '../controllers/chatController.js';
-import auth from '../middleware/auth.js';
+
+const express = require('express');
+const { getOrCreateConversation, sendMessage, getMessages, getUserConversations, deleteChatHistory, blockUser, unblockUser } = require('../controllers/chatController.js');
+const { getUserById } = require('../controllers/userController.js');
+const auth = require('../middleware/auth.js');
 
 const router = express.Router();
 
@@ -12,7 +14,6 @@ router.post('/block', auth, blockUser);
 router.post('/unblock', auth, unblockUser);
 
 // Get user by ID
-import { getUserById } from '../controllers/userController.js';
 router.get('/users/:id', auth, getUserById);
 
 // Get or create a conversation between two users
@@ -27,4 +28,4 @@ router.get('/messages/:conversationId', auth, getMessages);
 // Get all conversations for a user
 router.get('/conversations/:userId', auth, getUserConversations);
 
-export default router;
+module.exports = router;

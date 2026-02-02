@@ -1,6 +1,7 @@
-import express from 'express';
-import passport from '../config/passport.js';
-import jwt from 'jsonwebtoken';
+
+const express = require('express');
+const passport = require('../config/passport.js');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
@@ -13,4 +14,4 @@ const generateToken = (userId) => {
 
 // ...existing code...
 
-export default router;
+module.exports = router;

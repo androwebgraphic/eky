@@ -1,5 +1,5 @@
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
+const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://andreassklizovic:jl31156l@eky.zw3yij8.mongodb.net/eky?retryWrites=true&w=majority';

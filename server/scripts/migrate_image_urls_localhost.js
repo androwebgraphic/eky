@@ -2,8 +2,8 @@
 // This script updates all dog image URLs in MongoDB to use your local backend address.
 // Adjust NEW_BASE_URL as needed (e.g., http://localhost:3001 or your LAN IP).
 
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/eky';

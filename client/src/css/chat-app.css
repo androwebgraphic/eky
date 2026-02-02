@@ -1,3 +1,11 @@
+.chat-app-user-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  position: relative;
+}
 /* Action row for chat controls */
 .chat-app-actions-row {
   display: flex;
@@ -6,9 +14,9 @@
   flex-wrap: wrap;
   align-items: center;
 }
-
 .chat-app-action-btn {
   padding: 3px 8px;
+/* removed extra closing brace */
   font-size: 11px;
   border-radius: 8px;
   border: 2px solid #72211f;
@@ -54,11 +62,12 @@
 /* Modern chat modal container */
 .chat-app-container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   min-width: 260px;
   max-width: 370px;
   width: 96vw;
   max-height: 80vh;
+  height: 80vh;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 24px rgba(33,150,243,0.13), 0 1.5px 6px rgba(0,0,0,0.07);
@@ -71,43 +80,114 @@
   padding: 0;
   transition: box-shadow 0.2s;
 }
-.chat-app-close-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #2196f3;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 5px 18px;
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(33,150,243,0.12);
-  margin: 0;
-  transition: background 0.2s;
-  z-index: 10;
-}
-.chat-app-close-btn:hover {
-  background: #1769aa;
-}
+
 @media (max-width: 600px) {
   .chat-app-container {
-    flex-direction: column;
-    width: 98vw;
-    min-width: unset;
-    max-width: 99vw;
-    max-height: 80vh;
-    left: 50%;
-    right: unset;
-    bottom: 10px;
-    top: unset;
-    transform: translateX(-50%);
-    border-radius: 14px;
-    box-shadow: 0 2px 12px rgba(33,150,243,0.13), 0 1px 4px rgba(0,0,0,0.08);
-    margin: 0 auto;
-    padding: 0;
+    width: 100vw !important;
+    height: 70vh !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    position: fixed !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    z-index: 1002 !important;
   }
+  .chat-app-sidebar {
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+    border-bottom: 1px solid #e3e3e3 !important;
+    border-right: none !important;
+    padding: 10px 4px !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+  }
+  .chat-app-main {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 8px 2px 8px 2px !important;
+    background: #f9f9f9 !important;
+    overflow: hidden !important;
+  }
+  .chat-app-messages {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    margin-bottom: 8px !important;
+    padding-right: 2px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .chat-app-container {
+    width: 100vw;
+    min-width: 0;
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    bottom: 0;
+    right: 0;
+  }
+  .chat-app-sidebar {
+    border-radius: 0;
+    border-bottom: 1px solid #e3e3e3;
+    border-right: none;
+    width: 100vw;
+    min-width: 0;
+    max-width: 100vw;
+    padding: 10px 4px;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+  .chat-app-main {
+    min-height: 200px;
+    padding: 8px 2px 8px 2px;
+  }
+}
+/* Chat close button always top right, above content */
+/* Chat close button smaller and more to the right */
+.chat-app-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(33,150,243,0.12);
+  cursor: pointer;
+  z-index: 1100;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  /* Ensure it overlays and does not take up layout space */
+  /* Remove any static/block display from parent */
+}
   .chat-app-sidebar {
     width: 100%;
     min-width: 0;
@@ -123,18 +203,6 @@
     flex: 1;
     padding: 10px 4px 8px 4px;
     min-height: 220px;
-  }
-  .chat-app-close-btn {
-    position: static;
-    width: 95vw;
-    margin-left: 0;
-    margin-right: 0;
-    font-size: 15px;
-    padding: 6px 0;
-    margin-top: 4px;
-    margin-bottom: 8px;
-    border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(33,150,243,0.10);
   }
   /* Responsive profile row for mobile */
   .chat-app-profile-row {
@@ -168,16 +236,18 @@
     margin-bottom: 0 !important;
     display: inline-block !important;
   }
-}
 
 .chat-app-sidebar {
-  width: 100px;
+  width: 100%;
   background: #f5f8fa;
-  border-right: 1px solid #e3e3e3;
+  border-right: none;
+  border-bottom: 1px solid #e3e3e3;
   padding: 10px 6px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow-x: visible;
+  overflow-y: visible;
 }
 
 .chat-app-convos {
@@ -188,12 +258,13 @@
 
 .chat-app-convo-btn {
   width: 100%;
-  background: #fbe1cd;
-  border: 2px solid #72211f;
-  border-radius: 8px;
-  padding: 6px 0;
-  font-size: 13px;
-  color: #72211f;
+  background: #f5f8fa;
+  border-right: none;
+  border-bottom: 1px solid #e3e3e3;
+  padding: 10px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-bottom: 4px;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
@@ -208,18 +279,27 @@
 }
 
 .chat-app-main {
-  flex: 2;
+  flex: 1 1 0%;
   display: flex;
   flex-direction: column;
   padding: 10px 8px;
   background: #f9f9f9;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .chat-app-messages {
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 0;
+  max-height: 100%;
   overflow-y: auto;
   margin-bottom: 8px;
   padding-right: 2px;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #f9f9f9;
 }
 
 .chat-app-message {
@@ -237,7 +317,8 @@
   border-radius: 8px;
   padding: 6px 10px;
   font-size: 13px;
-  max-width: 180px;
+  max-width: 340px;
+    -webkit-overflow-scrolling: touch !important;
   word-break: break-word;
 }
 .chat-app-bubble.self {
@@ -287,10 +368,23 @@
 }
 
 .chat-app-search {
-  width: 100%;
+  width: 80%;
+  max-width: 220px;
+  min-width: 80px;
   margin-bottom: 4px;
   border-radius: 6px;
   border: 1px solid #ddd;
-  padding: 4px 8px;
-  font-size: 13px;
+  padding: 2px 6px;
+  font-size: 12px;
+  height: 28px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .chat-app-search {
+    width: 90%;
+    max-width: 98vw;
+    font-size: 13px;
+    height: 32px;
+  }
 }

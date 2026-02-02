@@ -1,0 +1,19 @@
+{
+  "adoptionConfirmed": "Adoption confirmed!",
+  "adoptionCompletedClosed": "Adoption completed. Conversation closed.",
+  "adoptionCanceled": "Adoption canceled!",
+  "adoptionCanceledClosed": "Adoption canceled. Conversation closed.",
+  "searchUsersPlaceholder": "Search users by name or username...",
+  "noUsersOnline": "No users online",
+  "pendingAdoptions": "Pending Adoptions:",
+  "noPendingAdoptions": "No pending adoptions for your account.",
+  "deleteConversation": "Delete",
+  "unblock": "Unblock",
+  "block": "Block",
+  "confirmAdoption": "Confirm Adoption",
+  "cancelAdoption": "Cancel Adoption",
+  "noPendingAdoptionsFound": "No pending adoptions found.",
+  "typing": "Typing...",
+  "typeMessagePlaceholder": "Type a message...",
+  "send": "Send"
+}

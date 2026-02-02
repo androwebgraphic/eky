@@ -1,0 +1,19 @@
+{
+  "adoptionConfirmed": "Adoption bestätigt!",
+  "adoptionCompletedClosed": "Adoption abgeschlossen. Unterhaltung geschlossen.",
+  "adoptionCanceled": "Adoption abgebrochen!",
+  "adoptionCanceledClosed": "Adoption abgebrochen. Unterhaltung geschlossen.",
+  "searchUsersPlaceholder": "Benutzer nach Name oder Benutzername suchen...",
+  "noUsersOnline": "Keine Benutzer online",
+  "pendingAdoptions": "Ausstehende Adoptionen:",
+  "noPendingAdoptions": "Keine ausstehenden Adoptionen für Ihr Konto.",
+  "deleteConversation": "Löschen",
+  "unblock": "Entsperren",
+  "block": "Blockieren",
+  "confirmAdoption": "Adoption bestätigen",
+  "cancelAdoption": "Adoption abbrechen",
+  "noPendingAdoptionsFound": "Keine ausstehenden Adoptionen gefunden.",
+  "typing": "Schreibt...",
+  "typeMessagePlaceholder": "Nachricht eingeben...",
+  "send": "Senden"
+}

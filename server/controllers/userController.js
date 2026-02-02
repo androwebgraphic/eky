@@ -1,5 +1,42 @@
-// Get user by ID (for chat block/unblock and profile fetch)
-export const getUserById = async (req, res) => {
+// Remove a d
+// og from the user's wishlist
+const User = require('../models/userModel');
+const removeFromWishlist = async (req, res) => {
+	try {
+		const userId = req.user._id;
+		const dogId = req.params.dogId;
+		await User.findByIdAndUpdate(userId, { $pull: { wishlist: dogId } });
+		res.status(200).json({ message: 'Dog removed from wishlist' });
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+// Get the user's wishlist
+const getWishlist = async (req, res) => {
+	try {
+		const userId = req.user._id;
+		const user = await User.findById(userId).populate('wishlist');
+		res.status(200).json({ wishlist: user.wishlist });
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+// Send a password reset link (stub)
+const requestPasswordReset = async (req, res) => {
+	// For now, just return success
+	res.status(200).json({ message: 'Password reset link (stub) sent if user exists.' });
+};
+// ...existing code...
+const Dog = require('../models/dogModel');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
+
+const getUserById = async (req, res) => {
 	try {
 		const user = await User.findById(req.params.id);
 		if (!user) return res.status(404).json({ message: 'User not found' });
@@ -8,8 +45,7 @@ export const getUserById = async (req, res) => {
 		res.status(500).json({ message: err.message });
 	}
 };
-// User search for chat app
-export const searchUsers = async (req, res) => {
+const searchUsers = async (req, res) => {
 	try {
 		const query = req.query.query || '';
 		if (!query.trim()) return res.json([]);
@@ -31,15 +67,8 @@ export const searchUsers = async (req, res) => {
 		res.status(500).json({ message: err.message });
 	}
 };
-import User from '../models/userModel.js';
-import Dog from '../models/dogModel.js';
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import sharp from 'sharp';
-import fs from 'fs';
-import path from 'path';
-import nodemailer from 'nodemailer';
-import crypto from 'crypto';
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 const generateToken = (userId) => {
 	return jwt.sign({ userId }, process.env.JWT_SECRET || 'fallback_secret', {
@@ -67,7 +96,7 @@ const signupUser = async (req, res) => {
 		name,
 		email,
 		username,
-		password:hashedPassword,
+		password: hashedPassword,
 		person: person || 'private',
 		phone
 	});
@@ -171,24 +200,49 @@ const updateProfile = async (req, res) => {
 			const uploadDir = `uploads/users/${userId}`;
 			
 			// Create directory if it doesn't exist
-			if (!fs.existsSync(uploadDir)) {
-				fs.mkdirSync(uploadDir, { recursive: true });
-			}
+			   if (!fs.existsSync(uploadDir)) {
+				   try {
+					   fs.mkdirSync(uploadDir, { recursive: true });
+				   } catch (mkdirErr) {
+					   console.error('[PROFILE UPLOAD ERROR] Failed to create uploadDir:', uploadDir, mkdirErr);
+					   return res.status(500).json({ message: 'Failed to create upload directory.' });
+				   }
+			   }
 
 			try {
-				// Process and save profile picture
-				console.log('Starting image processing...');
-				const filename = `profile-${Date.now()}.jpg`;
+				   // Validate file buffer
+				   if (!req.file.buffer || !req.file.buffer.length) {
+					   console.error('[PROFILE UPLOAD ERROR] File buffer is empty!');
+					   return res.status(400).json({ message: 'Uploaded file is empty or invalid.' });
+				   }
+				   // Log first 16 bytes for debug
+				   console.log('[PROFILE UPLOAD DEBUG] First 16 bytes:', req.file.buffer.slice(0, 16));
+				   // Optionally, check mimetype
+				   if (!req.file.mimetype.startsWith('image/')) {
+					   console.error('[PROFILE UPLOAD ERROR] File is not an image:', req.file.mimetype);
+					   return res.status(400).json({ message: 'Uploaded file is not an image.' });
+				   }
+				   // Determine extension and sharp pipeline
+				// FORCE PNG: Always save as PNG with .png extension
+				const ext = '.png';
+				const filename = `profile-${Date.now()}${ext}`;
 				const filepath = path.join(uploadDir, filename);
-				console.log('Image will be saved to:', filepath);
-
-				// Resize and save image with auto-rotation
-				await sharp(req.file.buffer)
-					.rotate() // Auto-rotate based on EXIF orientation
-					.resize(300, 300, { fit: 'cover', position: 'center' })
-					.jpeg({ quality: 90 })
-					.toFile(filepath);
-
+				console.log('[PROFILE UPLOAD FINAL DEBUG] FORCED PNG branch. Filename:', filename, 'Filepath:', filepath);
+				try {
+					await sharp(req.file.buffer)
+						.rotate()
+						.resize(300, 300, { fit: 'cover', position: 'center' })
+						.png({ quality: 90 })
+						.toFile(filepath);
+				} catch (sharpErr) {
+					console.error('[PROFILE UPLOAD ERROR] sharp.toFile failed:', filepath, sharpErr);
+					return res.status(500).json({ message: 'Failed to save processed image.' });
+				}
+				// Double-check file existence after write
+				if (!fs.existsSync(filepath)) {
+					console.error('[PROFILE UPLOAD ERROR] File not found after sharp.toFile:', filepath);
+					return res.status(500).json({ message: 'Image file missing after save.' });
+				}
 				console.log('Image processing completed successfully');
 				// Set relative URL for database storage
 				profilePictureUrl = `/${uploadDir}/${filename}`;
@@ -222,10 +276,10 @@ const updateProfile = async (req, res) => {
 
 		console.log('User updated successfully:', {
 			_id: updatedUser._id,
-			name: updatedUser.name,
-			profilePicture: updatedUser.profilePicture
+			name: updatedUser.name
 		});
 		
+		console.log('[PROFILE UPDATE DEBUG] updatedUser.profilePicture:', updatedUser.profilePicture);
 		res.status(200).json({
 			message: 'Profile updated successfully',
 			user: {
@@ -287,80 +341,12 @@ const addToWishlist = async (req, res) => {
 		res.status(200).json({ message: "Dog added to wishlist" });
 		
 	} catch (error) {
-		res.status(500).json({ message: error.message });
-		console.log("Error in addToWishlist: ", error.message);
-	}
-};
-
-const removeFromWishlist = async (req, res) => {
-	try {
-		const { dogId } = req.params;
-		const userId = req.user._id;
-		
-		// Remove dog from wishlist
-		await User.findByIdAndUpdate(userId, {
-			$pull: { wishlist: dogId }
-		});
-		
-		res.status(200).json({ message: "Dog removed from wishlist" });
-		
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-		console.log("Error in removeFromWishlist: ", error.message);
-	}
-};
-
-const getWishlist = async (req, res) => {
-	try {
-		const userId = req.user._id;
-		
-		// Get user's wishlist with populated dog data
-		const user = await User.findById(userId).populate({
-			path: 'wishlist',
-			model: 'Dog'
-		});
-		
-		res.status(200).json(user.wishlist);
-		
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-		console.log("Error in getWishlist: ", error.message);
-	}
-};
-
-// Configure email transporter (you'll need to set up environment variables)
-const createTransporter = () => {
-	// For development, you can use a service like Gmail or Ethereal
-	// For production, use a proper email service like SendGrid, AWS SES, etc.
-	return nodemailer.createTransport({
-		service: 'gmail', // or your preferred email service
-		auth: {
-			user: process.env.EMAIL_USER, // Your email
-			pass: process.env.EMAIL_PASS  // Your app password
-		}
-	});
-};
-
-const requestPasswordReset = async (req, res) => {
-	try {
-		const { email } = req.body;
-		
-		// Find user by email
-		const user = await User.findOne({ email });
-		if (!user) {
-			// Don't reveal if email exists or not for security
-			return res.status(200).json({ message: 'If an account with that email exists, a password reset link has been sent.' });
-		}
-		
-		// Generate reset token
-		const resetToken = crypto.randomBytes(32).toString('hex');
-		const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
-		
 		// Set reset token and expiration (1 hour)
 		user.passwordResetToken = resetTokenHash;
 		user.passwordResetExpires = Date.now() + 60 * 60 * 1000; // 1 hour
 		await user.save();
 		
+		console.log('Update data:', updateData);
 		// Create reset URL
 		const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
 		
@@ -403,12 +389,19 @@ const requestPasswordReset = async (req, res) => {
 			res.status(500).json({ 
 				message: 'Error sending password reset email. Please try again later.' 
 			});
-		}
-		
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-		console.log("Error in requestPasswordReset: ", error.message);
+			}
+	    }
 	}
-};
 
-export { signupUser, loginUser, updateProfile, deleteProfile, addToWishlist, removeFromWishlist, getWishlist, requestPasswordReset };
+module.exports = {
+	signupUser,
+	loginUser,
+	updateProfile,
+	deleteProfile,
+	addToWishlist,
+	removeFromWishlist,
+	getWishlist,
+	requestPasswordReset,
+	getUserById,
+	searchUsers
+};

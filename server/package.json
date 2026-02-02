@@ -1,11 +1,11 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.cjs",
   "scripts": {
-    "dev": "nodemon  server.js",
-    "start": "node server.js",
-    "stop": "pkill -f 'node server.js' || pkill -f nodemon || true"
+    "dev": "nodemon server.cjs",
+    "start": "node server.cjs",
+    "stop": "pkill -f 'node server.cjs' || pkill -f nodemon || true"
   },
   "keywords": [],
   "author": "",
@@ -20,14 +20,13 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "leaflet": "^1.9.4",
-    "mongoose": "^8.9.6",
+    "mongoose": "^8.22.0",
     "multer": "^2.0.2",
     "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.12",
     "passport": "^0.7.0",
     "passport-facebook": "^3.0.0",
     "passport-google-oauth20": "^2.0.0",
-    "proxy": "http://localhost:3001",
     "react-leaflet": "^5.0.0",
     "sharp": "^0.34.5",
     "socket.io": "^4.8.3",

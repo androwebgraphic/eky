@@ -1,7 +1,7 @@
 // Usage: node mongo_check.js
 // This script lists all collections and documents in your MongoDB 'eky' database.
 
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const uri = process.env.MONGO_URI || 'mongodb+srv://andreassklizovic:jl31156l@eky.zw3yij8.mongodb.net/eky?retryWrites=true&w=majority';
 

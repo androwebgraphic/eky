@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -10,8 +10,8 @@ interface EditDogFormData {
   description?: string;
   size?: string;
   gender?: 'male' | 'female';
-  vaccinated?: boolean;
-  neutered?: boolean;
+  vaccinated?: boolean | string;
+  neutered?: boolean | string;
   images?: string[];
 }
 
@@ -23,32 +23,37 @@ interface EditDogModalProps {
 
 const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave }) => {
   const { t } = useTranslation();
-    const { register, handleSubmit, reset, watch } = useForm<EditDogFormData>({
+    const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<EditDogFormData>({
       defaultValues: {
         ...dog,
         gender: dog.gender === 'female' ? 'female' : 'male',
         vaccinated: dog.vaccinated === true ? 'true' : 'false',
         neutered: dog.neutered === true ? 'true' : 'false',
+        images: [],
       }
     });
 
-    const genderValue = watch('gender');
-    const vaccinatedValue = watch('vaccinated');
-    const neuteredValue = watch('neutered');
+  // Reset form when dog changes
+  React.useEffect(() => {
+    reset({
+      ...dog,
+      gender: dog.gender === 'female' ? 'female' : 'male',
+      vaccinated: dog.vaccinated === true ? 'true' : 'false',
+      neutered: dog.neutered === true ? 'true' : 'false',
+      images: [],
+    });
+  }, [dog, reset]);
 
-    useEffect(() => {
-      reset({
-        ...dog,
-        gender: dog.gender === 'female' ? 'female' : 'male',
-        vaccinated: dog.vaccinated === true ? 'true' : 'false',
-        neutered: dog.neutered === true ? 'true' : 'false',
-      });
-    }, [dog, reset]);
-  // Removed unused window resize effect
+  // Handle image upload and save files in form state
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArr = Array.from(e.target.files);
+      setValue('images', filesArr as any, { shouldValidate: true });
+    }
+  };
 
-  useEffect(() => {
-    console.log('[EditDogModal] Mounted with dog:', dog);
-  }, [dog]);
+
+  // Removed useEffect for reset and mount log
 
   const onSubmit: SubmitHandler<EditDogFormData> = fields => {
     // Convert string values to correct types for health fields
@@ -57,27 +62,84 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
       vaccinated: String(fields.vaccinated) === 'true',
       neutered: String(fields.neutered) === 'true',
       gender: fields.gender === 'male' ? 'male' : 'female',
+      images: fields.images || [],
     };
-    console.log('[EditDogModal] onSubmit called with fields:', updatedFields);
     onSave({ ...dog, ...updatedFields });
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      background: 'rgba(0,0,255,0.2)',
-      zIndex: 999999,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      pointerEvents: 'auto',
-    }}>
-      <div style={{ position: 'relative', minWidth: '320px', minHeight: '220px', maxWidth: '90vw', maxHeight: '90vh' }}>
+    <>
+      {/* Overlay, not interactive */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,255,0.2)',
+          zIndex: 999998,
+        }}
+      />
+      {/* Modal content, fully interactive */}
+      <div
+        className="editdog-modal-container"
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          minWidth: '320px',
+          minHeight: '80px',
+          maxWidth: '98vw',
+          width: '100%',
+          maxHeight: '80vh',
+          boxSizing: 'border-box',
+          padding: '0',
+          zIndex: 999999,
+        }}
+      >
+        {/* Responsive style for desktop: make modal much wider and more comfortable */}
+        <style>{`
+          @media (min-width: 900px) {
+            .editdog-modal-container {
+              max-width: 640px !important;
+              min-width: 420px !important;
+              padding: 0 !important;
+            }
+            .editdog-modal-container form {
+              padding: 2rem 2.5rem !important;
+              font-size: 1.13rem !important;
+            }
+          }
+          .editdog-modal-container input,
+          .editdog-modal-container textarea {
+            font-size: 1.15rem !important;
+            padding: 0.7rem 1rem !important;
+            border-radius: 8px !important;
+            border: 1.5px solid #bbb !important;
+            margin-bottom: 1.2rem !important;
+            width: 100%;
+            box-sizing: border-box;
+          }
+          .editdog-modal-container input[type="radio"],
+          .editdog-modal-container input[type="checkbox"] {
+            width: 26px !important;
+            height: 26px !important;
+            min-width: 26px !important;
+            min-height: 26px !important;
+            accent-color: #3498db !important;
+            cursor: pointer !important;
+            z-index: 2 !important;
+            position: relative;
+          }
+          .editdog-modal-container label {
+            font-size: 1.13rem !important;
+            cursor: pointer !important;
+          }
+        `}</style>
         {/* Force user-select:auto for all radios/checkboxes in modal */}
+        {/* Remove pointer-events: auto from .editdog-modal-override to avoid blocking events */}
         <style>{`
           .editdog-modal-override input[type="radio"],
           .editdog-modal-override input[type="checkbox"],
@@ -86,19 +148,9 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
             -webkit-user-select: auto !important;
             -moz-user-select: auto !important;
             -ms-user-select: auto !important;
-            pointer-events: auto !important;
           }
         `}</style>
-        {/* Minimal radio test for debugging */}
-        <div style={{ padding: 20, background: '#fff', zIndex: 9999999, position: 'relative', marginBottom: 20 }}>
-          <h4>Test Radio (in Modal)</h4>
-          <label style={{ userSelect: 'auto', pointerEvents: 'auto' }}>
-            <input type="radio" name="modaltestgender" value="male" style={{ userSelect: 'auto', pointerEvents: 'auto' }} /> Male
-          </label>
-          <label style={{ userSelect: 'auto', pointerEvents: 'auto', marginLeft: 20 }}>
-            <input type="radio" name="modaltestgender" value="female" style={{ userSelect: 'auto', pointerEvents: 'auto' }} /> Female
-          </label>
-        </div>
+        {/* ...removed test radio block... */}
         <button
           type="button"
           onClick={() => {
@@ -131,51 +183,50 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '1.2rem',
-            fontSize: '1rem',
+            gap: '0.7rem',
+            fontSize: '1.05rem',
             background: 'white',
             border: '2px solid #3498db',
             borderRadius: 12,
-            padding: '2rem',
-            minWidth: '320px',
-            minHeight: '220px',
-            maxWidth: '90vw',
-            maxHeight: '90vh',
+            padding: '1.2rem 1.5rem',
+            minWidth: '0',
+            minHeight: '0',
+            maxWidth: '640px',
+            width: '100%',
+            maxHeight: '55vh',
             zIndex: 9999999,
             boxSizing: 'border-box',
             overflow: 'auto',
           }}
         >
           <label>{t('adddog.name')}</label>
-          <input
-            {...register('name')}
-            defaultValue={dog.name || ''}
-            required
-            style={{ padding: '0.5rem', borderRadius: 6, border: '1px solid #ccc', fontSize: '1rem', marginBottom: '1rem' }}
-          />
+          <input {...register('name', { required: true })} />
+          {errors.name && <span style={{ color: 'red', fontSize: '0.95rem' }}>{t('adddog.name')} is required</span>}
+
           <label>{t('adddog.breed')}</label>
-          <input
-            {...register('breed')}
-            defaultValue={dog.breed || ''}
-            style={{ padding: '0.5rem', borderRadius: 6, border: '1px solid #ccc', fontSize: '1rem', marginBottom: '1rem' }}
-          />
+          <input {...register('breed')} />
+
           <label>{t('adddog.age') || 'Age'}</label>
-          <input type="number" {...register('age')} defaultValue={dog.age || ''} style={{ padding: '0.5rem', borderRadius: 6, border: '1px solid #ccc', fontSize: '1rem', marginBottom: '1rem' }} />
+          <input type="number" {...register('age')} />
+
           <label>{t('adddog.color') || 'Color'}</label>
-          <input {...register('color')} defaultValue={dog.color || ''} style={{ padding: '0.5rem', borderRadius: 6, border: '1px solid #ccc', fontSize: '1rem', marginBottom: '1rem' }} />
+          <input {...register('color')} />
+
           <label>{t('adddog.description') || 'Description'}</label>
-          <textarea {...register('description')} defaultValue={dog.description || ''} style={{ padding: '0.5rem', borderRadius: 6, border: '1px solid #ccc', fontSize: '1rem', marginBottom: '1rem' }} />
+          <textarea {...register('description')} />
+
           <label>{t('adddog.size') || 'Size'}</label>
-          <input {...register('size')} defaultValue={dog.size || ''} style={{ padding: '0.5rem', borderRadius: 6, border: '1px solid #ccc', fontSize: '1rem', marginBottom: '1rem' }} />
+          <input {...register('size')} />
+
           <label>{t('adddog.gender') || 'Gender'}</label>
           <div style={{ display: 'flex', gap: '2rem', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', pointerEvents: 'auto', zIndex: 9999999 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 9999999 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', fontSize: '1.1rem', userSelect: 'auto' }}>
                 <input
                   type="radio"
                   value="male"
-                  {...register('gender')}
-                  style={{ accentColor: '#3498db', width: 20, height: 20, marginRight: 6, background: '#fff', border: '2px solid #3498db', pointerEvents: 'auto', zIndex: 9999999, userSelect: 'auto' }}
+                  {...register('gender', { required: true })}
+                  name="gender"
                 />
                 Male
               </label>
@@ -184,22 +235,24 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
                   type="radio"
                   value="female"
                   {...register('gender')}
-                  style={{ accentColor: '#e74c3c', width: 20, height: 20, marginRight: 6, background: '#fff', border: '2px solid #e74c3c', pointerEvents: 'auto', zIndex: 9999999, userSelect: 'auto' }}
+                  name="gender"
                 />
                 Female
               </label>
+              {errors.gender && <span style={{ color: 'red', fontSize: '0.95rem' }}>{t('adddog.gender')} is required</span>}
             </div>
           </div>
+
           {/* Health radio buttons */}
           <div style={{ display: 'flex', gap: '2rem', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', pointerEvents: 'auto', zIndex: 9999999 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 9999999 }}>
               <span style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.5rem' }}>Vaccinated:</span>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', userSelect: 'auto' }}>
                 <input
                   type="radio"
                   value="true"
-                  {...register('vaccinated')}
-                  style={{ accentColor: '#27ae60', width: 20, height: 20, marginRight: 6, background: '#fff', border: '2px solid #27ae60', pointerEvents: 'auto', zIndex: 9999999, userSelect: 'auto' }}
+                  {...register('vaccinated', { required: true })}
+                  name="vaccinated"
                 />
                 Yes
               </label>
@@ -208,19 +261,20 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
                   type="radio"
                   value="false"
                   {...register('vaccinated')}
-                  style={{ accentColor: '#e74c3c', width: 20, height: 20, marginRight: 6, background: '#fff', border: '2px solid #e74c3c', pointerEvents: 'auto', zIndex: 9999999, userSelect: 'auto' }}
+                  name="vaccinated"
                 />
                 No
               </label>
+              {errors.vaccinated && <span style={{ color: 'red', fontSize: '0.95rem' }}>Vaccinated is required</span>}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', pointerEvents: 'auto', zIndex: 9999999 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 9999999 }}>
               <span style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.5rem' }}>Neutered:</span>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', userSelect: 'auto' }}>
                 <input
                   type="radio"
                   value="true"
-                  {...register('neutered')}
-                  style={{ accentColor: '#27ae60', width: 20, height: 20, marginRight: 6, background: '#fff', border: '2px solid #27ae60', pointerEvents: 'auto', zIndex: 9999999, userSelect: 'auto' }}
+                  {...register('neutered', { required: true })}
+                  name="neutered"
                 />
                 Yes
               </label>
@@ -229,16 +283,24 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
                   type="radio"
                   value="false"
                   {...register('neutered')}
-                  style={{ accentColor: '#e74c3c', width: 20, height: 20, marginRight: 6, background: '#fff', border: '2px solid #e74c3c', pointerEvents: 'auto', zIndex: 9999999, userSelect: 'auto' }}
+                  name="neutered"
                 />
                 No
               </label>
+              {errors.neutered && <span style={{ color: 'red', fontSize: '0.95rem' }}>Neutered is required</span>}
             </div>
           </div>
+
           {/* Image upload */}
           <label style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Images</label>
-          <input type="file" multiple accept="image/*" {...register('images')} style={{ marginBottom: '1rem' }} />
-          <div className="editdog-modal-override" style={{
+          <input type="file" multiple accept="image/*" onChange={handleImageChange} style={{ marginBottom: '1rem', fontSize: '1.1rem', padding: '0.5rem 0.7rem' }} />
+
+          {/* Debug output for troubleshooting */}
+          <pre style={{ background: '#f8f8f8', color: '#333', fontSize: '0.95rem', padding: '0.5rem', borderRadius: 4, marginBottom: 8 }}>
+            {JSON.stringify(watch(), null, 2)}
+          </pre>
+
+          <div style={{
             display: 'flex',
             justifyContent: 'flex-end',
             marginTop: '1.5rem',
@@ -267,7 +329,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
           </div>
         </form>
       </div>
-    </div>
+    </>
   );
 };
 

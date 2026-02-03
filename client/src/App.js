@@ -1,5 +1,6 @@
 
 import Header from "./components/Header";
+import RadioTest from "./components/pages/RadioTest";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import ErrorBoundary from './components/ErrorBoundary';
@@ -22,31 +23,30 @@ const App = () => {
     }, []);
 
     return (
-
-      
-      <ErrorBoundary>
-        <div id="Wrap">
-
-          <Header />
-          <Navbar />
-          <Footer onChatClick={() => setShowChatModal(true)} />
-        </div>
-        {showChatModal && (
-          <div style={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            zIndex: 10010,
-            boxShadow: '0 4px 24px rgba(33,150,243,0.18)',
-            borderRadius: 16,
-          }}>
-            <div style={{ background: '#fff', borderRadius: 16, padding: 0, minWidth: 260, maxWidth: 340, position: 'relative' }} onClick={e => e.stopPropagation()}>
-              <ChatApp />
-            </div>
+      <>
+        <RadioTest />
+        <ErrorBoundary>
+          <div id="Wrap">
+            <Header />
+            <Navbar />
+            <Footer onChatClick={() => setShowChatModal(true)} />
           </div>
-        )}
-      </ErrorBoundary>
-    
+          {showChatModal && (
+            <div style={{
+              position: 'fixed',
+              bottom: 24,
+              right: 24,
+              zIndex: 10010,
+              boxShadow: '0 4px 24px rgba(33,150,243,0.18)',
+              borderRadius: 16,
+            }}>
+              <div style={{ background: '#fff', borderRadius: 16, padding: 0, minWidth: 260, maxWidth: 340, position: 'relative' }} onClick={e => e.stopPropagation()}>
+                <ChatApp />
+              </div>
+            </div>
+          )}
+        </ErrorBoundary>
+      </>
     );
 };
 

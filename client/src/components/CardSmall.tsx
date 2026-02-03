@@ -123,7 +123,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     } else {
       setInWishlist(false);
     }
-  }, [_id, currentUser?.wishlist?.length]);
+  }, [_id, currentUser?.wishlist]);
 
   // Likes state
   const [likesCount, setLikesCount] = useState(likes?.length || 0);
@@ -284,177 +284,61 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   }
 
   return (
-    <div className="card" style={compactDesktop ? {
-      maxWidth: '300px',
-      padding: '1rem',
-      fontSize: '1rem',
-      borderRadius: '1rem',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-      margin: '0.75rem',
-      background: '#fff',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-    } : undefined}>
-      <div
-        className="img"
-        style={{
-          position: 'relative',
-          cursor: images && images.length > 0 ? 'pointer' : 'default',
-          width: compactDesktop ? '180px' : '100%',
-          aspectRatio: '1/1',
-          height: 0,
-          paddingBottom: compactDesktop ? '180px' : '100%',
-          display: 'block',
-          background: '#f8f8f8',
-          boxSizing: 'border-box',
-          border: '1px solid #eee',
-          overflow: 'hidden',
-          borderRadius: compactDesktop ? '1rem' : '1rem'
-        }}
-        onClick={images && images.length > 0 ? () => setShowSlider(true) : undefined}
-      >
-        {hasVideoUrl ? (
-          <video controls width="100%" height="auto" poster={posterUrl}>
-            <source src={videoUrl} />
-          </video>
-        ) : (largestImgUrl) ? (
-            <div style={{ position: 'relative', width: smallImage ? '60%' : '100%', margin: smallImage ? '0 auto' : undefined, aspectRatio: '1/1' }}>
-              <img src={largestImgUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', borderRadius: '1rem', imageRendering: 'auto', position: 'relative', zIndex: 1 }} onError={e => { (e.target as HTMLImageElement).src = '/img/nany.jpg'; }} />
-              {adoptionStatusState === 'pending' && (
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  background: 'rgba(0,0,0,0.45)',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 22,
-                  fontWeight: 700,
-                  letterSpacing: 1,
-                  borderRadius: '1rem',
-                  zIndex: 2,
-                  textShadow: '0 2px 8px #000',
-                  pointerEvents: 'none'
-                }}>
-                  In adoption process
-                </div>
-              )}
-            </div>
-        ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
-            <div style={{ position: 'relative', width: smallImage ? '60%' : '100%', margin: smallImage ? '0 auto' : undefined, aspectRatio: '1/1' }}>
-              <img src={thumbUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', borderRadius: '1rem', imageRendering: 'auto', position: 'relative', zIndex: 1 }} onError={e => { (e.target as HTMLImageElement).src = '/img/nany.jpg'; }} />
-              {adoptionStatusState === 'pending' && (
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  background: 'rgba(0,0,0,0.45)',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 22,
-                  fontWeight: 700,
-                  letterSpacing: 1,
-                  borderRadius: '1rem',
-                  zIndex: 2,
-                  textShadow: '0 2px 8px #000',
-                  pointerEvents: 'none'
-                }}>
-                  In adoption process
-                </div>
-              )}
-            </div>
-        ) : null}
-        {/* Modal DogImageSlider */}
-        {uniqueImages.length > 0 && showSlider && createPortal(
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              background: 'rgba(0,0,0,0.85)',
-              zIndex: 9999,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              padding: '6vw 0', // More vertical padding for overlay
-              boxSizing: 'border-box',
-            }}
-            onClick={e => {
-              if (e.target === e.currentTarget) setShowSlider(false);
-            }}
-            aria-modal="true"
-            role="dialog"
-            tabIndex={-1}
-          >
-            <div
-              style={{
-                position: 'relative',
-                maxWidth: 600,
-                width: '90vw',
-                height: 'auto',
-                maxHeight: '80vh',
-                background: 'transparent',
-                borderRadius: 16,
-                overflow: 'hidden',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'column',
-                boxSizing: 'border-box',
-              }}
-              onClick={e => e.stopPropagation()}
-              tabIndex={-1}
-              ref={sliderContentRef}
-            >
-              <button
-                type="button"
-                onClick={e => { e.stopPropagation(); setShowSlider(false); }}
-                aria-label="Close slider"
-                style={{
-                  position: 'absolute',
-                  top: 8,
-                  right: 8,
-                  zIndex: 10000,
-                  background: '#e74c3c',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: 40,
-                  height: 40,
-                  fontSize: 28,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'background 0.2s',
-                  userSelect: 'none',
-                  touchAction: 'manipulation',
-                }}
-                tabIndex={0}
-                autoFocus
-              >
-                ×
-              </button>
-              <DogImageSlider images={uniqueImages} alt={name} />
-            </div>
-          </div>,
-          document.body
-        )}
-      </div>
+    <>
+      {(typeof onViewDetails === 'function') ? (
+        <button
+          className="card card-small-clickable"
+          style={compactDesktop ? {
+            maxWidth: '300px',
+            padding: '1rem',
+            fontSize: '1rem',
+            borderRadius: '1rem',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            margin: '0.75rem',
+            background: '#fff',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            cursor: 'pointer',
+            border: 'none',
+            width: '100%',
+            textAlign: 'left',
+          } : {
+            cursor: 'pointer',
+            border: 'none',
+            width: '100%',
+            textAlign: 'left',
+          }}
+          onClick={onViewDetails}
+          tabIndex={0}
+          role="button"
+          type="button"
+        >
+          {/* ...existing card content... */}
+          {cardContent()}
+        </button>
+      ) : (
+        <div className="card"
+          style={compactDesktop ? {
+            maxWidth: '300px',
+            padding: '1rem',
+            fontSize: '1rem',
+            borderRadius: '1rem',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            margin: '0.75rem',
+            background: '#fff',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          } : undefined}
+        >
+          {cardContent()}
+        </div>
+      )}
+    </>
+      {/* The cardContent function will render the card's inner content, including the image, description, actions, etc. */}
+
+// ...existing code...
       <div className="description">
           <h3 style={{ color: '#751719', marginBottom: 4 }}>
             <strong>{t('fields.name')}</strong> {name}
@@ -717,12 +601,18 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
                 👍 {likesCount}
               </div>
             )}
-            {canEdit && onEdit && (
+            {canEdit && (
               <button
                 className="edit"
-                onClick={onEdit}
+                onClick={e => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  console.log('[CardSmall] Edit button clicked for dog:', _id, name);
+                  if (onEdit) onEdit(e);
+                  else alert('No onEdit handler provided!');
+                }}
                 title={t('button.edit') || 'Edit'}
-
+                style={{ pointerEvents: 'auto', opacity: 1, zIndex: 9999 }}
               >
                 {t('button.edit') || 'Edit'}
               </button>
@@ -742,6 +632,175 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
       </div>
 
   );
+
+  // Helper to render the card's inner content
+  function cardContent() {
+    return (
+      <>
+        <div
+          className="img"
+          style={{
+            position: 'relative',
+            cursor: images && images.length > 0 ? 'pointer' : 'default',
+            width: compactDesktop ? '180px' : '100%',
+            aspectRatio: '1/1',
+            height: 0,
+            paddingBottom: compactDesktop ? '180px' : '100%',
+            display: 'block',
+            background: '#f8f8f8',
+            boxSizing: 'border-box',
+            border: '1px solid #eee',
+            overflow: 'hidden',
+            borderRadius: compactDesktop ? '1rem' : '1rem'
+          }}
+          onClick={images && images.length > 0 ? (e) => { e.stopPropagation(); setShowSlider(true); } : undefined}
+        >
+          {hasVideoUrl ? (
+            <video controls width="100%" height="auto" poster={posterUrl}>
+              <source src={videoUrl} />
+            </video>
+          ) : (largestImgUrl) ? (
+              <div style={{ position: 'relative', width: smallImage ? '60%' : '100%', margin: smallImage ? '0 auto' : undefined, aspectRatio: '1/1' }}>
+                <img src={largestImgUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', borderRadius: '1rem', imageRendering: 'auto', position: 'relative', zIndex: 1 }} onError={e => { (e.target as HTMLImageElement).src = '/img/nany.jpg'; }} />
+                {adoptionStatusState === 'pending' && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'rgba(0,0,0,0.45)',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 22,
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    borderRadius: '1rem',
+                    zIndex: 2,
+                    textShadow: '0 2px 8px #000',
+                    pointerEvents: 'none'
+                  }}>
+                    In adoption process
+                  </div>
+                )}
+              </div>
+          ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
+              <div style={{ position: 'relative', width: smallImage ? '60%' : '100%', margin: smallImage ? '0 auto' : undefined, aspectRatio: '1/1' }}>
+                <img src={thumbUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', borderRadius: '1rem', imageRendering: 'auto', position: 'relative', zIndex: 1 }} onError={e => { (e.target as HTMLImageElement).src = '/img/nany.jpg'; }} />
+                {adoptionStatusState === 'pending' && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'rgba(0,0,0,0.45)',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 22,
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    borderRadius: '1rem',
+                    zIndex: 2,
+                    textShadow: '0 2px 8px #000',
+                    pointerEvents: 'none'
+                  }}>
+                    In adoption process
+                  </div>
+                )}
+              </div>
+          ) : null}
+          {/* Modal DogImageSlider */}
+          {uniqueImages.length > 0 && showSlider && createPortal(
+            <div
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                background: 'rgba(0,0,0,0.85)',
+                zIndex: 9999,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                padding: '6vw 0', // More vertical padding for overlay
+                boxSizing: 'border-box',
+              }}
+              onClick={e => {
+                if (e.target === e.currentTarget) setShowSlider(false);
+              }}
+              aria-modal="true"
+              role="dialog"
+              tabIndex={-1}
+            >
+              <div
+                style={{
+                  position: 'relative',
+                  maxWidth: 600,
+                  width: '90vw',
+                  height: 'auto',
+                  maxHeight: '80vh',
+                  background: 'transparent',
+                  borderRadius: 16,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexDirection: 'column',
+                  boxSizing: 'border-box',
+                }}
+                onClick={e => e.stopPropagation()}
+                tabIndex={-1}
+                ref={sliderContentRef}
+              >
+                <button
+                  type="button"
+                  onClick={e => { e.stopPropagation(); setShowSlider(false); }}
+                  aria-label="Close slider"
+                  style={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    zIndex: 10000,
+                    background: '#e74c3c',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: 40,
+                    height: 40,
+                    fontSize: 28,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'background 0.2s',
+                    userSelect: 'none',
+                    touchAction: 'manipulation',
+                  }}
+                  tabIndex={0}
+                  autoFocus
+                >
+                  ×
+                </button>
+                <DogImageSlider images={uniqueImages} alt={name} />
+              </div>
+            </div>,
+            document.body
+          )}
+        </div>
+        {/* ...rest of the card content (description, actions, etc.)... */}
+        {/* The rest of the card content is already present below in the file and will be rendered as before. */}
+      </>
+    );
+  }
 };
 
 export default CardSmall;

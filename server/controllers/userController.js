@@ -326,72 +326,22 @@ const addToWishlist = async (req, res) => {
 	try {
 		const { dogId } = req.body;
 		const userId = req.user._id;
-		
 		// Check if dog is already in wishlist
 		const user = await User.findById(userId);
 		if (user.wishlist.includes(dogId)) {
 			return res.status(400).json({ message: "Dog already in wishlist" });
 		}
-		
 		// Add dog to wishlist
 		await User.findByIdAndUpdate(userId, {
 			$push: { wishlist: dogId }
 		});
-		
-		res.status(200).json({ message: "Dog added to wishlist" });
-		
+		// Return updated user (without password)
+		const updatedUser = await User.findById(userId).select('-password');
+		res.status(200).json({ message: "Dog added to wishlist", user: updatedUser });
 	} catch (error) {
-		// Set reset token and expiration (1 hour)
-		user.passwordResetToken = resetTokenHash;
-		user.passwordResetExpires = Date.now() + 60 * 60 * 1000; // 1 hour
-		await user.save();
-		
-		console.log('Update data:', updateData);
-		// Create reset URL
-		const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-		
-		// Email content
-		const message = `
-			<h2>Password Reset Request</h2>
-			<p>You requested a password reset for your account.</p>
-			<p>Click the link below to reset your password. This link will expire in 1 hour:</p>
-			<a href="${resetUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
-			<p>If you didn't request this, please ignore this email.</p>
-			<p>If the button doesn't work, copy and paste this link: ${resetUrl}</p>
-		`;
-		
-		try {
-			// Send email (if configured)
-			if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-				const transporter = createTransporter();
-				await transporter.sendMail({
-					from: process.env.EMAIL_USER,
-					to: user.email,
-					subject: 'Password Reset Request - EKY Dog Adoption',
-					html: message
-				});
-			} else {
-				// For development - log the reset URL to console
-				console.log('Password reset URL (development):', resetUrl);
-			}
-			
-			res.status(200).json({ 
-				message: 'Password reset link sent to your email. Please check your inbox and spam folder.' 
-			});
-			
-		} catch (emailError) {
-			console.log('Email sending failed:', emailError);
-			// Clear the reset token if email fails
-			user.passwordResetToken = undefined;
-			user.passwordResetExpires = undefined;
-			await user.save();
-			
-			res.status(500).json({ 
-				message: 'Error sending password reset email. Please try again later.' 
-			});
-			}
-	    }
+		res.status(500).json({ message: error.message });
 	}
+}
 
 module.exports = {
 	signupUser,

@@ -44,6 +44,7 @@ interface CardSmallProps {
   adoptionQueue?: any;
   onDogUpdate?: (update: any) => void;
   createdAt?: string;
+  smallImage?: boolean;
 }
 
 const CardSmall: React.FC<CardSmallProps> = (props) => {
@@ -69,6 +70,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     adoptionQueue,
     onDogUpdate,
     createdAt,
+    smallImage = false,
   } = props;
 
   const { t } = useTranslation();
@@ -111,14 +113,14 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   };
   // Wishlist state
   const [inWishlist, setInWishlist] = useState(false);
+  // Keep inWishlist in sync with AuthContext user.wishlist
   React.useEffect(() => {
     if (_id && currentUser && currentUser.wishlist) {
-      const isInList = currentUser.wishlist.includes(_id);
-      setInWishlist(isInList);
+      setInWishlist(currentUser.wishlist.includes(_id));
     } else {
       setInWishlist(false);
     }
-  }, [_id, currentUser]);
+  }, [_id, currentUser && currentUser.wishlist && currentUser.wishlist.length]);
 
   // Likes state
   const [likesCount, setLikesCount] = useState(likes?.length || 0);
@@ -171,19 +173,17 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     // Removed unused latestToken variable
     const currentlyInWishlist = inWishlist;
     if (currentlyInWishlist) {
-      // Pass latestToken to removeFromWishlist if needed
       const result = await removeFromWishlist(_id);
       if (result.success) {
-        setInWishlist(false);
+        // AuthContext will update user.wishlist, effect above will update inWishlist
         alert('Removed from wishlist!');
       } else {
         alert('Failed to remove from wishlist: ' + (result.error || 'Unknown error'));
       }
     } else {
-      // Pass latestToken to addToWishlist if needed
       const result = await addToWishlist(_id);
       if (result.success) {
-        setInWishlist(true);
+        // AuthContext will update user.wishlist, effect above will update inWishlist
         alert('Added to wishlist! ❤️');
       } else {
         alert('Failed to add to wishlist: ' + (result.error || 'Unknown error'));
@@ -304,7 +304,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
             <source src={videoUrl} />
           </video>
         ) : (largestImgUrl) ? (
-            <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
+            <div style={{ position: 'relative', width: smallImage ? '60%' : '100%', margin: smallImage ? '0 auto' : undefined, aspectRatio: '1/1' }}>
               <img src={largestImgUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', borderRadius: '1rem', imageRendering: 'auto', position: 'relative', zIndex: 1 }} onError={e => { (e.target as HTMLImageElement).src = '/img/nany.jpg'; }} />
               {adoptionStatusState === 'pending' && (
                 <div style={{
@@ -331,7 +331,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
               )}
             </div>
         ) : (typeof (thumbUrl) !== 'undefined' && thumbUrl) ? (
-            <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
+            <div style={{ position: 'relative', width: smallImage ? '60%' : '100%', margin: smallImage ? '0 auto' : undefined, aspectRatio: '1/1' }}>
               <img src={thumbUrl} alt={name} style={{ width: '100%', height: '100%', aspectRatio: '1/1', objectFit: 'cover', display: 'block', borderRadius: '1rem', imageRendering: 'auto', position: 'relative', zIndex: 1 }} onError={e => { (e.target as HTMLImageElement).src = '/img/nany.jpg'; }} />
               {adoptionStatusState === 'pending' && (
                 <div style={{

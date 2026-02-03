@@ -256,6 +256,7 @@ const DogList: React.FC = () => {
       <div id="Doglist">
 
         {!loading && !error && filteredDogs.map(d => {
+          const showSmallImage = filteredDogs.length === 1;
           // Extract dog owner ID (handle both string and object, and _id vs id)
           let dogOwnerId;
           if (typeof (d.user as any) === 'string') {
@@ -283,6 +284,7 @@ const DogList: React.FC = () => {
           
           return (
             <CardSmall
+              smallImage={showSmallImage}
               key={d._id}
               _id={d._id}
               name={d.name}

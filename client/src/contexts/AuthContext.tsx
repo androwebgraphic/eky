@@ -165,7 +165,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const data = await response.json();
 
       if (response.ok) {
-        if (user) {
+        // Use updated user from backend if available
+        if (data && data.user) {
+          updateUser(data.user);
+        } else if (user) {
+          // fallback: update manually if backend did not return user
           const updatedUser = {
             ...user,
             wishlist: [...(user.wishlist || []), dogId]
@@ -220,8 +224,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (response.ok) {
-        const wishlist = await response.json();
-        return wishlist;
+        const data = await response.json();
+        // The backend returns { wishlist: [...] }
+        return data.wishlist || [];
       } else {
         return [];
       }

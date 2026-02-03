@@ -31,7 +31,10 @@ const DogList: React.FC = () => {
 	useEffect(() => {
 		fetch('http://localhost:3001/api/dogs')
 			.then(res => res.json())
-			.then(data => setDogs(data))
+			.then(data => {
+				console.log('[DOGLIST DEBUG] Dogs from backend:', data);
+				setDogs(data);
+			})
 			.catch(() => setDogs([]));
 	}, []);
 

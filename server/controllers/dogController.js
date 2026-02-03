@@ -560,7 +560,8 @@ const listDogs = async (req, res) => {
     const dogs = await Dog.find()
       .populate('user', 'name username')
       .sort({ createdAt: -1 });
-    res.json(dogs);
+      console.log('[LISTDOGS DEBUG] Returning dogs:', JSON.stringify(dogs, null, 2));
+      res.json(dogs);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

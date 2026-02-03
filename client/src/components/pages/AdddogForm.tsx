@@ -52,6 +52,7 @@ const AdddogForm: React.FC = () => {
   const [smallPreview, setSmallPreview] = useState<string | null>(null);
   const [isVideo, setIsVideo] = useState(false);
   const [posterBlob, setPosterBlob] = useState<Blob | null>(null);
+  const [mediaError, setMediaError] = useState<string | null>(null);
 
   // create poster image for a video file by capturing first frame in browser
   const createVideoPoster = (file: File): Promise<Blob> => {
@@ -180,6 +181,12 @@ const AdddogForm: React.FC = () => {
     if (!fields.location?.trim()) {
       setSubmitError(t('adddog.locationRequired'));
       return;
+    }
+    if (!mediaFile) {
+      setMediaError(t('adddog.mediaRequired') || 'Image is required');
+      return;
+    } else {
+      setMediaError(null);
     }
     
     try {
@@ -357,6 +364,7 @@ const AdddogForm: React.FC = () => {
             <input type="file" accept="image/*,video/*" id="adddog-media" name="media" onChange={onFileChange} />
             {smallPreview && <img className="thumb-small" src={smallPreview} alt="thumb" />}
           </div>
+          {mediaError && <div className="error" role="alert" style={{ color: 'red', marginTop: 4 }}>{mediaError}</div>}
           {mediaPreview && (
             <div id="media-preview">
               {isVideo ? (

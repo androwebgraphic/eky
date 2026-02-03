@@ -57,8 +57,13 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 	function toAbsUrl(url?: string) {
 		if (!url) return url;
 		const cacheBuster = (window as any).__EKY_IMAGE_CB || ((window as any).__EKY_IMAGE_CB = Date.now());
+		// Use backend URL from env or default
+		const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 		if (/^https?:\/\//.test(url)) return url + (url.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
-		if (url.startsWith('/uploads/') || url.startsWith('/u/dogs/')) return url + '?cb=' + cacheBuster;
+		if (url.startsWith('/uploads/') || url.startsWith('/u/dogs/')) {
+			// Prepend backend URL if not already absolute
+			return apiBase + url + '?cb=' + cacheBuster;
+		}
 		return url;
 	}
 
@@ -116,9 +121,9 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 				boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
 				background: '#fff',
 				margin: 8,
-				minWidth: 220,
-				maxWidth: 320,
-				flex: '1 1 220px',
+				minWidth: 320,
+				maxWidth: 420,
+				flex: '1 1 320px',
 				overflow: 'hidden',
 				position: 'relative',
 			}}

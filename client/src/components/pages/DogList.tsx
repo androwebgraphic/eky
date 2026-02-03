@@ -255,8 +255,140 @@ const DogList: React.FC = () => {
 
       <div id="Doglist">
 
-        {!loading && !error && filteredDogs.map(d => {
+        {!loading && !error && filteredDogs.length === 1 && typeof window !== 'undefined' && window.innerWidth > 768 ? (
+          (() => {
+            const d = filteredDogs[0];
+            return (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', width: '100%' }}>
+                <CardSmall
+                  smallImage={true}
+                  compactDesktop={true}
+                  key={d._id}
+                  _id={d._id}
+                  name={d.name}
+                  breed={d.breed}
+                  age={d.age}
+                  likes={d.likes || []}
+                  images={d.images}
+                  video={d.video}
+                  thumbnail={d.thumbnail}
+                  color={d.color}
+                  place={d.place || d.location}
+                  description={d.description}
+                  size={d.size}
+                  gender={d.gender}
+                  vaccinated={d.vaccinated}
+                  neutered={d.neutered}
+                  user={d.user}
+                  canEdit={Boolean(isAuthenticated && (user?._id === d.user?._id || user?.role === 'superadmin'))}
+                  adoptionStatus={d.adoptionStatus}
+                  adoptionQueue={d.adoptionQueue}
+                  onDogUpdate={update => {
+                    console.log('[DogList] onDogUpdate received:', update);
+                    if (update && update.remove && update.id) {
+                      setDogs(prev => {
+                        console.log('[DogList] Dog list before removal:', prev);
+                        const filtered = prev.filter(dog => dog._id !== update.id);
+                        console.log('[DogList] Dog list after removal:', filtered);
+                        return filtered;
+                      });
+                      if (selectedDog && selectedDog._id === update.id) setSelectedDog(null);
+                      // Always refetch dogs after adoption actions to ensure correct state
+                      refetchDogs();
+                    } else {
+                      refetchDogs();
+                      if (selectedDog && update && selectedDog._id === update._id) setSelectedDog(update);
+                    }
+                  }}
+                  onViewDetails={(event) => {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    setModalPosition({
+                      x: rect.left + rect.width / 2,
+                      y: rect.top + rect.height / 2
+                    });
+                    setSelectedDog(d);
+                  }}
+                  onEdit={(event) => {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    setModalPosition({
+                      x: rect.left + rect.width / 2,
+                      y: rect.top + rect.height / 2
+                    });
+                    handleEditDog(d);
+                  }}
+                  onRemove={() => handleRemoveDog(d)}
+                />
+              </div>
+            );
+          })()
+        ) :
+        !loading && !error && filteredDogs.length > 1 && typeof window !== 'undefined' && window.innerWidth > 768 ? (
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'flex-start', gap: '1.5rem', width: '100%' }}>
+            {filteredDogs.map(d => (
+              <CardSmall
+                smallImage={false}
+                compactDesktop={true}
+                key={d._id}
+                _id={d._id}
+                name={d.name}
+                breed={d.breed}
+                age={d.age}
+                likes={d.likes || []}
+                images={d.images}
+                video={d.video}
+                thumbnail={d.thumbnail}
+                color={d.color}
+                place={d.place || d.location}
+                description={d.description}
+                size={d.size}
+                gender={d.gender}
+                vaccinated={d.vaccinated}
+                neutered={d.neutered}
+                user={d.user}
+                canEdit={Boolean(isAuthenticated && (user?._id === d.user?._id || user?.role === 'superadmin'))}
+                adoptionStatus={d.adoptionStatus}
+                adoptionQueue={d.adoptionQueue}
+                onDogUpdate={update => {
+                  console.log('[DogList] onDogUpdate received:', update);
+                  if (update && update.remove && update.id) {
+                    setDogs(prev => {
+                      console.log('[DogList] Dog list before removal:', prev);
+                      const filtered = prev.filter(dog => dog._id !== update.id);
+                      console.log('[DogList] Dog list after removal:', filtered);
+                      return filtered;
+                    });
+                    if (selectedDog && selectedDog._id === update.id) setSelectedDog(null);
+                    // Always refetch dogs after adoption actions to ensure correct state
+                    refetchDogs();
+                  } else {
+                    refetchDogs();
+                    if (selectedDog && update && selectedDog._id === update._id) setSelectedDog(update);
+                  }
+                }}
+                onViewDetails={(event) => {
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  setModalPosition({
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                  });
+                  setSelectedDog(d);
+                }}
+                onEdit={(event) => {
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  setModalPosition({
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                  });
+                  handleEditDog(d);
+                }}
+                onRemove={() => handleRemoveDog(d)}
+              />
+            ))}
+          </div>
+        ) :
+        !loading && !error && filteredDogs.map(d => {
           const showSmallImage = filteredDogs.length === 1;
+          const compactDesktop = typeof window !== 'undefined' && window.innerWidth > 768;
           // Extract dog owner ID (handle both string and object, and _id vs id)
           let dogOwnerId;
           if (typeof (d.user as any) === 'string') {
@@ -285,6 +417,7 @@ const DogList: React.FC = () => {
           return (
             <CardSmall
               smallImage={showSmallImage}
+              compactDesktop={compactDesktop}
               key={d._id}
               _id={d._id}
               name={d.name}

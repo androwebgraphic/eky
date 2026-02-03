@@ -45,6 +45,7 @@ interface CardSmallProps {
   onDogUpdate?: (update: any) => void;
   createdAt?: string;
   smallImage?: boolean;
+  compactDesktop?: boolean;
 }
 
 const CardSmall: React.FC<CardSmallProps> = (props) => {
@@ -71,6 +72,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
     onDogUpdate,
     createdAt,
     smallImage = false,
+    compactDesktop = false,
   } = props;
 
   const { t } = useTranslation();
@@ -282,22 +284,33 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   }
 
   return (
-    <div className="card">
+    <div className="card" style={compactDesktop ? {
+      maxWidth: '300px',
+      padding: '1rem',
+      fontSize: '1rem',
+      borderRadius: '1rem',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+      margin: '0.75rem',
+      background: '#fff',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+    } : undefined}>
       <div
         className="img"
         style={{
           position: 'relative',
           cursor: images && images.length > 0 ? 'pointer' : 'default',
-          width: '100%',
+          width: compactDesktop ? '180px' : '100%',
           aspectRatio: '1/1',
           height: 0,
-          paddingBottom: '100%',
+          paddingBottom: compactDesktop ? '180px' : '100%',
           display: 'block',
           background: '#f8f8f8',
           boxSizing: 'border-box',
           border: '1px solid #eee',
           overflow: 'hidden',
-          borderRadius: '1rem'
+          borderRadius: compactDesktop ? '1rem' : '1rem'
         }}
         onClick={images && images.length > 0 ? () => setShowSlider(true) : undefined}
       >

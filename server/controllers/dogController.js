@@ -558,10 +558,10 @@ const getPendingAdoptions = async (req, res) => {
 const listDogs = async (req, res) => {
   try {
     const dogs = await Dog.find()
-      .populate('user', 'name username')
+      .populate('user', 'name username email phone person')
       .sort({ createdAt: -1 });
-      console.log('[LISTDOGS DEBUG] Returning dogs:', JSON.stringify(dogs, null, 2));
-      res.json(dogs);
+    console.log('[LISTDOGS DEBUG] Returning dogs:', JSON.stringify(dogs, null, 2));
+    res.json(dogs);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

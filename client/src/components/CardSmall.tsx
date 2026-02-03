@@ -36,26 +36,6 @@ export interface CardSmallProps {
 }
 
 const CardSmall: React.FC<CardSmallProps> = (props) => {
-		// Map modal state and handler for dog list card
-		type MapCoords = { lat: number; lon: number };
-		const [showMap, setShowMap] = React.useState(false);
-		const [mapCoords, setMapCoords] = React.useState<MapCoords | null>(null);
-		const [mapPlace, setMapPlace] = React.useState<string | null>(null);
-
-		const handleShowMap = async (place: string) => {
-			setShowMap(false);
-			setMapCoords(null);
-			setMapPlace(place);
-			if (!place) return;
-			try {
-				const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(place)}&format=json&limit=1`);
-				const data = await res.json();
-				if (data && data.length > 0) {
-					setMapCoords({ lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) });
-					setShowMap(true);
-				}
-			} catch {}
-		};
 	const { t } = useTranslation();
 	       const {
 		       name = 'Unknown',
@@ -93,6 +73,9 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
 		largestImgUrl = toAbsUrl(sorted[0].url);
 	}
+
+	const [imgError, setImgError] = React.useState(false);
+	const [videoError, setVideoError] = React.useState(false);
 
 	const posterUrl = video && video.poster && video.poster.length
 		? toAbsUrl(video.poster[video.poster.length - 1].url)
@@ -159,27 +142,40 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 					       }}
 				       >
 					       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', width: '100%' }}>
-						       {hasVideoUrl ? (
-							       <video controls width="100%" height="200" poster={posterUrl} style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
-								       <source src={videoUrl} />
-							       </video>
-						       ) : largestImgUrl ? (
-							       <img
-								       src={largestImgUrl}
-								       alt={name}
-								       style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}
-								       loading="lazy"
-							       />
-						       ) : thumbUrl ? (
-							       <img
-								       src={thumbUrl}
-								       alt={name}
-								       style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}
-								       loading="lazy"
-							       />
-						       ) : (
-							       <div style={{ width: '100%', height: '200px', background: '#eee', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }} />
-						       )}
+							{hasVideoUrl && !videoError ? (
+								<video
+									controls
+									width="100%"
+									height="200"
+									poster={posterUrl}
+									style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}
+									onError={() => setVideoError(true)}
+								>
+									<source src={videoUrl} />
+								</video>
+							) : videoError ? (
+								<div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>Video failed to load</div>
+							) : largestImgUrl && !imgError ? (
+								<img
+									src={largestImgUrl}
+									alt={name}
+									style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}
+									loading="lazy"
+									onError={() => setImgError(true)}
+								/>
+							) : imgError ? (
+								<div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>Image failed to load</div>
+							) : thumbUrl && !imgError ? (
+								<img
+									src={thumbUrl}
+									alt={name}
+									style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}
+									loading="lazy"
+									onError={() => setImgError(true)}
+								/>
+							) : (
+								<div style={{ width: '100%', height: '200px', background: '#eee', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }} />
+							)}
 						       <div style={{ padding: '16px', width: '100%' }}>
 							       <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 4 }}>{name}</div>
 							       <div style={{ color: '#666', fontSize: 15, marginBottom: 4 }}>{breed}</div>
@@ -187,34 +183,17 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 								       {age !== undefined && <span>{t('Age')}: {age} </span>}
 								       {gender && <span>{t('Gender')}: {t(gender)}</span>}
 							       </div>
-								{place && (
-									<div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>
-										{t('Place')}: <span style={{color:'#1976d2',textDecoration:'underline',cursor:'pointer',marginLeft:4}}
-											onClick={()=>handleShowMap(place)}>{place}</span>
-										{showMap && mapCoords && mapPlace === place && (
-											<div style={{marginTop:8,position:'relative',background:'#fff',border:'1px solid #ccc',borderRadius:12,padding:8,zIndex:1000}}>
-												<button type="button" onClick={()=>setShowMap(false)} style={{position:'absolute',top:8,right:8,width:28,height:28,background:'#e74c3c',color:'#fff',border:'none',borderRadius:'50%',fontSize:'1.2rem',fontWeight:'bold',cursor:'pointer',zIndex:1000000}} aria-label="Close" title="Close">×</button>
-												<iframe
-													title="Map"
-													width="100%"
-													height="200"
-													style={{borderRadius:12, border:'1px solid #ccc'}}
-													src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCoords.lon-0.01},${mapCoords.lat-0.01},${mapCoords.lon+0.01},${mapCoords.lat+0.01}&layer=mapnik&marker=${mapCoords.lat},${mapCoords.lon}`}
-													allowFullScreen
-												/>
-												<div style={{fontSize:'0.9rem',marginTop:4}}>
-													<a href={`https://www.openstreetmap.org/?mlat=${mapCoords.lat}&mlon=${mapCoords.lon}#map=16/${mapCoords.lat}/${mapCoords.lon}`} target="_blank" rel="noopener noreferrer">View larger map</a>
-												</div>
+									 {(place || (props as any).location) && (
+											<div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>
+												{t('fields.location', 'Location')}: <span style={{color:'#1976d2',marginLeft:4}}>{place || (props as any).location}</span>
 											</div>
 										)}
-									</div>
-								)}
 							       {vaccinated && <div style={{ color: '#388e3c', fontSize: 13, marginBottom: 4 }}>{t('Vaccinated')}</div>}
 							       {adoptionStatus && <div style={{ color: '#1976d2', fontSize: 13, marginBottom: 4 }}>{t('Adoption Status')}: {t(adoptionStatus)}</div>}
 						       </div>
 					       </div>
 					       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', alignItems: 'center', padding: '8px 8px 16px 8px', width: '100%' }}>
-									       <button type="button" onClick={onViewDetails} style={{ ...styles.details, flex: '1 1 40%', minWidth: 60, maxWidth: 60, height: 28, fontSize: 12, padding: '0', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t('viewDetails', t('button.viewDetails', 'Details'))}</button>
+											   <button type="button" onClick={onViewDetails} style={{ ...styles.details, flex: '1 1 40%', minWidth: 60, maxWidth: 60, height: 28, fontSize: 12, padding: '0', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t('button.viewDetails', 'Details')}</button>
 									       <button type="button" onClick={handleAdopt} style={{ ...styles.adopt, flex: '1 1 40%', minWidth: 60, maxWidth: 60, height: 28, fontSize: 12, padding: '0', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t('adopt', t('button.adopt', 'Adoptieren'))}</button>
 									       <button type="button" onClick={handleWishlist} style={{ ...styles.wishlist, flex: '1 1 40%', minWidth: 60, maxWidth: 60, height: 28, fontSize: 12, padding: '0', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t('wishlist', t('button.addToList', 'Zur Liste'))}</button>
 									       {canEdit && (

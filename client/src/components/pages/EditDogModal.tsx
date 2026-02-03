@@ -45,11 +45,21 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave, o
     });
   }, [dog, reset]);
 
-  // Handle image upload and save files in form state
+  // Image upload and preview
+  const [imagePreviews, setImagePreviews] = React.useState<string[]>([]);
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArr = Array.from(e.target.files);
       setValue('images', filesArr as any, { shouldValidate: true });
+      // Generate previews
+      const readers = filesArr.map(file => {
+        return new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+      });
+      Promise.all(readers).then(setImagePreviews);
     }
   };
 
@@ -90,6 +100,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave, o
           border: '3px solid #3498db',
           borderRadius: 16,
           zIndex: 999999,
+          pointerEvents: 'auto',
         }}
       >
         {/* Responsive style for desktop: make modal much wider and more comfortable */}
@@ -213,7 +224,6 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave, o
                   type="radio"
                   value="male"
                   {...register('gender', { required: true })}
-                  name="gender"
                 />
                 Male
               </label>
@@ -222,7 +232,6 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave, o
                   type="radio"
                   value="female"
                   {...register('gender')}
-                  name="gender"
                 />
                 Female
               </label>
@@ -239,7 +248,6 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave, o
                   type="radio"
                   value="true"
                   {...register('vaccinated', { required: true })}
-                  name="vaccinated"
                 />
                 Yes
               </label>
@@ -248,7 +256,6 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave, o
                   type="radio"
                   value="false"
                   {...register('vaccinated')}
-                  name="vaccinated"
                 />
                 No
               </label>
@@ -261,7 +268,6 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave, o
                   type="radio"
                   value="true"
                   {...register('neutered', { required: true })}
-                  name="neutered"
                 />
                 Yes
               </label>
@@ -270,7 +276,6 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave, o
                   type="radio"
                   value="false"
                   {...register('neutered')}
-                  name="neutered"
                 />
                 No
               </label>
@@ -281,6 +286,14 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave, o
           {/* Image upload */}
           <label style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Images</label>
           <input type="file" multiple accept="image/*" onChange={handleImageChange} style={{ marginBottom: '1rem', fontSize: '1.1rem', padding: '0.5rem 0.7rem' }} />
+          {/* Image previews */}
+          {imagePreviews.length > 0 && (
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+              {imagePreviews.map((src, idx) => (
+                <img key={idx} src={src} alt={`preview-${idx}`} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '1px solid #ccc' }} />
+              ))}
+            </div>
+          )}
 
           {/* Debug output removed */}
 

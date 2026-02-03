@@ -5,7 +5,10 @@ import DogList from './DogList';
 const Home: React.FC = () => {
   return (
     <main>
-       <h1>TEST APLIKACIJA</h1>
+      <div style={{ color: 'blue', fontWeight: 'bold', marginBottom: 16 }}>
+        HOME DEBUG: Home component rendered
+      </div>
+      <h1>TEST APLIKACIJA</h1>
       <Search 
         searchTerm={''}
         onSearchChange={() => {}}

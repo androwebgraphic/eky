@@ -491,11 +491,6 @@ const DogList: React.FC = () => {
       {editDog && modalPosition && createPortal(
         <EditDogModal
           dog={editDog}
-          onClose={() => {
-            console.log('[DogList] EditDogModal closed by user');
-            setEditDog(null);
-            setModalPosition(null);
-          }}
           onSave={async (updatedDog) => {
             console.log('[DogList] onSave called from EditDogModal', updatedDog);
             // Update the dog list and also update editDog so modal receives new images
@@ -528,7 +523,8 @@ const DogList: React.FC = () => {
             // Never set selectedDog here; only update editDog and refresh list
             console.log('[DogList] setEditDog called with latestDog (modal stays open)', latestDog);
           }}
-          modalPosition={modalPosition}
+          // ...existing code...
+          isSingleDog={dogs.length === 1}
         />, 
         document.body
       )}

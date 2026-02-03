@@ -78,8 +78,22 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       setProfilePicturePreview('');
       setError(null);
       setSuccess(null);
+    } else if (isOpen && !user) {
+      setFormData({ name: '', email: '', username: '', phone: '' });
+      setProfilePicture(null);
+      setProfilePicturePreview('');
+      setError(null);
+      setSuccess(null);
     }
-  }, [isOpen, activeTab, user, loadWishlist, typedUser.email, typedUser.name, typedUser.phone, typedUser.username]);
+    // Listen for wishlist-updated events (from DogList add)
+    const handler = (e: any) => {
+      if (e.detail && Array.isArray(e.detail.wishlist)) {
+        setWishlist(e.detail.wishlist);
+      }
+    };
+    window.addEventListener('wishlist-updated', handler);
+    return () => window.removeEventListener('wishlist-updated', handler);
+  }, [isOpen, activeTab]);
 
   const handleModalClose = React.useCallback(() => {
     console.log('handleModalClose called');
@@ -468,7 +482,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                 <img 
                   key={profilePicKey}
                   src={profilePicturePreview || getProfileImageUrl((user as any)?.profilePicture)}
-                  alt={user.username ? `${user.username}'s profile` : 'User profile'} 
+                  alt={user && user.username ? `${user.username}'s profile` : 'User profile'} 
                   style={{ 
                     width: '60px', 
                     height: '60px', 
@@ -478,8 +492,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   }}
                 />
                 <div>
-                  <h3 style={{ margin: '0 0 4px 0' }}>{user.username}</h3>
-                  <span style={{ color: '#4CAF50', fontSize: '14px' }}>{t('userProfile.online')}</span>
+                  <h3 style={{ margin: '0 0 4px 0' }}>{user ? user.username : ''}</h3>
+                  {user && <span style={{ color: '#4CAF50', fontSize: '14px' }}>{t('userProfile.online')}</span>}
                 </div>
               </div>
             </div>
@@ -690,16 +704,16 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
             ) : (
               <div>
                 <div style={{ marginBottom: '16px' }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{t('userProfile.fullName')}:</span> {user.name}
+                  <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{t('userProfile.fullName')}:</span> {user ? user.name : ''}
                 </div>
                 <div style={{ marginBottom: '16px' }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{t('userProfile.email')}:</span> {user.email}
+                  <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{t('userProfile.email')}:</span> {user ? user.email : ''}
                 </div>
                 <div style={{ marginBottom: '20px' }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{t('userProfile.username')}:</span> {user.username}
+                  <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{t('userProfile.username')}:</span> {user ? user.username : ''}
                 </div>
                 <div style={{ marginBottom: '16px' }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{t('userProfile.phone')}:</span> {typedUser.phone}
+                  <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{t('userProfile.phone')}:</span> {typedUser ? typedUser.phone : ''}
                 </div>
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                   <button
@@ -860,8 +874,20 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                           const fallbackRemove = t('button.removeFromList');
                           // eslint-disable-next-line no-console
                           console.log('[UserProfileModal] removeKey:', removeKey, '| fallback:', fallbackRemove);
+                          // Optimistically update wishlist for instant UI feedback
+                          setWishlist(prev => {
+                            const updated = prev.filter((d: any) => d._id !== dog._id);
+                            console.log('[WISHLIST DEBUG] Optimistically updated wishlist:', updated);
+                            return updated;
+                          });
                           await removeFromWishlist(dog._id);
-                          await loadWishlist();
+                          // Also update global user state for immediate UI sync
+                          if (user) {
+                            updateUser({
+                              ...user,
+                              wishlist: (user.wishlist || []).filter(id => id !== dog._id)
+                            });
+                          }
                         }}
                         style={{
                           padding: '6px 12px',

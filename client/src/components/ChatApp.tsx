@@ -181,8 +181,10 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
 
   // Block/unblock logic
     // Adoption handlers
+    const [confirmingAdoption, setConfirmingAdoption] = useState(false);
     const handleConfirmAdoption = async (dogId: string, isOwner: boolean) => {
       if (!token) return;
+      setConfirmingAdoption(true);
       try {
         const res = await fetch(`${getApiUrl()}/api/dogs/confirm-adoption`, {
           method: 'POST',
@@ -191,12 +193,19 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
         });
         if (res.ok) {
           setNotification(t('adoptionConfirmed'));
+          // Refetch dog status to sync UI
+          const dogRes = await fetch(`${getApiUrl()}/api/dogs/${dogId}`);
+          if (dogRes.ok) {
+            const dogData = await dogRes.json();
+            setDogStatusMap(prev => ({ ...prev, [dogId]: dogData.adoptionStatus }));
+          }
           setAdoptionDogId('');
           setAdoptionIsOwner(false);
-          // UI will update via socket event (receiveMessage)
         }
       } catch (err) {
         setNotification(t('adoptionConfirmError'));
+      } finally {
+        setConfirmingAdoption(false);
       }
     };
     const handleCancelAdoption = async (dogId: string) => {
@@ -594,8 +603,59 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
             {adoptionDogId && (
               <div style={{ padding: '12px 16px', background: '#fffbe6', borderBottom: '1px solid #ffe58f', display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span>{t('adoptionPending') || 'Adoption pending for this dog.'}</span>
-                <button style={{ background: '#4caf50', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8, display: adoptionIsOwner ? 'inline-block' : 'none' }} onClick={() => handleConfirmAdoption(adoptionDogId, true)}>{t('confirmAdoption') || 'Confirm Adoption'}</button>
-                <button style={{ background: '#f44336', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8, display: !adoptionIsOwner ? 'inline-block' : 'none' }} onClick={() => handleCancelAdoption(adoptionDogId)}>{t('cancelAdoption') || 'Cancel Adoption'}</button>
+                {/* Adoption confirmation logic: */}
+                {(() => {
+                  // Determine if current user has confirmed adoption
+                  // We assume adoptionIsOwner means this user is the owner, not that they've confirmed
+                  // So we need to check dogStatusMap[adoptionDogId] === 'pending' and if this user has confirmed
+                  // For now, let's assume only one confirmation is needed per user (owner/adopter)
+                  const status = dogStatusMap[adoptionDogId];
+                  // If adoption is pending, show confirm button if user has NOT confirmed
+                  // If user has confirmed, show waiting message
+                  // We'll use adoptionIsOwner to determine which button to show
+                  // (You may want to refine this logic if you track confirmations per user)
+                  if (status === 'pending') {
+                    // Show confirm button if user has NOT confirmed
+                    // We'll use adoptionIsOwner as a proxy for role, but need a way to know if this user has confirmed
+                    // For now, if adoptionIsOwner, show confirm; else, show waiting
+                    // Let's improve: if adoptionIsOwner, show confirm; else, show waiting
+                    // But if adoptionIsOwner is false, and user is adopter, show confirm; else, show waiting
+                    // For now, let's show confirm if adoptionIsOwner, else show waiting
+                    if (!confirmingAdoption && adoptionIsOwner) {
+                      return (
+                        <button
+                          style={{ background: '#4caf50', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8, opacity: confirmingAdoption ? 0.6 : 1, pointerEvents: confirmingAdoption ? 'none' : 'auto' }}
+                          onClick={() => handleConfirmAdoption(adoptionDogId, true)}
+                          disabled={confirmingAdoption}
+                        >
+                          {confirmingAdoption ? (t('confirming') || 'Confirming...') : (t('confirmAdoption') || 'Confirm Adoption')}
+                        </button>
+                      );
+                    } else if (!confirmingAdoption && !adoptionIsOwner) {
+                      // If user is adopter, show confirm button
+                      return (
+                        <button
+                          style={{ background: '#4caf50', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8, opacity: confirmingAdoption ? 0.6 : 1, pointerEvents: confirmingAdoption ? 'none' : 'auto' }}
+                          onClick={() => handleConfirmAdoption(adoptionDogId, false)}
+                          disabled={confirmingAdoption}
+                        >
+                          {confirmingAdoption ? (t('confirming') || 'Confirming...') : (t('confirmAdoption') || 'Confirm Adoption')}
+                        </button>
+                      );
+                    } else {
+                      // If user has confirmed, show waiting message
+                      return (
+                        <span style={{ marginLeft: 12, color: '#888' }}>{t('waitingForOtherParty') || 'Waiting for other party to confirm...'}</span>
+                      );
+                    }
+                  }
+                  // If adoption is not pending, show nothing
+                  return null;
+                })()}
+                {/* Cancel button for adopter only, if needed */}
+                {adoptionDogId && !adoptionIsOwner && (
+                  <button style={{ background: '#f44336', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8 }} onClick={() => handleCancelAdoption(adoptionDogId)}>{t('cancelAdoption') || 'Cancel Adoption'}</button>
+                )}
               </div>
             )}
             <div className="chat-app-messages" style={{ flex: 1, overflowY: 'auto', padding: 16, background: '#f9f9fb' }}>

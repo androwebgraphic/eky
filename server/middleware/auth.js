@@ -6,6 +6,7 @@ const auth = async (req, res, next) => {
 		const authHeader = req.header('Authorization');
 		console.log('Auth middleware - Authorization header:', authHeader);
 		
+	console.log('[AUTH DEBUG] Entering auth middleware');
 		const token = authHeader?.replace('Bearer ', '');
 		console.log('Auth middleware - Extracted token:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
 		
@@ -27,7 +28,9 @@ const auth = async (req, res, next) => {
 		
 		req.user = user;
 		console.log('Auth middleware - Success, continuing to next middleware');
+		console.log('[AUTH DEBUG] About to call next()');
 		next();
+		console.log('[AUTH DEBUG] After next() in auth middleware');
 		
 	} catch (error) {
 		console.error('Auth middleware - Error:', error.message);

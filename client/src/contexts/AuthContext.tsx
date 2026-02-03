@@ -176,6 +176,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           };
           updateUser(updatedUser);
         }
+        // If backend returns a populated wishlist, update user.wishlist for UI sync
+        if (data && Array.isArray(data.wishlist)) {
+          if (user) {
+            const updatedUser = {
+              ...user,
+              wishlist: data.wishlist.map((dog: any) => dog._id)
+            };
+            updateUser(updatedUser);
+          }
+          return { success: true, wishlist: data.wishlist };
+        }
         return { success: true };
       } else {
         return { success: false, error: data.message || 'Failed to add to wishlist' };
@@ -195,17 +206,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         },
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        if (user) {
+        // Use updated user from backend if available
+        if (data && data.user) {
+          updateUser(data.user);
+        } else if (user) {
+          // fallback: update manually if backend did not return user
           const updatedUser = {
             ...user,
             wishlist: (user.wishlist || []).filter(id => id !== dogId)
           };
           updateUser(updatedUser);
         }
+        // If backend returns a populated wishlist, update user.wishlist for UI sync
+        if (data && Array.isArray(data.wishlist)) {
+          if (user) {
+            const updatedUser = {
+              ...user,
+              wishlist: data.wishlist.map((dog: any) => dog._id)
+            };
+            updateUser(updatedUser);
+          }
+        }
         return { success: true };
       } else {
-        const data = await response.json();
         return { success: false, error: data.message || 'Failed to remove from wishlist' };
       }
     } catch (error) {
@@ -225,12 +251,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        // The backend returns { wishlist: [...] }
-        return data.wishlist || [];
+        console.log('[WISHLIST FRONTEND DEBUG] Raw backend response:', data);
+        // The backend returns { wishlist: [...] } where wishlist is an array of dog objects
+        if (Array.isArray(data.wishlist)) {
+          // Always update user.wishlist to match backend
+          if (user) {
+            const updatedUser = {
+              ...user,
+              wishlist: data.wishlist.map((dog: any) => dog._id)
+            };
+            updateUser(updatedUser);
+          }
+          return data.wishlist;
+        }
+        // fallback: if wishlist is array of IDs, return empty (should not happen)
+        return [];
       } else {
         return [];
       }
     } catch (error) {
+      console.error('[WISHLIST FRONTEND DEBUG] Error:', error);
       return [];
     }
   };

@@ -1,4 +1,6 @@
 
+console.log('[SERVER DEBUG] server.cjs loaded and running');
+
 const dotenv = require("dotenv");
 dotenv.config({ path: __dirname + '/.env' });
 
@@ -21,6 +23,7 @@ const app = express();
 
 // 3. Set up middleware AFTER app is created
 app.use((req, res, next) => {
+  console.log(`[GLOBAL REQUEST LOGGER] ${req.method} ${req.originalUrl}`);
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');

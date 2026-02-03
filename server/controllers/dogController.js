@@ -169,10 +169,17 @@ const updateDog = async (req, res) => {
 // POST /api/dogs/:id/adopt-confirm
 const confirmAdoption = async (req, res) => {
   try {
+    console.log('[CONFIRM ADOPTION] req.body:', req.body);
+    console.log('[CONFIRM ADOPTION] req.params:', req.params);
     const dogId = req.params.id || req.body.dogId;
+    console.log('[CONFIRM ADOPTION] dogId:', dogId);
     const dog = await Dog.findById(dogId);
-    if (!dog) return res.status(404).json({ message: 'Dog not found' });
+    if (!dog) {
+      console.log('[CONFIRM ADOPTION] Dog not found:', dogId);
+      return res.status(404).json({ message: 'Dog not found' });
+    }
     if (dog.adoptionStatus !== 'pending' || !dog.adoptionQueue) {
+      console.log('[CONFIRM ADOPTION] No pending adoption for this dog:', dogId);
       return res.status(400).json({ message: 'No pending adoption for this dog' });
     }
     const userId = req.user._id.toString();
@@ -183,13 +190,16 @@ const confirmAdoption = async (req, res) => {
       if (!dog.adoptionQueue.ownerConfirmed) {
         dog.adoptionQueue.ownerConfirmed = true;
         justConfirmed = true;
+        console.log('[CONFIRM ADOPTION] Owner confirmed:', userId);
       }
     } else if (userId === adopterId) {
       if (!dog.adoptionQueue.adopterConfirmed) {
         dog.adoptionQueue.adopterConfirmed = true;
         justConfirmed = true;
+        console.log('[CONFIRM ADOPTION] Adopter confirmed:', userId);
       }
     } else {
+      console.log('[CONFIRM ADOPTION] Not authorized:', userId);
       return res.status(403).json({ message: 'Not authorized to confirm adoption' });
     }
     // If both confirmed, mark as adopted and clear adoptionQueue, then allow removal elsewhere if needed
@@ -234,11 +244,14 @@ const confirmAdoption = async (req, res) => {
       return res.json({ message: 'Adoption confirmed and dog deleted', adopted: true, removed: !!deletedDog, dogId });
     } else if (justConfirmed) {
       await dog.save();
+      console.log('[CONFIRM ADOPTION] Confirmation registered, waiting for other party.');
       return res.json({ message: 'Adoption confirmation registered. Waiting for other party.', adopted: false });
     } else {
+      console.log('[CONFIRM ADOPTION] Already confirmed, waiting for other party.');
       return res.json({ message: 'Already confirmed. Waiting for other party.', adopted: false });
     }
   } catch (err) {
+    console.error('[CONFIRM ADOPTION] Server error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 }

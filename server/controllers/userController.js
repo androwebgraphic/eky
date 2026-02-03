@@ -1,26 +1,73 @@
-// Remove a d
-// og from the user's wishlist
+console.log('[WISHLIST DEBUG] userController.js loaded');
 const User = require('../models/userModel');
+// Remove a dog from the user's wishlist
 const removeFromWishlist = async (req, res) => {
 	try {
-		const userId = req.user._id;
 		const dogId = req.params.dogId;
-		await User.findByIdAndUpdate(userId, { $pull: { wishlist: dogId } });
-		res.status(200).json({ message: 'Dog removed from wishlist' });
+		const userId = req.user._id;
+		console.log('[WISHLIST DEBUG] removeFromWishlist called:', { userId, dogId });
+		// Remove dog from wishlist
+		const updateResult = await User.findByIdAndUpdate(userId, {
+			$pull: { wishlist: dogId }
+		}, { new: true });
+		console.log('[WISHLIST DEBUG] DB update result:', updateResult);
+		// Return updated user (without password)
+		const updatedUser = await User.findById(userId).select('-password');
+		const populatedUser = await User.findById(userId).populate('wishlist').select('-password');
+		res.status(200).json({ 
+			message: "Dog removed from wishlist", 
+			user: updatedUser, 
+			wishlist: populatedUser.wishlist || []
+		});
 	} catch (error) {
+		console.error('[WISHLIST DEBUG] Error in removeFromWishlist:', error);
 		res.status(500).json({ message: error.message });
 	}
 };
 
-// Get the user's wishlist
+// Get the user's wishlist (correct async version)
 const getWishlist = async (req, res) => {
+		console.log('[WISHLIST DEBUG] getWishlist controller called');
 	try {
-		const userId = req.user._id;
-		const user = await User.findById(userId).populate('wishlist');
-		res.status(200).json({ wishlist: user.wishlist });
-	} catch (error) {
-		res.status(500).json({ message: error.message });
-	}
+		       const userId = req.user && req.user._id;
+		       console.log('[WISHLIST DEBUG] userId:', userId);
+		       if (!userId) {
+			       console.error('[WISHLIST DEBUG] No userId in req.user:', req.user);
+			       return res.status(401).json({ message: 'Unauthorized: No userId' });
+		       }
+		       let user;
+		       try {
+			       user = await User.findById(userId).populate('wishlist');
+		       } catch (err) {
+			       console.error('[WISHLIST DEBUG] Error during User.findById:', err);
+			       return res.status(500).json({ message: 'Error during user lookup', error: err.message });
+		       }
+		       if (!user) {
+			       console.error('[WISHLIST DEBUG] No user found for userId:', userId);
+			       return res.status(404).json({ message: 'User not found' });
+		       }
+		       if (!('wishlist' in user)) {
+			       console.error('[WISHLIST DEBUG] User found but wishlist property is missing:', user);
+			       return res.status(500).json({ message: 'Wishlist property missing on user' });
+		       }
+		       if (!Array.isArray(user.wishlist)) {
+			       console.error('[WISHLIST DEBUG] Wishlist is not an array:', user.wishlist);
+			       return res.status(500).json({ message: 'Wishlist is not an array' });
+		       }
+		       // Log each wishlist entry for debugging
+		       user.wishlist.forEach((dog, idx) => {
+			       if (!dog) {
+				       console.error(`[WISHLIST DEBUG] Wishlist entry at index ${idx} is null or undefined.`);
+			       } else if (!dog._id) {
+				       console.error(`[WISHLIST DEBUG] Wishlist entry at index ${idx} is missing _id:`, dog);
+			       }
+		       });
+		       console.log('[WISHLIST DEBUG] Populated wishlist:', user.wishlist);
+		       res.status(200).json({ wishlist: user.wishlist });
+	       } catch (error) {
+		       console.error('[WISHLIST DEBUG] Outer catch error:', error);
+		       res.status(500).json({ message: error.message, stack: error.stack });
+	       }
 };
 
 // Send a password reset link (stub)
@@ -331,13 +378,18 @@ const addToWishlist = async (req, res) => {
 		if (user.wishlist.includes(dogId)) {
 			return res.status(400).json({ message: "Dog already in wishlist" });
 		}
-		// Add dog to wishlist
-		await User.findByIdAndUpdate(userId, {
-			$push: { wishlist: dogId }
-		});
-		// Return updated user (without password)
-		const updatedUser = await User.findById(userId).select('-password');
-		res.status(200).json({ message: "Dog added to wishlist", user: updatedUser });
+			// Add dog to wishlist
+			await User.findByIdAndUpdate(userId, {
+				$push: { wishlist: dogId }
+			});
+			// Return updated user (without password) and populated wishlist
+			const updatedUser = await User.findById(userId).select('-password');
+			const populatedUser = await User.findById(userId).populate('wishlist').select('-password');
+			res.status(200).json({ 
+				message: "Dog added to wishlist", 
+				user: updatedUser, 
+				wishlist: populatedUser.wishlist || []
+			});
 	} catch (error) {
 		res.status(500).json({ message: error.message });
 	}

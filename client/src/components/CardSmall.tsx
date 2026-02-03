@@ -115,12 +115,13 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   const [inWishlist, setInWishlist] = useState(false);
   // Keep inWishlist in sync with AuthContext user.wishlist
   React.useEffect(() => {
-    if (_id && currentUser && currentUser.wishlist) {
-      setInWishlist(currentUser.wishlist.includes(_id));
+    const wishlistArr = currentUser?.wishlist || [];
+    if (_id && wishlistArr) {
+      setInWishlist(wishlistArr.includes(_id));
     } else {
       setInWishlist(false);
     }
-  }, [_id, currentUser && currentUser.wishlist && currentUser.wishlist.length]);
+  }, [_id, currentUser?.wishlist?.length]);
 
   // Likes state
   const [likesCount, setLikesCount] = useState(likes?.length || 0);
@@ -165,25 +166,26 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
   };
   const imageBase = getImageBase();
 
+  type AddToWishlistResult = { success: boolean; error?: string; wishlist?: any[] };
   const handleWishlistToggle = async () => {
     if (!_id || !isAuthenticated) {
       alert('Please log in to add dogs to your wishlist');
       return;
     }
-    // Removed unused latestToken variable
     const currentlyInWishlist = inWishlist;
     if (currentlyInWishlist) {
       const result = await removeFromWishlist(_id);
       if (result.success) {
-        // AuthContext will update user.wishlist, effect above will update inWishlist
         alert('Removed from wishlist!');
       } else {
         alert('Failed to remove from wishlist: ' + (result.error || 'Unknown error'));
       }
     } else {
-      const result = await addToWishlist(_id);
+      const result = (await addToWishlist(_id)) as AddToWishlistResult;
       if (result.success) {
-        // AuthContext will update user.wishlist, effect above will update inWishlist
+        if (result.wishlist && window.dispatchEvent) {
+          window.dispatchEvent(new CustomEvent('wishlist-updated', { detail: { wishlist: result.wishlist } }));
+        }
         alert('Added to wishlist! ❤️');
       } else {
         alert('Failed to add to wishlist: ' + (result.error || 'Unknown error'));

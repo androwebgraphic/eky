@@ -1,7 +1,6 @@
-
-// Import React and types
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+        // Import React and types
+        import React from 'react';
+        import { useTranslation } from 'react-i18next';
 
 // Extend window interface for cache buster
 declare global {
@@ -52,44 +51,35 @@ interface CardSmallProps {
   adoptionQueue?: any[];
 }
 
-function CardSmall(props: CardSmallProps) {
-  const {
-    _id,
-    name,
-    breed,
-    age,
-    size,
-    description,
-    gender,
-    color,
-    place,
-    images,
-    video,
-    thumbnail,
-    canEdit,
-    onViewDetails,
-    onDogUpdate,
-    onEdit,
-    onRemove,
-    smallImage,
-    compactDesktop,
-    vaccinated,
-    neutered,
-    likes,
-  } = props;
-  const { t } = useTranslation();
+      const CardSmall: React.FC<CardSmallProps> = (props) => {
+        const { t } = useTranslation();
+        const {
+          name,
+          breed,
+          age,
+          gender,
+          place,
+          video,
+          thumbnail,
+          canEdit,
+          onViewDetails,
+          onDogUpdate,
+          onEdit,
+          onRemove,
+          likes,
+        } = props;
 
-  const toAbsUrl = (url?: string) => {
+  function toAbsUrl(url?: string) {
     if (!url) return url;
     const cacheBuster = window.__EKY_IMAGE_CB || (window.__EKY_IMAGE_CB = Date.now());
     if (/^https?:\/\//.test(url)) return url + (url.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
     if (url.startsWith('/uploads/') || url.startsWith('/u/dogs/')) return url + '?cb=' + cacheBuster;
-    if (url.startsWith('uploads/') || url.startsWith('u/dogs/')) return '/' + url + '?cb=' + cacheBuster;
     return url;
-  };
+  }
+
 
   let largestImgUrl: string | undefined = undefined;
-  const validImages = (images || []).filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
+  const validImages = (props.images || []).filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
   if (validImages.length) {
     const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
     largestImgUrl = toAbsUrl(sorted[0].url);
@@ -107,7 +97,7 @@ function CardSmall(props: CardSmallProps) {
 
   return (
     <div
-      className="card-small"
+      className="card card-small"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -178,22 +168,46 @@ function CardSmall(props: CardSmallProps) {
       <div style={{
         display: 'flex',
         flexDirection: 'row',
+        flexWrap: 'wrap',
         justifyContent: 'space-between',
         width: '100%',
         padding: '0 16px 16px 16px',
-        gap: '8px',
+        gap: '1px',
+        minHeight: '48px',
+        alignContent: 'flex-start',
       }}>
-        {onViewDetails && (
-          <button type="button" className="details" onClick={e => { e.stopPropagation(); onViewDetails(e); }} style={{ background: '#3498db', color: '#fff' }}>{t('details', { defaultValue: 'Details' })}</button>
+        <button
+          type="button"
+          className="details"
+          onClick={e => { e.stopPropagation(); (onViewDetails || (() => {}))(e); }}
+          style={{ background: '#3498db', color: '#fff', fontSize: '1.25rem', padding: '12px 24px', borderRadius: '8px', minWidth: '0', minHeight: '0' }}
+        >
+          {t('details', { defaultValue: 'Details' })}
+        </button>
+        <button
+          type="button"
+          className="adopt"
+          onClick={e => { e.stopPropagation(); (onDogUpdate || (() => {}))(props); }}
+          style={{ background: '#27ae60', color: '#fff', fontSize: '1.25rem', padding: '12px 24px', borderRadius: '8px', minWidth: '0', minHeight: '0' }}
+        >
+          {t('adopt', { defaultValue: 'Adopt' })}
+        </button>
+        <button
+          type="button"
+          className="wishlist"
+          onClick={e => { e.stopPropagation(); /* TODO: add to wishlist handler */ }}
+          style={{ background: '#8e44ad', color: '#fff', fontSize: '1.25rem', padding: '12px 24px', borderRadius: '8px', minWidth: '0', minHeight: '0' }}
+        >
+          {t('wishlist', { defaultValue: 'Add to Wishlist' })}
+        </button>
+        <span style={{ alignSelf: 'center', color: '#888', fontSize: '0.95rem' }}>
+          {t('likes', { defaultValue: 'Likes' })}: {Array.isArray(likes) ? likes.length : 0}
+        </span>
+        {canEdit && onEdit && (
+          <button type="button" className="edit" onClick={e => { e.stopPropagation(); onEdit(e); }} style={{ background: '#f1c40f', color: '#222', fontSize: '1.25rem', padding: '12px 24px', borderRadius: '8px', minWidth: '0', minHeight: '0' }}>{t('edit', { defaultValue: 'Edit' })}</button>
         )}
-        {typeof onDogUpdate === 'function' && (
-          <button type="button" className="adopt" onClick={e => { e.stopPropagation(); onDogUpdate(props); }} style={{ background: '#27ae60', color: '#fff' }}>{t('adopt', { defaultValue: 'Adopt' })}</button>
-        )}
-        {onEdit && canEdit && (
-          <button type="button" className="edit" onClick={e => { e.stopPropagation(); onEdit(e); }} style={{ background: '#f1c40f', color: '#222' }}>{t('edit', { defaultValue: 'Edit' })}</button>
-        )}
-        {onRemove && canEdit && (
-          <button type="button" className="remove" onClick={e => { e.stopPropagation(); onRemove(); }} style={{ background: '#e74c3c', color: '#fff' }}>{t('remove', { defaultValue: 'Remove' })}</button>
+        {canEdit && onRemove && (
+          <button type="button" className="remove" onClick={e => { e.stopPropagation(); onRemove(); }} style={{ background: '#e74c3c', color: '#fff', fontSize: '1.25rem', padding: '12px 24px', borderRadius: '8px', minWidth: '0', minHeight: '0' }}>{t('remove', { defaultValue: 'Remove' })}</button>
         )}
       </div>
 
@@ -201,7 +215,10 @@ function CardSmall(props: CardSmallProps) {
     </div>
   );
 }
+            style={{ background: '#f1c40f', color: '#222', fontSize: '1.25rem', padding: '12px 24px', borderRadius: '8px', minWidth: '0', minHeight: '0' }}>{t('edit', { defaultValue: 'Edit' })}</button>
 
-export default CardSmall;
+
+
+
 
 

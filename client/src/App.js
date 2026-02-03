@@ -1,6 +1,5 @@
 
 import Header from "./components/Header";
-import RadioTest from "./components/pages/RadioTest";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import ErrorBoundary from './components/ErrorBoundary';
@@ -24,7 +23,6 @@ const App = () => {
 
     return (
       <>
-        <RadioTest />
         <ErrorBoundary>
           <div id="Wrap">
             <Header />

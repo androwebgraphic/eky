@@ -23,7 +23,7 @@ interface EditDogModalProps {
 
 const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave }) => {
   const { t } = useTranslation();
-    const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<EditDogFormData>({
+    const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<EditDogFormData>({
       defaultValues: {
         ...dog,
         gender: dog.gender === 'female' ? 'female' : 'male',
@@ -67,22 +67,10 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
     onSave({ ...dog, ...updatedFields });
   };
 
+
+
   return (
     <>
-      {/* Overlay, not interactive */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0,0,255,0.2)',
-          zIndex: 999998,
-          pointerEvents: 'none',
-        }}
-      />
-      {/* Modal content, fully interactive */}
       <div
         className="editdog-modal-container"
         style={{
@@ -97,8 +85,10 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
           maxHeight: '80vh',
           boxSizing: 'border-box',
           padding: '0',
+          background: 'white',
+          border: '3px solid #3498db',
+          borderRadius: 16,
           zIndex: 999999,
-          pointerEvents: 'auto',
         }}
       >
         {/* Responsive style for desktop: make modal much wider and more comfortable */}
@@ -141,7 +131,6 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
           }
         `}</style>
         {/* Force user-select:auto for all radios/checkboxes in modal */}
-        {/* Remove pointer-events: auto from .editdog-modal-override to avoid blocking events */}
         <style>{`
           .editdog-modal-override input[type="radio"],
           .editdog-modal-override input[type="checkbox"],
@@ -152,7 +141,6 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
             -ms-user-select: auto !important;
           }
         `}</style>
-        {/* ...removed test radio block... */}
         <button
           type="button"
           onClick={() => {
@@ -297,10 +285,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
           <label style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Images</label>
           <input type="file" multiple accept="image/*" onChange={handleImageChange} style={{ marginBottom: '1rem', fontSize: '1.1rem', padding: '0.5rem 0.7rem' }} />
 
-          {/* Debug output for troubleshooting */}
-          <pre style={{ background: '#f8f8f8', color: '#333', fontSize: '0.95rem', padding: '0.5rem', borderRadius: 4, marginBottom: 8 }}>
-            {JSON.stringify(watch(), null, 2)}
-          </pre>
+          {/* Debug output removed */}
 
           <div style={{
             display: 'flex',

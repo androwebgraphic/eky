@@ -79,6 +79,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
           height: '100vh',
           background: 'rgba(0,0,255,0.2)',
           zIndex: 999998,
+          pointerEvents: 'none',
         }}
       />
       {/* Modal content, fully interactive */}
@@ -97,6 +98,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
           boxSizing: 'border-box',
           padding: '0',
           zIndex: 999999,
+          pointerEvents: 'auto',
         }}
       >
         {/* Responsive style for desktop: make modal much wider and more comfortable */}
@@ -220,7 +222,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
 
           <label>{t('adddog.gender') || 'Gender'}</label>
           <div style={{ display: 'flex', gap: '2rem', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 9999999 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', fontSize: '1.1rem', userSelect: 'auto' }}>
                 <input
                   type="radio"
@@ -245,7 +247,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
 
           {/* Health radio buttons */}
           <div style={{ display: 'flex', gap: '2rem', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 9999999 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <span style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.5rem' }}>Vaccinated:</span>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', userSelect: 'auto' }}>
                 <input
@@ -267,7 +269,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
               </label>
               {errors.vaccinated && <span style={{ color: 'red', fontSize: '0.95rem' }}>Vaccinated is required</span>}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 9999999 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <span style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.5rem' }}>Neutered:</span>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', userSelect: 'auto' }}>
                 <input
@@ -307,7 +309,6 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
             position: 'sticky',
             bottom: 0,
             background: 'white',
-            zIndex: 10,
             paddingBottom: 1
           }}>
             <button

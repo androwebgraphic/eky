@@ -267,10 +267,15 @@ const deleteDog = async (req, res) => {
       console.warn('Dog not found for id:', req.params.id);
       return res.status(404).json({ message: 'Dog not found', id: req.params.id });
     }
+    // Debug: print user and dog ownership
+    console.log('[DELETE DEBUG] req.user:', req.user);
+    console.log('[DELETE DEBUG] dog.user:', dog.user);
     // Authorization check: only the user who created the dog or superadmin can delete it
     const isSuperAdmin = req.user.role === 'superadmin';
     const isOwner = dog.user.toString() === req.user._id.toString();
+    console.log('[DELETE DEBUG] isSuperAdmin:', isSuperAdmin, 'isOwner:', isOwner);
     if (!isOwner && !isSuperAdmin) {
+      console.warn('[DELETE DEBUG] Not authorized. req.user._id:', req.user._id, 'dog.user:', dog.user);
       return res.status(403).json({ message: 'Not authorized to delete this dog' });
     }
     // Remove all files in uploads/dogs/<id>

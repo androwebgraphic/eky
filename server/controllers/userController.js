@@ -27,47 +27,41 @@ const removeFromWishlist = async (req, res) => {
 
 // Get the user's wishlist (correct async version)
 const getWishlist = async (req, res) => {
-		console.log('[WISHLIST DEBUG] getWishlist controller called');
-	try {
-		       const userId = req.user && req.user._id;
-		       console.log('[WISHLIST DEBUG] userId:', userId);
-		       if (!userId) {
-			       console.error('[WISHLIST DEBUG] No userId in req.user:', req.user);
-			       return res.status(401).json({ message: 'Unauthorized: No userId' });
-		       }
-		       let user;
-		       try {
-			       user = await User.findById(userId).populate('wishlist');
-		       } catch (err) {
-			       console.error('[WISHLIST DEBUG] Error during User.findById:', err);
-			       return res.status(500).json({ message: 'Error during user lookup', error: err.message });
-		       }
-		       if (!user) {
-			       console.error('[WISHLIST DEBUG] No user found for userId:', userId);
-			       return res.status(404).json({ message: 'User not found' });
-		       }
-		       if (!('wishlist' in user)) {
-			       console.error('[WISHLIST DEBUG] User found but wishlist property is missing:', user);
-			       return res.status(500).json({ message: 'Wishlist property missing on user' });
-		       }
-		       if (!Array.isArray(user.wishlist)) {
-			       console.error('[WISHLIST DEBUG] Wishlist is not an array:', user.wishlist);
-			       return res.status(500).json({ message: 'Wishlist is not an array' });
-		       }
-		       // Log each wishlist entry for debugging
-		       user.wishlist.forEach((dog, idx) => {
-			       if (!dog) {
-				       console.error(`[WISHLIST DEBUG] Wishlist entry at index ${idx} is null or undefined.`);
-			       } else if (!dog._id) {
-				       console.error(`[WISHLIST DEBUG] Wishlist entry at index ${idx} is missing _id:`, dog);
-			       }
-		       });
-		       console.log('[WISHLIST DEBUG] Populated wishlist:', user.wishlist);
-		       res.status(200).json({ wishlist: user.wishlist });
-	       } catch (error) {
-		       console.error('[WISHLIST DEBUG] Outer catch error:', error);
-		       res.status(500).json({ message: error.message, stack: error.stack });
-	       }
+    console.log('[WISHLIST DEBUG] getWishlist controller called');
+    try {
+	const userId = req.user && req.user._id;
+	console.log('[WISHLIST DEBUG] userId:', userId);
+	if (!userId) {
+	    console.error('[WISHLIST DEBUG] No userId in req.user:', req.user);
+	    return res.status(401).json({ message: 'Unauthorized: No userId' });
+	}
+	const user = await User.findById(userId).populate('wishlist');
+	if (!user) {
+	    console.error('[WISHLIST DEBUG] No user found for userId:', userId);
+	    return res.status(404).json({ message: 'User not found' });
+	}
+	if (!('wishlist' in user)) {
+	    console.error('[WISHLIST DEBUG] User found but wishlist property is missing:', user);
+	    return res.status(500).json({ message: 'Wishlist property missing on user' });
+	}
+	if (!Array.isArray(user.wishlist)) {
+	    console.error('[WISHLIST DEBUG] Wishlist is not an array:', user.wishlist);
+	    return res.status(500).json({ message: 'Wishlist is not an array' });
+	}
+	// Log each wishlist entry for debugging
+	user.wishlist.forEach((dog, idx) => {
+	    if (!dog) {
+		console.error(`[WISHLIST DEBUG] Wishlist entry at index ${idx} is null or undefined.`);
+	    } else if (!dog._id) {
+		console.error(`[WISHLIST DEBUG] Wishlist entry at index ${idx} is missing _id:`, dog);
+	    }
+	});
+	console.log('[WISHLIST DEBUG] Populated wishlist:', user.wishlist);
+	res.status(200).json({ wishlist: user.wishlist });
+    } catch (error) {
+	console.error('[WISHLIST DEBUG] Error in getWishlist:', error);
+	res.status(500).json({ message: error.message, stack: error.stack });
+    }
 };
 
 // Send a password reset link (stub)
@@ -396,14 +390,14 @@ const addToWishlist = async (req, res) => {
 }
 
 module.exports = {
-	signupUser,
-	loginUser,
-	updateProfile,
-	deleteProfile,
-	addToWishlist,
-	removeFromWishlist,
-	getWishlist,
-	requestPasswordReset,
-	getUserById,
-	searchUsers
+	signupUser: async (req, res) => await signupUser(req, res),
+	loginUser: async (req, res) => await loginUser(req, res),
+	updateProfile: async (req, res) => await updateProfile(req, res),
+	deleteProfile: async (req, res) => await deleteProfile(req, res),
+	addToWishlist: async (req, res) => await addToWishlist(req, res),
+	removeFromWishlist: async (req, res) => await removeFromWishlist(req, res),
+	getWishlist: async (req, res) => await getWishlist(req, res),
+	requestPasswordReset: async (req, res) => await requestPasswordReset(req, res),
+	getUserById: async (req, res) => await getUserById(req, res),
+	searchUsers: async (req, res) => await searchUsers(req, res)
 };

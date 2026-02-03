@@ -19,9 +19,10 @@ interface EditDogModalProps {
   dog: any;
   isSingleDog: boolean;
   onSave: (dog: any) => void;
+  onClose: () => void;
 }
 
-const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave }) => {
+const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave, onClose }) => {
   const { t } = useTranslation();
     const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<EditDogFormData>({
       defaultValues: {
@@ -143,11 +144,7 @@ const EditDogModal: React.FC<EditDogModalProps> = ({ dog, isSingleDog, onSave })
         `}</style>
         <button
           type="button"
-          onClick={() => {
-            if (typeof window !== 'undefined' && window.dispatchEvent) {
-              window.dispatchEvent(new CustomEvent('closeEditDogModal'));
-            }
-          }}
+          onClick={onClose}
           style={{
             position: 'absolute',
             top: 12,

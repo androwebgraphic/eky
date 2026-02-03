@@ -21,18 +21,19 @@ const chatRoutes = require('./routes/chatRoutes.js'); // <-- Add this here
 
 const app = express();
 
-// 3. Set up middleware AFTER app is created
-app.use((req, res, next) => {
-  console.log(`[GLOBAL REQUEST LOGGER] ${req.method} ${req.originalUrl}`);
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-  next();
-});
+// 3. Set up CORS middleware FIRST
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://172.20.10.2:3000'];
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 // 4. Load environment variables
 dotenv.config({ path: '.env' });
 
@@ -61,6 +62,7 @@ console.log('[STATIC DEBUG] uploadsPath resolved to:', uploadsPath);
 // Add CORS headers for all /uploads and /u responses (before static middleware)
 function setUploadsCORS(req, res, next) {
   console.log('[CORS DEBUG] /uploads CORS middleware triggered for:', req.originalUrl);
+  // For static assets, allow all origins (no credentials)
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
@@ -77,21 +79,12 @@ app.use("/api/auth", authRoutes);
 
 // ... rest of your Socket.IO code
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-  next();
-});
+// Removed leftover manual CORS header logic. Only use cors middleware above.
  
  // Start server after all middleware and routes are set up
 
 const PORT = process.env.PORT || 3001;
-const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://172.20.10.2:3000', 'http://localhost:3002', 'http://127.0.0.1:3002', 'http://172.20.10.2:3002'];
+// Duplicate declaration removed. Use the first allowedOrigins declaration only.
 const httpServer = http.createServer({ maxHeaderSize: 1024 * 1024 }, app);
 httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`Server started at:`);

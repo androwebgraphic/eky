@@ -4,29 +4,34 @@ const User = require('../models/userModel');
 const auth = async (req, res, next) => {
 	try {
 		const authHeader = req.header('Authorization');
+		console.log('[AUTH DEBUG] Entering auth middleware');
+		console.log('[AUTH DEBUG] Request:', req.method, req.originalUrl);
 		console.log('Auth middleware - Authorization header:', authHeader);
-		
-	console.log('[AUTH DEBUG] Entering auth middleware');
 		const token = authHeader?.replace('Bearer ', '');
 		console.log('Auth middleware - Extracted token:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
-		
 		if (!token) {
 			console.log('Auth middleware - No token provided');
 			return res.status(401).json({ message: 'Access denied. No token provided.' });
 		}
-		
-		const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
-		console.log('Auth middleware - Token decoded successfully, userId:', decoded.userId);
-		
+		let decoded;
+		try {
+			decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+			console.log('Auth middleware - Token decoded successfully:', decoded);
+		} catch (err) {
+			console.log('Auth middleware - Token decode error:', err.message);
+			return res.status(401).json({ message: 'Invalid token' });
+		}
 		const user = await User.findById(decoded.userId).select('-password');
-		console.log('Auth middleware - User found:', user ? user.username : 'NOT FOUND');
-		
+		console.log('Auth middleware - User found:', user ? { username: user.username, role: user.role, _id: user._id } : 'NOT FOUND');
 		if (!user) {
 			console.log('Auth middleware - User not found in database');
 			return res.status(401).json({ message: 'Token is not valid.' });
 		}
-		
 		req.user = user;
+		// Extra debug for DELETE /api/dogs/:id
+		if (req.method === 'DELETE' && req.originalUrl.startsWith('/api/dogs/')) {
+			console.log('[AUTH DEBUG] DELETE /api/dogs/:id - req.user:', req.user);
+		}
 		console.log('Auth middleware - Success, continuing to next middleware');
 		console.log('[AUTH DEBUG] About to call next()');
 		next();

@@ -51,7 +51,7 @@ interface CardSmallProps {
   adoptionQueue?: any[];
 }
 
-      const CardSmall: React.FC<CardSmallProps> = (props) => {
+    export const CardSmall: React.FC<CardSmallProps> = (props) => {
         const { t } = useTranslation();
         const {
           name,

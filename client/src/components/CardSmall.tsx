@@ -37,22 +37,22 @@ export interface CardSmallProps {
 
 const CardSmall: React.FC<CardSmallProps> = (props) => {
 	const { t } = useTranslation();
-	       const {
-		       name = 'Unknown',
-		       breed = 'Unknown',
-		       age,
-		       gender,
-		       place,
-		       video,
-		       thumbnail,
-		       canEdit,
-		       onViewDetails,
-		       onEdit,
-		       onRemove,
-		       vaccinated,
-		       images,
-		       adoptionStatus,
-	       } = props;
+		       const {
+			       name = 'Unknown',
+			       breed = 'Unknown',
+			       age,
+			       gender,
+			       place,
+			       video,
+			       thumbnail,
+			       canEdit,
+			       onViewDetails,
+			       onEdit,
+			       onRemove,
+			       vaccinated,
+			       images,
+			       adoptionStatus,
+		       } = props;
 
 	function toAbsUrl(url?: string) {
 		if (!url) return url;
@@ -116,31 +116,31 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 
 		       return (
 			       <>
-				       <style>{`
-					       @media (max-width: 600px) {
-						       .card.card-small {
-							       min-width: 98vw !important;
-							       max-width: 98vw !important;
-							       flex: 1 1 98vw !important;
+					       <style>{`
+						       @media (max-width: 600px) {
+							       .card.card-small {
+								       min-width: 92vw !important;
+								       max-width: none !important;
+								       flex: 0 0 92vw !important;
+							       }
 						       }
-					       }
-				       `}</style>
-				       <div
-					       className="card card-small"
-					       style={{
-						       display: 'flex',
-						       flexDirection: 'column',
-						       borderRadius: 12,
-						       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-						       background: '#fff',
-						       margin: 8,
-						       minWidth: 220,
-						       maxWidth: 420,
-						       flex: '1 1 220px',
-						       overflow: 'hidden',
-						       position: 'relative',
-					       }}
-				       >
+					       `}</style>
+										       <div
+											       className="card card-small"
+											       style={{
+												       display: 'flex',
+												       flexDirection: 'column',
+												       borderRadius: 12,
+												       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+												       background: '#fff',
+												       margin: '16px auto',
+												       width: '100%',
+												       maxWidth: 420,
+												       overflow: 'hidden',
+												       position: 'relative',
+												       boxSizing: 'border-box',
+											       }}
+										       >
 					       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', width: '100%' }}>
 							{hasVideoUrl && !videoError ? (
 								<video
@@ -177,19 +177,26 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 								<div style={{ width: '100%', height: '200px', background: '#eee', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }} />
 							)}
 						       <div style={{ padding: '16px', width: '100%' }}>
-							       <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 4 }}>{name}</div>
-							       <div style={{ color: '#666', fontSize: 15, marginBottom: 4 }}>{breed}</div>
-							       <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>
-								       {age !== undefined && <span>{t('Age')}: {age} </span>}
-								       {gender && <span>{t('Gender')}: {t(gender)}</span>}
-							       </div>
-									 {(place || (props as any).location) && (
-											<div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>
-												{t('fields.location', 'Location')}: <span style={{color:'#1976d2',marginLeft:4}}>{place || (props as any).location}</span>
-											</div>
-										)}
-							       {vaccinated && <div style={{ color: '#388e3c', fontSize: 13, marginBottom: 4 }}>{t('Vaccinated')}</div>}
-							       {adoptionStatus && <div style={{ color: '#1976d2', fontSize: 13, marginBottom: 4 }}>{t('Adoption Status')}: {t(adoptionStatus)}</div>}
+								       <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 4 }}>{name}</div>
+								       <div style={{ color: '#666', fontSize: 15, marginBottom: 4 }}>{t('fields.breed', 'Breed')}: {breed}</div>
+								       <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>
+									       {age !== undefined && <span>{t('fields.age', 'Age')}: {age} </span>}
+									       {gender && <span>{t('fields.gender', 'Gender')}: {t(`gender.${gender}`, gender)}</span>}
+								       </div>
+									       {(place || (props as any).location) && (
+										       <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>
+											       {t('fields.location', 'Location')}: 
+													       <span 
+														       style={{color:'#1976d2',marginLeft:4, cursor:'pointer', textDecoration:'underline'}}
+														       onClick={() => onViewDetails && onViewDetails({} as any /* signal map click */)}
+														       title={t('dogDetails.showMap', 'Show map')}
+													       >
+														       {place || (props as any).location}
+													       </span>
+										       </div>
+									       )}
+								   {vaccinated && <div style={{ color: '#388e3c', fontSize: 13, marginBottom: 4 }}>{t('fields.vaccinated', 'Vaccinated')}</div>}
+								   {adoptionStatus && <div style={{ color: '#1976d2', fontSize: 13, marginBottom: 4 }}>{t('fields.adoptionStatus', 'Adoption Status')}: {t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)}</div>}
 						       </div>
 					       </div>
 					       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', alignItems: 'center', padding: '8px 8px 16px 8px', width: '100%' }}>

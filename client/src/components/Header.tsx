@@ -60,7 +60,7 @@ const Header: React.FC = () => {
     };
   }, [isExpanded]);
 
-  const profileImageUrl = user?.profilePicture ? `${getApiUrl()}/u${user.profilePicture.replace('/uploads', '')}` : "../img/androcolored-80x80.jpg";
+  // Removed unused variable 'profileImageUrl'
   
   // Calculate dropdown position based on header height
   const dropdownTop = headerRef.current ? `${headerRef.current.offsetHeight}px` : '60px';
@@ -70,71 +70,43 @@ const Header: React.FC = () => {
       {isAuthenticated ? (
         <>
         <header
-          ref={headerRef}
           className="UserHeader"
+          style={{
+            margin: 0,
+            padding: 0,
+            top: 0,
+            left: 0,
+            width: '100vw',
+            background: '#75171a',
+            color: '#f8f8f8',
+            position: 'fixed',
+            zIndex: 1000,
+            borderTop: '4px solid #75171a',
+            minHeight: '60px',
+            boxSizing: 'border-box',
+          }}
         >
          
-          {/* Left side: Navigation Links */}
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <Link to="/" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.about')}</Link>
-            <Link to="psi" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.dogs')}</Link>
-          </nav>
-
-          {/* Right side: Language Selector + User Info */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px', position: 'relative', marginLeft: 'auto' }}>
-            <LanguageSelector />
-            
-            {/* User Picture + Expandable Info */}
-            <div 
-              style={{ 
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(!isExpanded);
-              }}
-            >
-              <div style={{ position: 'relative', display: 'inline-block' }}>
-                <img 
-                  src={profileImageUrl}
-                  alt={t('userHeader.avatarAlt')} 
-                  style={{ 
-                    width: '35px', 
-                    height: '35px', 
-                    borderRadius: '50%',
-                    objectFit: 'cover'
-                  }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "../img/androcolored-80x80.jpg";
-                  }}
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+            {/* Left: Navigation Links */}
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <Link to="/" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.about')}</Link>
+              <Link to="psi" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.dogs')}</Link>
+            </nav>
+            <div style={{ flex: 1 }} />
+            {/* Right: User Info */}
+            {user && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={e => { e.stopPropagation(); setIsExpanded(!isExpanded); }}>
+                <img
+                  src={user.profilePicture ? `${getApiUrl()}/u${user.profilePicture.replace('/uploads', '')}` : '../img/androcolored-80x80.jpg'}
+                  alt={t('userHeader.avatarAlt')}
+                  style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', background: '#eee' }}
+                  onError={e => { (e.target as HTMLImageElement).src = '../img/androcolored-80x80.jpg'; }}
                 />
-                {/* Green online indicator */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '2px',
-                    right: '2px',
-                    width: '8px',
-                    height: '8px',
-                    backgroundColor: '#4CAF50',
-                    borderRadius: '50%',
-                    border: '1px solid white',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
-                  }}
-                  title="Online"
-                />
+                <span style={{ color: '#f8f8f8', fontWeight: 600, fontSize: 15 }}>{user.username}</span>
+                <span style={{ fontSize: 12, color: '#4CAF50', marginLeft: 2 }}>●</span>
               </div>
-
-              {/* Expand/collapse indicator */}
-              {!isExpanded && (
-                <div style={{ fontSize: '12px', color: '#f5f5f5' }}>
-                  ►
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </header>
         
@@ -227,25 +199,25 @@ const Header: React.FC = () => {
           )}
         </>
       ) : (
-        <header style={{
-          position: 'fixed',
-          top: '0',
-          left: '0',
-          right: '0',
-          minHeight: '7.5rem',
-          zIndex: '1000',
-          padding: '18px 20px 12px 20px',
-          backgroundColor: '#72211f',
-          color: '#f5f5f5',
-          fontSize: '20px',
-          fontWeight: 'bold',
-          boxSizing: 'border-box',
-          borderBottom: '2px solid #8a2419',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-        }}>
+         <header style={{
+           position: 'fixed',
+           top: '0',
+           left: '0',
+           right: '0',
+           minHeight: '7.5rem',
+           zIndex: '1000',
+           padding: '18px 20px 12px 20px',
+           backgroundColor: '#75171a',
+           color: '#f8f8f8',
+           fontSize: '20px',
+           fontWeight: 'bold',
+           boxSizing: 'border-box',
+           borderBottom: '2px solid #8a2419',
+           display: 'flex',
+           flexDirection: 'column',
+           alignItems: 'center',
+           justifyContent: 'flex-start',
+         }}>
           <div
             style={{
               width: '100%',

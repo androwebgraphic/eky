@@ -8,7 +8,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 
 interface MediaVariant { url: string; width?: number; size?: string }
-interface DogDetailsProps {
+export interface DogDetailsProps {
   _id?: string;
   name: string;
   breed?: string;
@@ -28,7 +28,7 @@ interface DogDetailsProps {
   user?: {
     _id: string;
     name: string;
-    username: string;
+    username?: string;
     email?: string;
     phone?: string;
     person?: 'private' | 'organization';
@@ -40,17 +40,54 @@ interface DogDetailsProps {
   createdAt?: string;
 }
 
-const DogDetails: React.FC<DogDetailsProps> = ({
+const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   _id, name, breed, age, images, video, thumbnail, color, place, location, description, size, gender, vaccinated, neutered, onClose, user: owner,
-  adoptionStatus, adoptionQueue, onDogUpdate, onDogChanged, createdAt
+  adoptionStatus, adoptionQueue, onDogUpdate, onDogChanged, createdAt, _showMap
 }) => {
-  const [showMap, setShowMap] = useState(false);
+  const [showMap, setShowMap] = useState(!!_showMap);
   const [coords, setCoords] = useState<{lat: number, lng: number} | null>(null);
   const [loadingCoords, setLoadingCoords] = useState(false);
   const [coordsError, setCoordsError] = useState<string | null>(null);
+
+  // If _showMap is true and location exists, trigger geocoding on mount
+  React.useEffect(() => {
+    if (_showMap && location) {
+      (async () => {
+        setLoadingCoords(true);
+        setCoordsError(null);
+        try {
+          let query = location.trim();
+          if (query.split(/\s+/).length < 2) {
+            query += ', Croatia';
+          }
+          const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&extratags=1`);
+          const data = await resp.json();
+          if (data && data.length > 0) {
+            const result = data[0];
+            setCoords({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
+            setShowMap(true);
+          } else {
+            setShowMap(true);
+            setCoordsError('Location not found');
+          }
+        } catch (e) {
+          setShowMap(true);
+          setCoordsError('Location search failed');
+        } finally {
+          setLoadingCoords(false);
+        }
+      })();
+    }
+  }, [_showMap, location]);
   const { t } = useTranslation();
   const { user: currentUser, isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist } = useAuth();
   const isOwner = !!(currentUser && owner && currentUser._id === owner._id);
+  // DEBUG: Log context and props to diagnose button visibility
+  console.log('[DogDetails DEBUG] currentUser:', currentUser);
+  console.log('[DogDetails DEBUG] owner:', owner);
+  console.log('[DogDetails DEBUG] isOwner:', isOwner);
+  console.log('[DogDetails DEBUG] isAuthenticated:', isAuthenticated);
+  console.log('[DogDetails DEBUG] _id:', _id);
 
   const handleWishlistToggle = async () => {
     if (!_id || !isAuthenticated) {

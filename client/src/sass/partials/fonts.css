@@ -5,13 +5,4 @@
  *     '
  *   /Volumes/Catalina ssd/Applications/MAMP/htdocs/eky/src/sass/partials/fonts.scss 120:13  root stylesheet */
 
-body::before {
-  font-family: "Source Code Pro", "SF Mono", Monaco, Inconsolata, "Fira Mono",
-      "Droid Sans Mono", monospace, monospace;
-  white-space: pre;
-  display: block;
-  padding: 1em;
-  margin-bottom: 1em;
-  border-bottom: 2px solid black;
-  content: "Error: Undefined variable.\a     \2577 \a 120 \2502       color: $txt-color;\a     \2502              ^^^^^^^^^^\a     \2575 \a   /Volumes/Catalina ssd/Applications/MAMP/htdocs/eky/src/sass/partials/fonts.scss 120:13  root stylesheet";
-}
+/* Removed error overlay that was causing a white stripe above header */

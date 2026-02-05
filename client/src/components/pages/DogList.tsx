@@ -39,11 +39,28 @@ function DogList() {
 	const handleEdit = (dog: DogDetailsProps) => setEditDog(dog);
 	const handleRemove = (dog: DogDetailsProps) => setRemoveDog(dog);
 	const handleDetails = (dog: DogDetailsProps) => setDetailsDog(dog);
-	const handleEditSave = async (updatedDog: DogDetailsProps) => {
+	const handleEditSave = async (updatedDog: any) => {
+		// Use FormData for PATCH with files
+		const formData = new FormData();
+		// Append all fields except images
+		Object.entries(updatedDog).forEach(([key, value]) => {
+			if (key === 'images' && Array.isArray(value)) {
+				value.forEach((file: File) => {
+					formData.append('media', file);
+				});
+			} else if (value !== undefined && value !== null) {
+				// Only append string or Blob/File, otherwise convert to string
+				if (typeof value === 'string' || value instanceof Blob) {
+					formData.append(key, value);
+				} else {
+					formData.append(key, String(value));
+				}
+			}
+		});
 		await fetch(`${API_URL}/api/dogs/${updatedDog._id}`, {
 			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(updatedDog),
+			body: formData,
+			credentials: 'include',
 		});
 		setEditDog(null);
 		setLoading(true);

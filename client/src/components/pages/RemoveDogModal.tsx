@@ -22,7 +22,40 @@ const RemoveDogModal: React.FC<RemoveDogModalProps> = ({ dog, onConfirm, onClose
       maxWidth: 420,
       boxShadow: '0 2px 16px rgba(0,0,0,0.18)'
     }}>
-      <h2 style={{ color: '#e74c3c', marginBottom: 16 }}>Remove Dog</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <h2 style={{ color: '#e74c3c', margin: 0 }}>Remove Dog</h2>
+        <button
+          onClick={onClose}
+          style={{
+            width: 22,
+            height: 22,
+            background: '#e74c3c',
+            border: 'none',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 0,
+            cursor: 'pointer',
+            marginLeft: 12,
+            boxShadow: '0 2px 8px rgba(231,76,60,0.10)',
+          }}
+          aria-label="Close"
+          title="Close"
+        >
+          <span style={{
+            color: '#fff',
+            fontSize: '2rem',
+            fontWeight: 900,
+            lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            height: '100%',
+          }}>×</span>
+        </button>
+      </div>
       <div style={{ marginBottom: 24 }}>
         Are you sure you want to remove <b>{dog.name}</b>?
       </div>

@@ -58,7 +58,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
       const messagePayload: any = {
         conversationId: selectedConvo._id,
         sender: user._id,
-        recipient,
+         // const [dogOwnerMap, setDogOwnerMap] = useState<Record<string, string>>({});
         message: input,
         messageType: 'text',
         dogId: adoptionDogId || undefined,
@@ -66,7 +66,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
       };
       socketRef.current?.emit('sendMessage', messagePayload);
       await fetch(`${getApiUrl()}/api/chat/message`, {
-        method: 'POST',
+         // const [userWithBlocks, setUserWithBlocks] = useState<UserWithBlocks | null>(null);
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -119,45 +119,8 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
       const firstUser = onlineUsers[0];
       setSelectedConvo({ _id: firstUser._id, participants: [user._id, firstUser._id] });
     }
-  }, [selectedConvo, onlineUsers, user._id]);
+  }, [selectedConvo, onlineUsers, user, user._id]);
 
-  // Function to send an adoption message for a given dogId
-  const sendAdoptionMessage = async (dogId: string) => {
-    if (!selectedConvo || !token) return;
-    const recipient = selectedConvo.participants.find(id => id !== user._id);
-    const messagePayload: any = {
-      conversationId: selectedConvo._id,
-      sender: user._id,
-      recipient,
-      message: t('adoptionRequest') || 'Adoption request',
-      messageType: 'adoption',
-      dogId,
-      isOwner: adoptionIsOwner
-    };
-    socketRef.current?.emit('sendMessage', messagePayload);
-    await fetch(`${getApiUrl()}/api/chat/message`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(messagePayload)
-    });
-    setMessages(prev => [
-      ...prev,
-      {
-        _id: Math.random().toString(36).substr(2, 9),
-        sender: user._id,
-        recipient,
-        message: messagePayload.message,
-        sentAt: new Date().toISOString(),
-        messageType: 'adoption',
-        dogId,
-        isOwner: adoptionIsOwner
-      }
-    ]);
-    setAdoptionDogId(dogId);
-  };
 
   // Handler for input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -588,7 +551,37 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
                 );
               })()}
               {/* Close button */}
-              <button onClick={() => setChatVisible(false)} style={{ float: 'right', background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', marginLeft: 16 }} title="Close chat">×</button>
+              <button
+                onClick={() => setChatVisible(false)}
+                style={{
+                  float: 'right',
+                  background: '#e74c3c',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 22,
+                  height: 22,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginLeft: 16,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(231,76,60,0.10)',
+                }}
+                title="Close chat"
+                aria-label="Close chat"
+              >
+                <span style={{
+                  color: '#fff',
+                  fontSize: '2rem',
+                  fontWeight: 900,
+                  lineHeight: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  height: '100%',
+                }}>×</span>
+              </button>
               {/* Block/Unblock and Delete Conversation Buttons */}
               <span style={{ float: 'right', display: 'flex', gap: 8 }}>
                 <button style={{ background: isBlocked ? '#ff9800' : '#eee', color: isBlocked ? '#fff' : '#333', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8 }} onClick={handleBlockUnblock}>

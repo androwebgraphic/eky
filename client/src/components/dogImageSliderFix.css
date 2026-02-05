@@ -1,7 +1,8 @@
 
+
 .dog-image-slider .swiper-button-next {
   top: 50% !important;
-  right: 16px !important;
+  right: 32px !important;
   left: auto !important;
   transform: translateY(-50%);
   width: 56px;
@@ -15,7 +16,7 @@
 
 .dog-image-slider .swiper-button-prev {
   top: 50% !important;
-  left: 16px !important;
+  left: 32px !important;
   right: auto !important;
   transform: translateY(-50%);
   width: 56px;
@@ -39,7 +40,7 @@
     width: 44px;
     height: 44px;
     font-size: 28px;
-    right: 8px !important;
+    right: 18px !important;
     left: auto !important;
     background: none;
     border: none;
@@ -49,7 +50,7 @@
     width: 44px;
     height: 44px;
     font-size: 28px;
-    left: 8px !important;
+    left: 18px !important;
     right: auto !important;
     background: none;
     border: none;

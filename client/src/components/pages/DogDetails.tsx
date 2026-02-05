@@ -208,24 +208,33 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
 
 
   // Prepare images for DogImageSlider (always use largest available, prefer 1024px, always pass full Cloudinary URL)
+  // Deduplicate images by base name (ignore size/hash/extension variants)
   const sliderImages: { url: string; width?: number }[] = React.useMemo(() => {
     const toAbs = (u?: string) => {
       if (!u) return u;
-      // If already absolute (http/https), add cache-busting param
       if (/^https?:\/\//.test(u)) return u + (u.includes('?') ? '&' : '?') + 'cb=' + Date.now();
-      // If starts with /u/dogs/ or /uploads/, prepend apiBase and add cache-busting
       if (u.startsWith('/u/dogs/') || u.startsWith('/uploads/')) return apiBase + u + '?cb=' + Date.now();
-      // If starts with u/dogs/ or uploads/ (missing leading slash), add it and prepend apiBase and add cache-busting
       if (u.startsWith('u/dogs/') || u.startsWith('uploads/')) return apiBase + '/' + u + '?cb=' + Date.now();
-      // Otherwise, treat as relative to apiBase and add cache-busting
       return apiBase + '/' + u.replace(/^\/+/,'') + '?cb=' + Date.now();
+    };
+    const getImageBase = (url: string) => {
+      let cleanUrl = url.split('?')[0];
+      const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
+      const base = filename.replace(/(-\d{3,}(?:-[a-z0-9]+)?-(?:320|640|1024|orig))?(-(?:320|640|1024|orig))?(\.(jpg|jpeg|png|webp))$/i, '')
+        .replace(/(-(?:320|640|1024|orig))?(\.(jpg|jpeg|png|webp))$/i, '')
+        .replace(/(\.(jpg|jpeg|png|webp))$/i, '');
+      return base;
     };
     if (images && images.length > 0) {
       const validImages = images.filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
-      const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
-      const preferred = sorted.filter(img => img.width === 1024);
-      const source = preferred.length > 0 ? preferred : sorted;
-      return source.map(img => ({ url: toAbs(img.url), width: img.width }));
+      // Deduplicate by base name
+      const uniqueImages = validImages.filter((img, idx, arr) => {
+        const base = getImageBase(img.url);
+        return arr.findIndex(other => getImageBase(other.url) === base) === idx;
+      });
+      // Prefer largest width for each base
+      const sorted = [...uniqueImages].sort((a, b) => (b.width || 0) - (a.width || 0));
+      return sorted.map(img => ({ url: toAbs(img.url), width: img.width }));
     } else if (thumbnail && thumbnail.url) {
       return [{ url: toAbs(thumbnail.url) }];
     }

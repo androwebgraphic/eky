@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
 interface ImageType {
@@ -22,7 +23,7 @@ export interface CardSmallProps {
 	video?: VideoType;
 	thumbnail?: ThumbnailType;
 	canEdit?: boolean;
-	onViewDetails?: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+	onViewDetails?: (event?: React.MouseEvent<any, MouseEvent>) => void;
 	onDogUpdate?: (props: any) => void;
 	onEdit?: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 	onRemove?: () => void;
@@ -37,7 +38,9 @@ export interface CardSmallProps {
 
 const CardSmall: React.FC<CardSmallProps> = (props) => {
 	const { t } = useTranslation();
-		       const {
+	const { isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist } = useAuth();
+	const [wishlistLoading, setWishlistLoading] = React.useState(false);
+	const {
 			       name = 'Unknown',
 			       breed = 'Unknown',
 			       age,
@@ -68,7 +71,32 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 	}
 
 	let largestImgUrl: string | undefined = undefined;
-	const validImages = (images || []).filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
+				// Improved: Only count unique base images (ignore size/hash/extension variants)
+				const getImageBase = (url: string) => {
+					// Remove query params
+					let cleanUrl = url.split('?')[0];
+					// Remove directory, get filename
+					const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
+					// Remove size/hash/extension: keep up to first dash before size/hash/orig, or just before extension
+					// Examples:
+					//   pexels-chinmay-singh-251922-823213-1770306116766-s6jvdd-1024.jpg => pexels-chinmay-singh-251922-823213
+					//   img-0-320.jpg => img-0
+					//   img-0-orig.jpg => img-0
+					//   img-0.jpg => img-0
+					//   foo-bar-123-320.jpg => foo-bar-123
+					//   foo-bar.jpg => foo-bar
+					// Remove trailing -<digits>[-hash]-<size> or -orig before extension
+					const base = filename.replace(/(-\d{3,}(?:-[a-z0-9]+)?-(?:320|640|1024|orig))?(-(?:320|640|1024|orig))?(\.(jpg|jpeg|png|webp))$/i, '')
+						.replace(/(-(?:320|640|1024|orig))?(\.(jpg|jpeg|png|webp))$/i, '')
+						.replace(/(\.(jpg|jpeg|png|webp))$/i, '');
+					return base;
+				};
+				const uniqueImages = (images || []).filter((img, idx, arr) => {
+					if (!img || !img.url) return false;
+					const base = getImageBase(img.url);
+					return arr.findIndex(other => other && other.url && getImageBase(other.url) === base) === idx;
+				});
+				const validImages = uniqueImages;
 	if (validImages.length) {
 		const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
 		largestImgUrl = toAbsUrl(sorted[0].url);
@@ -77,45 +105,70 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 	const [imgError, setImgError] = React.useState(false);
 	const [videoError, setVideoError] = React.useState(false);
 
-	const posterUrl = video && video.poster && video.poster.length
-		? toAbsUrl(video.poster[video.poster.length - 1].url)
-		: undefined;
-	const hasVideoUrl = video && typeof video.url === 'string' && video.url.length > 0;
-	const videoUrl = hasVideoUrl ? toAbsUrl(video.url) : undefined;
-	let thumbUrl: string | undefined = undefined;
-	if (thumbnail && thumbnail.url) {
-		thumbUrl = toAbsUrl(thumbnail.url);
-	}
+				       const hasVideoUrl = video && typeof video.url === 'string' && video.url.length > 0;
+				       const videoUrl = hasVideoUrl ? toAbsUrl(video.url) : undefined;
+				       let thumbUrl: string | undefined = undefined;
+				       if (thumbnail && thumbnail.url) {
+					       thumbUrl = toAbsUrl(thumbnail.url);
+				       }
+				       // Add posterUrl for video poster
+				       const posterUrl = video && video.poster && video.poster.length
+					       ? toAbsUrl(video.poster[video.poster.length - 1].url)
+					       : undefined;
 
-	// Button color palette
-	const styles = {
-	 details: {
-	 background: '#72211f', color: '#fff', border: 'none', fontWeight: 600
-	 },
-		adopt: {
-			background: '#43a047', color: '#fff', border: 'none', fontWeight: 600
-		},
-		wishlist: {
-			background: '#dbb69d', color: '#fff', border: 'none', fontWeight: 600
-		},
-		edit: {
-			background: 'orange', color: '#fff', border: 'none', fontWeight: 600
-		},
-		remove: {
-			background: '#d32f2f', color: '#fff', border: 'none', fontWeight: 600
-		}
-	};
+						// Button color palette
+						const styles = {
+						       details: {
+							       background: '#72211f', color: '#fff', border: 'none', fontWeight: 600
+						       },
+						       adopt: {
+							       background: '#43a047', color: '#fff', border: 'none', fontWeight: 600
+						       },
+						       wishlist: {
+							       background: '#dbb69d', color: '#fff', border: 'none', fontWeight: 600
+						       },
+						       edit: {
+							       background: 'orange', color: '#fff', border: 'none', fontWeight: 600
+						       },
+						       remove: {
+							       background: '#d32f2f', color: '#fff', border: 'none', fontWeight: 600
+						       }
+						};
 
 	// Button handlers
 	const handleAdopt = () => {
 		alert(t('Adopt functionality coming soon!'));
 	};
-	const handleWishlist = () => {
-		alert(t('Wishlist functionality coming soon!'));
-	};
 
-		       return (
-			       <>
+		const handleWishlist = async () => {
+			if (!props._id) return;
+			if (!isAuthenticated) {
+				alert(t('Please log in to use the wishlist.'));
+				return;
+			}
+			setWishlistLoading(true);
+			const currentlyInWishlist = isInWishlist(props._id);
+			let result;
+			if (currentlyInWishlist) {
+				result = await removeFromWishlist(props._id);
+				if (result.success) {
+					alert(t('Removed from wishlist!'));
+				} else {
+					alert(t('Failed to remove from wishlist: ') + (result.error || 'Unknown error'));
+				}
+			} else {
+				result = await addToWishlist(props._id);
+				if (result.success) {
+					alert(t('Added to wishlist! ❤️'));
+				} else {
+					alert(t('Failed to add to wishlist: ') + (result.error || 'Unknown error'));
+				}
+			}
+			setWishlistLoading(false);
+		};
+
+			       return (
+				       <>
 					       <style>{`
 						       @media (max-width: 600px) {
 							       .card.card-small {
@@ -125,58 +178,94 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 							       }
 						       }
 					       `}</style>
-										       <div
-											       className="card card-small"
-											       style={{
-												       display: 'flex',
-												       flexDirection: 'column',
-												       borderRadius: 12,
-												       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-												       background: '#fff',
-												       margin: '16px auto',
-												       width: '100%',
-												       maxWidth: 420,
-												       overflow: 'hidden',
-												       position: 'relative',
-												       boxSizing: 'border-box',
-											       }}
-										       >
-					       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', width: '100%' }}>
-							{hasVideoUrl && !videoError ? (
-								<video
-									controls
-									width="100%"
-									height="200"
-									poster={posterUrl}
-									style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}
-									onError={() => setVideoError(true)}
-								>
-									<source src={videoUrl} />
-								</video>
-							) : videoError ? (
-								<div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>Video failed to load</div>
-							) : largestImgUrl && !imgError ? (
-								<img
-									src={largestImgUrl}
-									alt={name}
-									style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}
-									loading="lazy"
-									onError={() => setImgError(true)}
-								/>
-							) : imgError ? (
-								<div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>Image failed to load</div>
-							) : thumbUrl && !imgError ? (
-								<img
-									src={thumbUrl}
-									alt={name}
-									style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}
-									loading="lazy"
-									onError={() => setImgError(true)}
-								/>
-							) : (
-								<div style={{ width: '100%', height: '200px', background: '#eee', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }} />
-							)}
-						       <div style={{ padding: '16px', width: '100%' }}>
+					       <div
+						       className="card card-small"
+						       style={{
+							       display: 'flex',
+							       flexDirection: 'column',
+							       borderRadius: 12,
+							       boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+							       background: '#fff',
+							       margin: '16px auto',
+							       width: '100%',
+							       maxWidth: 420,
+							       overflow: 'hidden',
+							       position: 'relative',
+							       boxSizing: 'border-box',
+						       }}
+					       >
+						       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', width: '100%', position: 'relative' }}>
+							       {/* Image/Video section */}
+								       {hasVideoUrl && !videoError ? (
+										   <div style={{ cursor: 'pointer' }} onClick={e => onViewDetails && onViewDetails(e)} title={t('dogDetails.showMap', 'Show details')}>
+											   <video
+												   controls
+												   width="100%"
+												   height="200"
+												   poster={posterUrl}
+												   style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}
+												   onError={() => setVideoError(true)}
+												   onClick={e => onViewDetails && onViewDetails(e)}
+											   >
+												   <source src={videoUrl} />
+											   </video>
+										   </div>
+								       ) : videoError ? (
+									       <div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>Video failed to load</div>
+								       ) : largestImgUrl && !imgError ? (
+										   <img
+											   src={largestImgUrl}
+											   alt={name}
+											   style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', cursor: 'pointer' }}
+											   loading="lazy"
+											   onError={() => setImgError(true)}
+											   onClick={e => onViewDetails && onViewDetails(e)}
+											   title={t('dogDetails.showMap', 'Show details')}
+										   />
+								       ) : imgError ? (
+									       <div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>Image failed to load</div>
+								       ) : thumbUrl && !imgError ? (
+										   <img
+											   src={thumbUrl}
+											   alt={name}
+											   style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', cursor: 'pointer' }}
+											   loading="lazy"
+											   onError={() => setImgError(true)}
+											   onClick={e => onViewDetails && onViewDetails(e)}
+											   title={t('dogDetails.showMap', 'Show details')}
+										   />
+								       ) : (
+									       <div style={{ width: '100%', height: '200px', background: '#eee', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }} />
+								       )}
+							       {/* Multi-image indicator */}
+								   {validImages.length > 1 && (
+									   <div
+										   title={t('dogDetails.showMoreImages', 'View all images')}
+										   style={{
+											   position: 'absolute',
+											   top: 10,
+											   right: 10,
+											   background: 'rgba(0,0,0,0.7)',
+											   color: '#fff',
+											   borderRadius: '50%',
+											   width: 32,
+											   height: 32,
+											   display: 'flex',
+											   alignItems: 'center',
+											   justifyContent: 'center',
+											   fontWeight: 700,
+											   fontSize: 16,
+											   zIndex: 2,
+											   boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+										   }}
+									   >
+										   <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+											   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+											   {validImages.length}
+										   </span>
+									   </div>
+								   )}
+							       <div style={{ padding: '16px', width: '100%' }}>
 								       <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 4 }}>{name}</div>
 								       <div style={{ color: '#666', fontSize: 15, marginBottom: 4 }}>{t('fields.breed', 'Breed')}: {breed}</div>
 								       <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>
@@ -202,7 +291,36 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 					       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', alignItems: 'center', padding: '8px 8px 16px 8px', width: '100%' }}>
 											   <button type="button" onClick={onViewDetails} style={{ ...styles.details, flex: '1 1 40%', minWidth: 60, maxWidth: 60, height: 28, fontSize: 12, padding: '0', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t('button.viewDetails', 'Details')}</button>
 									       <button type="button" onClick={handleAdopt} style={{ ...styles.adopt, flex: '1 1 40%', minWidth: 60, maxWidth: 60, height: 28, fontSize: 12, padding: '0', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t('adopt', t('button.adopt', 'Adoptieren'))}</button>
-									       <button type="button" onClick={handleWishlist} style={{ ...styles.wishlist, flex: '1 1 40%', minWidth: 60, maxWidth: 60, height: 28, fontSize: 12, padding: '0', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t('wishlist', t('button.addToList', 'Zur Liste'))}</button>
+																							 <button
+																								 type="button"
+																								 onClick={handleWishlist}
+																								 style={{
+																									 background: isInWishlist && props._id && isInWishlist(props._id) ? '#ff4444' : '#43a047',
+																									 color: '#fff',
+																									 border: 'none',
+																									 fontWeight: 600,
+																									 flex: '1 1 40%',
+																									 minWidth: 60,
+																									 maxWidth: 60,
+																									 height: 28,
+																									 fontSize: 14,
+																									 padding: '0',
+																									 borderRadius: 6,
+																									 cursor: wishlistLoading ? 'wait' : 'pointer',
+																									 textAlign: 'center',
+																									 display: 'flex',
+																									 alignItems: 'center',
+																									 justifyContent: 'center',
+																									 opacity: wishlistLoading ? 0.7 : 1,
+																									 boxShadow: isInWishlist && props._id && isInWishlist(props._id) ? '0 0 0 2px #ff4444' : '0 0 0 2px #43a047',
+																									 transition: 'background 0.2s, box-shadow 0.2s',
+																								 }}
+																								 disabled={wishlistLoading}
+																							 >
+																								 {isInWishlist && props._id && isInWishlist(props._id)
+																									 ? <><span style={{fontSize:18,marginRight:4}}>💔</span>{t('button.removeFromList', 'Entfernen')}</>
+																									 : <><span style={{fontSize:18,marginRight:4}}>❤️</span>{t('button.addToList', 'Zur Liste')}</>}
+																							 </button>
 									       {canEdit && (
 										       <button type="button" onClick={onEdit} style={{ ...styles.edit, flex: '1 1 40%', minWidth: 60, maxWidth: 60, height: 28, fontSize: 12, padding: '0', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t('edit', t('button.edit', 'Bearbeiten'))}</button>
 									       )}

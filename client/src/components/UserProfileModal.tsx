@@ -26,13 +26,21 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   const [loadingWishlist, setLoadingWishlist] = useState(false);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>('');
-  // Helper to get full image URL
+  // Helper to get full image URL (robust)
   const getProfileImageUrl = (profilePicture: string | undefined) => {
     if (!profilePicture) return "../img/androcolored-80x80.jpg";
     let url = profilePicture.startsWith('/') ? profilePicture : '/' + profilePicture;
     // Use /u/ for compatibility if needed
     url = url.replace('/uploads', '/u');
-    return getApiUrl() + url;
+    // Always use API base for /uploads/ and /u/ paths
+    if (url.startsWith('/uploads/') || url.startsWith('/u/')) {
+      const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      return apiBase + url;
+    }
+    // If already absolute URL, return as is
+    if (/^https?:\/\//.test(url)) return url;
+    // Fallback to placeholder
+    return '../img/androcolored-80x80.jpg';
   };
   const [formData, setFormData] = useState({
      name: typedUser?.name || '',
@@ -63,7 +71,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
 
   // Load wishlist when modal opens and wishlist tab is active
   React.useEffect(() => {
-    if (isOpen && activeTab === 'wishlist') {
+    if (isOpen) {
       loadWishlist();
     }
     // Reset form data when modal opens
@@ -93,7 +101,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     };
     window.addEventListener('wishlist-updated', handler);
     return () => window.removeEventListener('wishlist-updated', handler);
-  }, [isOpen, activeTab]);
+  }, [isOpen, loadWishlist, typedUser.email, typedUser.name, typedUser.phone, typedUser.username, user]);
 
   const handleModalClose = React.useCallback(() => {
     console.log('handleModalClose called');
@@ -397,26 +405,36 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('Close button clicked');
               handleModalClose();
             }}
             style={{
-              background: 'none',
+              background: '#e74c3c',
               border: 'none',
-              fontSize: '24px',
-              cursor: 'pointer',
-              color: '#666',
-              padding: '5px',
+              width: '22px',
+              height: '22px',
               borderRadius: '50%',
-              width: '32px',
-              height: '32px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              padding: 0,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(231,76,60,0.10)'
             }}
+            aria-label="Close"
+            title="Close"
             type="button"
           >
-            ×
+            <span style={{
+              color: '#fff',
+              fontSize: '2rem',
+              fontWeight: 900,
+              lineHeight: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%'
+            }}>×</span>
           </button>
         </div>
 
@@ -777,8 +795,18 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       alignItems: 'center'
                     }}
                   >
-                    <img 
-                      src={dog.thumbnail?.url || dog.images?.[0]?.url || '../img/placeholder-dog.jpg'}
+                    <img
+                      src={(() => {
+                        const url = dog.thumbnail?.url || dog.images?.[0]?.url;
+                        if (!url) return '../img/placeholder-dog.jpg';
+                        if (/^https?:\/\//.test(url)) return url;
+                        if (url.startsWith('/uploads/') || url.startsWith('/u/dogs/')) {
+                          const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+                          return apiBase + url;
+                        }
+                        // Fallback to placeholder if not a valid path
+                        return '../img/placeholder-dog.jpg';
+                      })()}
                       alt={dog.name}
                       style={{
                         width: '60px',
@@ -870,18 +898,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       )}
                       <button
                         onClick={async () => {
-                          const removeKey = t('userProfile.remove');
-                          const fallbackRemove = t('button.removeFromList');
-                          // eslint-disable-next-line no-console
-                          console.log('[UserProfileModal] removeKey:', removeKey, '| fallback:', fallbackRemove);
-                          // Optimistically update wishlist for instant UI feedback
-                          setWishlist(prev => {
-                            const updated = prev.filter((d: any) => d._id !== dog._id);
-                            console.log('[WISHLIST DEBUG] Optimistically updated wishlist:', updated);
-                            return updated;
-                          });
+                          // const removeKey = t('userProfile.remove');
+                          // const fallbackRemove = t('button.removeFromList');
+                          setWishlist(prev => prev.filter((d: any) => d._id !== dog._id));
                           await removeFromWishlist(dog._id);
-                          // Also update global user state for immediate UI sync
                           if (user) {
                             updateUser({
                               ...user,
@@ -894,19 +914,18 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                           backgroundColor: '#ff4444',
                           color: 'white',
                           border: 'none',
-                          borderRadius: '4px',
+                          borderRadius: '20px',
                           cursor: 'pointer',
-                          fontSize: '12px',
-                          whiteSpace: 'nowrap'
+                          fontSize: '14px',
+                          fontWeight: 600,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          boxShadow: '0 0 0 2px #ff4444',
+                          transition: 'background 0.2s, box-shadow 0.2s',
                         }}
                       >
-                        💔 {(() => {
-                          const removeKey = t('userProfile.remove');
-                          const fallbackRemove = t('button.removeFromList');
-                          // eslint-disable-next-line no-console
-                          console.log('[UserProfileModal][render] removeKey:', removeKey, '| fallback:', fallbackRemove);
-                          return removeKey !== 'userProfile.remove' ? removeKey : fallbackRemove;
-                        })()}
+                        <span style={{fontSize:18}}>💔</span> {t('button.removeFromList', 'Entfernen')}
                       </button>
                     </div>
                   </div>

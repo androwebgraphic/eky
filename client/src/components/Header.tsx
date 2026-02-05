@@ -94,19 +94,22 @@ const Header: React.FC = () => {
               <Link to="psi" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.dogs')}</Link>
             </nav>
             <div style={{ flex: 1 }} />
-            {/* Right: User Info */}
-            {user && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={e => { e.stopPropagation(); setIsExpanded(!isExpanded); }}>
-                <img
-                  src={user.profilePicture ? `${getApiUrl()}/u${user.profilePicture.replace('/uploads', '')}` : '../img/androcolored-80x80.jpg'}
-                  alt={t('userHeader.avatarAlt')}
-                  style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', background: '#eee' }}
-                  onError={e => { (e.target as HTMLImageElement).src = '../img/androcolored-80x80.jpg'; }}
-                />
-                <span style={{ color: '#f8f8f8', fontWeight: 600, fontSize: 15 }}>{user.username}</span>
-                <span style={{ fontSize: 12, color: '#4CAF50', marginLeft: 2 }}>●</span>
-              </div>
-            )}
+            {/* Right: Language Selector and User Info */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <LanguageSelector />
+              {user && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={e => { e.stopPropagation(); setIsExpanded(!isExpanded); }}>
+                  <img
+                    src={user.profilePicture ? `${getApiUrl()}/u${user.profilePicture.replace('/uploads', '')}` : '../img/androcolored-80x80.jpg'}
+                    alt={t('userHeader.avatarAlt')}
+                    style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', background: '#eee' }}
+                    onError={e => { (e.target as HTMLImageElement).src = '../img/androcolored-80x80.jpg'; }}
+                  />
+                  <span style={{ color: '#f8f8f8', fontWeight: 600, fontSize: 15 }}>{user.username}</span>
+                  <span style={{ fontSize: 12, color: '#4CAF50', marginLeft: 2 }}>●</span>
+                </div>
+              )}
+            </div>
           </div>
         </header>
         

@@ -1,0 +1,16 @@
+{
+  "dogDetails": {
+    "showMap": "Prikaži kartu"
+  },
+  "fields": {
+    "vaccinated": "Cijepljen",
+    "adoptionStatus": "Status posvajanja"
+  },
+  "adoptionStatus": {
+    "available": "dostupan"
+  },
+  "adopt": "Posvoji",
+  "wishlist": "Dodaj u listu",
+  "edit": "Uredi",
+  "remove": "Ukloni"
+}

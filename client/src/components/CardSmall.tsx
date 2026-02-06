@@ -71,32 +71,9 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 	}
 
 	let largestImgUrl: string | undefined = undefined;
-				// Improved: Only count unique base images (ignore size/hash/extension variants)
-				const getImageBase = (url: string) => {
-					// Remove query params
-					let cleanUrl = url.split('?')[0];
-					// Remove directory, get filename
-					const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
-					// Remove size/hash/extension: keep up to first dash before size/hash/orig, or just before extension
-					// Examples:
-					//   pexels-chinmay-singh-251922-823213-1770306116766-s6jvdd-1024.jpg => pexels-chinmay-singh-251922-823213
-					//   img-0-320.jpg => img-0
-					//   img-0-orig.jpg => img-0
-					//   img-0.jpg => img-0
-					//   foo-bar-123-320.jpg => foo-bar-123
-					//   foo-bar.jpg => foo-bar
-					// Remove trailing -<digits>[-hash]-<size> or -orig before extension
-					const base = filename.replace(/(-\d{3,}(?:-[a-z0-9]+)?-(?:320|640|1024|orig))?(-(?:320|640|1024|orig))?(\.(jpg|jpeg|png|webp))$/i, '')
-						.replace(/(-(?:320|640|1024|orig))?(\.(jpg|jpeg|png|webp))$/i, '')
-						.replace(/(\.(jpg|jpeg|png|webp))$/i, '');
-					return base;
-				};
-				const uniqueImages = (images || []).filter((img, idx, arr) => {
-					if (!img || !img.url) return false;
-					const base = getImageBase(img.url);
-					return arr.findIndex(other => other && other.url && getImageBase(other.url) === base) === idx;
-				});
-				const validImages = uniqueImages;
+	// Images are already deduplicated in DogList, so just filter out invalid ones
+	const validImages = (images || []).filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
+	
 	if (validImages.length) {
 		const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
 		largestImgUrl = toAbsUrl(sorted[0].url);
@@ -289,8 +266,8 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 						       </div>
 					       </div>
 					       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', alignItems: 'center', padding: '8px 8px 16px 8px', width: '100%' }}>
-											   <button type="button" onClick={onViewDetails} style={{ ...styles.details, flex: '1 1 40%', minWidth: 60, maxWidth: 60, height: 28, fontSize: 12, padding: '0', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t('button.viewDetails', 'Details')}</button>
-									       <button type="button" onClick={handleAdopt} style={{ ...styles.adopt, flex: '1 1 40%', minWidth: 60, maxWidth: 60, height: 28, fontSize: 12, padding: '0', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t('adopt', t('button.adopt', 'Adoptieren'))}</button>
+											   <button type="button" onClick={onViewDetails} style={{ ...styles.details, flex: '1 1 auto', minWidth: 'fit-content', height: 32, fontSize: 12, padding: '0 12px', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>{t('button.viewDetails', 'Details')}</button>
+									       <button type="button" onClick={handleAdopt} style={{ ...styles.adopt, flex: '1 1 auto', minWidth: 'fit-content', height: 32, fontSize: 12, padding: '0 12px', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>{t('adopt', t('button.adopt', 'Adoptieren'))}</button>
 																							 <button
 																								 type="button"
 																								 onClick={handleWishlist}
@@ -299,12 +276,11 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 																									 color: '#fff',
 																									 border: 'none',
 																									 fontWeight: 600,
-																									 flex: '1 1 40%',
-																									 minWidth: 60,
-																									 maxWidth: 60,
-																									 height: 28,
-																									 fontSize: 14,
-																									 padding: '0',
+																									 flex: '1 1 auto',
+																									 minWidth: 'fit-content',
+																									 height: 32,
+																									 fontSize: 11,
+																									 padding: '0 8px',
 																									 borderRadius: 6,
 																									 cursor: wishlistLoading ? 'wait' : 'pointer',
 																									 textAlign: 'center',
@@ -314,18 +290,19 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 																									 opacity: wishlistLoading ? 0.7 : 1,
 																									 boxShadow: isInWishlist && props._id && isInWishlist(props._id) ? '0 0 0 2px #ff4444' : '0 0 0 2px #43a047',
 																									 transition: 'background 0.2s, box-shadow 0.2s',
+																									 whiteSpace: 'nowrap',
 																								 }}
 																								 disabled={wishlistLoading}
 																							 >
 																								 {isInWishlist && props._id && isInWishlist(props._id)
-																									 ? <><span style={{fontSize:18,marginRight:4}}>💔</span>{t('button.removeFromList', 'Entfernen')}</>
-																									 : <><span style={{fontSize:18,marginRight:4}}>❤️</span>{t('button.addToList', 'Zur Liste')}</>}
+																									 ? <><span style={{fontSize:16,marginRight:4}}>💔</span>{t('button.removeFromList', 'Entfernen')}</>
+																									 : <><span style={{fontSize:16,marginRight:4}}>❤️</span>{t('button.addToList', 'Zur Liste')}</>}
 																							 </button>
 									       {canEdit && (
-										       <button type="button" onClick={onEdit} style={{ ...styles.edit, flex: '1 1 40%', minWidth: 60, maxWidth: 60, height: 28, fontSize: 12, padding: '0', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t('edit', t('button.edit', 'Bearbeiten'))}</button>
+										       <button type="button" onClick={onEdit} style={{ ...styles.edit, flex: '1 1 auto', minWidth: 'fit-content', height: 32, fontSize: 12, padding: '0 12px', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>{t('edit', t('button.edit', 'Bearbeiten'))}</button>
 									       )}
 									       {canEdit && (
-										       <button type="button" onClick={onRemove} style={{ ...styles.remove, flex: '1 1 40%', minWidth: 60, maxWidth: 60, height: 28, fontSize: 12, padding: '0', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{t('remove', t('button.remove', 'Entfernen'))}</button>
+										       <button type="button" onClick={onRemove} style={{ ...styles.remove, flex: '1 1 auto', minWidth: 'fit-content', height: 32, fontSize: 12, padding: '0 12px', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>{t('remove', t('button.remove', 'Entfernen'))}</button>
 									       )}
 					       </div>
 				       </div>

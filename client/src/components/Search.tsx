@@ -31,7 +31,6 @@ const Search: React.FC<SearchProps> = ({
     <div className="search-container" style={{
       marginBottom: '0.75rem',
       padding: '0.5rem',
-      backgroundColor: '#f8f9fa',
       borderRadius: '4px'
     }}>
       {/* Basic search row */}
@@ -65,9 +64,9 @@ const Search: React.FC<SearchProps> = ({
           style={{
             padding: '0.375rem 0.75rem',
             borderRadius: '3px',
-            border: '1px solid #007bff',
-            backgroundColor: showAdvanced ? '#007bff' : 'transparent',
-            color: showAdvanced ? 'white' : '#007bff',
+            border: '1px solid #75171a',
+            backgroundColor: '#f5f5f0',
+            color: '#75171a',
             fontSize: '0.875rem',
             cursor: 'pointer',
             whiteSpace: 'nowrap',

@@ -17,10 +17,13 @@ html {
   padding: 0;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none; }
+  /* Removed user-select: none to allow input interactivity */ }
+
+input, textarea, select {
+  -webkit-user-select: text;
+     -moz-user-select: text;
+      -ms-user-select: text;
+          user-select: text; }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Applications\/MAMP\/htdocs\/eky\/client\/src\/sass\/partials\/reset\.scss}line{font-family:\0000320}}
 ul {

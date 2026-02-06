@@ -115,11 +115,11 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
 
   // Auto-select the first available online user as a conversation if none is selected
   useEffect(() => {
-    if (!selectedConvo && onlineUsers.length > 0) {
+    if (!selectedConvo && onlineUsers.length > 0 && user?._id) {
       const firstUser = onlineUsers[0];
       setSelectedConvo({ _id: firstUser._id, participants: [user._id, firstUser._id] });
     }
-  }, [selectedConvo, onlineUsers, user, user._id]);
+  }, [selectedConvo, onlineUsers, user?._id]);
 
 
   // Handler for input change
@@ -202,81 +202,102 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
       body: JSON.stringify({ userId: user._id, blockId: otherUserId })
     });
   };
+  // Store user._id in a ref to avoid re-running effect when user object reference changes
+  const userIdRef = useRef<string | null>(null);
+  
   useEffect(() => {
-    if (user?._id && token) {
-      if (!socketRef.current) {
-        socketRef.current = io(getApiUrl());
-      }
-      socketRef.current.on('connect', () => {
-        console.log('[DEBUG] Socket connected:', socketRef.current.id);
-      });
-      socketRef.current.on('disconnect', () => {
-        console.log('[DEBUG] Socket disconnected');
-      });
-      console.log('[DEBUG] Emitting join event with userId:', user._id);
-      socketRef.current.emit('join', user._id);
-      socketRef.current.emit('getOnlineUsers');
-      socketRef.current.on('onlineUsers', (users) => {
-        console.log('[DEBUG] Received onlineUsers:', users);
-        if (users.length > 1) {
-          setOnlineUsers(users.filter((u: any) => u._id !== user._id));
-        } else {
-          setOnlineUsers(users);
-        }
-      });
-      socketRef.current.on('adoptionUpdate', () => {
-        window.location.reload();
-      });
-      socketRef.current.on('dogUpdated', ({ dog }) => {
-        if (dog && dog._id) {
-          fetch(`${getApiUrl()}/api/dogs/${dog._id}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          })
-            .then(res => res.json())
-            .then(data => {
-              setDogStatusMap(prev => ({ ...prev, [dog._id]: data.adoptionStatus }));
-              setDogOwnerMap(prev => ({ ...prev, [dog._id]: data.owner }));
-            });
-        }
-      });
-      socketRef.current.on('receiveMessage', (msg) => {
-        const adoptionSystemKeywords = ['confirmed', 'completed', 'closed', 'canceled', 'cancelled'];
-        const isAdoptionSystemMsg = msg.messageType === 'adoption' && msg.dogId && msg.message && adoptionSystemKeywords.some(k => msg.message.toLowerCase().includes(k));
-        if (isAdoptionSystemMsg) {
-          setMessages(prev => [...prev, {
-            _id: Math.random().toString(36).substr(2, 9),
-            sender: null,
-            recipient: null,
-            message: msg.message,
-            sentAt: new Date().toISOString(),
-            messageType: 'system',
-            dogId: msg.dogId
-          }]);
-          setNotification(msg.message);
-          fetch(`${getApiUrl()}/api/dogs/${msg.dogId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          })
-            .then(res => res.json())
-            .then(data => {
-              setDogStatusMap(prev => ({ ...prev, [msg.dogId]: data.adoptionStatus }));
-              setDogOwnerMap(prev => ({ ...prev, [msg.dogId]: data.owner }));
-            });
-          setAdoptionDogId('');
-          setAdoptionIsOwner(false);
-        } else {
-          setMessages(prev => [...prev, msg]);
-          if (msg.messageType === 'adoption' && msg.dogId) {
-            setAdoptionDogId(msg.dogId);
-            setAdoptionIsOwner(!!msg.isOwner);
-          }
-        }
-      });
+    const userId = user?._id;
+    // Only setup socket if we have userId and token, and userId changed
+    if (!userId || !token) return;
+    if (userIdRef.current === userId && socketRef.current?.connected) return;
+    
+    userIdRef.current = userId;
+    
+    // Cleanup existing socket if any
+    if (socketRef.current) {
+      socketRef.current.removeAllListeners();
+      socketRef.current.disconnect();
     }
+    
+    socketRef.current = io(getApiUrl());
+    
+    socketRef.current.on('connect', () => {
+      console.log('[DEBUG] Socket connected:', socketRef.current?.id);
+      // Join room after connection
+      socketRef.current?.emit('join', userId);
+      socketRef.current?.emit('getOnlineUsers');
+    });
+    
+    socketRef.current.on('disconnect', () => {
+      console.log('[DEBUG] Socket disconnected');
+    });
+    
+    socketRef.current.on('onlineUsers', (users) => {
+      if (users.length > 1) {
+        setOnlineUsers(users.filter((u: any) => u._id !== userId));
+      } else {
+        setOnlineUsers(users);
+      }
+    });
+    
+    socketRef.current.on('adoptionUpdate', () => {
+      window.location.reload();
+    });
+    
+    socketRef.current.on('dogUpdated', ({ dog }) => {
+      if (dog && dog._id) {
+        fetch(`${getApiUrl()}/api/dogs/${dog._id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+          .then(res => res.json())
+          .then(data => {
+            setDogStatusMap(prev => ({ ...prev, [dog._id]: data.adoptionStatus }));
+            setDogOwnerMap(prev => ({ ...prev, [dog._id]: data.owner }));
+          });
+      }
+    });
+    
+    socketRef.current.on('receiveMessage', (msg) => {
+      const adoptionSystemKeywords = ['confirmed', 'completed', 'closed', 'canceled', 'cancelled'];
+      const isAdoptionSystemMsg = msg.messageType === 'adoption' && msg.dogId && msg.message && adoptionSystemKeywords.some(k => msg.message.toLowerCase().includes(k));
+      if (isAdoptionSystemMsg) {
+        setMessages(prev => [...prev, {
+          _id: Math.random().toString(36).substr(2, 9),
+          sender: null,
+          recipient: null,
+          message: msg.message,
+          sentAt: new Date().toISOString(),
+          messageType: 'system',
+          dogId: msg.dogId
+        }]);
+        setNotification(msg.message);
+        fetch(`${getApiUrl()}/api/dogs/${msg.dogId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+          .then(res => res.json())
+          .then(data => {
+            setDogStatusMap(prev => ({ ...prev, [msg.dogId]: data.adoptionStatus }));
+            setDogOwnerMap(prev => ({ ...prev, [msg.dogId]: data.owner }));
+          });
+        setAdoptionDogId('');
+        setAdoptionIsOwner(false);
+      } else {
+        setMessages(prev => [...prev, msg]);
+        if (msg.messageType === 'adoption' && msg.dogId) {
+          setAdoptionDogId(msg.dogId);
+          setAdoptionIsOwner(!!msg.isOwner);
+        }
+      }
+    });
+
     return () => {
-      socketRef.current?.disconnect();
-      socketRef.current = null;
+      if (socketRef.current) {
+        socketRef.current.removeAllListeners();
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
     };
-  }, [user, token, user?.profilePicture]);
+  }, [user?._id, token]);
 
   useEffect(() => {
     if (selectedConvo && token) {

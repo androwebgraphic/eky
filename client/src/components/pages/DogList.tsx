@@ -2,24 +2,95 @@
 
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import CardSmall from '../CardSmall';
 import EditDogModal from './EditDogModal';
 import RemoveDogModal from './RemoveDogModal';
 import DogDetails from './DogDetails';
 import type { DogDetailsProps } from './DogDetails';
+import { useAuth } from '../../contexts/AuthContext';
+import Search from '../Search';
 const API_URL = process.env.REACT_APP_API_URL || '';
 
 function DogList() {
 
 	const { t } = useTranslation();
+	const { token } = useAuth();
 	const [dogs, setDogs] = useState<DogDetailsProps[]>([]);
 	const [editDog, setEditDog] = useState<DogDetailsProps | null>(null);
 	const [removeDog, setRemoveDog] = useState<DogDetailsProps | null>(null);
 	const [detailsDog, setDetailsDog] = useState<DogDetailsProps | null>(null);
+	const [mapDog, setMapDog] = useState<{ name: string; location: string } | null>(null);
+	const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number } | null>(null);
+	const [mapLoading, setMapLoading] = useState(false);
+	const [mapError, setMapError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+
+	// Search/filter state
+	const [searchTerm, setSearchTerm] = useState('');
+	const [genderFilter, setGenderFilter] = useState('');
+	const [sizeFilter, setSizeFilter] = useState('');
+	const [locationFilter, setLocationFilter] = useState('');
+
+	// Get unique locations for filter dropdown
+	const availableLocations = useMemo(() => {
+		const locations = dogs
+			.map(dog => dog.place || (dog as any).location)
+			.filter((loc): loc is string => !!loc);
+		return Array.from(new Set(locations)).sort();
+	}, [dogs]);
+
+	// Filter dogs based on search/filters
+	const filteredDogs = useMemo(() => {
+		return dogs.filter(dog => {
+			// Search term matches name or breed
+			const term = searchTerm.toLowerCase();
+			const matchesSearch = !term || 
+				(dog.name && dog.name.toLowerCase().includes(term)) ||
+				(dog.breed && dog.breed.toLowerCase().includes(term));
+			
+			// Gender filter
+			const matchesGender = !genderFilter || dog.gender === genderFilter;
+			
+			// Size filter
+			const matchesSize = !sizeFilter || dog.size === sizeFilter;
+			
+			// Location filter
+			const dogLocation = dog.place || (dog as any).location;
+			const matchesLocation = !locationFilter || dogLocation === locationFilter;
+			
+			return matchesSearch && matchesGender && matchesSize && matchesLocation;
+		});
+	}, [dogs, searchTerm, genderFilter, sizeFilter, locationFilter]);
+
+	// Geocode location for map modal
+	const openMapForDog = async (dog: DogDetailsProps) => {
+		const location = dog.place || (dog as any).location;
+		if (!location) return;
+		setMapDog({ name: dog.name, location });
+		setMapLoading(true);
+		setMapError(null);
+		setMapCoords(null);
+		try {
+			let query = location.trim();
+			if (query.split(/\s+/).length < 2) {
+				query += ', Croatia';
+			}
+			const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+			const data = await resp.json();
+			if (data && data.length > 0) {
+				setMapCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+			} else {
+				setMapError(t('dogDetails.locationNotFound', 'Location not found'));
+			}
+		} catch (e) {
+			setMapError(t('dogDetails.locationSearchFailed', 'Location search failed'));
+		} finally {
+			setMapLoading(false);
+		}
+	};
 
 	useEffect(() => {
 		setLoading(true);
@@ -81,15 +152,37 @@ function DogList() {
 	};
 	const handleRemoveConfirm = async () => {
 		if (!removeDog) return;
-		await fetch(`${API_URL}/api/dogs/${removeDog._id}`, { method: 'DELETE' });
-		setRemoveDog(null);
-		setLoading(true);
-		fetch(`${API_URL}/api/dogs`)
-			.then(res => res.json())
-			.then(data => {
-				setDogs(Array.isArray(data) ? data : []);
-				setLoading(false);
+		const headers: Record<string, string> = {};
+		// Get token from context or fallback to localStorage
+		const authToken = token || localStorage.getItem('token');
+		if (authToken) {
+			headers['Authorization'] = `Bearer ${authToken}`;
+		}
+		console.log('[DELETE DEBUG] Deleting dog:', removeDog._id, 'with token:', authToken ? 'present' : 'missing');
+		try {
+			const resp = await fetch(`${API_URL}/api/dogs/${removeDog._id}`, { 
+				method: 'DELETE',
+				headers
 			});
+			const data = await resp.json();
+			console.log('[DELETE DEBUG] Response status:', resp.status, 'data:', data);
+			if (!resp.ok) {
+				console.error('[DELETE DEBUG] Failed to delete dog:', data);
+				setRemoveDog(null);
+				return;
+			}
+			setRemoveDog(null);
+			setLoading(true);
+			fetch(`${API_URL}/api/dogs`)
+				.then(res => res.json())
+				.then(data => {
+					setDogs(Array.isArray(data) ? data : []);
+					setLoading(false);
+				});
+		} catch (err) {
+			console.error('[DELETE DEBUG] Fetch error:', err);
+			setRemoveDog(null);
+		}
 	};
 
 	if (loading) return <div>{t('doglist.loading') || 'Loading dogs...'}</div>;
@@ -97,6 +190,20 @@ function DogList() {
 
 	return (
 		<>
+			{/* Search bar */}
+			<div style={{ padding: '0 16px', paddingTop: '70px', maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
+				<Search
+					searchTerm={searchTerm}
+					onSearchChange={setSearchTerm}
+					genderFilter={genderFilter}
+					onGenderChange={setGenderFilter}
+					sizeFilter={sizeFilter}
+					onSizeChange={setSizeFilter}
+					locationFilter={locationFilter}
+					onLocationChange={setLocationFilter}
+					availableLocations={availableLocations}
+				/>
+			</div>
 			<main
 				style={{
 					display: isDesktop ? 'flex' : 'block',
@@ -107,12 +214,12 @@ function DogList() {
 					position: 'relative',
 					margin: isDesktop ? '32px 0 32px 32px' : undefined,
 					marginTop: isDesktop ? '32px' : undefined,
-					paddingTop: isDesktop ? '60px' : '60px', // ensure main is below fixed header
+					paddingTop: isDesktop ? '16px' : '16px',
 					overflowY: 'auto',
 					WebkitOverflowScrolling: isDesktop ? undefined : 'touch',
 				}}
 			>
-				{dogs.length === 0 ? (
+				{filteredDogs.length === 0 ? (
 					<div>{t('doglist.empty') || 'No dogs found.'}</div>
 				) : (
 					<div
@@ -125,7 +232,7 @@ function DogList() {
 							width: isDesktop ? undefined : '100%',
 						}}
 					>
-						{dogs.map(dog => {
+						{filteredDogs.map(dog => {
 							// Deduplicate images by base name before passing to CardSmall
 							const getImageBase = (url: string) => {
 								let cleanUrl = url.split('?')[0];
@@ -172,8 +279,10 @@ function DogList() {
 											// Always close any open modals before opening new details
 											setEditDog(null);
 											setDetailsDog(null);
+											setMapDog(null);
 											if (e && Object.keys(e).length === 0) {
-												handleDetails({ ...dog, _showMap: true } as any);
+												// Location click - open map only
+												openMapForDog(dog);
 											} else {
 												handleDetails(dog);
 											}
@@ -341,6 +450,81 @@ function DogList() {
 						</div>
 					</div>
 				))}
+			{/* Map-only modal */}
+			{mapDog && (
+				<div
+					style={{
+						position: 'fixed',
+						top: 0,
+						left: 0,
+						width: '100vw',
+						height: '100vh',
+						background: 'rgba(0,0,0,0.6)',
+						zIndex: 2147483647,
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+					}}
+					onClick={(e) => { if (e.target === e.currentTarget) setMapDog(null); }}
+				>
+					<div
+						style={{
+							background: '#fff',
+							borderRadius: 16,
+							maxWidth: 600,
+							width: '95vw',
+							maxHeight: '80vh',
+							overflow: 'auto',
+							position: 'relative',
+							padding: 24,
+						}}
+					>
+						<button
+							onClick={() => setMapDog(null)}
+							style={{
+								position: 'absolute',
+								top: 12,
+								right: 12,
+								width: 36,
+								height: 36,
+								background: '#e74c3c',
+								color: '#fff',
+								border: 'none',
+								borderRadius: '50%',
+								fontSize: '1.5rem',
+								fontWeight: 'bold',
+								cursor: 'pointer',
+								zIndex: 2,
+							}}
+							aria-label="Close"
+							title="Close"
+						>
+							×
+						</button>
+						<h3 style={{ marginTop: 0, marginBottom: 16 }}>
+							📍 {mapDog.name} - {mapDog.location}
+						</h3>
+						{mapLoading && <div style={{ textAlign: 'center', padding: 20 }}>{t('dogDetails.loadingMap', 'Loading map...')}</div>}
+						{mapError && <div style={{ textAlign: 'center', padding: 20, color: '#e74c3c' }}>{mapError}</div>}
+						{mapCoords && !mapLoading && (
+							<iframe
+								title="Dog Location Map"
+								width="100%"
+								height="350"
+								style={{ border: 0, borderRadius: 8 }}
+								loading="lazy"
+								allowFullScreen
+								src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCoords.lng - 0.02}%2C${mapCoords.lat - 0.02}%2C${mapCoords.lng + 0.02}%2C${mapCoords.lat + 0.02}&layer=mapnik&marker=${mapCoords.lat}%2C${mapCoords.lng}`}
+							/>
+						)}
+						{!mapCoords && !mapLoading && !mapError && (
+							<div style={{ textAlign: 'center', padding: 20, color: '#888' }}>
+								{t('dogDetails.noLocationData', 'No location data available')}
+							</div>
+						)}
+					</div>
+				</div>
+			)}
 		</>
 	);
 }

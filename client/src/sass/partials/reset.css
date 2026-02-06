@@ -16,7 +16,12 @@ html {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  user-select: none;
+}
+
+/* Allow text selection in form inputs */
+input, textarea, select {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 ul {

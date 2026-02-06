@@ -17,6 +17,10 @@ html {
   /* Removed user-select: none to allow input interactivity */
 }
 
+input, textarea, select {
+  user-select: text;
+}
+
 ul {
   list-style: none;
 }

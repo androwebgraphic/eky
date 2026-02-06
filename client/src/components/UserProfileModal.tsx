@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -26,6 +26,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   const [loadingWishlist, setLoadingWishlist] = useState(false);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>('');
+  
   // Helper to get full image URL (robust)
   const getProfileImageUrl = (profilePicture: string | undefined) => {
     if (!profilePicture) return "../img/androcolored-80x80.jpg";
@@ -101,7 +102,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     };
     window.addEventListener('wishlist-updated', handler);
     return () => window.removeEventListener('wishlist-updated', handler);
-  }, [isOpen, loadWishlist, typedUser.email, typedUser.name, typedUser.phone, typedUser.username, user]);
+    // Only re-run when modal opens/closes or user ID changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, typedUser?._id]);
 
   const handleModalClose = React.useCallback(() => {
     console.log('handleModalClose called');
@@ -582,10 +585,36 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       padding: '8px 12px',
                       border: '1px solid #ddd',
                       borderRadius: '4px',
-                      fontSize: '14px'
+                      fontSize: '16px',
+                      WebkitUserSelect: 'text',
+                      userSelect: 'text'
                     }}
                     required
                     autoComplete="name"
+                  />
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+                    {t('userProfile.phone')}
+                  </label>
+                  <input
+                    type="text"
+                    id="profileContactNum"
+                    name="contactNum"
+                    value={formData.phone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '16px',
+                      background: '#fff'
+                    }}
+                    autoComplete="off"
+                    data-form-type="other"
+                    data-lpignore="true"
                   />
                 </div>
 
@@ -604,7 +633,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       padding: '8px 12px',
                       border: '1px solid #ddd',
                       borderRadius: '4px',
-                      fontSize: '14px'
+                      fontSize: '16px',
+                      WebkitUserSelect: 'text',
+                      userSelect: 'text'
                     }}
                     required
                     autoComplete="email"
@@ -626,34 +657,15 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       padding: '8px 12px',
                       border: '1px solid #ddd',
                       borderRadius: '4px',
-                      fontSize: '14px'
+                      fontSize: '16px',
+                      WebkitUserSelect: 'text',
+                      userSelect: 'text'
                     }}
                     required
                     autoComplete="username"
                   />
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
-                    {t('userProfile.phone')}
-                  </label>
-                  <input
-                    type="tel"
-                    id="profilePhoneInput"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      fontSize: '14px'
-                    }}
-                    required
-                    autoComplete="tel"
-                  />
-                </div>
                 {/* Password Change Section */}
                 <div style={{ 
                   marginBottom: '20px', 

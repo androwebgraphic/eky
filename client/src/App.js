@@ -7,6 +7,26 @@ import ChatApp from './components/ChatApp';
 import "./css/mobile-fixes.css"; // Mobile viewport fixes
 
 const App = () => {
+  // CRITICAL: Fix input fields being non-editable due to global user-select: none
+  useEffect(() => {
+    if (typeof document !== 'undefined' && !document.getElementById('eky-input-fix-style')) {
+      const inputFixStyle = `
+        input, textarea, select, [contenteditable="true"] {
+          -webkit-user-select: text !important;
+          -moz-user-select: text !important;
+          -ms-user-select: text !important;
+          user-select: text !important;
+          pointer-events: auto !important;
+          caret-color: #333 !important;
+        }
+      `;
+      const style = document.createElement('style');
+      style.id = 'eky-input-fix-style';
+      style.innerHTML = inputFixStyle;
+      document.head.appendChild(style);
+    }
+  }, []);
+
   // Global scroll style for html/body/root/main
   useEffect(() => {
     if (typeof document !== 'undefined' && !document.getElementById('eky-global-scroll-style')) {

@@ -111,39 +111,37 @@ const io = new SocketIOServer(httpServer, {
 const { setIo } = require('./socket.js');
 setIo(io);
 
+// Load User model for socket operations
+const User = require('./models/userModel.js');
+
 // --- Online users tracking ---
 const onlineUsers = new Map(); // userId -> { _id, userName, socketId }
 
 io.on('connection', (socket) => {
   // Join user room and register online user
-  socket.on('join', (userId) => {
+  socket.on('join', async (userId) => {
     console.log('[Socket.IO] join event for userId:', userId);
     socket.join(userId);
-    // Fetch userName from DB for display (async)
-    import('./models/userModel.js').then(({ default: User }) => {
-      // Always fetch latest profilePicture from DB before emitting online users
-      User.findById(userId).select('_id username name email profilePicture').lean().then(userDoc => {
-        if (userDoc) {
-          let userName = userDoc.name;
-          if (!userName || userName.trim() === '') userName = userDoc.username;
-          if (!userName || userName.trim() === '') userName = userDoc.email;
-          if (!userName || userName.trim() === '') userName = 'User';
-          const profilePicture = userDoc.profilePicture || '';
-          onlineUsers.set(userId, { _id: userId, userName, profilePicture, socketId: socket.id });
-          console.log('[Socket.IO] User joined and set online:', { _id: userId, userName, profilePicture });
-          // Always fetch latest profilePicture for all online users before emitting
-          Promise.all(Array.from(onlineUsers.values()).map(async u => {
-            const freshUser = await User.findById(u._id).select('profilePicture').lean();
-            return { ...u, profilePicture: freshUser?.profilePicture || '' };
-          })).then(freshOnlineUsers => {
-            io.emit('onlineUsers', freshOnlineUsers);
-            io.emit('userOnline', { _id: userId, userName, profilePicture });
-          });
-        } else {
-          console.log('[Socket.IO] No user found for userId:', userId);
-        }
-      });
-    });
+    try {
+      // Fetch userName from DB for display
+      const userDoc = await User.findById(userId).select('_id username name email profilePicture').lean();
+      if (userDoc) {
+        let userName = userDoc.name;
+        if (!userName || userName.trim() === '') userName = userDoc.username;
+        if (!userName || userName.trim() === '') userName = userDoc.email;
+        if (!userName || userName.trim() === '') userName = 'User';
+        const profilePicture = userDoc.profilePicture || '';
+        onlineUsers.set(userId, { _id: userId, userName, profilePicture, socketId: socket.id });
+        console.log('[Socket.IO] User joined and set online:', { _id: userId, userName, profilePicture });
+        // Emit online users
+        io.emit('onlineUsers', Array.from(onlineUsers.values()));
+        io.emit('userOnline', { _id: userId, userName, profilePicture });
+      } else {
+        console.log('[Socket.IO] No user found for userId:', userId);
+      }
+    } catch (err) {
+      console.error('[Socket.IO] Error in join event:', err);
+    }
   });
 
   // Client requests current online users
@@ -152,18 +150,6 @@ io.on('connection', (socket) => {
     socket.emit('onlineUsers', Array.from(onlineUsers.values()));
   });
 
-    app.use(cors({
-      origin: function(origin, callback) {
-        // allow requests with no origin (like mobile apps, curl, etc.)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) {
-          return callback(null, true);
-        } else {
-          return callback(new Error('Not allowed by CORS'));
-        }
-      },
-      credentials: true
-    }));
   // Send message event
   socket.on('sendMessage', ({ conversationId, sender, recipient, message }) => {
     io.to(recipient).emit('receiveMessage', { conversationId, sender, message, sentAt: new Date().toISOString() });

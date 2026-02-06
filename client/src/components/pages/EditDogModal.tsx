@@ -1,4 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react';
+import ReactDOM from 'react-dom';
+
+// Portal container for modal
+const modalRoot = document.getElementById('editdog-modal-root') || (() => {
+  const root = document.createElement('div');
+  root.id = 'editdog-modal-root';
+  root.style.position = 'fixed';
+  root.style.top = '0';
+  root.style.left = '0';
+  root.style.width = '100%';
+  root.style.height = '100%';
+  root.style.zIndex = '2147483647';
+  document.body.appendChild(root);
+  return root;
+})();
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
@@ -143,7 +158,7 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
     }
   };
 
-  return (
+  return ReactDOM.createPortal(
     <div 
       className="edit-modal-overlay"
       style={{
@@ -610,7 +625,8 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    modalRoot
   );
 }
 

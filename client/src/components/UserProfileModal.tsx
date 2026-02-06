@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
+
+// Portal container for modal
+const modalRoot = document.getElementById('modal-root') || (() => {
+  const root = document.createElement('div');
+  root.id = 'modal-root';
+  root.style.position = 'fixed';
+  root.style.top = '0';
+  root.style.left = '0';
+  root.style.width = '100%';
+  root.style.height = '100%';
+  root.style.zIndex = '2147483647';
+  document.body.appendChild(root);
+  return root;
+})();
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
+import '../css/modal.css';
 
 interface User {
   id?: string;
@@ -140,6 +156,48 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       setSuccess(null);
       setLoading(false);
     }
+  }, [isOpen]);
+
+  // Prevent body scrolling when modal is open
+  React.useEffect(() => {
+    if (isOpen) {
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.height = '100%';
+      
+      // Store scroll position
+      const scrollY = window.scrollY;
+      document.body.dataset.scrollY = scrollY.toString();
+      
+      // Prevent touch scrolling on mobile
+      document.body.style.touchAction = 'none';
+    } else {
+      // Restore body scroll
+      const scrollY = document.body.dataset.scrollY || '0';
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.body.style.touchAction = '';
+      
+      // Restore scroll position
+      window.scrollTo(0, parseInt(scrollY, 10));
+      
+      // Clear stored scroll position
+      delete document.body.dataset.scrollY;
+    }
+    
+    return () => {
+      // Cleanup when modal unmounts
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.body.style.touchAction = '';
+      delete document.body.dataset.scrollY;
+    };
   }, [isOpen]);
 
 
@@ -364,20 +422,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     }
   };
 
-  return (
+  // Render modal using portal to escape #Wrap container
+  return ReactDOM.createPortal(
     <div 
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000
-      }}
+      className="modal-overlay"
       onClick={(e) => {
         // Close modal when clicking on backdrop
         if (e.target === e.currentTarget) {
@@ -387,16 +435,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       }}
     >
       <div 
-        style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          padding: '24px',
-          maxWidth: '500px',
-          width: '90%',
-          maxHeight: '80vh',
-          overflowY: 'auto',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-        }}
+        className="modal"
         onClick={(e) => {
           // Prevent modal from closing when clicking inside the modal
           e.stopPropagation();
@@ -947,7 +986,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    modalRoot
   );
 };
 

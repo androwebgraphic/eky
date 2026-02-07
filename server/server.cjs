@@ -16,6 +16,7 @@ const authRoutes = require("./routes/authRoutes.js");
 const auth = require('./middleware/auth.js');
 const cors = require('cors');
 const chatRoutes = require('./routes/chatRoutes.js'); // <-- Add this here
+const adoptionRoutes = require('./routes/adoptionRoutes.js'); // <-- Add adoption routes
 
 // 2. Create the Express app FIRST
 
@@ -73,6 +74,7 @@ app.use('/u', setUploadsCORS, express.static(uploadsPath));
 app.use("/api/users", userRoutes);
 app.use("/api/dogs", dogRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/adoption", adoptionRoutes);
 // If you want to use the auth middleware globally, use ONLY the function, not the module object:
 // const auth = require('./middleware/auth.js');
 // app.use(auth); // Uncomment if you want global auth protection

@@ -39,6 +39,7 @@ export interface CardSmallProps {
 const CardSmall: React.FC<CardSmallProps> = (props) => {
 	const { t } = useTranslation();
 	const { isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist } = useAuth();
+	const navigate = React.useMemo(() => (window as any).navigate || null, []);
 	const [wishlistLoading, setWishlistLoading] = React.useState(false);
 	const {
 			       name = 'Unknown',
@@ -60,11 +61,9 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 	function toAbsUrl(url?: string) {
 		if (!url) return url;
 		const cacheBuster = (window as any).__EKY_IMAGE_CB || ((window as any).__EKY_IMAGE_CB = Date.now());
-		// Use backend URL from env or default
 		const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 		if (/^https?:\/\//.test(url)) return url + (url.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
 		if (url.startsWith('/uploads/') || url.startsWith('/u/dogs/')) {
-			// Prepend backend URL if not already absolute
 			return apiBase + url + '?cb=' + cacheBuster;
 		}
 		return url;
@@ -72,31 +71,21 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 
 	let largestImgUrl: string | undefined = undefined;
 	
-	// Deduplicate images by base name (ignore size/hash/extension variants)
 	const getImageBase = (url: string) => {
 		let cleanUrl = url.split('?')[0];
 		const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
 		
 		let base = filename;
 		
-		// Remove file extension FIRST
 		base = base.replace(/\.(jpg|jpeg|png|webp)$/i, '');
 		
-		// Handle uploaded files: name-TIMESTAMP-HASH-SIZE -> name
-		// Examples: doggy-1770420370994-1liy0v-320 -> doggy
-		// Also handle: doggy-orig -> doggy
 		if (base.includes('-') && !base.startsWith('pexels-')) {
-			// Remove -orig suffix if present
 			base = base.replace(/-orig$/, '');
-			// Remove -TIMESTAMP-HASH-SIZE suffix (10-13 digit timestamp + 6 char hash + 3-4 digit size)
 			const uploadedMatch = base.match(/^(.+?)-\d{10,13}-[a-z0-9]{6}-\d{3,4}$/);
 			if (uploadedMatch) {
 				base = uploadedMatch[1];
 			}
 		} else if (base.startsWith('pexels-')) {
-			// Handle Pexels images: pexels-name-ID-TIMESTAMP-HASH-SIZE -> name-ID
-			// Examples: pexels-anyela-malaga-341169564-18062006-1770420371422-qfmvmr-320 -> anyela-malaga-341169564-18062006
-			// Also handle: pexels-name-ID-orig -> name-ID
 			base = base.replace(/-orig$/, '');
 			const pexelsMatch = base.match(/^pexels-(.+?)-\d+(-\d{10,13}-[a-z0-9]{6}-\d{3,4})?$/);
 			if (pexelsMatch) {
@@ -107,7 +96,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		return base;
 	};
 	
-	// First filter valid images, then deduplicate by base name
 	const validImages = (images || []).filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
 	const uniqueImages = validImages.filter((img, idx, arr) => {
 		const base = getImageBase(img.url);
@@ -128,12 +116,10 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 				       if (thumbnail && thumbnail.url) {
 					       thumbUrl = toAbsUrl(thumbnail.url);
 				       }
-				       // Add posterUrl for video poster
 				       const posterUrl = video && video.poster && video.poster.length
 					       ? toAbsUrl(video.poster[video.poster.length - 1].url)
 					       : undefined;
 
-						// Button color palette
 						const styles = {
 						       details: {
 							       background: '#72211f', color: '#fff', border: 'none', fontWeight: 600
@@ -152,9 +138,54 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 						       }
 						};
 
-	// Button handlers
-	const handleAdopt = () => {
-		alert(t('Adopt functionality coming soon!'));
+	const handleAdopt = async () => {
+		if (!props._id) return;
+		if (!isAuthenticated) {
+			alert(t('Please log in to adopt a dog.'));
+			return;
+		}
+		
+		if (canEdit) {
+			alert(t('Cannot adopt your own dog.'));
+			return;
+		}
+
+		const confirmAdopt = window.confirm(
+			`Do you want to send an adoption request for ${name}?`
+		);
+		
+		if (!confirmAdopt) return;
+
+		try {
+			const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+			const response = await fetch(`${apiBase}/api/adoption/requests`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${localStorage.getItem('token')}`
+				},
+				body: JSON.stringify({
+					dogId: props._id,
+					message: 'I am interested in adopting this dog.'
+				})
+			});
+
+		const data = await response.json();
+
+		if (response.ok) {
+			alert('Adoption request sent successfully! Opening chat...');
+			// Open chat modal
+			if (typeof window !== 'undefined') {
+				window.dispatchEvent(new CustomEvent('openChatModal'));
+			}
+		} else {
+			console.error('Server error:', data);
+			alert('Failed to send adoption request: ' + (data.error || data.message || JSON.stringify(data)));
+		}
+	} catch (error) {
+		console.error('Error sending adoption request:', error);
+		alert('An error occurred while sending the adoption request. Check browser console (F12) for details.');
+	}
 	};
 
 		const handleWishlist = async () => {
@@ -212,8 +243,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 						       }}
 					       >
 						       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', width: '100%', position: 'relative' }}>
-							       {/* Image/Video section */}
-								       {hasVideoUrl && !videoError ? (
+							       {hasVideoUrl && !videoError ? (
 										   <div style={{ cursor: 'pointer' }} onClick={e => onViewDetails && onViewDetails(e)} title={t('dogDetails.showMap', 'Show details')}>
 									   <video
 										   controls
@@ -254,8 +284,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 								       ) : (
 									       <div style={{ width: '100%', height: '200px', background: '#eee', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }} />
 								       )}
-							       {/* Multi-image indicator */}
-								   {uniqueImages.length > 1 && (
+							       {uniqueImages.length > 1 && (
 									   <div
 										   title={t('dogDetails.showMoreImages', 'View all images')}
 										   style={{
@@ -294,7 +323,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 											       {t('fields.location', 'Location')}: 
 													       <span 
 														       style={{color:'#1976d2',marginLeft:4, cursor:'pointer', textDecoration:'underline'}}
-														       onClick={() => onViewDetails && onViewDetails({} as any /* signal map click */)}
+														       onClick={() => onViewDetails && onViewDetails({} as any)}
 														       title={t('dogDetails.showMap', 'Show map')}
 													       >
 														       {place || (props as any).location}

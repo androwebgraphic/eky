@@ -76,9 +76,16 @@ const App = () => {
   const [showChatModal, setShowChatModal] = useState(false);
 
   useEffect(() => {
-    const handler = () => setShowChatModal(false);
-    window.addEventListener('closeChatModal', handler);
-    return () => window.removeEventListener('closeChatModal', handler);
+    const closeHandler = () => setShowChatModal(false);
+    const openHandler = () => setShowChatModal(true);
+    
+    window.addEventListener('closeChatModal', closeHandler);
+    window.addEventListener('openChatModal', openHandler);
+    
+    return () => {
+      window.removeEventListener('closeChatModal', closeHandler);
+      window.removeEventListener('openChatModal', openHandler);
+    };
   }, []);
 
   return (

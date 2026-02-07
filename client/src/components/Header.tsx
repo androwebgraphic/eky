@@ -92,6 +92,7 @@ const Header: React.FC = () => {
             <nav style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <Link to="/" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.about')}</Link>
               <Link to="psi" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.dogs')}</Link>
+              <Link to="zahtjevi-za-posvajanjem" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.adoptionRequests') || 'Adoption Requests'}</Link>
             </nav>
             <div style={{ flex: 1 }} />
             {/* Right: Language Selector and User Info */}
@@ -289,6 +290,7 @@ const Header: React.FC = () => {
             {/* Left side: Navigation Links */}
             <nav style={{ display: 'flex', alignItems: 'center', gap: '15px', flexShrink: 1 }}>
               <Link to="/" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.about')}</Link>
+              <Link to="psi" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.dogs')}</Link>
               <Link to="logiranje" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.login')}</Link>
               <Link to="registracija" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.register')}</Link>
             </nav>

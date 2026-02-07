@@ -42,7 +42,7 @@ const mapModalRoot = document.getElementById('doglist-map-root') || (() => {
 function DogList() {
 
 	const { t } = useTranslation();
-	const { token } = useAuth();
+	const { token, user } = useAuth();
 	const [dogs, setDogs] = useState<DogDetailsProps[]>([]);
 	const [editDog, setEditDog] = useState<DogDetailsProps | null>(null);
 	const [removeDog, setRemoveDog] = useState<DogDetailsProps | null>(null);
@@ -276,6 +276,12 @@ function DogList() {
 									return arr.findIndex(other => other && other.url && getImageBase(other.url) === base) === idx;
 								});
 							}
+							const isOwner = user && dog.user && (
+								typeof dog.user === 'string' 
+									? dog.user === user._id 
+									: dog.user._id === user._id
+							);
+
 							return (
 								<div
 									key={dog._id}
@@ -298,7 +304,7 @@ function DogList() {
 									<CardSmall
 										{...dog}
 										images={dedupedImages}
-										canEdit={true}
+										canEdit={isOwner}
 										onEdit={() => handleEdit(dog)}
 										onRemove={() => handleRemove(dog)}
 										onViewDetails={e => {

@@ -107,3 +107,32 @@ body {
     max-height: 65vh !important;
   }
 }
+
+/* Mobile-specific modal adjustments */
+@media (max-width: 767px) {
+  .modal-overlay {
+    padding: 5px !important;
+    align-items: flex-start !important;
+    padding-top: 10vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  .modal {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 450px !important;
+    height: 450px !important;
+    min-height: 200px !important;
+    padding: 1rem !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  .modal-close {
+    z-index: 10000 !important;
+    top: 0.5rem !important;
+    right: 0.5rem !important;
+  }
+}

@@ -134,15 +134,15 @@ const RegisterForm: React.FC = () => {
         <button type="submit" id="register" name="register" className="details" disabled={isSubmitting || !acceptedTerms}>
           {isSubmitting ? t('button.submitting') || 'Submitting...' : (t('button.register') || 'Register')}
         </button>
-            <TermsModal
-              open={showTerms}
-              onClose={() => setShowTerms(false)}
-              onAccept={() => {
-                setAcceptedTerms(true);
-                setShowTerms(false);
-              }}
-            />
       </form>
+      <TermsModal
+        open={showTerms}
+        onClose={() => setShowTerms(false)}
+        onAccept={() => {
+          setAcceptedTerms(true);
+          setShowTerms(false);
+        }}
+      />
       <p>
         {t('register.remember')} <input type="checkbox" id="register-remember" name="remember" autoComplete="off" {...register('remember')} />
       </p>

@@ -215,42 +215,42 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 							       {/* Image/Video section */}
 								       {hasVideoUrl && !videoError ? (
 										   <div style={{ cursor: 'pointer' }} onClick={e => onViewDetails && onViewDetails(e)} title={t('dogDetails.showMap', 'Show details')}>
-											   <video
-												   controls
-												   width="100%"
-												   height="200"
-												   poster={posterUrl}
-												   style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}
-												   onError={() => setVideoError(true)}
-												   onClick={e => onViewDetails && onViewDetails(e)}
-											   >
+									   <video
+										   controls
+										   width="100%"
+										   height="200"
+										   poster={posterUrl}
+										   style={{ width: '100%', height: '200px', objectFit: 'contain', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', background: '#f5f5f5' }}
+										   onError={() => setVideoError(true)}
+										   onClick={e => onViewDetails && onViewDetails(e)}
+									   >
 												   <source src={videoUrl} />
 											   </video>
 										   </div>
 								       ) : videoError ? (
 									       <div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>Video failed to load</div>
 								       ) : largestImgUrl && !imgError ? (
-										   <img
-											   src={largestImgUrl}
-											   alt={name}
-											   style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', cursor: 'pointer' }}
-											   loading="lazy"
-											   onError={() => setImgError(true)}
-											   onClick={e => onViewDetails && onViewDetails(e)}
-											   title={t('dogDetails.showMap', 'Show details')}
-										   />
+									   <img
+										   src={largestImgUrl}
+										   alt={name}
+										   style={{ width: '100%', height: '200px', objectFit: 'contain', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', cursor: 'pointer', background: '#f5f5f5' }}
+										   loading="lazy"
+										   onError={() => setImgError(true)}
+										   onClick={e => onViewDetails && onViewDetails(e)}
+										   title={t('dogDetails.showMap', 'Show details')}
+									   />
 								       ) : imgError ? (
 									       <div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>Image failed to load</div>
-								       ) : thumbUrl && !imgError ? (
-										   <img
-											   src={thumbUrl}
-											   alt={name}
-											   style={{ width: '100%', height: '200px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', cursor: 'pointer' }}
-											   loading="lazy"
-											   onError={() => setImgError(true)}
-											   onClick={e => onViewDetails && onViewDetails(e)}
-											   title={t('dogDetails.showMap', 'Show details')}
-										   />
+								   ) : thumbUrl && !imgError ? (
+									   <img
+										   src={thumbUrl}
+										   alt={name}
+										   style={{ width: '100%', height: '200px', objectFit: 'contain', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', cursor: 'pointer', background: '#f5f5f5' }}
+										   loading="lazy"
+										   onError={() => setImgError(true)}
+										   onClick={e => onViewDetails && onViewDetails(e)}
+										   title={t('dogDetails.showMap', 'Show details')}
+									   />
 								       ) : (
 									       <div style={{ width: '100%', height: '200px', background: '#eee', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }} />
 								       )}

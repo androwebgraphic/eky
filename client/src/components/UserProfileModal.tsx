@@ -441,7 +441,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
           e.stopPropagation();
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexShrink: 0 }}>
           <h2 style={{ margin: 0, color: '#333' }}>{t('userProfile.title')}</h2>
           <button
             onClick={(e) => {
@@ -460,7 +460,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
               justifyContent: 'center',
               padding: 0,
               cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(231,76,60,0.10)'
+              boxShadow: '0 2px 8px rgba(231,76,60,0.10)',
+              zIndex: 10000
             }}
             aria-label="Close"
             title="Close"
@@ -481,7 +482,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         </div>
 
         {/* Tab Navigation */}
-        <div style={{ display: 'flex', marginBottom: '20px', borderBottom: '1px solid #ddd' }}>
+        <div style={{ display: 'flex', marginBottom: '20px', borderBottom: '1px solid #ddd', flexShrink: 0 }}>
           <button
             onClick={() => setActiveTab('profile')}
             style={{
@@ -511,29 +512,30 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
           </button>
         </div>
 
-        {error && (
-          <div style={{
-            backgroundColor: '#ffebee',
-            color: '#c62828',
-            padding: '12px',
-            borderRadius: '4px',
-            marginBottom: '16px'
-          }}>
-            {error}
-          </div>
-        )}
+        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
+          {error && (
+            <div style={{
+              backgroundColor: '#ffebee',
+              color: '#c62828',
+              padding: '12px',
+              borderRadius: '4px',
+              marginBottom: '16px'
+            }}>
+              {error}
+            </div>
+          )}
 
-        {success && (
-          <div style={{
-            backgroundColor: '#e8f5e8',
-            color: '#2e7d32',
-            padding: '12px',
-            borderRadius: '4px',
-            marginBottom: '16px'
-          }}>
-            {success}
-          </div>
-        )}
+          {success && (
+            <div style={{
+              backgroundColor: '#e8f5e8',
+              color: '#2e7d32',
+              padding: '12px',
+              borderRadius: '4px',
+              marginBottom: '16px'
+            }}>
+              {success}
+            </div>
+          )}
 
         {activeTab === 'profile' && (
           <>
@@ -985,6 +987,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
             )}
           </div>
         )}
+        </div>
       </div>
     </div>,
     modalRoot

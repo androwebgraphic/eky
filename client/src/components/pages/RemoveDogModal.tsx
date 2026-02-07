@@ -1,16 +1,17 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 // Portal container for modal
 const modalRoot = document.getElementById('removedog-modal-root') || (() => {
   const root = document.createElement('div');
   root.id = 'removedog-modal-root';
-  root.style.position = 'fixed';
+  // Portal root should NOT block clicks - only modal overlay should
+  root.style.position = 'absolute';
   root.style.top = '0';
   root.style.left = '0';
-  root.style.width = '100%';
-  root.style.height = '100%';
-  root.style.zIndex = '2147483647';
+  root.style.zIndex = '0';
+  root.style.pointerEvents = 'none';
   document.body.appendChild(root);
   return root;
 })();
@@ -22,6 +23,7 @@ interface RemoveDogModalProps {
 }
 
 const RemoveDogModal: React.FC<RemoveDogModalProps> = ({ dog, onConfirm, onClose }) => {
+  const { t } = useTranslation();
   // NO LONGER NEEDED - we want background to remain scrollable
   // Modal will stay fixed while background scrolls
   
@@ -31,17 +33,27 @@ const RemoveDogModal: React.FC<RemoveDogModalProps> = ({ dog, onConfirm, onClose
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)',
-      background: 'white',
-      border: '2px solid #e74c3c',
-      borderRadius: 16,
-      padding: 32,
+      width: '85vw',
+      maxWidth: '400px',
+      height: 'auto',
+      background: 'rgba(0, 0, 0, 0.5)',
+      borderRadius: 12,
       zIndex: 2147483647,
-      minWidth: 320,
-      maxWidth: 420,
-      boxShadow: '0 2px 16px rgba(0,0,0,0.18)'
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '16px',
+      pointerEvents: 'auto'
     }}>
+      <div style={{
+        background: '#fafafa',
+        padding: 32,
+        borderRadius: 16,
+        width: '100%',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+      }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <h2 style={{ color: '#e74c3c', margin: 0 }}>Remove Dog</h2>
+        <h2 style={{ color: '#e74c3c', margin: 0 }}>{t('removeDog.title')}</h2>
         <button
           onClick={onClose}
           style={{
@@ -75,11 +87,12 @@ const RemoveDogModal: React.FC<RemoveDogModalProps> = ({ dog, onConfirm, onClose
         </button>
       </div>
       <div style={{ marginBottom: 24 }}>
-        Are you sure you want to remove <b>{dog.name}</b>?
+        {t('removeDog.confirm', { name: dog.name })}
       </div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16 }}>
-        <button onClick={onClose} style={{ background: '#bbb', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1.2rem', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer' }}>Cancel</button>
-        <button onClick={onConfirm} style={{ background: '#e74c3c', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1.2rem', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer' }}>Remove</button>
+        <button onClick={onClose} style={{ background: '#bbb', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1.2rem', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer' }}>{t('removeDog.cancel')}</button>
+        <button onClick={onConfirm} style={{ background: '#e74c3c', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1.2rem', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer' }}>{t('removeDog.remove')}</button>
+      </div>
       </div>
     </div>,
     modalRoot

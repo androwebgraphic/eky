@@ -111,15 +111,6 @@
     "medium": "Mittel",
     "large": "Groß"
   },
-  "doglist": {
-    "title": "Wählen Sie Ihren Freund fürs Leben",
-    "loading": "Lade Hunde...",
-    "empty": "Keine Hunde.",
-    "addFirst": "Ersten Hund hinzufügen",
-    "confirmRemove": "Sind Sie sicher, dass Sie {{name}} entfernen möchten?",
-    "failedToRemove": "Hund konnte nicht entfernt werden",
-    "failedToLoad": "Hunde konnten nicht geladen werden"
-  },
   "adddogExtra": {
     "ageNote": "Sie können einen Dezimalwert eingeben (z. B. 3,6 Jahre)"
   },
@@ -186,7 +177,17 @@
     "currentPhotos": "Aktuelle Fotos:",
     "noPhotos": "Keine Fotos ausgewählt",
     "resetPhotos": "Fotos zurücksetzen",
-    "saving": "Speichern..."
+    "saving": "Speichern...",
+    "imageActions": "Bildaktionen:",
+    "deleteSelected": "Ausgewählte löschen",
+    "deleteAll": "Alle löschen",
+    "tapToRemove": "Tippen zum Entfernen"
+  },
+  "removeDog": {
+    "title": "Hund entfernen",
+    "confirm": "Sind Sie sicher, dass Sie {{name}} entfernen möchten?",
+    "cancel": "Abbrechen",
+    "remove": "Entfernen"
   },
   "fields": {
     "name": "Name:",

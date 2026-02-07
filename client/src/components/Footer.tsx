@@ -1,9 +1,24 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import UserProfileModal from './UserProfileModal';
 // import ChatApp from './ChatApp';
+
+// Portal container for search modal
+const searchModalRoot = document.getElementById('search-modal-root') || (() => {
+  const root = document.createElement('div');
+  root.id = 'search-modal-root';
+  // Portal root should NOT block clicks - only modal overlay should
+  root.style.position = 'absolute';
+  root.style.top = '0';
+  root.style.left = '0';
+  root.style.zIndex = '0';
+  root.style.pointerEvents = 'none';
+  document.body.appendChild(root);
+  return root;
+})();
 
 interface FooterProps {
   onChatClick?: () => void;
@@ -143,20 +158,24 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
       )}
 
       {/* Search Modal */}
-      {showSearchModal && (
+      {showSearchModal && ReactDOM.createPortal(
         <div
           style={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '85vw',
+            maxWidth: '550px',
+            height: 'auto',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            borderRadius: '12px',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            zIndex: 10000,
-            padding: '20px'
+            zIndex: 2147483647,
+            padding: '16px',
+            pointerEvents: 'auto'
           }}
           onClick={() => setShowSearchModal(false)}
         >
@@ -383,7 +402,8 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
               {t('button.search') || 'Search'}
             </button>
           </div>
-        </div>
+        </div>,
+        searchModalRoot
       )}
 
       {/* Removed <Routes> from Footer to prevent duplicate rendering */}

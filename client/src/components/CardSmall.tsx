@@ -71,11 +71,51 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 	}
 
 	let largestImgUrl: string | undefined = undefined;
-	// Images are already deduplicated in DogList, so just filter out invalid ones
-	const validImages = (images || []).filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
 	
-	if (validImages.length) {
-		const sorted = [...validImages].sort((a, b) => (b.width || 0) - (a.width || 0));
+	// Deduplicate images by base name (ignore size/hash/extension variants)
+	const getImageBase = (url: string) => {
+		let cleanUrl = url.split('?')[0];
+		const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
+		
+		let base = filename;
+		
+		// Remove file extension FIRST
+		base = base.replace(/\.(jpg|jpeg|png|webp)$/i, '');
+		
+		// Handle uploaded files: name-TIMESTAMP-HASH-SIZE -> name
+		// Examples: doggy-1770420370994-1liy0v-320 -> doggy
+		// Also handle: doggy-orig -> doggy
+		if (base.includes('-') && !base.startsWith('pexels-')) {
+			// Remove -orig suffix if present
+			base = base.replace(/-orig$/, '');
+			// Remove -TIMESTAMP-HASH-SIZE suffix (10-13 digit timestamp + 6 char hash + 3-4 digit size)
+			const uploadedMatch = base.match(/^(.+?)-\d{10,13}-[a-z0-9]{6}-\d{3,4}$/);
+			if (uploadedMatch) {
+				base = uploadedMatch[1];
+			}
+		} else if (base.startsWith('pexels-')) {
+			// Handle Pexels images: pexels-name-ID-TIMESTAMP-HASH-SIZE -> name-ID
+			// Examples: pexels-anyela-malaga-341169564-18062006-1770420371422-qfmvmr-320 -> anyela-malaga-341169564-18062006
+			// Also handle: pexels-name-ID-orig -> name-ID
+			base = base.replace(/-orig$/, '');
+			const pexelsMatch = base.match(/^pexels-(.+?)-\d+(-\d{10,13}-[a-z0-9]{6}-\d{3,4})?$/);
+			if (pexelsMatch) {
+				base = pexelsMatch[1];
+			}
+		}
+		
+		return base;
+	};
+	
+	// First filter valid images, then deduplicate by base name
+	const validImages = (images || []).filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
+	const uniqueImages = validImages.filter((img, idx, arr) => {
+		const base = getImageBase(img.url);
+		return arr.findIndex(other => getImageBase(other.url) === base) === idx;
+	});
+	
+	if (uniqueImages.length) {
+		const sorted = [...uniqueImages].sort((a, b) => (b.width || 0) - (a.width || 0));
 		largestImgUrl = toAbsUrl(sorted[0].url);
 	}
 
@@ -215,7 +255,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 									       <div style={{ width: '100%', height: '200px', background: '#eee', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }} />
 								       )}
 							       {/* Multi-image indicator */}
-								   {validImages.length > 1 && (
+								   {uniqueImages.length > 1 && (
 									   <div
 										   title={t('dogDetails.showMoreImages', 'View all images')}
 										   style={{
@@ -238,7 +278,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 									   >
 										   <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
 											   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-											   {validImages.length}
+											   {uniqueImages.length}
 										   </span>
 									   </div>
 								   )}

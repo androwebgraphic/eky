@@ -39,6 +39,12 @@ const updateDog = async (req, res) => {
     editableFields.forEach(field => {
       if (Object.prototype.hasOwnProperty.call(req.body, field)) {
         let value = req.body[field];
+        
+        // Skip string "null" values
+        if (value === 'null') {
+          return;
+        }
+        
         // Convert booleans from string if needed
         if (field === 'vaccinated' || field === 'neutered') {
           value = value === 'true' || value === true || value === 'on';

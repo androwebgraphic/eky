@@ -152,22 +152,24 @@
     "deleting": "Brisanje...",
     "deleteAccount": "Izbriši račun",
     "changePhoto": "Promijeni fotografiju"
-  ,
-    "fullName": "Puno ime",
-    "email": "E-mail",
-    "username": "Korisničko ime",
-    "phone": "Telefon"
-  }
-  ,
+  },
   "editdog": {
     "title": "Uredi {{name}}",
     "newPhotos": "Nove fotografije odabrane (bit će dodane postojećima). Za uklanjanje starih fotografija, odznačite ili izbrišite ih dolje.",
     "currentPhotos": "Trenutne fotografije:",
     "noPhotos": "Nema odabranih fotografija",
     "resetPhotos": "Resetiraj fotografije",
-    "saving": "Snimanje..."
-  ,
-    "logout": "Odjava"
+    "saving": "Snimanje...",
+    "imageActions": "Radnje sa slikama:",
+    "deleteSelected": "Obriši odabrane",
+    "deleteAll": "Obriši sve",
+    "tapToRemove": "Dodirnite za uklanjanje"
+  },
+  "removeDog": {
+    "title": "Ukloni psa",
+    "confirm": "Jeste li sigurni da želite ukloniti {{name}}?",
+    "cancel": "Odustani",
+    "remove": "Ukloni"
   },
   "fields": {
     "name": "Ime:",

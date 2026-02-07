@@ -1,10 +1,25 @@
 
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import DogImageSlider from '../DogImageSlider';
 import { useTranslation } from 'react-i18next';
 // import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../../contexts/AuthContext';
+
+// Portal container for map modal
+const mapModalRoot = document.getElementById('map-modal-root') || (() => {
+  const root = document.createElement('div');
+  root.id = 'map-modal-root';
+  // Portal root should NOT block clicks - only modal overlay should
+  root.style.position = 'absolute';
+  root.style.top = '0';
+  root.style.left = '0';
+  root.style.zIndex = '0';
+  root.style.pointerEvents = 'none';
+  document.body.appendChild(root);
+  return root;
+})();
 
 
 interface MediaVariant { url: string; width?: number; size?: string }
@@ -210,32 +225,80 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   // Prepare images for DogImageSlider (always use largest available, prefer 1024px, always pass full Cloudinary URL)
   // Deduplicate images by base name (ignore size/hash/extension variants)
   const sliderImages: { url: string; width?: number }[] = React.useMemo(() => {
-    const toAbs = (u?: string) => {
-      if (!u) return u;
-      if (/^https?:\/\//.test(u)) return u + (u.includes('?') ? '&' : '?') + 'cb=' + Date.now();
-      if (u.startsWith('/u/dogs/') || u.startsWith('/uploads/')) return apiBase + u + '?cb=' + Date.now();
-      if (u.startsWith('u/dogs/') || u.startsWith('uploads/')) return apiBase + '/' + u + '?cb=' + Date.now();
-      return apiBase + '/' + u.replace(/^\/+/,'') + '?cb=' + Date.now();
-    };
     const getImageBase = (url: string) => {
       let cleanUrl = url.split('?')[0];
       const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
-      const base = filename.replace(/(-\d{3,}(?:-[a-z0-9]+)?-(?:320|640|1024|orig))?(-(?:320|640|1024|orig))?(\.(jpg|jpeg|png|webp))$/i, '')
-        .replace(/(-(?:320|640|1024|orig))?(\.(jpg|jpeg|png|webp))$/i, '')
-        .replace(/(\.(jpg|jpeg|png|webp))$/i, '');
+      
+      let base = filename;
+      
+      // Remove file extension FIRST
+      base = base.replace(/\.(jpg|jpeg|png|webp)$/i, '');
+      
+      // Handle uploaded files: name-TIMESTAMP-HASH-SIZE -> name
+      // Examples: doggy-1770420370994-1liy0v-320 -> doggy
+      // Also handle: doggy-orig -> doggy
+      if (base.includes('-') && !base.startsWith('pexels-')) {
+        // Remove -orig suffix if present
+        base = base.replace(/-orig$/, '');
+        // Remove -TIMESTAMP-HASH-SIZE suffix (10-13 digit timestamp + 6 char hash + 3-4 digit size)
+        const uploadedMatch = base.match(/^(.+?)-\d{10,13}-[a-z0-9]{6}-\d{3,4}$/);
+        if (uploadedMatch) {
+          base = uploadedMatch[1];
+        }
+      } else if (base.startsWith('pexels-')) {
+        // Handle Pexels images: pexels-name-ID-TIMESTAMP-HASH-SIZE -> name-ID
+        // Examples: pexels-anyela-malaga-341169564-18062006-1770420371422-qfmvmr-320 -> anyela-malaga-341169564-18062006
+        // Also handle: pexels-name-ID-orig -> name-ID
+        base = base.replace(/-orig$/, '');
+        const pexelsMatch = base.match(/^pexels-(.+?)-\d+(-\d{10,13}-[a-z0-9]{6}-\d{3,4})?$/);
+        if (pexelsMatch) {
+          base = pexelsMatch[1];
+        }
+      }
+      
       return base;
     };
     if (images && images.length > 0) {
       const validImages = images.filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
-      // Deduplicate by base name
-      const uniqueImages = validImages.filter((img, idx, arr) => {
+      
+      // Deduplicate FIRST before URL transformation
+      const baseToImage = new Map();
+      validImages.forEach(img => {
         const base = getImageBase(img.url);
-        return arr.findIndex(other => getImageBase(other.url) === base) === idx;
+        if (!baseToImage.has(base)) {
+          baseToImage.set(base, img);
+        } else {
+          // Keep the one with larger width
+          const existing = baseToImage.get(base);
+          if ((img.width || 0) > (existing.width || 0)) {
+            baseToImage.set(base, img);
+          }
+        }
       });
-      // Prefer largest width for each base
+      
+      const uniqueImages = Array.from(baseToImage.values());
+      console.log('[DOG DETAILS] Total images:', validImages.length, 'Unique images:', uniqueImages.length);
+      
+      // NOW convert to absolute URLs
+      const toAbs = (u?: string) => {
+        if (!u) return u;
+        if (/^https?:\/\//.test(u)) return u + (u.includes('?') ? '&' : '?') + 'cb=' + Date.now();
+        if (u.startsWith('/u/dogs/') || u.startsWith('/uploads/')) return apiBase + u + '?cb=' + Date.now();
+        if (u.startsWith('u/dogs/') || u.startsWith('uploads/')) return apiBase + '/' + u + '?cb=' + Date.now();
+        return apiBase + '/' + u.replace(/^\/+/,'') + '?cb=' + Date.now();
+      };
+      
+      // Sort by width descending and convert to absolute URLs
       const sorted = [...uniqueImages].sort((a, b) => (b.width || 0) - (a.width || 0));
       return sorted.map(img => ({ url: toAbs(img.url), width: img.width }));
     } else if (thumbnail && thumbnail.url) {
+      const toAbs = (u?: string) => {
+        if (!u) return u;
+        if (/^https?:\/\//.test(u)) return u + (u.includes('?') ? '&' : '?') + 'cb=' + Date.now();
+        if (u.startsWith('/u/dogs/') || u.startsWith('/uploads/')) return apiBase + u + '?cb=' + Date.now();
+        if (u.startsWith('u/dogs/') || u.startsWith('uploads/')) return apiBase + '/' + u + '?cb=' + Date.now();
+        return apiBase + '/' + u.replace(/^\/+/,'') + '?cb=' + Date.now();
+      };
       return [{ url: toAbs(thumbnail.url) }];
     }
     return [];
@@ -329,8 +392,8 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
             {coordsError && <span style={{ color: 'red', marginLeft: 8 }}>{coordsError}</span>}
           </p>
         )}
-        {showMap && (coords || location) && (
-          <div className="modal-map" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.7)', zIndex: 2147483647, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {showMap && (coords || location) && ReactDOM.createPortal(
+          <div className="modal-map" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '85vw', maxWidth: '700px', height: 'auto', background: 'rgba(0,0,0,0.7)', borderRadius: 12, zIndex: 2147483647, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, pointerEvents: 'auto' }}>
             <div style={{ background: '#fff', padding: 20, borderRadius: 12, maxWidth: 700, width: '95vw', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <button
                 onClick={() => setShowMap(false)}
@@ -396,7 +459,8 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 )}
               </div>
             </div>
-          </div>
+          </div>,
+          mapModalRoot
         )}
         {color && (
           <p className="meta">

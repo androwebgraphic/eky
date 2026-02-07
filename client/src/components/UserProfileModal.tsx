@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../contexts/AuthContext';
+import '../css/modal.css';
 
 // Portal container for modal
 const modalRoot = document.getElementById('modal-root') || (() => {
   const root = document.createElement('div');
   root.id = 'modal-root';
-  root.style.position = 'fixed';
+  // Portal root should NOT block clicks - only modal overlay should
+  root.style.position = 'absolute';
   root.style.top = '0';
   root.style.left = '0';
-  root.style.width = '100%';
-  root.style.height = '100%';
-  root.style.zIndex = '2147483647';
+  root.style.zIndex = '0';
+  root.style.pointerEvents = 'none';
   document.body.appendChild(root);
   return root;
 })();
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '../contexts/AuthContext';
-import '../css/modal.css';
 
 interface User {
   id?: string;

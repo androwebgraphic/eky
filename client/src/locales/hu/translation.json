@@ -153,8 +153,7 @@
     "deleting": "Törlés...",
     "deleteAccount": "Fiók törlése",
     "changePhoto": "Fénykép cseréje"
-  }
-  ,
+  },
   "dogDetails": {
     "imageAlt": "kutya kép",
     "ageSuffix": "év",
@@ -188,7 +187,17 @@
     "currentPhotos": "Jelenlegi fotók:",
     "noPhotos": "Nincsenek fotók kiválasztva",
     "resetPhotos": "Fotók visszaállítása",
-    "saving": "Mentés..."
+    "saving": "Mentés...",
+    "imageActions": "Képműveletek:",
+    "deleteSelected": "Kiválasztottak törlése",
+    "deleteAll": "Összes törlése",
+    "tapToRemove": "Érintse az eltávolításhoz"
+  },
+  "removeDog": {
+    "title": "Kutya eltávolítása",
+    "confirm": "Biztos, hogy el szeretnéd távolítani {{name}} kutyát?",
+    "cancel": "Mégse",
+    "remove": "Eltávolítás"
   },
   "fields": {
     "name": "Név:",

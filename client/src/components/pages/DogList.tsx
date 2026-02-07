@@ -3,6 +3,7 @@
 
 
 import React, { useState, useEffect, useMemo } from 'react';
+import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import CardSmall from '../CardSmall';
 import EditDogModal from './EditDogModal';
@@ -12,6 +13,31 @@ import type { DogDetailsProps } from './DogDetails';
 import { useAuth } from '../../contexts/AuthContext';
 import Search from '../Search';
 const API_URL = process.env.REACT_APP_API_URL || '';
+
+// Portal containers for DogList modals
+const detailsModalRoot = document.getElementById('doglist-details-root') || (() => {
+  const root = document.createElement('div');
+  root.id = 'doglist-details-root';
+  root.style.position = 'absolute';
+  root.style.top = '0';
+  root.style.left = '0';
+  root.style.zIndex = '0';
+  root.style.pointerEvents = 'none';
+  document.body.appendChild(root);
+  return root;
+})();
+
+const mapModalRoot = document.getElementById('doglist-map-root') || (() => {
+  const root = document.createElement('div');
+  root.id = 'doglist-map-root';
+  root.style.position = 'absolute';
+  root.style.top = '0';
+  root.style.left = '0';
+  root.style.zIndex = '0';
+  root.style.pointerEvents = 'none';
+  document.body.appendChild(root);
+  return root;
+})();
 
 function DogList() {
 
@@ -310,20 +336,25 @@ function DogList() {
 				/>
 			)}
 			{/* Details panel on desktop, modal on mobile */}
-			{detailsDog &&
+			{detailsDog && ReactDOM.createPortal(
 				(isDesktop ? (
 					<div
 						style={{
 							position: 'fixed',
-							top: 0,
-							left: 0,
-							width: '100vw',
-							height: '100vh',
+							top: '50%',
+							left: '50%',
+							transform: 'translate(-50%, -50%)',
+							width: '85vw',
+							maxWidth: '700px',
+							height: 'auto',
 							background: 'rgba(0,0,0,0.5)',
+							borderRadius: 12,
 							zIndex: 2147483647,
 							display: 'flex',
 							alignItems: 'center',
 							justifyContent: 'center',
+							padding: 16,
+							pointerEvents: 'auto'
 						}}
 					>
 						<div
@@ -390,15 +421,20 @@ function DogList() {
 					<div
 						style={{
 							position: 'fixed',
-							top: 0,
-							left: 0,
-							width: '100vw',
-							height: '100vh',
+							top: '50%',
+							left: '50%',
+							transform: 'translate(-50%, -50%)',
+							width: '85vw',
+							maxWidth: '700px',
+							height: 'auto',
 							background: 'rgba(0,0,0,0.5)',
+							borderRadius: 12,
 							zIndex: 2147483647,
 							display: 'flex',
 							alignItems: 'center',
 							justifyContent: 'center',
+							padding: 16,
+							pointerEvents: 'auto'
 						}}
 					>
 						<div
@@ -449,21 +485,28 @@ function DogList() {
 							/>
 						</div>
 					</div>
-				))}
+				)),
+				detailsModalRoot
+			)}
 			{/* Map-only modal */}
-			{mapDog && (
+			{mapDog && ReactDOM.createPortal(
 				<div
 					style={{
 						position: 'fixed',
-						top: 0,
-						left: 0,
-						width: '100vw',
-						height: '100vh',
+						top: '50%',
+						left: '50%',
+						transform: 'translate(-50%, -50%)',
+						width: '85vw',
+						maxWidth: '600px',
+						height: 'auto',
 						background: 'rgba(0,0,0,0.6)',
+						borderRadius: 12,
 						zIndex: 2147483647,
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
+						padding: 16,
+						pointerEvents: 'auto'
 					}}
 					onClick={(e) => { if (e.target === e.currentTarget) setMapDog(null); }}
 				>
@@ -523,7 +566,8 @@ function DogList() {
 							</div>
 						)}
 					</div>
-				</div>
+				</div>,
+				mapModalRoot
 			)}
 		</>
 	);

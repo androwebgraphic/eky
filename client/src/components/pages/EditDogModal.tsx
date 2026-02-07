@@ -1,23 +1,23 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext';
+import '../../css/edit-modal.css';
 
 // Portal container for modal
 const modalRoot = document.getElementById('editdog-modal-root') || (() => {
   const root = document.createElement('div');
   root.id = 'editdog-modal-root';
-  root.style.position = 'fixed';
+  // Portal root should NOT block clicks - only modal overlay should
+  root.style.position = 'absolute';
   root.style.top = '0';
   root.style.left = '0';
-  root.style.width = '100%';
-  root.style.height = '100%';
-  root.style.zIndex = '2147483647';
+  root.style.zIndex = '0';
+  root.style.pointerEvents = 'none';
   document.body.appendChild(root);
   return root;
 })();
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../contexts/AuthContext';
-import '../../css/edit-modal.css';
 
 interface EditDogFormData {
   name: string;
@@ -39,14 +39,50 @@ interface EditDogModalProps {
   modalPosition?: {x: number, y: number};
 }
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-const getImageUrl = (url: string) => {
-  if (!url) return '';
-  if (url.startsWith('/uploads/')) {
-    return `${API_URL}${url}`;
-  }
-  return url;
-};
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+  const getImageUrl = (url: string) => {
+    if (!url) return '';
+    // Handle both /uploads/ and /u/ prefixes
+    if (url.startsWith('/uploads/') || url.startsWith('/u/')) {
+      return `${API_URL}${url}`;
+    }
+    return url;
+  };
+
+  // Deduplicate images by base name
+  const getImageBase = (url: string) => {
+    let cleanUrl = url.split('?')[0];
+    const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
+    
+    let base = filename;
+    
+    // Remove file extension
+    base = base.replace(/\.(jpg|jpeg|png|webp)$/i, '');
+    
+    // Handle uploaded files: name-TIMESTAMP-HASH-SIZE -> name
+    // Examples: doggy-1770420370994-1liy0v-320 -> doggy
+    // Also handle: doggy-orig -> doggy
+    if (base.includes('-') && !base.startsWith('pexels-')) {
+      // Remove -orig suffix if present
+      base = base.replace(/-orig$/, '');
+      // Remove -TIMESTAMP-HASH-SIZE suffix (10-13 digit timestamp + 6 char hash + 3-4 digit size)
+      const uploadedMatch = base.match(/^(.+?)-\d{10,13}-[a-z0-9]{6}-\d{3,4}$/);
+      if (uploadedMatch) {
+        base = uploadedMatch[1];
+      }
+    } else if (base.startsWith('pexels-')) {
+      // Handle Pexels images: pexels-name-ID-TIMESTAMP-HASH-SIZE -> name-ID
+      // Examples: pexels-anyela-malaga-341169564-18062006-1770420371422-qfmvmr-320 -> anyela-malaga-341169564-18062006
+      // Also handle: pexels-name-ID-orig -> name-ID
+      base = base.replace(/-orig$/, '');
+      const pexelsMatch = base.match(/^pexels-(.+?)-\d+(-\d{10,13}-[a-z0-9]{6}-\d{3,4})?$/);
+      if (pexelsMatch) {
+        base = pexelsMatch[1];
+      }
+    }
+    
+    return base;
+  };
 
 function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps) {
   const isMounted = useRef(true);
@@ -54,7 +90,54 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
   const { token } = useAuth();
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
-  const [existingImages, setExistingImages] = useState<any[]>(dog.images ? [...dog.images] : []);
+  const [existingImages, setExistingImages] = useState<any[]>([]);
+  // Deduplicate images on mount and when dog changes
+  const [uniqueImages, setUniqueImages] = useState<any[]>([]);
+  useEffect(() => {
+    console.log('[EDITDOG] useEffect triggered, dog.images:', dog.images?.length);
+    if (dog.images && dog.images.length > 0) {
+      console.log('[EDITDOG] First few images:', dog.images.slice(0, 3).map(img => ({ url: img.url, width: img.width })));
+      const baseToImage = new Map();
+      const allBases: string[] = [];
+      dog.images.forEach((img: any) => {
+        if (!img.url) {
+          console.log('[EDITDOG] Skipping image with no url');
+          return;
+        }
+        const url = getImageUrl(img.url);
+        const base = getImageBase(img.url);
+        allBases.push(base);
+        console.log('[EDITDOG] Processing image:', { url, base, width: img.width });
+        
+        if (!baseToImage.has(base)) {
+          baseToImage.set(base, img);
+          console.log('[EDITDOG]   -> First occurrence, adding to Map');
+        } else {
+          // Keep one with larger width
+          const existing = baseToImage.get(base);
+          if ((img.width || 0) > (existing.width || 0)) {
+            baseToImage.set(base, img);
+            console.log('[EDITDOG]   -> Replacing with larger width');
+          } else {
+            console.log('[EDITDOG]   -> Skipping, smaller width');
+          }
+        }
+      });
+      const unique = Array.from(baseToImage.values());
+      console.log('[EDITDOG] Total images:', dog.images.length, 'Unique images:', unique.length);
+      console.log('[EDITDOG] All bases:', allBases);
+      unique.forEach((img, idx) => {
+        console.log('[EDITDOG] Unique image', idx, 'url:', getImageUrl(img.url), 'base:', getImageBase(img.url));
+      });
+      setUniqueImages(unique);
+      // Set existingImages for API calls (keep all variants for server to delete properly)
+      setExistingImages(dog.images ? [...dog.images] : []);
+    } else {
+      console.log('[EDITDOG] No images, clearing arrays');
+      setUniqueImages([]);
+      setExistingImages([]);
+    }
+  }, [dog.images]);
   const [selectedToDelete, setSelectedToDelete] = useState<Set<number>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -84,7 +167,10 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
       if (hasPhotoChanges) {
         const formData = new FormData();
         Object.entries(fields).forEach(([k, v]) => {
-          if (typeof v !== 'undefined' && v !== '') formData.append(k, v as any);
+          // Skip undefined, null, empty string, or string "null" values
+          if (v !== undefined && v !== null && v !== '' && v !== 'null') {
+            formData.append(k, v as any);
+          }
         });
         const keepImagesData = JSON.stringify(existingImages.map(img => img.url));
         formData.append('keepImages', keepImagesData);
@@ -111,7 +197,10 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
       } else {
         const bodyData: any = {};
         Object.entries(fields).forEach(([k, v]) => {
-          if (typeof v !== 'undefined' && v !== '') bodyData[k] = v;
+          // Skip undefined, null, empty string, or string "null" values
+          if (v !== undefined && v !== null && v !== '' && v !== 'null') {
+            bodyData[k] = v;
+          }
         });
         const headers: any = { 'Content-Type': 'application/json' };
         if (token) {
@@ -163,17 +252,22 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
       className="edit-modal-overlay"
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '85vw',
+        maxWidth: '550px',
+        height: 'auto',
+        maxHeight: '90vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        borderRadius: '12px',
         zIndex: 2147483647,
         display: 'flex',
-        alignItems: window.innerWidth > 768 ? 'center' : 'stretch',
+        alignItems: 'center',
         justifyContent: 'center',
-        padding: window.innerWidth > 768 ? '2rem' : '0',
-        boxSizing: 'border-box'
+        padding: '16px',
+        boxSizing: 'border-box',
+        pointerEvents: 'auto' // Enable clicks on modal
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -259,13 +353,13 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
                 </div>
               </div>
             )}
-            {existingImages.length > 0 && (
+            {uniqueImages.length > 0 && (
               <div>
                 <p style={{ margin: '0.5rem 0', color: '#666', fontSize: '0.9rem' }}>
                   {t('editdog.currentPhotos') || 'Current photos:'}
                 </p>
                 <div className="media-preview-list">
-                  {existingImages.map((img: any, idx: number) => (
+                  {uniqueImages.map((img: any, idx: number) => (
                     <span key={idx} style={{ position: 'relative', display: 'inline-block', marginRight: 8 }}>
                       <input
                         type="checkbox"
@@ -281,19 +375,48 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
                         style={{ position: 'absolute', top: window.innerWidth <= 768 ? 8 : 2, left: window.innerWidth <= 768 ? 8 : 2, zIndex: 3, width: window.innerWidth <= 768 ? 32 : 20, height: window.innerWidth <= 768 ? 32 : 20, accentColor: '#e74c3c', background: '#fff', border: '2px solid #e74c3c', borderRadius: 6, boxShadow: window.innerWidth <= 768 ? '0 2px 8px rgba(0,0,0,0.12)' : 'none' }}
                         title="Select to delete"
                       />
-                      <img src={getImageUrl(img.url)} alt={`img-${idx}`} width={window.innerWidth <= 768 ? 120 : 80} style={{ opacity: selectedToDelete.has(idx) ? 0.5 : 1, borderRadius: 8, marginTop: window.innerWidth <= 768 ? 12 : 0 }} />
+                      <img 
+                        src={getImageUrl(img.url)} 
+                        alt={`img-${idx}`} 
+                        width={window.innerWidth <= 768 ? 120 : 80} 
+                        height={window.innerWidth <= 768 ? 120 : 80}
+                        style={{ 
+                          opacity: selectedToDelete.has(idx) ? 0.5 : 1, 
+                          borderRadius: 8, 
+                          marginTop: window.innerWidth <= 768 ? 12 : 0,
+                          objectFit: 'cover',
+                          backgroundColor: '#f0f0f0',
+                          border: '1px solid #ddd',
+                          display: 'block'
+                        }}
+                        onError={(e: any) => {
+                          console.error('[EDITDOG] Image load error:', {
+                            src: getImageUrl(img.url),
+                            originalUrl: img.url,
+                            error: e,
+                            imgWidth: img.width,
+                            imgHeight: img.height
+                          });
+                        }}
+                        onLoad={(e: any) => {
+                          console.log('[EDITDOG] Image loaded successfully:', getImageUrl(img.url));
+                        }}
+                      />
                       <button
                         type="button"
                         style={{ position: 'absolute', top: window.innerWidth <= 768 ? 8 : 2, right: window.innerWidth <= 768 ? 8 : 2, background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '50%', width: window.innerWidth <= 768 ? 32 : 20, height: window.innerWidth <= 768 ? 32 : 20, minWidth: window.innerWidth <= 768 ? 32 : 20, minHeight: window.innerWidth <= 768 ? 32 : 20, maxWidth: window.innerWidth <= 768 ? 32 : 20, maxHeight: window.innerWidth <= 768 ? 32 : 20, cursor: 'pointer', fontWeight: 'bold', fontSize: window.innerWidth <= 768 ? 22 : 14, lineHeight: window.innerWidth <= 768 ? '32px' : '20px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: window.innerWidth <= 768 ? '0 2px 8px rgba(0,0,0,0.12)' : 'none' }}
                         onClick={() => {
-                          setExistingImages(existingImages.filter((_, i) => i !== idx));
+                          // Remove all variants of this image
+                          const imgBase = getImageBase(uniqueImages[idx].url);
+                          const newUniqueImages = uniqueImages.filter((img) => getImageBase(img.url) !== imgBase);
+                          setUniqueImages(newUniqueImages);
+                          // Remove all corresponding variants from existingImages
+                          const newExistingImages = existingImages.filter((img) => getImageBase(img.url) !== imgBase);
+                          setExistingImages(newExistingImages);
                           setSelectedToDelete(prev => {
                             const next = new Set(prev);
                             next.delete(idx);
-                            // Shift all indices above idx down by 1
-                            const shifted = new Set<number>();
-                            next.forEach(i => shifted.add(i > idx ? i - 1 : i));
-                            return shifted;
+                            return next;
                           });
                         }}
                         title="Delete this image"
@@ -308,30 +431,37 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
                     </span>
                   ))}
                 </div>
-                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <span style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>Image actions:</span>
+                    <span style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>{t('editdog.imageActions') || 'Image actions:'}</span>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button
                         type="button"
                         style={{ background: '#e74c3c', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: 'bold' }}
                         disabled={selectedToDelete.size === 0}
                         onClick={() => {
-                          setExistingImages(existingImages.filter((_, i) => !selectedToDelete.has(i)));
+                          // Remove all variants of selected images
+                          const selectedImages = Array.from(selectedToDelete).map(idx => uniqueImages[idx]);
+                          const basesToRemove = new Set(selectedImages.map(img => getImageBase(img.url)));
+                          const newUniqueImages = uniqueImages.filter((img) => !basesToRemove.has(getImageBase(img.url)));
+                          setUniqueImages(newUniqueImages);
+                          const newExistingImages = existingImages.filter((img) => !basesToRemove.has(getImageBase(img.url)));
+                          setExistingImages(newExistingImages);
                           setSelectedToDelete(new Set());
                         }}
                       >
-                        Delete Selected
+                        {t('editdog.deleteSelected') || 'Delete Selected'}
                       </button>
                       <button
                         type="button"
                         style={{ background: '#e67e22', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: 'bold' }}
                         onClick={() => {
+                          setUniqueImages([]);
                           setExistingImages([]);
                           setSelectedToDelete(new Set());
                         }}
                       >
-                        Delete All
+                        {t('editdog.deleteAll') || 'Delete All'}
                       </button>
                     </div>
                   </div>
@@ -631,7 +761,3 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
 }
 
 export default EditDogModal;
-
-
-
-

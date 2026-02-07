@@ -14,6 +14,8 @@ interface DogImageSliderProps {
 const DogImageSlider: React.FC<DogImageSliderProps> = ({ images, alt }) => {
   if (!images || images.length === 0) return null;
 
+  // Note: Deduplication is done in DogDetails component before passing images here
+
   // Responsive maxHeight: 480px on desktop, 320px on mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
   const maxHeight = isMobile ? 320 : 480;

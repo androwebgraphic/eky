@@ -161,7 +161,17 @@
     "currentPhotos": "Current photos:",
     "noPhotos": "No photos selected",
     "resetPhotos": "Reset Photos",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "imageActions": "Image actions:",
+    "deleteSelected": "Delete Selected",
+    "deleteAll": "Delete All",
+    "tapToRemove": "Tap to remove"
+  },
+  "removeDog": {
+    "title": "Remove Dog",
+    "confirm": "Are you sure you want to remove {{name}}?",
+    "cancel": "Cancel",
+    "remove": "Remove"
   },
   "dogDetails": {
     "imageAlt": "dog image",

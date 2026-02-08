@@ -8,7 +8,8 @@
     "about": "Rólunk",
     "login": "Bejelentkezés",
     "register": "Regisztráció",
-    "dogs": "Kutyák"
+    "dogs": "Kutyák",
+    "adoptionRequests": "Kérelmek"
   },
   "button": {
     "findFriend": "Találd meg örök barátod",
@@ -20,6 +21,8 @@
     "cancelAdoption": "Örökbefogadás visszavonása",
     "cancelling": "Visszavonás...",
     "requested": "Kérve",
+    "confirmAdoption": "Örökbefogadás megerősítése",
+    "confirming": "Megerősítés...",
     "addToList": "Hozzáadás a listához",
     "removeFromList": "Eltávolítás a listáról",
     "edit": "Szerkesztés",
@@ -50,15 +53,30 @@
     "size": "Méret",
     "location": "Helyszín"
   },
+  "gender": {
+    "male": "Hím",
+    "female": "Nőstény"
+  },
+  "size": {
+    "small": "Kicsi",
+    "medium": "Közepes",
+    "large": "Nagy"
+  },
   "doglist": {
-    "title": "Válaszd ki örök barátodat"
+    "title": "Válaszd ki örök barátodat",
+    "loading": "Kutyák betöltése...",
+    "empty": "Nincsenek kutyák.",
+    "addFirst": "Első kutya hozzáadása",
+    "confirmRemove": "Biztos, hogy el szeretnéd távolítani {{name}} kutyát?",
+    "failedToRemove": "A kutya eltávolítása sikertelen",
+    "failedToLoad": "A kutyák betöltése sikertelen"
   },
   "register": {
     "register": "Regisztráció",
     "name": "Neved",
     "username": "Felhasználónév",
     "email": "E-mail",
-    "phone": "Mobiltelefo",
+    "phone": "Mobiltelefon",
     "password": "Jelszó",
     "passwordAgain": "Jelszó újra",
     "person": "Magánszemély vagy Egyesület?",
@@ -104,30 +122,10 @@
     "locationRequired": "A hely megadása kötelező",
     "failed": "A kutya hozzáadása sikertelen"
   },
-  "gender": {
-    "male": "Hím",
-    "female": "Nőstény"
-  },
-  "size": {
-    "small": "Kicsi",
-    "medium": "Közepes",
-    "large": "Nagy"
-  },
-  "doglist": {
-    "title": "Válaszd ki örök barátodat",
-    "loading": "Kutyák betöltése...",
-    "empty": "Nincsenek kutyák.",
-    "addFirst": "Első kutya hozzáadása",
-    "confirmRemove": "Biztos, hogy el szeretnéd távolítani {{name}} kutyát?",
-    "failedToRemove": "A kutya eltávolítása sikertelen",
-    "failedToLoad": "A kutyák betöltése sikertelen"
-  },
   "adddogExtra": {
     "ageNote": "Megadhat egy tizedes értéket (pl. 3,6 év)"
   },
-  "social": {
-    
-  },
+  "social": {},
   "share": {
     "title": "Ossza meg másokkal"
   },
@@ -171,13 +169,11 @@
     "loadingMap": "Térkép betöltése...",
     "mapPreview": "Térkép előnézet",
     "viewFullMap": "Teljes térkép megtekintése"
-  }
-  ,
+  },
   "users": {
     "title": "Felhasználók",
     "empty": "Nincsenek található felhasználók"
-  }
-  ,
+  },
   "language": {
     "selectAria": "Nyelv kiválasztása"
   },
@@ -216,6 +212,72 @@
     "contactOwner": "Kapcsolatba lépés a tulajdonossal"
   },
   "common": {
-    "close": "Bezár"
+    "close": "Bezárás"
+  },
+  "adoption": {
+    "title": "Kérelmek",
+    "refresh": "Frissítés",
+    "noRequests": "Nincsenek örökbefogadási kérések.",
+    "loading": "Betöltés...",
+    "adopter": "Örökbefogadó:",
+    "message": "Üzenet:",
+    "goToChat": "Csevegéshez",
+    "confirmRequest": "Kérés megerősítése",
+    "deny": "Elutasítás",
+    "finalize": "Örökbefogadás befejezése",
+    "confirmAdoption": "Örökbefogadás megerősítése",
+    "cancelRequest": "Kérés visszavonása",
+    "status": {
+      "pending": "Függőben",
+      "ownerConfirmed": "Tulajdonos megerősítette",
+      "adopterConfirmed": "Örökbefogadó megerősítette",
+      "adopted": "Örökbe fogadva",
+      "denied": "Elutasítva",
+      "cancelled": "Visszavonva"
+    },
+    "confirmRequestConfirm": "Biztosan megerősíti ezt az örökbefogadási kérést?",
+    "confirmRequestSuccess": "Örökbefogadási kérés megerősítve! Várakozás az örökbefogadó megerősítésére.",
+    "confirmAdoptionConfirm": "Biztosan megerősíti ezt az örökbefogadást?",
+    "confirmAdoptionSuccess": "Örökbefogadás megerősítve! A tulajdonos befejezi az örökbefogadást.",
+    "finalizeConfirm": "Biztos benne? Ez véglegesen törli a kutyát az adatbázisból.",
+    "finalizeSuccess": "Kutya sikeresen örökbe fogadva! Törölve az adatbázisból.",
+    "denyConfirm": "Biztosan elutasítja ezt a kérést?",
+    "denySuccess": "Örökbefogadási kérés elutasítva.",
+    "cancelConfirm": "Biztosan visszavonja ezt a kérést?",
+    "cancelSuccess": "Örökbefogadási kérés visszavonva."
+  },
+  "chat": {
+    "onlineUsers": "Online felhasználók",
+    "noUsersOnline": "Nincsenek online felhasználók.",
+    "chatWith": "Csevegés",
+    "selectUserToChat": "Válasszon felhasználót a csevegés megkezdéséhez.",
+    "typeMessagePlaceholder": "Írjon üzenetet...",
+    "send": "Küldés",
+    "block": "Blokkolás",
+    "unblock": "Feloldás",
+    "deleteConversation": "Beszélgetés törlése",
+    "adoptionPending": "Örökbefogás függőben ennél a kutyánál.",
+    "confirmAdoption": "Örökbefogadás megerősítése",
+    "confirming": "Megerősítés...",
+    "waitingForOtherParty": "Várakozás a másik fél megerősítésére...",
+    "cancelAdoption": "Örökbefogadás visszavonása",
+    "adoptionConfirmed": "Örökbefogás megerősítve!",
+    "adoptionConfirmError": "Örökbefogás megerősítése sikertelen",
+    "adoptionCanceled": "Örökbefogás visszavonva",
+    "adoptionCancelError": "Örökbefogás visszavonása sikertelen"
+  },
+  "alerts": {
+    "pleaseLoginToAdopt": "Be kell jelentkeznie a kutya örökbefogadásához.",
+    "cannotAdoptOwnDog": "Nem örökbe fogadhatja a saját kutyáját.",
+    "confirmAdoptRequest": "Szeretne örökbefogadási kérést küldeni {{name}} számára?",
+    "pleaseLoginToUseWishlist": "Be kell jelentkeznie a kívánságlista használatához.",
+    "removedFromWishlist": "Eltávolítva a kívánságlistáról!",
+    "failedToRemoveFromWishlist": "Sikertelen eltávolítás a kívánságlistáról: ",
+    "addedToWishlist": "Hozzáadva a kívánságlistához! ❤️",
+    "failedToAddToWishlist": "Sikertelen hozzáadás a kívánságlistához: ",
+    "unknownError": "Ismeretlen hiba",
+    "errorSendingAdoptionRequest": "Hiba történt az örökbefogadási kérés küldése közben. A részletekért ellenőrizze a böngésző konzolját (F12).",
+    "videoFailedToLoad": "A videó nem töltődött be",
+    "imageFailedToLoad": "A kép nem töltődött be"
   }
 }

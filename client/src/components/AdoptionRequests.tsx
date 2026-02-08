@@ -84,11 +84,11 @@ const AdoptionRequests: React.FC = () => {
       } else {
         const errorData = await response.json();
         console.error('Failed to fetch requests:', errorData);
-        showNotification(t('Failed to fetch adoption requests') + ': ' + (errorData.error || 'Unknown error'), 'error');
+        showNotification(t('adoptionRequests.failedToFetch') + ': ' + (errorData.error || t('alerts.unknownError')), 'error');
       }
     } catch (error) {
       console.error('Error fetching requests:', error);
-      showNotification(t('Error fetching adoption requests'), 'error');
+      showNotification(t('adoptionRequests.errorFetching'), 'error');
     } finally {
       setLoading(false);
     }
@@ -100,7 +100,7 @@ const AdoptionRequests: React.FC = () => {
   };
 
   const handleOwnerConfirm = async (requestId: string) => {
-    if (!window.confirm(t('Are you sure you want to confirm this adoption request?'))) return;
+    if (!window.confirm(t('adoptionRequests.confirmRequestConfirm'))) return;
 
     try {
       const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
@@ -112,20 +112,20 @@ const AdoptionRequests: React.FC = () => {
       });
 
       if (response.ok) {
-        showNotification(t('Adoption request confirmed! Waiting for adopter to confirm.'), 'success');
+        showNotification(t('adoptionRequests.confirmRequestSuccess'), 'success');
         fetchRequests();
       } else {
         const data = await response.json();
-        showNotification(t('Failed to confirm: ') + (data.error || 'Unknown error'), 'error');
+        showNotification(t('adoptionRequests.failedToConfirm') + (data.error || t('alerts.unknownError')), 'error');
       }
     } catch (error) {
       console.error('Error confirming request:', error);
-      showNotification(t('Error confirming request'), 'error');
+      showNotification(t('adoptionRequests.errorConfirming'), 'error');
     }
   };
 
   const handleAdopterConfirm = async (requestId: string) => {
-    if (!window.confirm(t('Are you sure you want to confirm this adoption?'))) return;
+    if (!window.confirm(t('adoptionRequests.confirmAdoptionConfirm'))) return;
 
     try {
       const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
@@ -137,20 +137,20 @@ const AdoptionRequests: React.FC = () => {
       });
 
       if (response.ok) {
-        showNotification(t('Adoption confirmed! The owner will finalize adoption.'), 'success');
+        showNotification(t('adoptionRequests.confirmAdoptionSuccess'), 'success');
         fetchRequests();
       } else {
         const data = await response.json();
-        showNotification(t('Failed to confirm: ') + (data.error || 'Unknown error'), 'error');
+        showNotification(t('adoptionRequests.failedToConfirm') + (data.error || t('alerts.unknownError')), 'error');
       }
     } catch (error) {
       console.error('Error confirming request:', error);
-      showNotification(t('Error confirming request'), 'error');
+      showNotification(t('adoptionRequests.errorConfirming'), 'error');
     }
   };
 
   const handleFinalize = async (requestId: string) => {
-    if (!window.confirm(t('Are you sure? This will permanently delete the dog from the database.'))) return;
+    if (!window.confirm(t('adoptionRequests.finalizeConfirm'))) return;
 
     try {
       const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
@@ -162,20 +162,20 @@ const AdoptionRequests: React.FC = () => {
       });
 
       if (response.ok) {
-        showNotification(t('Dog adopted successfully! Removed from database.'), 'success');
+        showNotification(t('adoptionRequests.finalizeSuccess'), 'success');
         fetchRequests();
       } else {
         const data = await response.json();
-        showNotification(t('Failed to finalize: ') + (data.error || 'Unknown error'), 'error');
+        showNotification(t('adoptionRequests.failedToFinalize') + (data.error || t('alerts.unknownError')), 'error');
       }
     } catch (error) {
       console.error('Error finalizing adoption:', error);
-      showNotification(t('Error finalizing adoption'), 'error');
+      showNotification(t('adoptionRequests.errorFinalizing'), 'error');
     }
   };
 
   const handleDeny = async (requestId: string) => {
-    if (!window.confirm(t('Are you sure you want to deny this request?'))) return;
+    if (!window.confirm(t('adoptionRequests.denyConfirm'))) return;
 
     try {
       const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
@@ -187,20 +187,20 @@ const AdoptionRequests: React.FC = () => {
       });
 
       if (response.ok) {
-        showNotification(t('Adoption request denied.'), 'info');
+        showNotification(t('adoptionRequests.denySuccess'), 'info');
         fetchRequests();
       } else {
         const data = await response.json();
-        showNotification(t('Failed to deny: ') + (data.error || 'Unknown error'), 'error');
+        showNotification(t('adoptionRequests.failedToDeny') + (data.error || t('alerts.unknownError')), 'error');
       }
     } catch (error) {
       console.error('Error denying request:', error);
-      showNotification(t('Error denying request'), 'error');
+      showNotification(t('adoptionRequests.errorDenying'), 'error');
     }
   };
 
   const handleCancel = async (requestId: string) => {
-    if (!window.confirm(t('Are you sure you want to cancel this request?'))) return;
+    if (!window.confirm(t('adoptionRequests.cancelConfirm'))) return;
 
     try {
       const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
@@ -212,26 +212,26 @@ const AdoptionRequests: React.FC = () => {
       });
 
       if (response.ok) {
-        showNotification(t('Adoption request cancelled.'), 'info');
+        showNotification(t('adoptionRequests.cancelSuccess'), 'info');
         fetchRequests();
       } else {
         const data = await response.json();
-        showNotification(t('Failed to cancel: ') + (data.error || 'Unknown error'), 'error');
+        showNotification(t('adoptionRequests.failedToCancel') + (data.error || t('alerts.unknownError')), 'error');
       }
     } catch (error) {
       console.error('Error cancelling request:', error);
-      showNotification(t('Error cancelling request'), 'error');
+      showNotification(t('adoptionRequests.errorCancelling'), 'error');
     }
   };
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { color: string; label: string }> = {
-      pending: { color: '#ff9800', label: t('Pending') },
-      owner_confirmed: { color: '#2196f3', label: t('Owner Confirmed') },
-      adopter_confirmed: { color: '#9c27b0', label: t('Adopter Confirmed') },
-      adopted: { color: '#4caf50', label: t('Adopted') },
-      denied: { color: '#f44336', label: t('Denied') },
-      cancelled: { color: '#9e9e9e', label: t('Cancelled') }
+      pending: { color: '#ff9800', label: t('adoption.status.pending') },
+      owner_confirmed: { color: '#2196f3', label: t('adoption.status.ownerConfirmed') },
+      adopter_confirmed: { color: '#9c27b0', label: t('adoption.status.adopterConfirmed') },
+      adopted: { color: '#4caf50', label: t('adoption.status.adopted') },
+      denied: { color: '#f44336', label: t('adoption.status.denied') },
+      cancelled: { color: '#9e9e9e', label: t('adoption.status.cancelled') }
     };
     const config = statusConfig[status] || { color: '#9e9e9e', label: status };
     return (
@@ -262,7 +262,7 @@ const AdoptionRequests: React.FC = () => {
       dog: request.dog
     });
 
-    const dogName = request.dog?.name || t('Unknown Dog');
+    const dogName = request.dog?.name || t('adoptionRequests.unknownDog');
     const dogBreed = request.dog?.breed || '';
     const dogAge = request.dog?.age;
     const dogGender = request.dog?.gender;
@@ -285,13 +285,13 @@ const AdoptionRequests: React.FC = () => {
             />
           ) : (
             <div className="dog-thumbnail placeholder">
-              {t('No Image')}
+              {t('adoptionRequests.noImage')}
             </div>
           )}
           <div className="request-info">
             <h3>{dogName}</h3>
             <p className="dog-details">
-              {dogBreed} • {dogAge} {t('years')} • {t(`gender.${dogGender}`, dogGender)}
+              {dogBreed} • {dogAge} {t('adoptionRequests.years')} • {t(`gender.${dogGender}`, dogGender)}
             </p>
             <p className="request-status">
               {getStatusBadge(request.status)}
@@ -301,12 +301,12 @@ const AdoptionRequests: React.FC = () => {
 
         <div className="request-details">
           <div className="participant-info">
-            <span className="label">{t('Adopter')}:</span>
+            <span className="label">{t('adoption.adopter')}:</span>
             <span>{request.adopter.name}</span>
           </div>
           {request.message && (
             <div className="request-message">
-              <span className="label">{t('Message')}:</span>
+              <span className="label">{t('adoption.message')}:</span>
               <span>{request.message}</span>
             </div>
           )}
@@ -321,7 +321,7 @@ const AdoptionRequests: React.FC = () => {
               className="btn-chat"
               onClick={handleGoToChat}
             >
-              💬 {t('Go to Chat')}
+              💬 {t('adoption.goToChat')}
             </button>
           )}
 
@@ -331,13 +331,13 @@ const AdoptionRequests: React.FC = () => {
                 className="btn-confirm"
                 onClick={() => handleOwnerConfirm(request._id)}
               >
-                {t('Confirm Request')}
+                {t('adoptionRequests.confirmRequestBtn')}
               </button>
               <button 
                 className="btn-deny"
                 onClick={() => handleDeny(request._id)}
               >
-                {t('Deny')}
+                {t('adoptionRequests.denyBtn')}
               </button>
             </>
           )}
@@ -347,7 +347,7 @@ const AdoptionRequests: React.FC = () => {
               className="btn-finalize"
               onClick={() => handleFinalize(request._id)}
             >
-              {t('Finalize Adoption')}
+              {t('adoptionRequests.finalizeBtn')}
             </button>
           )}
 
@@ -356,7 +356,7 @@ const AdoptionRequests: React.FC = () => {
               className="btn-confirm"
               onClick={() => handleAdopterConfirm(request._id)}
               >
-              {t('Confirm Adoption')}
+              {t('adoptionRequests.confirmAdoptionBtn')}
             </button>
           )}
 
@@ -365,7 +365,7 @@ const AdoptionRequests: React.FC = () => {
               className="btn-cancel"
               onClick={() => handleCancel(request._id)}
               >
-              {t('Cancel Request')}
+              {t('adoptionRequests.cancelRequestBtn')}
             </button>
           )}
         </div>
@@ -374,7 +374,7 @@ const AdoptionRequests: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="loading">{t('Loading...')}</div>;
+    return <div className="loading">{t('adoptionRequests.loading')}</div>;
   }
 
   return (
@@ -388,15 +388,15 @@ const AdoptionRequests: React.FC = () => {
       )}
       
       <div className="adoption-requests-header">
-        <h2>{t('Adoption Requests')}</h2>
+        <h2>{t('adoption.title')}</h2>
         <button className="btn-refresh" onClick={fetchRequests}>
-          {t('Refresh')}
+          {t('adoption.refresh')}
         </button>
       </div>
 
       {requests.length === 0 ? (
         <div className="no-requests">
-          {t('No adoption requests found.')}
+          {t('adoption.noRequests')}
         </div>
       ) : (
         <div className="adoption-requests-list">

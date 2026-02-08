@@ -197,6 +197,15 @@
   background-color: #7b1fa2;
 }
 
+.btn-chat {
+  background-color: #2196f3;
+  color: white;
+}
+
+.btn-chat:hover {
+  background-color: #1976d2;
+}
+
 /* Mobile responsive */
 @media (max-width: 767px) {
   .adoption-requests-container {

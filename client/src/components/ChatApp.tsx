@@ -1,6 +1,3 @@
-// (imports remain unchanged)
-// TEMP: Function to send an adoption message for a given dogId
-// (moved below imports, inside ChatApp component)
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import io from 'socket.io-client';
@@ -12,6 +9,7 @@ interface UserWithBlocks {
   _id: string;
   blockedUsers?: string[];
 }
+
 interface Message {
   _id: string;
   sender: string;
@@ -22,14 +20,16 @@ interface Message {
   dogId?: string;
   isOwner?: boolean;
 }
+
 interface Conversation {
   _id: string;
   participants: string[];
 }
+
 const getApiUrl = () => {
-  // Try to use explicit env var first
-  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-  // If running on mobile device, try to use window.location.hostname or fallback to LAN IP
+  if (process.env.REACT_APP_API_URL !== undefined) {
+    return process.env.REACT_APP_API_URL;
+  }
   const hostname = window.location.hostname;
   if (window.location.protocol === 'https:') {
     return `https://${hostname}`;
@@ -37,70 +37,21 @@ const getApiUrl = () => {
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return `http://${hostname}:3001`;
   }
-  // If on mobile, try to use LAN IP or fallback to current hostname
   if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
     return `http://${hostname}:3001`;
   }
-  // Fallback to hardcoded LAN IP (update as needed for your network)
   return `http://192.168.1.100:3001`;
 };
 
 interface ChatAppProps {
   dogId?: string;
+  adoptionConvoUserId?: string | null;
 }
 
-const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
-
-    // Main message sending handler for chat input
-    const sendMessage = async () => {
-      if (!selectedConvo || !token || !input.trim()) return;
-      const recipient = selectedConvo.participants.find(id => id !== user._id);
-      const messagePayload: any = {
-        conversationId: selectedConvo._id,
-        sender: user._id,
-         // const [dogOwnerMap, setDogOwnerMap] = useState<Record<string, string>>({});
-        message: input,
-        messageType: 'text',
-        dogId: adoptionDogId || undefined,
-        isOwner: adoptionIsOwner
-      };
-      socketRef.current?.emit('sendMessage', messagePayload);
-      await fetch(`${getApiUrl()}/api/chat/message`, {
-         // const [userWithBlocks, setUserWithBlocks] = useState<UserWithBlocks | null>(null);
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(messagePayload)
-      });
-      setMessages(prev => [
-        ...prev,
-        {
-          _id: Math.random().toString(36).substr(2, 9),
-          sender: user._id,
-          recipient,
-          message: input,
-          sentAt: new Date().toISOString(),
-          messageType: 'text',
-          dogId: adoptionDogId || undefined,
-          isOwner: adoptionIsOwner
-        }
-      ]);
-      setInput('');
-      // Do not clear adoptionDogId or adoptionIsOwner here; keep them until adoption is confirmed or canceled
-    };
+const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
   const { t } = useTranslation();
-
-  // ...existing code...
-
-
-  // Debug: log API URL and socket connection (optional, can be removed)
-  // useEffect(() => {
-  //   console.log('API URL:', getApiUrl());
-  // }, [t]);
-
-  // State and refs
   const { user, token } = useAuth();
+  
   const [dogStatusMap, setDogStatusMap] = useState<Record<string, string>>({});
   const [dogOwnerMap, setDogOwnerMap] = useState<Record<string, string>>({});
   const [adoptionDogId, setAdoptionDogId] = useState('');
@@ -110,19 +61,105 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
   const [input, setInput] = useState('');
   const [notification, setNotification] = useState('');
   const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
-  const [userWithBlocks, setUserWithBlocks] = useState<UserWithBlocks | null>(null);
+  const [userWithBlocks] = useState<UserWithBlocks | null>(null);
+  const [confirmingAdoption, setConfirmingAdoption] = useState(false);
+  const [chatVisible, setChatVisible] = useState(true);
+  const [activeTab, setActiveTab] = useState<'chats' | 'requests'>('chats');
+  const [adoptionRequests, setAdoptionRequests] = useState<any[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
   const socketRef = useRef<any>(null);
 
-  // Auto-select the first available online user as a conversation if none is selected
+  const sendMessage = async () => {
+    if (!selectedConvo || !token || !input.trim()) {
+      return;
+    }
+    const recipient = selectedConvo.participants.find(id => id !== user._id);
+    const messagePayload: any = {
+      conversationId: selectedConvo._id,
+      sender: user._id,
+      message: input,
+      messageType: 'text',
+      dogId: adoptionDogId || undefined,
+      isOwner: adoptionIsOwner
+    };
+    socketRef.current?.emit('sendMessage', messagePayload);
+    await fetch(`${getApiUrl()}/api/chat/message`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(messagePayload)
+    });
+    setMessages(prev => [
+      ...prev,
+      {
+        _id: Math.random().toString(36).substr(2, 9),
+        sender: user._id,
+        recipient,
+        message: input,
+        sentAt: new Date().toISOString(),
+        messageType: 'text',
+        dogId: adoptionDogId || undefined,
+        isOwner: adoptionIsOwner
+      }
+    ]);
+    setInput('');
+  };
+
+  const fetchAdoptionRequests = async () => {
+    if (!token) {
+      return;
+    }
+    setLoadingRequests(true);
+    try {
+      const dogsRes = await fetch(`${getApiUrl()}/api/dogs`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (dogsRes.ok) {
+        const allDogs = await dogsRes.json();
+        const dogsInAdoption = allDogs.filter((dog: any) => 
+          dog.adoptionStatus && 
+          dog.adoptionStatus === 'pending' &&
+          dog.adoptionQueue &&
+          dog.adoptionQueue.adopter &&
+          (String(dog.user._id || dog.user) === String(user._id) || 
+           String(dog.adoptionQueue.adopter) === String(user._id))
+        );
+        
+        const newReqs = dogsInAdoption.map((dog: any) => ({
+          _id: `dog-${dog._id}`,
+          dog: dog,
+          adopter: dog.adoptionQueue.adopter === String(user._id) ? user : dog.user,
+          status: dog.adoptionStatus,
+          isFromDog: true
+        }));
+        setAdoptionRequests(newReqs);
+      }
+    } catch (err) {
+      console.error('Failed to fetch adoption requests:', err);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
   useEffect(() => {
-    if (!selectedConvo && onlineUsers.length > 0 && user?._id) {
+    fetchAdoptionRequests();
+  }, [token]);
+
+  useEffect(() => {
+    if (adoptionConvoUserId && user?._id) {
+      startConversation(adoptionConvoUserId);
+    }
+  }, [adoptionConvoUserId, user?._id]);
+  
+  useEffect(() => {
+    if (!selectedConvo && onlineUsers.length > 0 && user?._id && !adoptionConvoUserId) {
       const firstUser = onlineUsers[0];
       setSelectedConvo({ _id: firstUser._id, participants: [user._id, firstUser._id] });
     }
-  }, [selectedConvo, onlineUsers, user?._id]);
+  }, [selectedConvo, onlineUsers, user?._id, adoptionConvoUserId]);
 
-
-  // Handler for input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
     if (selectedConvo) {
@@ -131,9 +168,16 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
     }
   };
 
-  // Handler for deleting a conversation
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      sendMessage();
+    }
+  };
+
   const handleDeleteConversation = async () => {
-    if (!selectedConvo || !token) return;
+    if (!selectedConvo || !token) {
+      return;
+    }
     await fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
@@ -142,59 +186,64 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
     setMessages([]);
   };
 
-  // Block/unblock logic
-    // Adoption handlers
-    const [confirmingAdoption, setConfirmingAdoption] = useState(false);
-    const handleConfirmAdoption = async (dogId: string, isOwner: boolean) => {
-      if (!token) return;
-      setConfirmingAdoption(true);
-      try {
-        const res = await fetch(`${getApiUrl()}/api/dogs/confirm-adoption`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ dogId, isOwner })
-        });
-        if (res.ok) {
-          setNotification(t('adoptionConfirmed'));
-          // Refetch dog status to sync UI
-          const dogRes = await fetch(`${getApiUrl()}/api/dogs/${dogId}`);
-          if (dogRes.ok) {
-            const dogData = await dogRes.json();
-            setDogStatusMap(prev => ({ ...prev, [dogId]: dogData.adoptionStatus }));
-          }
-          setAdoptionDogId('');
-          setAdoptionIsOwner(false);
+  const handleConfirmAdoption = async (dogId: string, isOwner: boolean) => {
+    if (!token) {
+      return;
+    }
+    setConfirmingAdoption(true);
+    try {
+      const res = await fetch(`${getApiUrl()}/api/dogs/confirm-adoption`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ dogId, isOwner })
+      });
+      if (res.ok) {
+        setNotification(t('adoptionConfirmed'));
+        const dogRes = await fetch(`${getApiUrl()}/api/dogs/${dogId}`);
+        if (dogRes.ok) {
+          const dogData = await dogRes.json();
+          setDogStatusMap(prev => ({ ...prev, [dogId]: dogData.adoptionStatus }));
         }
-      } catch (err) {
-        setNotification(t('adoptionConfirmError'));
-      } finally {
-        setConfirmingAdoption(false);
+        setAdoptionDogId('');
+        setAdoptionIsOwner(false);
       }
-    };
-    const handleCancelAdoption = async (dogId: string) => {
-      if (!token) return;
-      try {
-        const res = await fetch(`${getApiUrl()}/api/dogs/${dogId}/adopt-cancel`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ reason: '' })
-        });
-        if (res.ok) {
-          setNotification(t('adoptionCanceled'));
-          setAdoptionDogId('');
-          setAdoptionIsOwner(false);
-          // UI will update via socket event (receiveMessage)
-        }
-      } catch (err) {
-        setNotification(t('adoptionCancelError'));
+    } catch (err) {
+      setNotification(t('adoptionConfirmError'));
+    } finally {
+      setConfirmingAdoption(false);
+    }
+  };
+
+  const handleCancelAdoption = async (dogId: string) => {
+    if (!token) {
+      return;
+    }
+    try {
+      const res = await fetch(`${getApiUrl()}/api/dogs/${dogId}/adopt-cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ reason: '' })
+      });
+      if (res.ok) {
+        setNotification(t('adoptionCanceled'));
+        setAdoptionDogId('');
+        setAdoptionIsOwner(false);
       }
-    };
+    } catch (err) {
+      setNotification(t('adoptionCancelError'));
+    }
+  };
+
   const isBlocked = selectedConvo && userWithBlocks && userWithBlocks.blockedUsers && selectedConvo.participants.some(
-    id => id !== userWithBlocks._id && userWithBlocks.blockedUsers!.includes(id)
+    id => String(id) !== String(userWithBlocks._id) && userWithBlocks.blockedUsers!.map(String).includes(String(id))
   );
+
   const otherUserId = selectedConvo && userWithBlocks ? selectedConvo.participants.find(id => id !== userWithBlocks._id) : null;
+
   const handleBlockUnblock = async () => {
-    if (!otherUserId || !token) return;
+    if (!otherUserId || !token) {
+      return;
+    }
     const url = isBlocked ? '/api/chat/unblock' : '/api/chat/block';
     await fetch(`${getApiUrl()}${url}`, {
       method: 'POST',
@@ -202,18 +251,20 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
       body: JSON.stringify({ userId: user._id, blockId: otherUserId })
     });
   };
-  // Store user._id in a ref to avoid re-running effect when user object reference changes
+
   const userIdRef = useRef<string | null>(null);
   
   useEffect(() => {
     const userId = user?._id;
-    // Only setup socket if we have userId and token, and userId changed
-    if (!userId || !token) return;
-    if (userIdRef.current === userId && socketRef.current?.connected) return;
+    if (!userId || !token) {
+      return;
+    }
+    if (userIdRef.current === userId && socketRef.current?.connected) {
+      return;
+    }
     
     userIdRef.current = userId;
     
-    // Cleanup existing socket if any
     if (socketRef.current) {
       socketRef.current.removeAllListeners();
       socketRef.current.disconnect();
@@ -222,8 +273,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
     socketRef.current = io(getApiUrl());
     
     socketRef.current.on('connect', () => {
-      console.log('[DEBUG] Socket connected:', socketRef.current?.id);
-      // Join room after connection
       socketRef.current?.emit('join', userId);
       socketRef.current?.emit('getOnlineUsers');
     });
@@ -300,151 +349,81 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
   }, [user?._id, token]);
 
   useEffect(() => {
-    if (selectedConvo && token) {
-      fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-        .then(res => res.json())
-        .then(async data => {
-          setMessages(data);
-          // Always check for adoption message and refresh dog status
-          let found = false;
-          const adoptionMsg = data.find((m: any) => m.messageType === 'adoption' && m.dogId);
-          if (adoptionMsg && adoptionMsg.dogId) {
-            setAdoptionDogId(adoptionMsg.dogId);
-            setAdoptionIsOwner(adoptionMsg.isOwner || false);
-            found = true;
-            // Refetch dog status for this dog
-            fetch(`${getApiUrl()}/api/dogs/${adoptionMsg.dogId}`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            })
-              .then(res => res.json())
-              .then(dog => {
-                setDogStatusMap(prev => ({ ...prev, [adoptionMsg.dogId]: dog.adoptionStatus }));
-                setDogOwnerMap(prev => ({ ...prev, [adoptionMsg.dogId]: dog.owner }));
-                // If adoption is completed/canceled, show system message and clear adoption UI
-                if (dog.adoptionStatus === 'completed' || dog.adoptionStatus === 'closed' || dog.adoptionStatus === 'canceled' || dog.adoptionStatus === 'cancelled') {
-                  setNotification(t('adoptionConfirmed'));
-                  setAdoptionDogId('');
-                  setAdoptionIsOwner(false);
-                  setMessages(prev => [
-                    ...prev,
-                    {
-                      _id: Math.random().toString(36).substr(2, 9),
-                      sender: null,
-                      recipient: null,
-                      message: t('adoptionConfirmed'),
-                      sentAt: new Date().toISOString(),
-                      messageType: 'system',
-                      dogId: adoptionMsg.dogId
-                    }
-                  ]);
-                }
-              });
-          }
-          // If not found, check all dogs for pending adoptions involving these users
-          if (!found) {
-            try {
-              const res = await fetch(`${getApiUrl()}/api/dogs`, { headers: { 'Authorization': `Bearer ${token}` } });
-              if (res.ok) {
-                const dogs = await res.json();
-                const convoUserIds = selectedConvo.participants.map(String);
-                const pendingDog = dogs.find((dog: any) =>
-                  dog.adoptionStatus === 'pending' &&
-                  dog.adoptionQueue && dog.adoptionQueue.adopter &&
-                  convoUserIds.includes(String(dog.user._id || dog.user)) &&
-                  convoUserIds.includes(String(dog.adoptionQueue.adopter))
-                );
-                if (pendingDog && pendingDog._id) {
-                  setAdoptionDogId(pendingDog._id);
-                  setAdoptionIsOwner(String(pendingDog.user._id || pendingDog.user) === String(user._id));
-                  // Refetch dog status for this dog
-                  fetch(`${getApiUrl()}/api/dogs/${pendingDog._id}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                  })
-                    .then(res => res.json())
-                    .then(dog => {
-                      setDogStatusMap(prev => ({ ...prev, [pendingDog._id]: dog.adoptionStatus }));
-                      setDogOwnerMap(prev => ({ ...prev, [pendingDog._id]: dog.owner }));
-                    });
-                }
-              }
-            } catch {}
-          }
-        });
+    if (!selectedConvo || !token) {
+      return;
     }
-
-    // Listen for open-chat-with-user event to start conversation with given userId
-    const chatHandler = (e: any) => {
-      if (e && e.detail && e.detail.userId) {
-        const targetId = e.detail.userId;
-        // Find or create a conversation with this user
-        let convo = null;
-        for (const c of onlineUsers) {
-          if (typeof c === 'object' && c._id === targetId) {
-            convo = { _id: c._id, participants: [user._id, c._id] };
-            break;
-          }
-        }
-        if (convo) {
-          setSelectedConvo(convo);
-        } else {
-          // Fallback: create a new conversation object
-          setSelectedConvo({ _id: targetId, participants: [user._id, targetId] });
-        }
-      }
-    };
-    window.addEventListener('open-chat-with-user', chatHandler);
-    return () => {
-      window.removeEventListener('open-chat-with-user', chatHandler);
-    };
-  }, [selectedConvo, token, user._id, onlineUsers, user]);
-
-  // Fetch adoption status for all dogIds in messages and adoptionDogId
-  // Always fetch status for adoptionDogId when it changes, even if messages don't change
-  useEffect(() => {
-    if (!adoptionDogId || !token) return;
-    const fetchStatus = async () => {
-      try {
-        const res = await fetch(`${getApiUrl()}/api/dogs/${adoptionDogId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const dog = await res.json();
-          setDogStatusMap(prev => ({ ...prev, [adoptionDogId]: dog.adoptionStatus }));
-        }
-      } catch {}
-    };
-    fetchStatus();
-  }, [adoptionDogId, token]);
-
-  // Also fetch status for all dogIds in messages (for chat history)
-  useEffect(() => {
-    if (!token) return;
-    const ids = new Set<string>();
-    messages.forEach(m => { if (m.dogId) ids.add(m.dogId); });
-    if (ids.size === 0) return;
-    const fetchStatuses = async () => {
-      const newMap: Record<string, string> = {};
-      await Promise.all(Array.from(ids).map(async id => {
-        try {
-          const res = await fetch(`${getApiUrl()}/api/dogs/${id}`, {
+    fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(async data => {
+        setMessages(data);
+        let found = false;
+        const adoptionMsg = data.find((m: any) => m.messageType === 'adoption' && m.dogId);
+        if (adoptionMsg && adoptionMsg.dogId) {
+          setAdoptionDogId(adoptionMsg.dogId);
+          setAdoptionIsOwner(adoptionMsg.isOwner || false);
+          found = true;
+          fetch(`${getApiUrl()}/api/dogs/${adoptionMsg.dogId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (res.ok) {
-            const dog = await res.json();
-            newMap[id] = dog.adoptionStatus;
-          }
-        } catch {}
-      }));
-      setDogStatusMap(prev => ({ ...prev, ...newMap }));
-    };
-    fetchStatuses();
-  }, [messages, token]);
+          })
+            .then(res => res.json())
+            .then(dog => {
+              setDogStatusMap(prev => ({ ...prev, [adoptionMsg.dogId]: dog.adoptionStatus }));
+              setDogOwnerMap(prev => ({ ...prev, [adoptionMsg.dogId]: dog.owner }));
+              if (dog.adoptionStatus === 'completed' || dog.adoptionStatus === 'closed' || dog.adoptionStatus === 'canceled' || dog.adoptionStatus === 'cancelled') {
+                setNotification(t('adoptionConfirmed'));
+                setAdoptionDogId('');
+                setAdoptionIsOwner(false);
+                setMessages(prev => [
+                  ...prev,
+                  {
+                    _id: Math.random().toString(36).substr(2, 9),
+                    sender: null,
+                    recipient: null,
+                    message: t('adoptionConfirmed'),
+                    sentAt: new Date().toISOString(),
+                    messageType: 'system',
+                    dogId: adoptionMsg.dogId
+                  }
+                ]);
+              }
+            });
+        }
+        if (!found) {
+          try {
+            const res = await fetch(`${getApiUrl()}/api/dogs`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (res.ok) {
+              const dogs = await res.json();
+              const convoUserIds = selectedConvo.participants.map(String);
+              const pendingDog = dogs.find((dog: any) =>
+                dog.adoptionStatus === 'pending' &&
+                dog.adoptionQueue && dog.adoptionQueue.adopter &&
+                convoUserIds.includes(String(dog.user._id || dog.user)) &&
+                convoUserIds.includes(String(dog.adoptionQueue.adopter))
+              );
+              if (pendingDog && pendingDog._id) {
+                setAdoptionDogId(pendingDog._id);
+                setAdoptionIsOwner(String(pendingDog.user._id || pendingDog.user) === String(user._id));
+                fetch(`${getApiUrl()}/api/dogs/${pendingDog._id}`, {
+                  headers: { 'Authorization': `Bearer ${token}` }
+                })
+                  .then(res => res.json())
+                  .then(dog => {
+                    setDogStatusMap(prev => ({ ...prev, [pendingDog._id]: dog.adoptionStatus }));
+                    setDogOwnerMap(prev => ({ ...prev, [pendingDog._id]: dog.owner }));
+                  });
+              }
+            }
+          } catch {}
+        }
+      });
+  }, [selectedConvo, token, user._id]);
 
   const startConversation = async (otherUserId: string) => {
-    if (!otherUserId || !token) return;
-    // Always create or fetch the conversation
+    if (!otherUserId || !token) {
+      return;
+    }
     let convo;
     try {
       const res = await fetch(`${getApiUrl()}/api/chat/conversation`, {
@@ -459,19 +438,54 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
     } catch {
       convo = null;
     }
-    // Fallback: if convo is invalid, create minimal object
     if (!convo || !convo._id || !convo.participants) {
       convo = { _id: otherUserId, participants: [user._id, otherUserId] };
     }
     setSelectedConvo(convo);
-    // Fetch messages for this conversation
+    
+    try {
+      const res = await fetch(`${getApiUrl()}/api/dogs`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) {
+        const dogs = await res.json();
+        const convoUserIds = convo.participants.map(String);
+        console.log('[DEBUG] Conversation user IDs:', convoUserIds);
+        console.log('[DEBUG] Current user ID:', user._id);
+        console.log('[DEBUG] Dogs with adoption status:', dogs.filter((d: any) => d.adoptionStatus));
+        
+        const pendingDog = dogs.find((dog: any) => {
+          const dogOwnerId = String(dog.user._id || dog.user);
+          const adopterId = String(dog.adoptionQueue?.adopter);
+          const isAdopterInConvo = convoUserIds.includes(adopterId);
+          const isOwnerInConvo = convoUserIds.includes(dogOwnerId);
+          const matches = isAdopterInConvo && isOwnerInConvo;
+          
+          if (matches && dog.adoptionStatus) {
+            console.log('[DEBUG] Found matching dog:', dog.name, 'Status:', dog.adoptionStatus, 'Owner:', dogOwnerId, 'Adopter:', adopterId);
+          }
+          
+          return matches && (dog.adoptionStatus === 'pending' || dog.adoptionStatus === 'adopted');
+        });
+        
+        if (pendingDog && pendingDog._id) {
+          console.log('[DEBUG] Setting adoptionDogId:', pendingDog._id);
+          setAdoptionDogId(pendingDog._id);
+          setAdoptionIsOwner(String(pendingDog.user._id || pendingDog.user) === String(user._id));
+          setDogStatusMap(prev => ({ ...prev, [pendingDog._id]: pendingDog.adoptionStatus }));
+          setDogOwnerMap(prev => ({ ...prev, [pendingDog._id]: pendingDog.owner }));
+        } else {
+          console.log('[DEBUG] No matching dog found');
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching adoption status:', err);
+    }
+    
     fetch(`${getApiUrl()}/api/chat/messages/${convo._id}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(async data => {
         setMessages(data);
-        // Check for pending adoption in this chat
         let found = false;
         const adoptionMsg = data.find((m: any) => m.messageType === 'adoption' && m.dogId);
         if (adoptionMsg && adoptionMsg.dogId) {
@@ -479,7 +493,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
           setAdoptionIsOwner(adoptionMsg.isOwner || false);
           found = true;
         }
-        if (!found) {
+        if (!found && !adoptionDogId) {
           try {
             const res = await fetch(`${getApiUrl()}/api/dogs`, { headers: { 'Authorization': `Bearer ${token}` } });
             if (res.ok) {
@@ -501,51 +515,124 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
       });
   };
   
-  const [chatVisible, setChatVisible] = useState(true);
-  if (!chatVisible) return null;
+  if (!chatVisible) {
+    return null;
+  }
+
+  const getProfilePic = (u: any) => {
+    const pic = u?.profilePicture;
+    if (pic && typeof pic === 'string' && pic.trim() !== '') {
+      const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      if (/^(https?:\/\/|data:|blob:)/i.test(pic)) {
+        return pic + '?v=' + Date.now();
+      }
+      if (pic.startsWith('/uploads') || pic.startsWith('/u/')) {
+        return apiBase + pic + '?v=' + Date.now();
+      }
+      return pic + '?v=' + Date.now();
+    }
+    return '/img/chat-icon.svg';
+  };
+
   return (
     <div className="chat-app-container" style={{ display: 'flex', height: '100%' }}>
-      {/* Sidebar: Online Users */}
       <div className="chat-app-sidebar" style={{ width: 220, borderRight: '1px solid #eee', background: '#fafbfc', padding: 0 }}>
-        <div style={{ fontWeight: 'bold', padding: '12px 16px', borderBottom: '1px solid #eee' }}>{t('onlineUsers') || 'Online Users'}</div>
-        {onlineUsers.length === 0 ? (
-          <div style={{ padding: 16, color: '#888' }}>{t('noUsersOnline') || 'No users online.'}</div>
-        ) : (
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-              {onlineUsers.map(u => {
-                const showProfilePic = u.profilePicture && typeof u.profilePicture === 'string' && u.profilePicture.trim() !== '' && u.profilePicture.startsWith('/uploads');
-                return (
-                  <li key={u._id} style={{ display: 'flex', alignItems: 'center', padding: '10px 16px', cursor: 'pointer', background: selectedConvo && selectedConvo.participants.includes(u._id) ? '#e6f7ff' : 'transparent' }}
+        <div style={{ display: 'flex', borderBottom: '1px solid #eee' }}>
+          <button
+            onClick={() => setActiveTab('chats')}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              background: activeTab === 'chats' ? '#e6f7ff' : 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '14px'
+            }}
+          >
+            {t('nav.dogs') || 'Chats'}
+          </button>
+          <button
+            onClick={() => setActiveTab('requests')}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              background: activeTab === 'requests' ? '#e6f7ff' : 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '14px'
+            }}
+          >
+            {t('nav.adoptionRequests') || 'Requests'}
+          </button>
+        </div>
+        {activeTab === 'chats' && (
+          <>
+            <div style={{ fontWeight: 'bold', padding: '12px 16px', borderBottom: '1px solid #eee' }}>{t('onlineUsers') || 'Online Users'}</div>
+            {onlineUsers.length === 0 ? (
+              <div style={{ padding: 16, color: '#888' }}>{t('noUsersOnline') || 'No users online.'}</div>
+            ) : (
+              <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                {onlineUsers.map(u => (
+                  <li key={u._id} 
+                      style={{ display: 'flex', alignItems: 'center', padding: '10px 16px', cursor: 'pointer', background: selectedConvo && selectedConvo.participants.includes(u._id) ? '#e6f7ff' : 'transparent' }}
                       onClick={() => startConversation(u._id)}>
-                    {showProfilePic ? (
-                      <img src={u.profilePicture + '?v=' + Date.now()}
-                           alt={u.userName || 'User'}
-                           style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 12, objectFit: 'cover', border: '1px solid #ddd' }} />
-                    ) : (
-                      <img src="/img/chat-icon.svg" alt="User" style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 12, objectFit: 'cover', border: '1px solid #ddd' }} />
-                    )}
+                    <img 
+                      src={getProfilePic(u)}
+                      alt={u.userName || 'User'}
+                      style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 12, objectFit: 'cover', border: '1px solid #ddd' }} 
+                    />
                     <span style={{ flex: 1 }}>{u.userName || u._id}</span>
                     <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#4caf50', display: 'inline-block', marginLeft: 8 }} title="Online"></span>
                   </li>
-                );
-              })}
-          </ul>
+                ))}
+              </ul>
+            )}
+          </>
+        )}
+        {activeTab === 'requests' && (
+          <>
+            <div style={{ fontWeight: 'bold', padding: '12px 16px', borderBottom: '1px solid #eee' }}>{t('adoption.title') || 'Requests'}</div>
+            {loadingRequests ? (
+              <div style={{ padding: 16, color: '#888' }}>{t('adoption.loading') || 'Loading...'}</div>
+            ) : adoptionRequests.length === 0 ? (
+              <div style={{ padding: 16, color: '#888' }}>{t('adoption.noRequests') || 'No adoption requests found.'}</div>
+            ) : (
+              <ul style={{ listStyle: 'none', margin: 0, padding: 0, maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+                {adoptionRequests.map((req: any) => (
+                  <li key={req._id} style={{ padding: '12px 16px', borderBottom: '1px solid #eee' }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: 4 }}>{req.dog?.name || t('adoptionRequests.unknownDog')}</div>
+                    <div style={{ fontSize: '12px', color: '#666' }}>{t('adoption.adopter') || 'Adopter:'} {req.adopter?.name || req.adopter?.username || 'Unknown'}</div>
+                    <div style={{ fontSize: '12px', color: '#888' }}>{t('adoption.status.' + req.status) || req.status}</div>
+                    <button
+                      onClick={() => {
+                        setActiveTab('chats');
+                        if (req.adopter && req.adopter._id) {
+                          startConversation(req.adopter._id);
+                        }
+                      }}
+                      style={{
+                        marginTop: 8,
+                        background: '#1890ff',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 4,
+                        padding: '6px 12px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                    >
+                      {t('adoption.goToChat') || 'Go to Chat'}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </div>
-      {/* DEBUG: Show current user and online users profilePicture values */}
-      <div style={{ background: '#ffe', color: '#a00', fontSize: 12, padding: 8, borderBottom: '1px solid #ccc' }}>
-        <div><b>DEBUG:</b> Current user profilePicture: <span style={{ color: '#00a' }}>{user?.profilePicture || '(none)'}</span></div>
-        <div><b>DEBUG:</b> Online users profilePictures:</div>
-        <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-          {onlineUsers.map(u => (
-            <li key={u._id}>
-              {u.userName || u._id}: <span style={{ color: '#00a' }}>{u.profilePicture || '(none)'}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-        {/* SOCKET/ONLINE USERS WARNING */}
         {(!socketRef.current || !socketRef.current.connected) && (
           <div style={{ background: '#fcc', color: '#900', padding: '8px', marginBottom: '8px', fontWeight: 'bold' }}>
             Socket not connected. Check backend/server.
@@ -554,24 +641,19 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
         {selectedConvo ? (
           <>
             <div className="chat-app-header" style={{ borderBottom: '1px solid #eee', padding: '12px 16px', background: '#f7fafd' }}>
-              {/* Show profile picture and name of other user */}
               {(() => {
                 const otherUser = onlineUsers.find(u => selectedConvo.participants.includes(u._id) && u._id !== user._id);
-                const showProfilePic = otherUser && typeof otherUser.profilePicture === 'string' && otherUser.profilePicture.trim() !== '' && otherUser.profilePicture.startsWith('/uploads');
                 return (
                   <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    {showProfilePic ? (
-                      <img src={otherUser.profilePicture + '?v=' + Date.now()}
-                           alt={otherUser.userName || 'User'}
-                           style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '1px solid #ddd' }} />
-                    ) : (
-                      <img src="/img/chat-icon.svg" alt="User" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '1px solid #ddd' }} />
-                    )}
+                    <img 
+                      src={otherUser ? getProfilePic(otherUser) : '/img/chat-icon.svg'}
+                      alt={otherUser?.userName || 'User'}
+                      style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '1px solid #ddd' }} 
+                    />
                     <span>{t('chatWith') || 'Chat with'} {otherUser?.userName || selectedConvo.participants.filter(id => id !== user._id).join(', ')}</span>
                   </span>
                 );
               })()}
-              {/* Close button */}
               <button
                 onClick={() => setChatVisible(false)}
                 style={{
@@ -603,7 +685,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
                   height: '100%',
                 }}>×</span>
               </button>
-              {/* Block/Unblock and Delete Conversation Buttons */}
               <span style={{ float: 'right', display: 'flex', gap: 8 }}>
                 <button style={{ background: isBlocked ? '#ff9800' : '#eee', color: isBlocked ? '#fff' : '#333', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8 }} onClick={handleBlockUnblock}>
                   {isBlocked ? (t('unblock') || 'Unblock') : (t('block') || 'Block')}
@@ -613,32 +694,16 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
                 </button>
               </span>
             </div>
-            {/* Adoption Action Buttons */}
             {adoptionDogId && (
               <div style={{ padding: '12px 16px', background: '#fffbe6', borderBottom: '1px solid #ffe58f', display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span>{t('adoptionPending') || 'Adoption pending for this dog.'}</span>
-                {/* Adoption confirmation logic: */}
                 {(() => {
-                  // Determine if current user has confirmed adoption
-                  // We assume adoptionIsOwner means this user is the owner, not that they've confirmed
-                  // So we need to check dogStatusMap[adoptionDogId] === 'pending' and if this user has confirmed
-                  // For now, let's assume only one confirmation is needed per user (owner/adopter)
                   const status = dogStatusMap[adoptionDogId];
-                  // If adoption is pending, show confirm button if user has NOT confirmed
-                  // If user has confirmed, show waiting message
-                  // We'll use adoptionIsOwner to determine which button to show
-                  // (You may want to refine this logic if you track confirmations per user)
                   if (status === 'pending') {
-                    // Show confirm button if user has NOT confirmed
-                    // We'll use adoptionIsOwner as a proxy for role, but need a way to know if this user has confirmed
-                    // For now, if adoptionIsOwner, show confirm; else, show waiting
-                    // Let's improve: if adoptionIsOwner, show confirm; else, show waiting
-                    // But if adoptionIsOwner is false, and user is adopter, show confirm; else, show waiting
-                    // For now, let's show confirm if adoptionIsOwner, else show waiting
                     if (!confirmingAdoption && adoptionIsOwner) {
                       return (
                         <button
-                          style={{ background: '#4caf50', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8, opacity: confirmingAdoption ? 0.6 : 1, pointerEvents: confirmingAdoption ? 'none' : 'auto' }}
+                          style={{ background: '#4caf50', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8 }}
                           onClick={() => handleConfirmAdoption(adoptionDogId, true)}
                           disabled={confirmingAdoption}
                         >
@@ -646,10 +711,9 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
                         </button>
                       );
                     } else if (!confirmingAdoption && !adoptionIsOwner) {
-                      // If user is adopter, show confirm button
                       return (
                         <button
-                          style={{ background: '#4caf50', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8, opacity: confirmingAdoption ? 0.6 : 1, pointerEvents: confirmingAdoption ? 'none' : 'auto' }}
+                          style={{ background: '#4caf50', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8 }}
                           onClick={() => handleConfirmAdoption(adoptionDogId, false)}
                           disabled={confirmingAdoption}
                         >
@@ -657,16 +721,13 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
                         </button>
                       );
                     } else {
-                      // If user has confirmed, show waiting message
                       return (
                         <span style={{ marginLeft: 12, color: '#888' }}>{t('waitingForOtherParty') || 'Waiting for other party to confirm...'}</span>
                       );
                     }
                   }
-                  // If adoption is not pending, show nothing
                   return null;
                 })()}
-                {/* Cancel button for adopter only, if needed */}
                 {adoptionDogId && !adoptionIsOwner && (
                   <button style={{ background: '#f44336', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8 }} onClick={() => handleCancelAdoption(adoptionDogId)}>{t('cancelAdoption') || 'Cancel Adoption'}</button>
                 )}
@@ -689,7 +750,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId }) => {
                 type="text"
                 value={input}
                 onChange={handleInputChange}
-                onKeyDown={e => { if (e.key === 'Enter') sendMessage(); }}
+                onKeyDown={handleKeyDown}
                 placeholder={t('typeMessagePlaceholder') || 'Type a message...'}
                 style={{ width: '80%', marginRight: 8 }}
               />

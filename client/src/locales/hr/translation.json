@@ -8,7 +8,8 @@
     "about": "O nama",
     "login": "Logiraj se",
     "register": "Registracija",
-    "dogs": "Psi"
+    "dogs": "Psi",
+    "adoptionRequests": "Zahtjevi"
   },
   "button": {
     "findFriend": "Pronađi zauvijek prijatelja",
@@ -124,9 +125,7 @@
   "adddogExtra": {
     "ageNote": "Možete upisati i decimalnu vrijednost (npr. 3.6 godina)"
   },
-  "social": {
-    
-  },
+  "social": {},
   "share": {
     "title": "Podijeli s drugima"
   },
@@ -171,19 +170,15 @@
     "cancel": "Odustani",
     "remove": "Ukloni"
   },
-  "fields": {
-    "name": "Ime:",
-    "breed": "Pasma:",
-    "gender": "Spol:",
-    "age": "Dob:",
-    "location": "Lokacija:",
-    "color": "Boja:",
-    "size": "Veličina:",
-    "vaccination": "Cijepljenje:",
-    "description": "Opis:"
-  },
   "common": {
-    "close": "Zatvori"
+    "close": "Zatvori",
+    "cancel": "Odustani",
+    "save": "Spremi",
+    "delete": "Obriši",
+    "edit": "Uredi",
+    "loading": "Učitavanje...",
+    "error": "Greška",
+    "success": "Uspjeh"
   },
   "dogDetails": {
     "imageAlt": "slika psa",
@@ -207,16 +202,6 @@
     "title": "Korisnici",
     "empty": "Nema pronađenih korisnika"
   },
-  "common": {
-    "close": "Zatvori",
-    "cancel": "Odustani",
-    "save": "Spremi",
-    "delete": "Obriši",
-    "edit": "Uredi",
-    "loading": "Učitavanje...",
-    "error": "Greška",
-    "success": "Uspjeh"
-  },
   "fields": {
     "name": "Ime:",
     "breed": "Pasmina:",
@@ -234,11 +219,73 @@
     "postedBy": "Objavio:",
     "contactOwner": "Kontaktiraj vlasnika"
   },
-  "gender": {
-    "male": "Mužjak",
-    "female": "Ženka"
-  },
   "language": {
     "selectAria": "Odaberite jezik"
+  },
+  "adoption": {
+    "title": "Zahtjevi",
+    "refresh": "Osvježi",
+    "noRequests": "Nema pronađenih zahtjeva za posvajanje.",
+    "loading": "Učitavanje...",
+    "adopter": "Posvojitelj:",
+    "message": "Poruka:",
+    "goToChat": "Idi na razgovor",
+    "confirmRequest": "Potvrdi zahtjev",
+    "deny": "Odbij",
+    "finalize": "Završi posvajanje",
+    "confirmAdoption": "Potvrdi posvajanje",
+    "cancelRequest": "Otkaži zahtjev",
+    "status": {
+      "pending": "Na čekanju",
+      "ownerConfirmed": "Vlasnik potvrđeno",
+      "adopterConfirmed": "Posvojitelj potvrđeno",
+      "adopted": "Posvojen",
+      "denied": "Odbijeno",
+      "cancelled": "Otkazano"
+    },
+    "confirmRequestConfirm": "Jeste li sigurni da želite potvrditi ovaj zahtjev za posvajanje?",
+    "confirmRequestSuccess": "Zahtjev za posvajanje potvrđen! Čekanje na potvrdu posvojitelja.",
+    "confirmAdoptionConfirm": "Jeste li sigurni da želite potvrditi ovo posvajanje?",
+    "confirmAdoptionSuccess": "Posvajanje potvrđeno! Vlasnik će završiti posvajanje.",
+    "finalizeConfirm": "Jeste li sigurni? Ovo će trajno izbrisati psa iz baze podataka.",
+    "finalizeSuccess": "Pas uspješno posvojen! Uklonjen iz baze podataka.",
+    "denyConfirm": "Jeste li sigurni da želite odbiti ovaj zahtjev?",
+    "denySuccess": "Zahtjev za posvajanje odbijen.",
+    "cancelConfirm": "Jeste li sigurni da želite otkazati ovaj zahtjev?",
+    "cancelSuccess": "Zahtjev za posvajanje otkazan."
+  },
+  "chat": {
+    "onlineUsers": "Korisnici na mreži",
+    "noUsersOnline": "Nema korisnika na mreži.",
+    "chatWith": "Razgovor s",
+    "selectUserToChat": "Odaberite korisnika za početak razgovora.",
+    "typeMessagePlaceholder": "Upišite poruku...",
+    "send": "Pošalji",
+    "block": "Blokiraj",
+    "unblock": "Odblokiraj",
+    "deleteConversation": "Izbriši razgovor",
+    "adoptionPending": "Posvajanje na čekanju za ovog psa.",
+    "confirmAdoption": "Potvrdi posvajanje",
+    "confirming": "Potvrđivanje...",
+    "waitingForOtherParty": "Čekanje na potvrdu druge strane...",
+    "cancelAdoption": "Otkaži posvajanje",
+    "adoptionConfirmed": "Posvajanje potvrđeno!",
+    "adoptionConfirmError": "Neuspješno potvrđivanje posvajanja",
+    "adoptionCanceled": "Posvajanje otkazano",
+    "adoptionCancelError": "Neuspješno otkazivanje posvajanja"
+  },
+  "alerts": {
+    "pleaseLoginToAdopt": "Morate biti prijavljeni da biste posvojili psa.",
+    "cannotAdoptOwnDog": "Ne možete posvojiti vlastitog psa.",
+    "confirmAdoptRequest": "Želite li poslati zahtjev za posvajanje za {{name}}?",
+    "pleaseLoginToUseWishlist": "Morate biti prijavljeni da biste koristili listu želja.",
+    "removedFromWishlist": "Uklonjeno s liste želja!",
+    "failedToRemoveFromWishlist": "Neuspješno uklanjanje s liste želja: ",
+    "addedToWishlist": "Dodano na listu želja! ❤️",
+    "failedToAddToWishlist": "Neuspješno dodavanje na listu želja: ",
+    "unknownError": "Nepoznata greška",
+    "errorSendingAdoptionRequest": "Dogodila se greška prilikom slanja zahtjeva za posvajanje. Provjerite konzolu preglednika (F12) za detalje.",
+    "videoFailedToLoad": "Video se nije učitao",
+    "imageFailedToLoad": "Slika se nije učitala"
   }
 }

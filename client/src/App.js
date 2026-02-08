@@ -74,10 +74,19 @@ const App = () => {
   }, []);
 
   const [showChatModal, setShowChatModal] = useState(false);
+  const [adoptionConvoUserId, setAdoptionConvoUserId] = useState(null);
 
   useEffect(() => {
-    const closeHandler = () => setShowChatModal(false);
-    const openHandler = () => setShowChatModal(true);
+    const closeHandler = () => {
+      setShowChatModal(false);
+      setAdoptionConvoUserId(null);
+    };
+    const openHandler = (e) => {
+      setShowChatModal(true);
+      if (e.detail && e.detail.userId) {
+        setAdoptionConvoUserId(e.detail.userId);
+      }
+    };
     
     window.addEventListener('closeChatModal', closeHandler);
     window.addEventListener('openChatModal', openHandler);
@@ -106,7 +115,7 @@ const App = () => {
             borderRadius: 16,
           }}>
             <div style={{ background: '#fff', borderRadius: 16, padding: 0, minWidth: 260, maxWidth: 340, position: 'relative' }} onClick={e => e.stopPropagation()}>
-              <ChatApp />
+              <ChatApp adoptionConvoUserId={adoptionConvoUserId} />
             </div>
           </div>
         )}

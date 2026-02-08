@@ -92,7 +92,6 @@ const Header: React.FC = () => {
             <nav style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <Link to="/" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.about')}</Link>
               <Link to="psi" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.dogs')}</Link>
-              <Link to="zahtjevi-za-posvajanjem" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.adoptionRequests') || 'Adoption Requests'}</Link>
             </nav>
             <div style={{ flex: 1 }} />
             {/* Right: Language Selector and User Info */}

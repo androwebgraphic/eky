@@ -60,7 +60,17 @@ exports.createAdoptionRequest = async (req, res) => {
 
     await adoptionRequest.save();
 
-    // Populate and return the request
+    // Update Dog model to reflect adoption status
+    await Dog.findByIdAndUpdate(dogId, {
+      adoptionStatus: 'pending',
+      adoptionQueue: {
+        adopter: adopterId,
+        ownerConfirmed: false,
+        adopterConfirmed: false
+      }
+    });
+
+    // Populate and return request
     await adoptionRequest.populate('dog adopter owner', 'name email');
 
     res.status(201).json({
@@ -127,6 +137,11 @@ exports.ownerConfirmRequest = async (req, res) => {
     request.timestamps.owner_confirmed_at = new Date();
     await request.save();
 
+    // Update Dog model to reflect owner confirmation
+    await Dog.findByIdAndUpdate(request.dog, {
+      'adoptionQueue.ownerConfirmed': true
+    });
+
     res.json({
       message: 'Adoption request confirmed by owner',
       adoptionRequest: request
@@ -160,6 +175,12 @@ exports.adopterConfirmRequest = async (req, res) => {
     request.status = 'adopter_confirmed';
     request.timestamps.adopter_confirmed_at = new Date();
     await request.save();
+
+    // Update Dog model to reflect adopter confirmation
+    await Dog.findByIdAndUpdate(request.dog, {
+      adoptionStatus: 'adopted',
+      'adoptionQueue.adopterConfirmed': true
+    });
 
     res.json({
       message: 'Adoption request confirmed by adopter',
@@ -229,6 +250,12 @@ exports.denyRequest = async (req, res) => {
     request.timestamps.denied_at = new Date();
     await request.save();
 
+    // Update Dog model to clear adoption status
+    await Dog.findByIdAndUpdate(request.dog, {
+      adoptionStatus: 'available',
+      $unset: { adoptionQueue: '' }
+    });
+
     res.json({
       message: 'Adoption request denied',
       adoptionRequest: request
@@ -258,6 +285,12 @@ exports.cancelRequest = async (req, res) => {
     request.status = 'cancelled';
     request.timestamps.cancelled_at = new Date();
     await request.save();
+
+    // Update Dog model to clear adoption status
+    await Dog.findByIdAndUpdate(request.dog, {
+      adoptionStatus: 'available',
+      $unset: { adoptionQueue: '' }
+    });
 
     res.json({
       message: 'Adoption request cancelled',

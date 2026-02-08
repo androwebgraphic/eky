@@ -8,7 +8,8 @@
     "about": "Über",
     "login": "Anmelden",
     "register": "Registrieren",
-    "dogs": "Hunde"
+    "dogs": "Hunde",
+    "adoptionRequests": "Anfragen"
   },
   "button": {
     "findFriend": "Finde deinen treuen Freund",
@@ -207,5 +208,71 @@
   },
   "common": {
     "close": "Schließen"
+  },
+  "adoption": {
+    "title": "Anfragen",
+    "refresh": "Aktualisieren",
+    "noRequests": "Keine Adoptionsanfragen gefunden.",
+    "loading": "Laden...",
+    "adopter": "Adoptierer:",
+    "message": "Nachricht:",
+    "goToChat": "Zum Chat",
+    "confirmRequest": "Anfrage bestätigen",
+    "deny": "Ablehnen",
+    "finalize": "Adoption abschließen",
+    "confirmAdoption": "Adoption bestätigen",
+    "cancelRequest": "Anfrage abbrechen",
+    "status": {
+      "pending": "Ausstehend",
+      "ownerConfirmed": "Besitzer bestätigt",
+      "adopterConfirmed": "Adoptierer bestätigt",
+      "adopted": "Adoptiert",
+      "denied": "Abgelehnt",
+      "cancelled": "Abgebrochen"
+    },
+    "confirmRequestConfirm": "Sind Sie sicher, dass Sie diese Adoptionsanfrage bestätigen möchten?",
+    "confirmRequestSuccess": "Adoptionsanfrage bestätigt! Warten auf Bestätigung des Adoptierers.",
+    "confirmAdoptionConfirm": "Sind Sie sicher, dass Sie diese Adoption bestätigen möchten?",
+    "confirmAdoptionSuccess": "Adoption bestätigt! Der Besitzer wird die Adoption abschließen.",
+    "finalizeConfirm": "Sind Sie sicher? Dadurch wird der Hund dauerhaft aus der Datenbank gelöscht.",
+    "finalizeSuccess": "Hund erfolgreich adoptiert! Aus der Datenbank entfernt.",
+    "denyConfirm": "Sind Sie sicher, dass Sie diese Anfrage ablehnen möchten?",
+    "denySuccess": "Adoptionsanfrage abgelehnt.",
+    "cancelConfirm": "Sind Sie sicher, dass Sie diese Anfrage abbrechen möchten?",
+    "cancelSuccess": "Adoptionsanfrage abgebrochen."
+  },
+  "chat": {
+    "onlineUsers": "Benutzer online",
+    "noUsersOnline": "Keine Benutzer online.",
+    "chatWith": "Chat mit",
+    "selectUserToChat": "Wählen Sie einen Benutzer aus, um zu chatten.",
+    "typeMessagePlaceholder": "Nachricht eingeben...",
+    "send": "Senden",
+    "block": "Blockieren",
+    "unblock": "Entblockieren",
+    "deleteConversation": "Gespräch löschen",
+    "adoptionPending": "Adoption ausstehend für diesen Hund.",
+    "confirmAdoption": "Adoption bestätigen",
+    "confirming": "Bestätigen...",
+    "waitingForOtherParty": "Warten auf Bestätigung der anderen Partei...",
+    "cancelAdoption": "Adoption abbrechen",
+    "adoptionConfirmed": "Adoption bestätigt!",
+    "adoptionConfirmError": "Bestätigung der Adoption fehlgeschlagen",
+    "adoptionCanceled": "Adoption abgebrochen",
+    "adoptionCancelError": "Abbrechen der Adoption fehlgeschlagen"
+  },
+  "alerts": {
+    "pleaseLoginToAdopt": "Bitte melden Sie sich an, um einen Hund zu adoptieren.",
+    "cannotAdoptOwnDog": "Sie können Ihren eigenen Hund nicht adoptieren.",
+    "confirmAdoptRequest": "Möchten Sie eine Adoptionsanfrage für {{name}} senden?",
+    "pleaseLoginToUseWishlist": "Bitte melden Sie sich an, um die Wunschliste zu nutzen.",
+    "removedFromWishlist": "Von der Wunschliste entfernt!",
+    "failedToRemoveFromWishlist": "Entfernen von der Wunschliste fehlgeschlagen: ",
+    "addedToWishlist": "Zur Wunschliste hinzugefügt! ❤️",
+    "failedToAddToWishlist": "Hinzufügen zur Wunschliste fehlgeschlagen: ",
+    "unknownError": "Unbekannter Fehler",
+    "errorSendingAdoptionRequest": "Beim Senden der Adoptionsanfrage ist ein Fehler aufgetreten. Überprüfen Sie die Browser-Konsole (F12) für Details.",
+    "videoFailedToLoad": "Video konnte nicht geladen werden",
+    "imageFailedToLoad": "Bild konnte nicht geladen werden"
   }
 }

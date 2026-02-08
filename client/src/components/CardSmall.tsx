@@ -39,7 +39,6 @@ export interface CardSmallProps {
 const CardSmall: React.FC<CardSmallProps> = (props) => {
 	const { t } = useTranslation();
 	const { isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist } = useAuth();
-	const navigate = React.useMemo(() => (window as any).navigate || null, []);
 	const [wishlistLoading, setWishlistLoading] = React.useState(false);
 	const {
 			       name = 'Unknown',
@@ -59,10 +58,14 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		       } = props;
 
 	function toAbsUrl(url?: string) {
-		if (!url) return url;
+		if (!url) {
+			return url;
+		}
 		const cacheBuster = (window as any).__EKY_IMAGE_CB || ((window as any).__EKY_IMAGE_CB = Date.now());
 		const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-		if (/^https?:\/\//.test(url)) return url + (url.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
+		if (/^https?:\/\//.test(url)) {
+			return url + (url.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
+		}
 		if (url.startsWith('/uploads/') || url.startsWith('/u/dogs/')) {
 			return apiBase + url + '?cb=' + cacheBuster;
 		}
@@ -139,22 +142,29 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 						};
 
 	const handleAdopt = async () => {
-		if (!props._id) return;
+		if (!props._id) {
+			return;
+		}
 		if (!isAuthenticated) {
-			alert(t('Please log in to adopt a dog.'));
+			alert(t('alerts.pleaseLoginToAdopt'));
 			return;
 		}
 		
 		if (canEdit) {
-			alert(t('Cannot adopt your own dog.'));
+			alert(t('alerts.cannotAdoptOwnDog'));
 			return;
 		}
 
-		const confirmAdopt = window.confirm(
-			`Do you want to send an adoption request for ${name}?`
-		);
+		if (adoptionStatus && adoptionStatus !== 'available') {
+			alert(t('alerts.dogNotAvailableForAdoption') || 'This dog is not available for adoption.');
+			return;
+		}
+
+		const confirmAdopt = window.confirm(t('alerts.confirmAdoptRequest', { name }));
 		
-		if (!confirmAdopt) return;
+		if (!confirmAdopt) {
+			return;
+		}
 
 		try {
 			const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
@@ -173,25 +183,35 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		const data = await response.json();
 
 		if (response.ok) {
-			alert('Adoption request sent successfully! Opening chat...');
-			// Open chat modal
+			alert(t('chat.adoptionConfirmed'));
+			// Open chat modal with owner's user ID
 			if (typeof window !== 'undefined') {
-				window.dispatchEvent(new CustomEvent('openChatModal'));
+				// Get owner ID from response - owner is populated with _id
+				const ownerId = data.adoptionRequest?.owner?._id || data.adoptionRequest?.owner;
+				if (ownerId) {
+					const event = new CustomEvent('openChatModal', { detail: { userId: ownerId } });
+					window.dispatchEvent(event);
+				} else {
+					// Fallback: just open modal
+					window.dispatchEvent(new CustomEvent('openChatModal'));
+				}
 			}
 		} else {
 			console.error('Server error:', data);
-			alert('Failed to send adoption request: ' + (data.error || data.message || JSON.stringify(data)));
+			alert(t('chat.adoptionConfirmError') + ': ' + (data.error || data.message || JSON.stringify(data)));
 		}
 	} catch (error) {
 		console.error('Error sending adoption request:', error);
-		alert('An error occurred while sending the adoption request. Check browser console (F12) for details.');
+		alert(t('alerts.errorSendingAdoptionRequest'));
 	}
 	};
 
 		const handleWishlist = async () => {
-			if (!props._id) return;
+			if (!props._id) {
+				return;
+			}
 			if (!isAuthenticated) {
-				alert(t('Please log in to use the wishlist.'));
+				alert(t('alerts.pleaseLoginToUseWishlist'));
 				return;
 			}
 			setWishlistLoading(true);
@@ -200,16 +220,16 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 			if (currentlyInWishlist) {
 				result = await removeFromWishlist(props._id);
 				if (result.success) {
-					alert(t('Removed from wishlist!'));
+					alert(t('alerts.removedFromWishlist'));
 				} else {
-					alert(t('Failed to remove from wishlist: ') + (result.error || 'Unknown error'));
+					alert(t('alerts.failedToRemoveFromWishlist') + (result.error || t('alerts.unknownError')));
 				}
 			} else {
 				result = await addToWishlist(props._id);
 				if (result.success) {
-					alert(t('Added to wishlist! ❤️'));
+					alert(t('alerts.addedToWishlist'));
 				} else {
-					alert(t('Failed to add to wishlist: ') + (result.error || 'Unknown error'));
+					alert(t('alerts.failedToAddToWishlist') + (result.error || t('alerts.unknownError')));
 				}
 			}
 			setWishlistLoading(false);
@@ -258,7 +278,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 											   </video>
 										   </div>
 								       ) : videoError ? (
-									       <div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>Video failed to load</div>
+									       <div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>{t('alerts.videoFailedToLoad')}</div>
 								       ) : largestImgUrl && !imgError ? (
 									   <img
 										   src={largestImgUrl}
@@ -336,7 +356,27 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 					       </div>
 					       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', alignItems: 'center', padding: '8px 8px 16px 8px', width: '100%' }}>
 											   <button type="button" onClick={onViewDetails} style={{ ...styles.details, flex: '1 1 auto', minWidth: 'fit-content', height: 32, fontSize: 12, padding: '0 12px', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>{t('button.viewDetails', 'Details')}</button>
-									       <button type="button" onClick={handleAdopt} style={{ ...styles.adopt, flex: '1 1 auto', minWidth: 'fit-content', height: 32, fontSize: 12, padding: '0 12px', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>{t('adopt', t('button.adopt', 'Adoptieren'))}</button>
+									       <button 
+											 type="button" 
+											 onClick={handleAdopt} 
+											 disabled={adoptionStatus && adoptionStatus !== 'available'}
+											 style={{
+												 ...styles.adopt,
+												 flex: '1 1 auto',
+												 minWidth: 'fit-content',
+												 height: 32,
+												 fontSize: 12,
+												 padding: '0 12px',
+												 borderRadius: 6,
+												 cursor: (adoptionStatus && adoptionStatus !== 'available') ? 'not-allowed' : 'pointer',
+												 textAlign: 'center',
+												 display: 'flex',
+												 alignItems: 'center',
+												 justifyContent: 'center',
+												 whiteSpace: 'nowrap',
+												 opacity: (adoptionStatus && adoptionStatus !== 'available') ? 0.5 : 1
+											 }}
+									 >{t('adopt', t('button.adopt', 'Adoptieren'))}</button>
 																							 <button
 																								 type="button"
 																								 onClick={handleWishlist}

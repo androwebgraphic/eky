@@ -5,4 +5,4 @@ eky
 eky.pub
 ekykey
 ekykey.pub
-env.development.local
+.env.development.local

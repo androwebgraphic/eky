@@ -40,8 +40,14 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Use build-time constant for API URL
-const API_URL = process.env.REACT_APP_API_URL;
+// Helper function to get API URL dynamically
+const getApiUrl = () => {
+  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+  // Dynamically construct API URL based on current hostname
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+  const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
+  return `${protocol}//${hostname}:3001`;
+};
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -66,6 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     setLoading(false);
   }, []);
+
   // Helper to always get latest token from localStorage
   const getLatestToken = () => localStorage.getItem('token') || token;
 
@@ -94,12 +101,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('🌐 API URL:', API_URL);
+      console.log('🌐 API URL:', getApiUrl());
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch(`${API_URL}/api/users/logiranje`, {
+      const response = await fetch(`${getApiUrl()}/api/users/logiranje`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +137,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (userData: any) => {
     try {
-      const response = await fetch(`${API_URL}/api/users/registracija`, {
+      const response = await fetch(`${getApiUrl()}/api/users/registracija`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -153,7 +160,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const addToWishlist = async (dogId: string) => {
     try {
       const latestToken = getLatestToken();
-      const response = await fetch(`${API_URL}/api/users/wishlist`, {
+      const response = await fetch(`${getApiUrl()}/api/users/wishlist`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -199,7 +206,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const removeFromWishlist = async (dogId: string) => {
     try {
       const latestToken = getLatestToken();
-      const response = await fetch(`${API_URL}/api/users/wishlist/${dogId}`, {
+      const response = await fetch(`${getApiUrl()}/api/users/wishlist/${dogId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${latestToken}`
@@ -242,7 +249,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const getWishlist = async () => {
     try {
       const latestToken = getLatestToken();
-      const response = await fetch(`${API_URL}/api/users/wishlist`, {
+      const response = await fetch(`${getApiUrl()}/api/users/wishlist`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${latestToken}`
@@ -294,19 +301,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const isAuthenticated = !!user && !!token;
 
   const value: AuthContextType = {
-  user,
-  currentUser: user, 
-  token,
-  login,
-  register,
-  logout,
-  updateUser,
-  addToWishlist,
-  removeFromWishlist,
-  getWishlist,
-  isInWishlist,
-  isAuthenticated,
-  loading,
-};
+    user,
+    currentUser: user, 
+    token,
+    login,
+    register,
+    logout,
+    updateUser,
+    addToWishlist,
+    removeFromWishlist,
+    getWishlist,
+    isInWishlist,
+    isAuthenticated,
+    loading,
+  };
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

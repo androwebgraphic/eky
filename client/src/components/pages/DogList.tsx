@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +8,14 @@ import DogDetails from './DogDetails';
 import type { DogDetailsProps } from './DogDetails';
 import { useAuth } from '../../contexts/AuthContext';
 import Search from '../Search';
-const API_URL = process.env.REACT_APP_API_URL || '';
+
+const getApiUrl = () => {
+  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+  // Dynamically construct API URL based on current hostname
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+  const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
+  return `${protocol}//${hostname}:3001`;
+};
 
 // Portal containers for DogList modals
 const detailsModalRoot = document.getElementById('doglist-details-root') || (() => {
@@ -121,7 +124,7 @@ function DogList() {
 	useEffect(() => {
 		const fetchDogs = () => {
 			setLoading(true);
-			fetch(`${API_URL}/api/dogs`)
+			fetch(`${getApiUrl()}/api/dogs`)
 				.then(res => res.json())
 				.then(data => {
 					setDogs(Array.isArray(data) ? data : []);
@@ -178,14 +181,14 @@ function DogList() {
 				   }
 			}
 		});
-		await fetch(`${API_URL}/api/dogs/${updatedDog._id}`, {
+		await fetch(`${getApiUrl()}/api/dogs/${updatedDog._id}`, {
 			method: 'PATCH',
 			body: formData,
 			credentials: 'include',
 		});
 		setEditDog(null);
 		setLoading(true);
-		fetch(`${API_URL}/api/dogs`)
+		fetch(`${getApiUrl()}/api/dogs`)
 			.then(res => res.json())
 			.then(data => {
 				setDogs(Array.isArray(data) ? data : []);
@@ -202,7 +205,7 @@ function DogList() {
 		}
 		console.log('[DELETE DEBUG] Deleting dog:', removeDog._id, 'with token:', authToken ? 'present' : 'missing');
 		try {
-			const resp = await fetch(`${API_URL}/api/dogs/${removeDog._id}`, { 
+			const resp = await fetch(`${getApiUrl()}/api/dogs/${removeDog._id}`, { 
 				method: 'DELETE',
 				headers
 			});
@@ -215,7 +218,7 @@ function DogList() {
 			}
 			setRemoveDog(null);
 			setLoading(true);
-			fetch(`${API_URL}/api/dogs`)
+			fetch(`${getApiUrl()}/api/dogs`)
 				.then(res => res.json())
 				.then(data => {
 					setDogs(Array.isArray(data) ? data : []);
@@ -612,4 +615,3 @@ function DogList() {
 }
 
 export default DogList;
-

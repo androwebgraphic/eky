@@ -36,6 +36,14 @@ interface AdoptionRequest {
   };
 }
 
+const getApiUrl = () => {
+  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+  // Dynamically construct API URL based on current hostname
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+  const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
+  return `${protocol}//${hostname}:3001`;
+};
+
 const AdoptionRequests: React.FC = () => {
   const { t } = useTranslation();
   const [requests, setRequests] = useState<AdoptionRequest[]>([]);
@@ -65,7 +73,7 @@ const AdoptionRequests: React.FC = () => {
 
   const fetchRequests = async () => {
     try {
-      const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const apiBase = getApiUrl();
       const token = localStorage.getItem('token');
       console.log('Fetching requests with token:', token ? 'present' : 'missing');
       
@@ -103,7 +111,7 @@ const AdoptionRequests: React.FC = () => {
     if (!window.confirm(t('adoptionRequests.confirmRequestConfirm'))) return;
 
     try {
-      const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const apiBase = getApiUrl();
       const response = await fetch(`${apiBase}/api/adoption/requests/${requestId}/owner-confirm`, {
         method: 'POST',
         headers: {
@@ -128,7 +136,7 @@ const AdoptionRequests: React.FC = () => {
     if (!window.confirm(t('adoptionRequests.confirmAdoptionConfirm'))) return;
 
     try {
-      const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const apiBase = getApiUrl();
       const response = await fetch(`${apiBase}/api/adoption/requests/${requestId}/adopter-confirm`, {
         method: 'POST',
         headers: {
@@ -153,7 +161,7 @@ const AdoptionRequests: React.FC = () => {
     if (!window.confirm(t('adoptionRequests.finalizeConfirm'))) return;
 
     try {
-      const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const apiBase = getApiUrl();
       const response = await fetch(`${apiBase}/api/adoption/requests/${requestId}/finalize`, {
         method: 'POST',
         headers: {
@@ -178,7 +186,7 @@ const AdoptionRequests: React.FC = () => {
     if (!window.confirm(t('adoptionRequests.denyConfirm'))) return;
 
     try {
-      const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const apiBase = getApiUrl();
       const response = await fetch(`${apiBase}/api/adoption/requests/${requestId}/deny`, {
         method: 'POST',
         headers: {
@@ -203,7 +211,7 @@ const AdoptionRequests: React.FC = () => {
     if (!window.confirm(t('adoptionRequests.cancelConfirm'))) return;
 
     try {
-      const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const apiBase = getApiUrl();
       const response = await fetch(`${apiBase}/api/adoption/requests/${requestId}/cancel`, {
         method: 'POST',
         headers: {
@@ -355,7 +363,7 @@ const AdoptionRequests: React.FC = () => {
             <button 
               className="btn-confirm"
               onClick={() => handleAdopterConfirm(request._id)}
-              >
+            >
               {t('adoptionRequests.confirmAdoptionBtn')}
             </button>
           )}
@@ -364,7 +372,7 @@ const AdoptionRequests: React.FC = () => {
             <button 
               className="btn-cancel"
               onClick={() => handleCancel(request._id)}
-              >
+            >
               {t('adoptionRequests.cancelRequestBtn')}
             </button>
           )}

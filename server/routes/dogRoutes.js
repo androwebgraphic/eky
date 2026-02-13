@@ -28,14 +28,32 @@ const cpUpload = upload.fields([
 
 
 
-router.post('/:id/adopt-confirm', authMiddleware, confirmAdoption);
-router.post('/confirm-adoption', authMiddleware, confirmAdoption); // New route for body-based confirm
+// Specific routes first (must come before /:id routes)
+router.get('/', listDogs);
+router.post('/', authMiddleware, cpUpload, createDog);
+router.post('/confirm-adoption', authMiddleware, confirmAdoption);
 router.get('/pending-adoptions', authMiddleware, getPendingAdoptions);
+
+// Superadmin routes - can manage any adoption
+router.post('/superadmin/adopt-confirm/:id', authMiddleware, async (req, res) => {
+  const { isAdmin, isSuperAdmin } = require('../middleware/auth.js');
+  if (!isAdmin(req.user) && !isSuperAdmin(req.user)) {
+    return res.status(403).json({ message: 'Admin privileges required' });
+  }
+  return confirmAdoption(req, res);
+});
+router.post('/superadmin/adopt-cancel/:id', authMiddleware, async (req, res) => {
+  const { isAdmin, isSuperAdmin } = require('../middleware/auth.js');
+  if (!isAdmin(req.user) && !isSuperAdmin(req.user)) {
+    return res.status(403).json({ message: 'Admin privileges required' });
+  }
+  return cancelAdoption(req, res);
+});
+
+// Parameterized routes
+router.post('/:id/adopt-confirm', authMiddleware, confirmAdoption);
 router.post('/:id/adopt-cancel', authMiddleware, cancelAdoption);
 router.post('/:id/adopt-request', authMiddleware, adoptRequest);
-
-router.post('/', authMiddleware, cpUpload, createDog);
-router.get('/', listDogs); // List all dogs
 router.get('/:id', getDogById);
 router.patch('/:id', authMiddleware, cpUpload, updateDog);
 router.delete('/:id', authMiddleware, deleteDog);

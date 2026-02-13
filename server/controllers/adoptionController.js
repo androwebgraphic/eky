@@ -31,22 +31,28 @@ exports.createAdoptionRequest = async (req, res) => {
       return res.status(400).json({ error: 'An adoption request is already in progress for this dog' });
     }
 
-    // Create chat conversation for communication
-    const conversation = new ChatConversation({
-      participants: [dog.user, adopterId]
+    // Check if conversation already exists between these users
+    let conversation = await ChatConversation.findOne({
+      participants: { $all: [dog.user, adopterId], $size: 2 }
     });
-    await conversation.save();
 
-    // Create initial chat message about adoption request
+    if (!conversation) {
+      conversation = new ChatConversation({
+        participants: [dog.user, adopterId]
+      });
+      await conversation.save();
+    }
+
+    // Create adoption request message in chat
     await ChatMessage.create({
       conversationId: conversation._id,
       sender: adopterId,
       recipient: dog.user,
-      message: `Adoption Request: I am interested in adopting ${dog.name}. ${message || ''}`
+      message: `Adoption Request: I am interested in adopting ${dog.name}. ${message || ''}`,
+      messageType: 'adoption_request',
+      dogId: dogId,
+      requiresAction: true
     });
-
-    // Update conversation timestamp
-    await ChatConversation.findByIdAndUpdate(conversation._id, { updatedAt: Date.now() });
 
     // Create adoption request
     const adoptionRequest = new AdoptionRequest({
@@ -320,5 +326,168 @@ exports.getAdoptionRequest = async (req, res) => {
   } catch (error) {
     console.error('Error fetching adoption request:', error);
     res.status(500).json({ error: 'Failed to fetch adoption request' });
+  }
+};
+
+// Handle adoption action from chat (owner confirm/deny, adopter confirm/cancel)
+exports.handleAdoptionAction = async (req, res) => {
+  try {
+    const { messageId, action } = req.body;
+    const userId = req.user.id;
+
+    const message = await ChatMessage.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+
+    const adoptionRequest = await AdoptionRequest.findOne({
+      dog: message.dogId,
+      conversationId: message.conversationId
+    }).populate('dog');
+
+    if (!adoptionRequest) {
+      return res.status(404).json({ error: 'Adoption request not found' });
+    }
+
+    const isOwner = userId === adoptionRequest.owner.toString();
+    const isAdopter = userId === adoptionRequest.adopter.toString();
+
+    // Owner confirms adoption
+    if (action === 'owner_confirm' && isOwner) {
+      if (adoptionRequest.status !== 'pending') {
+        return res.status(400).json({ error: 'Invalid status for owner confirmation' });
+      }
+
+      adoptionRequest.status = 'owner_confirmed';
+      adoptionRequest.timestamps.owner_confirmed_at = new Date();
+      await adoptionRequest.save();
+
+      await Dog.findByIdAndUpdate(adoptionRequest.dog._id, {
+        'adoptionQueue.ownerConfirmed': true
+      });
+
+      // Send confirmation message to adopter
+      await ChatMessage.create({
+        conversationId: message.conversationId,
+        sender: userId,
+        recipient: adoptionRequest.adopter,
+        message: `Owner confirmed adoption request for ${adoptionRequest.dog.name}. Please confirm to proceed.`,
+        messageType: 'adoption_confirmed',
+        dogId: message.dogId,
+        requiresAction: true
+      });
+
+      // Mark original message as action taken
+      message.requiresAction = false;
+      message.actionTakenBy = userId;
+      await message.save();
+
+      res.json({ message: 'Adoption confirmed by owner', adoptionRequest });
+    }
+    // Owner denies adoption
+    else if (action === 'owner_deny' && isOwner) {
+      if (adoptionRequest.status !== 'pending' && adoptionRequest.status !== 'owner_confirmed') {
+        return res.status(400).json({ error: 'Invalid status for denial' });
+      }
+
+      adoptionRequest.status = 'denied';
+      adoptionRequest.timestamps.denied_at = new Date();
+      await adoptionRequest.save();
+
+      await Dog.findByIdAndUpdate(adoptionRequest.dog._id, {
+        adoptionStatus: 'available',
+        $unset: { adoptionQueue: '' }
+      });
+
+      // Send denial message to adopter
+      await ChatMessage.create({
+        conversationId: message.conversationId,
+        sender: userId,
+        recipient: adoptionRequest.adopter,
+        message: `Owner denied adoption request for ${adoptionRequest.dog.name}.`,
+        messageType: 'adoption_denied',
+        dogId: message.dogId
+      });
+
+      // Mark original message as action taken
+      message.requiresAction = false;
+      message.actionTakenBy = userId;
+      await message.save();
+
+      res.json({ message: 'Adoption denied', adoptionRequest });
+    }
+    // Adopter confirms adoption (after owner confirmation)
+    else if (action === 'adopter_confirm' && isAdopter) {
+      if (adoptionRequest.status !== 'owner_confirmed') {
+        return res.status(400).json({ error: 'Owner must confirm first' });
+      }
+
+      adoptionRequest.status = 'adopter_confirmed';
+      adoptionRequest.timestamps.adopter_confirmed_at = new Date();
+      await adoptionRequest.save();
+
+      await Dog.findByIdAndUpdate(adoptionRequest.dog._id, {
+        adoptionStatus: 'adopted',
+        'adoptionQueue.adopterConfirmed': true
+      });
+
+      // Delete the dog from database (both parties confirmed)
+      await Dog.findByIdAndDelete(adoptionRequest.dog._id);
+
+      // Send completion message to owner
+      await ChatMessage.create({
+        conversationId: message.conversationId,
+        sender: userId,
+        recipient: adoptionRequest.owner,
+        message: `Adoption completed! Both parties confirmed. ${adoptionRequest.dog.name} is now adopted and removed from the list.`,
+        messageType: 'adoption_completed',
+        dogId: message.dogId
+      });
+
+      // Mark original message as action taken
+      message.requiresAction = false;
+      message.actionTakenBy = userId;
+      await message.save();
+
+      res.json({ message: 'Adoption confirmed by adopter', adoptionRequest });
+    }
+    // Adopter cancels adoption
+    else if (action === 'adopter_cancel' && isAdopter) {
+      if (adoptionRequest.status !== 'pending' && adoptionRequest.status !== 'owner_confirmed') {
+        return res.status(400).json({ error: 'Cannot cancel at this stage' });
+      }
+
+      adoptionRequest.status = 'cancelled';
+      adoptionRequest.timestamps.cancelled_at = new Date();
+      await adoptionRequest.save();
+
+      await Dog.findByIdAndUpdate(adoptionRequest.dog._id, {
+        adoptionStatus: 'available',
+        $unset: { adoptionQueue: '' }
+      });
+
+      // Send cancellation message to owner
+      await ChatMessage.create({
+        conversationId: message.conversationId,
+        sender: userId,
+        recipient: adoptionRequest.owner,
+        message: `Adopter cancelled adoption request for ${adoptionRequest.dog.name}.`,
+        messageType: 'adoption_cancelled',
+        dogId: message.dogId
+      });
+
+      // Mark original message as action taken
+      message.requiresAction = false;
+      message.actionTakenBy = userId;
+      await message.save();
+
+      res.json({ message: 'Adoption cancelled', adoptionRequest });
+    }
+    else {
+      return res.status(403).json({ error: 'Not authorized for this action' });
+    }
+  } catch (error) {
+    console.error('Error handling adoption action:', error);
+    res.status(500).json({ error: 'Failed to handle adoption action' });
   }
 };

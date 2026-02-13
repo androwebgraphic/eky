@@ -30,4 +30,7 @@ router.post('/requests/:requestId/deny', adoptionController.denyRequest);
 // Adopter cancels adoption request
 router.post('/requests/:requestId/cancel', adoptionController.cancelRequest);
 
+// Handle adoption action from chat (owner confirm/deny, adopter confirm/cancel)
+router.post('/action', adoptionController.handleAdoptionAction);
+
 module.exports = router;

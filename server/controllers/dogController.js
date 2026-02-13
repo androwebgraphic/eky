@@ -14,11 +14,20 @@ const updateDog = async (req, res) => {
   console.log('[UPDATE DEBUG] req.body:', JSON.stringify(req.body, null, 2));
   console.log('[UPDATE DEBUG] req.files:', req.files);
   try {
-    // Fetch the dog by ID
+    // Fetch dog by ID
     const dogId = req.params.id;
     const dog = await Dog.findById(dogId);
     if (!dog) {
       return res.status(404).json({ message: 'Dog not found' });
+    }
+    
+    // Authorization check: only owner or superadmin can update dog
+    const isSuperAdmin = req.user.role === 'superadmin';
+    const isOwner = dog.user.toString() === req.user._id.toString();
+    console.log('[UPDATE DEBUG] isSuperAdmin:', isSuperAdmin, 'isOwner:', isOwner);
+    if (!isOwner && !isSuperAdmin) {
+      console.warn('[UPDATE DEBUG] Not authorized to update dog. req.user._id:', req.user._id, 'dog.user:', dog.user);
+      return res.status(403).json({ message: 'Not authorized to update this dog' });
     }
     // Get keepImages from request body or default to empty array
     let keepImages = req.body.keepImages;
@@ -602,13 +611,34 @@ const cancelAdoption = async (req, res) => {
       if (!convo) {
         convo = await ChatConversation.create({ participants: [ownerId, adopterId] });
       }
-      const sysMsg = `Adoption canceled for dog ${dog.name}.`;
-      await ChatMessage.create({ conversationId: convo._id, sender: null, recipient: null, message: sysMsg });
-      const { io } = require('../socket');
-      if (io) {
-        io.to(ownerId).emit('receiveMessage', { conversationId: convo._id, sender: null, message: sysMsg, messageType: 'adoption', dogId: dog._id });
-        io.to(adopterId).emit('receiveMessage', { conversationId: convo._id, sender: null, message: sysMsg, messageType: 'adoption', dogId: dog._id });
-      }
+    const sysMsg = `Adoption canceled for dog ${dog.name}. The dog is now available for adoption again.`;
+    await ChatMessage.create({ 
+      conversationId: convo._id, 
+      sender: null, 
+      recipient: null, 
+      message: sysMsg,
+      messageType: 'adoption_cancelled',
+      dogId: dog._id
+    });
+    const { io } = require('../socket');
+    if (io) {
+      io.to(ownerId).emit('receiveMessage', { 
+        conversationId: convo._id, 
+        sender: null, 
+        message: sysMsg,
+        messageType: 'adoption_cancelled',
+        dogId: dog._id
+      });
+      io.to(adopterId).emit('receiveMessage', { 
+        conversationId: convo._id, 
+        sender: null, 
+        message: sysMsg,
+        messageType: 'adoption_cancelled',
+        dogId: dog._id
+      });
+      // Also emit dogUpdated to refresh adoption status
+      io.emit('dogUpdated', { dog: { _id: dog._id, adoptionStatus: 'available' } });
+    }
     } catch (e) {
       console.warn('Failed to emit adoption-cancel event to both users:', e);
     }
@@ -650,12 +680,35 @@ const adoptRequest = async (req, res) => {
         convo = await ChatConversation.create({ participants: [ownerId, adopterId] });
       }
       const sysMsg = `Adoption process started for dog ${dog.name}. Please confirm adoption if you agree.`;
-      await ChatMessage.create({ conversationId: convo._id, sender: null, recipient: null, message: sysMsg });
+      await ChatMessage.create({ 
+        conversationId: convo._id, 
+        sender: null, 
+        recipient: ownerId, 
+        message: `Adoption Request: ${req.user.name || req.user.username} wants to adopt ${dog.name}.`,
+        messageType: 'adoption_request',
+        dogId: dog._id,
+        requiresAction: true
+      });
       // Use io property from socket.js
       const { io } = require('../socket');
       if (io) {
-        io.to(ownerId).emit('receiveMessage', { conversationId: convo._id, sender: null, message: sysMsg, messageType: 'adoption', dogId: dog._id });
-        io.to(adopterId).emit('receiveMessage', { conversationId: convo._id, sender: null, message: sysMsg, messageType: 'adoption', dogId: dog._id });
+        io.to(ownerId).emit('receiveMessage', { 
+          conversationId: convo._id, 
+          sender: null, 
+          recipient: ownerId,
+          message: `Adoption Request: ${req.user.name || req.user.username} wants to adopt ${dog.name}.`,
+          messageType: 'adoption_request', 
+          dogId: dog._id,
+          requiresAction: true
+        });
+        io.to(adopterId).emit('receiveMessage', { 
+          conversationId: convo._id, 
+          sender: null, 
+          recipient: adopterId,
+          message: sysMsg,
+          messageType: 'adoption',
+          dogId: dog._id
+        });
       }
     } catch (e) {
       console.warn('Failed to emit adoption-request event to both users:', e);

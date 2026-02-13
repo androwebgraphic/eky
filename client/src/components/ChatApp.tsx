@@ -19,6 +19,8 @@ interface Message {
   messageType?: string;
   dogId?: string;
   isOwner?: boolean;
+  requiresAction?: boolean;
+  actionTakenBy?: string;
 }
 
 interface Conversation {
@@ -234,6 +236,42 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     }
   };
 
+  // Handle adoption action from chat message
+  const handleAdoptionAction = async (messageId: string, action: string) => {
+    if (!token) {
+      return;
+    }
+    try {
+      const res = await fetch(`${getApiUrl()}/api/adoption/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ messageId, action })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNotification(data.message);
+        // Refresh messages to show updated state
+        if (selectedConvo) {
+          fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+            .then(res => res.json())
+            .then(data => setMessages(data));
+        }
+        // Fetch updated dog status
+        if (data.adoptionRequest && data.adoptionRequest.dog) {
+          setDogStatusMap(prev => ({ ...prev, [data.adoptionRequest.dog._id]: data.adoptionRequest.dog.adoptionStatus }));
+        }
+      } else {
+        const error = await res.json();
+        setNotification(error.error || 'Action failed');
+      }
+    } catch (err) {
+      console.error('Error handling adoption action:', err);
+      setNotification('Failed to handle adoption action');
+    }
+  };
+
   const isBlocked = selectedConvo && userWithBlocks && userWithBlocks.blockedUsers && selectedConvo.participants.some(
     id => String(id) !== String(userWithBlocks._id) && userWithBlocks.blockedUsers!.map(String).includes(String(id))
   );
@@ -302,13 +340,15 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
           .then(data => {
             setDogStatusMap(prev => ({ ...prev, [dog._id]: data.adoptionStatus }));
             setDogOwnerMap(prev => ({ ...prev, [dog._id]: data.owner }));
+            // Dispatch window event for DogList to refresh
+            window.dispatchEvent(new CustomEvent('dogUpdated'));
           });
       }
     });
     
     socketRef.current.on('receiveMessage', (msg) => {
       const adoptionSystemKeywords = ['confirmed', 'completed', 'closed', 'canceled', 'cancelled'];
-      const isAdoptionSystemMsg = msg.messageType === 'adoption' && msg.dogId && msg.message && adoptionSystemKeywords.some(k => msg.message.toLowerCase().includes(k));
+      const isAdoptionSystemMsg = (msg.messageType === 'adoption' || msg.messageType === 'adoption_cancelled') && msg.dogId && msg.message && adoptionSystemKeywords.some(k => msg.message.toLowerCase().includes(k));
       if (isAdoptionSystemMsg) {
         setMessages(prev => [...prev, {
           _id: Math.random().toString(36).substr(2, 9),
@@ -737,11 +777,105 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
               {messages.length === 0 ? (
                 <div className="chat-app-empty">No messages yet.</div>
               ) : (
-                messages.map(msg => (
-                  <div key={msg._id} className={`chat-app-message${msg.sender === user._id ? ' self' : ''}`}> 
-                    <span className="chat-app-bubble">{msg.message}</span>
-                  </div>
-                ))
+                messages.map(msg => {
+                  // Determine if this is an adoption request message that needs action buttons
+                  const isAdoptionRequest = msg.messageType === 'adoption_request' && msg.requiresAction && !msg.actionTakenBy;
+                  const isOwnerMessage = msg.recipient === user._id; // Owner received the request
+                  
+                  return (
+                    <div key={msg._id} className={`chat-app-message${msg.sender === user._id ? ' self' : ''}`}>
+                      <span className="chat-app-bubble" style={{
+                        background: isAdoptionRequest ? '#e3f2fd' : undefined,
+                        border: isAdoptionRequest ? '2px solid #2196f3' : undefined
+                      }}>
+                        {msg.message}
+                      </span>
+                      
+                      {/* Show action buttons for adoption requests */}
+                      {isAdoptionRequest && isOwnerMessage && (
+                        <div style={{ marginTop: 8, display: 'flex', gap: 8, justifyContent: 'center' }}>
+                          <button
+                            onClick={() => handleAdoptionAction(msg._id, 'owner_confirm')}
+                            style={{
+                              background: '#4caf50',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: 4,
+                              padding: '6px 12px',
+                              cursor: 'pointer',
+                              fontSize: '12px'
+                            }}
+                          >
+                            {t('confirm') || 'Confirm'}
+                          </button>
+                          <button
+                            onClick={() => handleAdoptionAction(msg._id, 'owner_deny')}
+                            style={{
+                              background: '#f44336',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: 4,
+                              padding: '6px 12px',
+                              cursor: 'pointer',
+                              fontSize: '12px'
+                            }}
+                          >
+                            {t('deny') || 'Deny'}
+                          </button>
+                        </div>
+                      )}
+                      
+                      {/* Show confirm/cancel buttons for adopter after owner confirmed */}
+                      {msg.messageType === 'adoption_confirmed' && msg.requiresAction && !msg.actionTakenBy && msg.recipient === user._id && (
+                        <div style={{ marginTop: 8, display: 'flex', gap: 8, justifyContent: 'center' }}>
+                          <button
+                            onClick={() => handleAdoptionAction(msg._id, 'adopter_confirm')}
+                            style={{
+                              background: '#4caf50',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: 4,
+                              padding: '6px 12px',
+                              cursor: 'pointer',
+                              fontSize: '12px'
+                            }}
+                          >
+                            {t('confirmAdoption') || 'Confirm Adoption'}
+                          </button>
+                          <button
+                            onClick={() => handleAdoptionAction(msg._id, 'adopter_cancel')}
+                            style={{
+                              background: '#f44336',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: 4,
+                              padding: '6px 12px',
+                              cursor: 'pointer',
+                              fontSize: '12px'
+                            }}
+                          >
+                            {t('cancel') || 'Cancel'}
+                          </button>
+                        </div>
+                      )}
+                      
+                      {/* Show system messages in different style */}
+                      {(msg.messageType === 'adoption_denied' || msg.messageType === 'adoption_cancelled' || msg.messageType === 'adoption_completed') && (
+                        <div style={{ 
+                          marginTop: 8, 
+                          padding: '8px 12px', 
+                          background: msg.messageType === 'adoption_completed' ? '#e8f5e9' : '#ffebee',
+                          borderRadius: 4,
+                          fontSize: '12px',
+                          textAlign: 'center',
+                          border: `1px solid ${msg.messageType === 'adoption_completed' ? '#4caf50' : '#f44336'}`
+                        }}>
+                          {msg.message}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
             <div className="chat-app-input-row" style={{ borderTop: '1px solid #eee', padding: 12, background: '#fff' }}>

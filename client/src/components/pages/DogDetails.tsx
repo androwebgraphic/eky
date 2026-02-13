@@ -169,9 +169,12 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         setCancelReason('');
         if (onDogUpdate && data.dog) onDogUpdate(data.dog);
         if (onDogChanged) onDogChanged();
-        // Force state refresh after cancel
-        setAdoptionStatus(data.dog?.adoptionStatus);
-        setAdoptionQueue(data.dog?.adoptionQueue);
+        // Force state refresh after cancel - wait a bit for the update to propagate
+        setTimeout(() => {
+          setAdoptionStatus(data.dog?.adoptionStatus || 'available');
+          setAdoptionQueue(data.dog?.adoptionQueue);
+          setCancelSuccess(false);
+        }, 100);
       } catch (e: any) {
         setCancelError(e.message || 'Error');
       } finally {

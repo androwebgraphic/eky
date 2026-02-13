@@ -11,19 +11,6 @@ const auth = require('../middleware/auth.js');
 
 const router = express.Router();
 
-
-// Wishlist routes (must be above /:id)
-router.post('/wishlist', auth, addToWishlist);
-router.delete('/wishlist/:dogId', auth, removeFromWishlist);
-console.log('[ROUTES DEBUG] Registering GET /wishlist route with getWishlist handler');
-console.log('[WISHLIST DEBUG] Before router.get(/wishlist)');
-router.get('/wishlist', auth, getWishlist);
-console.log('[WISHLIST DEBUG] After router.get(/wishlist)');
-
-// Get user by ID (for chat block/unblock and profile fetch)
-router.get('/:id', auth, getUserById);
-router.get('/search', auth, searchUsers);
-
 // Configure multer for profile picture uploads
 const storage = multer.memoryStorage();
 const upload = multer({ 
@@ -41,11 +28,30 @@ const upload = multer({
 });
 
 
+// Public routes
 router.post('/registracija', signupUser);
 router.post('/logiranje', loginUser);
+router.post('/password-reset', requestPasswordReset);
+
+// Wishlist routes (must be above /:id)
+router.post('/wishlist', auth, addToWishlist);
+router.delete('/wishlist/:dogId', auth, removeFromWishlist);
+console.log('[ROUTES DEBUG] Registering GET /wishlist route with getWishlist handler');
+console.log('[WISHLIST DEBUG] Before router.get(/wishlist)');
+router.get('/wishlist', auth, getWishlist);
+console.log('[WISHLIST DEBUG] After router.get(/wishlist)');
+
+// Other specific routes (must be above /:id)
+router.get('/search', auth, searchUsers);
+
+// User's own profile routes
 router.put('/profile', auth, upload.single('profilePicture'), updateProfile);
 router.delete('/profile', auth, deleteProfile);
-router.post('/password-reset', requestPasswordReset);
+
+// Superadmin routes for managing other users
+router.get('/:id', auth, getUserById);
+router.put('/:id/profile', auth, upload.single('profilePicture'), updateProfile);
+router.delete('/:id/profile', auth, deleteProfile);
 
 
 module.exports = router;

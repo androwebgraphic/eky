@@ -218,8 +218,11 @@ const updateProfile = async (req, res) => {
 			});
 		}
 
-		const { name, email, username, phone } = req.body;
-		const userId = req.user._id;
+		const { name, email, username, phone, role } = req.body;
+		const { id } = req.params;
+		
+		// Superadmin can update any user's profile
+		const userId = (req.user.role === 'superadmin' && id) ? id : req.user._id;
 		
 		// Check if email or username is already taken by another user
 		const existingUser = await User.findOne({ 
@@ -302,6 +305,10 @@ const updateProfile = async (req, res) => {
 		if (profilePictureUrl) {
 			updateData.profilePicture = profilePictureUrl;
 		}
+		// Allow superadmin to change user roles
+		if (role && req.user.role === 'superadmin') {
+			updateData.role = role;
+		}
 		console.log('Update data:', updateData);
 		
 		// Update user
@@ -343,7 +350,15 @@ const updateProfile = async (req, res) => {
 
 const deleteProfile = async (req, res) => {
 	try {
-		const userId = req.user._id;
+		const { id } = req.params;
+		
+		// Superadmin can delete any user, regular users can only delete themselves
+		const userId = (req.user.role === 'superadmin' && id) ? id : req.user._id;
+		
+		// Prevent superadmin from deleting themselves accidentally
+		if (req.user.role === 'superadmin' && userId === req.user._id.toString() && id) {
+			return res.status(403).json({ message: "Cannot delete yourself via another ID. Use profile deletion instead." });
+		}
 		
 		// Find and delete user
 		const deletedUser = await User.findByIdAndDelete(userId);

@@ -168,16 +168,12 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 
 		try {
 			const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-			const response = await fetch(`${apiBase}/api/adoption/requests`, {
+			const response = await fetch(`${apiBase}/api/dogs/${props._id}/adopt-request`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					'Authorization': `Bearer ${localStorage.getItem('token')}`
-				},
-				body: JSON.stringify({
-					dogId: props._id,
-					message: 'I am interested in adopting this dog.'
-				})
+				}
 			});
 
 		const data = await response.json();
@@ -186,9 +182,9 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 			alert(t('chat.adoptionConfirmed'));
 			// Open chat modal with owner's user ID
 			if (typeof window !== 'undefined') {
-				// Get owner ID from response - owner is populated with _id
-				const ownerId = data.adoptionRequest?.owner?._id || data.adoptionRequest?.owner;
-				if (ownerId) {
+				// Get dog data which has owner info
+				if (data.dog && (data.dog.user || (data.dog.user && data.dog.user._id))) {
+					const ownerId = data.dog.user._id || data.dog.user;
 					const event = new CustomEvent('openChatModal', { detail: { userId: ownerId } });
 					window.dispatchEvent(event);
 				} else {

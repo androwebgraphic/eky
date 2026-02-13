@@ -119,17 +119,33 @@ function DogList() {
 	};
 
 	useEffect(() => {
-		setLoading(true);
-		fetch(`${API_URL}/api/dogs`)
-			.then(res => res.json())
-			.then(data => {
-				setDogs(Array.isArray(data) ? data : []);
-				setLoading(false);
-			})
-			.catch(err => {
-				setError('Failed to load dogs');
-				setLoading(false);
-			});
+		const fetchDogs = () => {
+			setLoading(true);
+			fetch(`${API_URL}/api/dogs`)
+				.then(res => res.json())
+				.then(data => {
+					setDogs(Array.isArray(data) ? data : []);
+					setLoading(false);
+				})
+				.catch(err => {
+					setError('Failed to load dogs');
+					setLoading(false);
+				});
+		};
+
+		fetchDogs();
+
+		// Listen for dog update events (e.g., when adoption status changes)
+		const handleDogUpdated = () => {
+			console.log('[DogList] Dog updated, refreshing list...');
+			fetchDogs();
+		};
+
+		window.addEventListener('dogUpdated', handleDogUpdated);
+
+		return () => {
+			window.removeEventListener('dogUpdated', handleDogUpdated);
+		};
 	}, []);
 
 	const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 900;
@@ -281,6 +297,8 @@ function DogList() {
 									? dog.user === user._id 
 									: dog.user._id === user._id
 							);
+							const isSuperAdmin = user?.role === 'superadmin';
+							const canEdit = isOwner || isSuperAdmin;
 
 							return (
 								<div
@@ -304,7 +322,7 @@ function DogList() {
 									<CardSmall
 										{...dog}
 										images={dedupedImages}
-										canEdit={isOwner}
+										canEdit={canEdit}
 										onEdit={() => handleEdit(dog)}
 										onRemove={() => handleRemove(dog)}
 										onViewDetails={e => {

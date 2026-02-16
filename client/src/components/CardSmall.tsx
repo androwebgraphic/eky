@@ -48,7 +48,7 @@ export interface CardSmallProps {
 
 const CardSmall: React.FC<CardSmallProps> = (props) => {
 	const { t } = useTranslation();
-	const { isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist, token } = useAuth();
+	const { isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist, token, user: currentUser } = useAuth();
 	const [wishlistLoading, setWishlistLoading] = React.useState(false);
 		const {
 			name = 'Unknown',
@@ -193,7 +193,18 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 			return;
 		}
 
-		if (canEdit) {
+		// Check if current user is the owner of this dog
+		let isOwner = false;
+		if (currentUser && user) {
+			const currentUserId = currentUser._id.toString();
+			// Handle both string and object user formats
+			if (typeof user === 'string') {
+				isOwner = user === currentUserId;
+			} else if (user._id) {
+				isOwner = user._id.toString() === currentUserId;
+			}
+		}
+		if (isOwner) {
 			alert(t('alerts.cannotAdoptOwnDog'));
 			return;
 		}
@@ -312,19 +323,19 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 			<div
 				className="card card-small"
 				style={{
-					display: 'flex',
-					flexDirection: 'column',
-					borderRadius: 16,
-					boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
-					background: '#fff',
-					padding: 16,
-					margin: '16px auto',
-					width: '100%',
-					maxWidth: 420,
-					minWidth: 280,
-					overflow: 'hidden',
-					position: 'relative',
-					boxSizing: 'border-box',
+				display: 'flex',
+				flexDirection: 'column',
+				borderRadius: 16,
+				boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
+				background: '#fff',
+				padding: 16,
+				margin: 0,
+				width: '100%',
+				maxWidth: window.innerWidth > 768 ? 375 : 420,
+				minWidth: 280,
+				overflow: 'hidden',
+				position: 'relative',
+				boxSizing: 'border-box',
 				}}
 			>
 				{hasVideoUrl && !videoError ? (

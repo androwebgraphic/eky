@@ -211,7 +211,7 @@ function DogList() {
 	return (
 		<>
 			{/* Search bar */}
-			<div style={{ padding: '0 16px', paddingTop: '70px', maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
+			<div style={{ padding: '0 16px', paddingTop: window.innerWidth > 768 ? '80px' : '80px', maxWidth: '1200px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
 				<Search
 					searchTerm={searchTerm}
 					onSearchChange={setSearchTerm}
@@ -229,11 +229,9 @@ function DogList() {
 					flexDirection: isDesktop ? 'row' : undefined,
 					alignItems: isDesktop ? 'flex-start' : undefined,
 					justifyContent: isDesktop ? 'center' : undefined,
-					gap: isDesktop ? 32 : undefined,
+					gap: isDesktop ? 6 : undefined,
+					marginTop: '10px',
 					position: 'relative',
-					margin: isDesktop ? '32px 0 32px 32px' : undefined,
-					marginTop: isDesktop ? '32px' : undefined,
-					paddingTop: isDesktop ? '16px' : '16px',
 					overflowY: 'auto',
 					WebkitOverflowScrolling: isDesktop ? undefined : 'touch',
 				}}
@@ -248,6 +246,9 @@ function DogList() {
 							gap: 16,
 							flexWrap: 'wrap',
 							alignItems: 'flex-start',
+							maxWidth: '1200px',
+							margin: '30px auto',
+							padding: '0 16px',
 						}}
 					>
 						{filteredDogs.map(dog => {
@@ -301,7 +302,7 @@ function DogList() {
 						})}
 					</div>
 				) : (
-					<>
+					<div style={{ padding: '0 16px' }}>
 						{filteredDogs.map(dog => {
 						// Deduplicate images by base name before passing to CardSmall
 						const getImageBase = (url: string) => {
@@ -352,7 +353,7 @@ function DogList() {
 						);
 						})
 					}
-					</>
+					</div>
 				)}
 			</main>
 			{editDog && (

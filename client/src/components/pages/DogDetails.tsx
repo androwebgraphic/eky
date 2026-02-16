@@ -497,7 +497,8 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 title={t('dogDetails.mapPreview')}
                 width="100%"
                 height="450"
-                style={{ border: 0, borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
+                frameBorder="0"
+                style={{ border: 'none', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
                 src={coords
                   ? `https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng-0.005},${coords.lat-0.005},${coords.lng+0.005},${coords.lat+0.005}&layer=mapnik&marker=${coords.lat},${coords.lng}`
                   : `https://www.openstreetmap.org/export/embed.html?search=${encodeURIComponent(location || '')}&layer=mapnik`}
@@ -559,45 +560,21 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
             <div style={{ marginTop: isOwner ? '1.5rem' : '2rem', paddingTop: isOwner ? '1rem' : '1.5rem', borderTop: '2px solid #ddd' }}>
               {!isOwner && <h4 style={{ marginBottom: '1rem' }}>{t('fields.contactOwner') || 'Contact Owner'}</h4>}
               <p className="meta" style={{ marginBottom: '0.75rem' }}>
-                <strong>{t('fields.name') || 'Name'}:</strong>
-                <button
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#007bff',
-                    textDecoration: 'underline',
-                    fontWeight: 'bold',
-                    fontSize: '1.1rem',
-                    cursor: 'pointer',
-                    padding: 0,
-                    marginLeft: 4
-                  }}
-                  onClick={() => {
-                    // Open chat with owner
-                    window.dispatchEvent(new CustomEvent('open-chat-with-user', { detail: { userId: owner._id } }));
-                    // If adoption is pending, show confirm/cancel buttons
-                    if (adoptionStatusState === 'pending') {
-                      window.dispatchEvent(new CustomEvent('dog-adopt-initiate', { detail: { dogId: _id } }));
-                    }
-                  }}
-                  aria-label={t('fields.contactOwner') || 'Contact Owner'}
-                >
-                  {owner.name}
-                </button>
-                {typeof createdAt !== 'undefined' && (
-                  <span style={{ marginLeft: 8, color: '#888', fontSize: '11px' }}>
-                    • {new Date(createdAt as string).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-                  </span>
-                )}
+                <strong>{t('fields.name') || 'Name'} {owner.name}</strong>
               </p>
+              {typeof createdAt !== 'undefined' && (
+                <p className="meta" style={{ marginBottom: '0.75rem' }}>
+                  <strong>{t('postedOn') || 'Posted on'}</strong> {new Date(createdAt as string).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                </p>
+              )}
               {owner.username && owner.username !== owner.name && (
                 <p className="meta" style={{ marginBottom: '0.75rem', fontSize: '0.9rem' }}>
-                  <strong>{t('fields.username') || 'Username'}:</strong> {owner.username}
+                  <strong>{t('fields.username') || 'Username'}</strong> {owner.username}
                 </p>
               )}
               {owner.person && (
                 <p className="meta" style={{ marginBottom: '0.75rem' }}>
-                  <strong>{t('fields.userType') || 'Type'}:</strong> {t(`registerOptions.${owner.person}`) || owner.person}
+                  <strong>{t('fields.userType') || 'Type'}</strong> {t(`registerOptions.${owner.person}`) || owner.person}
                 </p>
               )}
               {/* Phone and email hidden for privacy */}
@@ -611,7 +588,6 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
           padding: '16px',
           width: '100%',
           boxSizing: 'border-box',
-          borderTop: '3px solid #75171a',
           marginTop: '20px',
           paddingBottom: '20px',
           display: 'flex',
@@ -631,7 +607,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                   handleWishlistToggle();
                 }}
                 style={{
-                  backgroundColor: '#4CAF50',
+                  backgroundColor: '#dbb69d',
                   color: 'white',
                   border: 'none',
                   fontWeight: 600,
@@ -644,7 +620,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: isInWishlist(_id) ? '0 0 0 2px #4CAF50' : '0 0 0 2px #4CAF50',
+                  boxShadow: isInWishlist(_id) ? '0 0 0 2px #dbb69d' : '0 0 0 2px #dbb69d',
                   transition: 'background 0.2s, box-shadow 0.2s',
                   whiteSpace: 'nowrap',
                   flex: '0 0 auto'
@@ -780,7 +756,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                   className="details"
                   onClick={handleAdopt}
                   disabled={adoptLoading || adoptionStatusState === 'adopted'}
-                  style={{ marginLeft: 12, backgroundColor: '#dbb69d', color: '#75171a', padding: '16px 24px', fontSize: '18px', fontWeight: 'bold', minHeight: '56px' }}
+                  style={{ marginLeft: 12, backgroundColor: '#4CAF50', color: '#f8f8f8', padding: '16px 24px', fontSize: '18px', fontWeight: 'bold', minHeight: '56px' }}
                 >
                   {adoptLoading
                     ? t('button.sending') || 'Slanje...'

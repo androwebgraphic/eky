@@ -19,6 +19,7 @@ export interface CardSmallProps {
 	breed?: string;
 	age?: number;
 	gender?: string;
+	size?: string;
 	place?: string;
 	video?: VideoType;
 	thumbnail?: ThumbnailType;
@@ -49,24 +50,28 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 	const { t } = useTranslation();
 	const { isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist, token } = useAuth();
 	const [wishlistLoading, setWishlistLoading] = React.useState(false);
-	const {
-		name = 'Unknown',
-		breed = 'Unknown',
-		age,
-		gender,
-		place,
-		video,
-		thumbnail,
-		canEdit,
-		onViewDetails,
-		onEdit,
-		onRemove,
-		vaccinated,
-		images,
-		adoptionStatus,
-		user,
-		createdAt,
-	} = props;
+		const {
+			name = 'Unknown',
+			breed = 'Unknown',
+			age,
+			gender,
+			size,
+			place,
+			video,
+			thumbnail,
+			canEdit,
+			onViewDetails,
+			onEdit,
+			onRemove,
+			vaccinated,
+			images,
+			adoptionStatus,
+			user,
+			createdAt,
+		} = props;
+
+		// Get location from correct field - dog model uses 'location' field
+		const location = (props as any).location || place;
 
 	function toAbsUrl(url?: string) {
 		if (!url) {
@@ -386,19 +391,20 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 								{t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)}
 							</div>
 						)}
-						<div style={{ fontWeight: 700, fontSize: 20, marginBottom: 4 }}>{name}</div>
-						<div style={{ color: '#666', fontSize: 15, marginBottom: 4 }}>{t('fields.breed', 'Breed')}: {breed}</div>
-						{age !== undefined && <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>{t('fields.age', 'Age')}: {age}</div>}
-						{gender && <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>{t('fields.gender', 'Gender')}: {t(`gender.${gender}`, gender)}</div>}
-						{(place || (props as any).location) && (
+						<div style={{ fontWeight: 700, fontSize: 20, marginBottom: 4, color: '#75171a', textAlign: 'center' }}>{name}</div>
+						<div style={{ color: '#666', fontSize: 15, marginBottom: 4 }}><strong>{t('fields.breed', 'Breed')}</strong> {breed}</div>
+						{age !== undefined && <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}><strong>{t('fields.age', 'Age')}</strong> {age}</div>}
+						{gender && <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}><strong>{t('fields.gender', 'Gender')}</strong> {t(`gender.${gender}`, gender)}</div>}
+						{size && <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}><strong>{t('fields.size', 'Size')}</strong> {t(`size.${size}`, size)}</div>}
+						{location && (
 							<div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>
-								{t('fields.location', 'Location')}: 
-								<span 
+								<strong>{t('fields.location', 'Location')}</strong>
+								<span
 									style={{color:'#1976d2',marginLeft:4, cursor:'pointer', textDecoration:'underline'}}
 									onClick={() => onViewDetails && onViewDetails({} as any)}
 									title={t('dogDetails.showMap', 'Show map')}
 								>
-									{place || (props as any).location}
+									{location}
 								</span>
 							</div>
 						)}

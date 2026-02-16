@@ -17,8 +17,8 @@ interface AddDogFormData {
   neutered?: boolean;
 }
 
-// Use API URL from environment, fallback to localhost:3002
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+// Use API URL from environment, fallback to localhost:3001
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 const AdddogForm: React.FC = () => {
   const { t } = useTranslation();

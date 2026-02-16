@@ -61,24 +61,18 @@ function DogList() {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [genderFilter, setGenderFilter] = useState('');
 	const [sizeFilter, setSizeFilter] = useState('');
-	const [locationFilter, setLocationFilter] = useState('');
-
-	// Get unique locations for filter dropdown
-	const availableLocations = useMemo(() => {
-		const locations = dogs
-			.map(dog => dog.place || (dog as any).location)
-			.filter((loc): loc is string => !!loc);
-		return Array.from(new Set(locations)).sort();
-	}, [dogs]);
+	const [ageFilter, setAgeFilter] = useState('');
 
 	// Filter dogs based on search/filters
 	const filteredDogs = useMemo(() => {
 		return dogs.filter(dog => {
-			// Search term matches name or breed
+			// Search term matches breed, size, OR location (NOT name)
 			const term = searchTerm.toLowerCase();
+			const dogLocation = (dog as any).location || dog.place;
 			const matchesSearch = !term || 
-				(dog.name && dog.name.toLowerCase().includes(term)) ||
-				(dog.breed && dog.breed.toLowerCase().includes(term));
+				(dog.breed && dog.breed.toLowerCase().includes(term)) ||
+				(dog.size && dog.size.toLowerCase().includes(term)) ||
+				(dogLocation && dogLocation.toLowerCase().includes(term));
 			
 			// Gender filter
 			const matchesGender = !genderFilter || dog.gender === genderFilter;
@@ -86,13 +80,29 @@ function DogList() {
 			// Size filter
 			const matchesSize = !sizeFilter || dog.size === sizeFilter;
 			
-			// Location filter
-			const dogLocation = dog.place || (dog as any).location;
-			const matchesLocation = !locationFilter || dogLocation === locationFilter;
+			// Age filter
+			let matchesAge = !ageFilter;
+			if (ageFilter && dog.age !== undefined && dog.age !== null) {
+				const age = parseFloat(String(dog.age));
+				switch (ageFilter) {
+					case 'puppy':
+						matchesAge = age >= 0 && age <= 1;
+						break;
+					case 'young':
+						matchesAge = age > 1 && age <= 3;
+						break;
+					case 'adult':
+						matchesAge = age > 3 && age <= 8;
+						break;
+					case 'senior':
+						matchesAge = age > 8;
+						break;
+				}
+			}
 			
-			return matchesSearch && matchesGender && matchesSize && matchesLocation;
+			return matchesSearch && matchesGender && matchesSize && matchesAge;
 		});
-	}, [dogs, searchTerm, genderFilter, sizeFilter, locationFilter]);
+	}, [dogs, searchTerm, genderFilter, sizeFilter, ageFilter]);
 
 	// Geocode location for map modal
 	const openMapForDog = async (dog: DogDetailsProps) => {
@@ -140,7 +150,6 @@ function DogList() {
 
 		// Listen for dog update events (e.g., when adoption status changes)
 		const handleDogUpdated = () => {
-			console.log('[DogList] Dog updated, refreshing list...');
 			fetchDogs();
 		};
 
@@ -203,16 +212,13 @@ function DogList() {
 		if (authToken) {
 			headers['Authorization'] = `Bearer ${authToken}`;
 		}
-		console.log('[DELETE DEBUG] Deleting dog:', removeDog._id, 'with token:', authToken ? 'present' : 'missing');
 		try {
 			const resp = await fetch(`${getApiUrl()}/api/dogs/${removeDog._id}`, { 
 				method: 'DELETE',
 				headers
 			});
 			const data = await resp.json();
-			console.log('[DELETE DEBUG] Response status:', resp.status, 'data:', data);
 			if (!resp.ok) {
-				console.error('[DELETE DEBUG] Failed to delete dog:', data);
 				setRemoveDog(null);
 				return;
 			}
@@ -225,7 +231,6 @@ function DogList() {
 					setLoading(false);
 				});
 		} catch (err) {
-			console.error('[DELETE DEBUG] Fetch error:', err);
 			setRemoveDog(null);
 		}
 	};
@@ -244,9 +249,8 @@ function DogList() {
 					onGenderChange={setGenderFilter}
 					sizeFilter={sizeFilter}
 					onSizeChange={setSizeFilter}
-					locationFilter={locationFilter}
-					onLocationChange={setLocationFilter}
-					availableLocations={availableLocations}
+					ageFilter={ageFilter}
+					onAgeChange={setAgeFilter}
 				/>
 			</div>
 			<main
@@ -485,8 +489,8 @@ function DogList() {
 							transform: 'translateX(-50%)',
 							width: '95vw',
 							maxWidth: '700px',
-							height: '500px',
-							maxHeight: '500px',
+							height: '85vh',
+							maxHeight: '85vh',
 							background: 'rgba(0,0,0,0.5)',
 							borderRadius: 12,
 							zIndex: 2147483647,
@@ -504,8 +508,8 @@ function DogList() {
 								borderRadius: 12,
 								maxWidth: 700,
 								width: '95vw',
-								height: '480px',
-								maxHeight: '480px',
+								height: '100%',
+								maxHeight: '100%',
 								overflow: 'auto',
 								overflowX: 'hidden',
 								position: 'relative',

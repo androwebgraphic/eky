@@ -115,7 +115,7 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
       <footer>
         <nav id="footer-nav">
           <ul>
-            <Link to="psi">
+            <Link to="/psi">
               <li title={t('nav.dogs')}>
                 <span className="eky-icon eky-eky"></span>
               </li>
@@ -123,7 +123,7 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
             <li title={t('button.chat') || 'Chat'} onClick={typeof onChatClick === 'function' ? onChatClick : undefined} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: 40 }}>
               <img src="/img/paper-airplane.svg" alt="Chat" style={{ width: 28, height: 28, display: 'block', filter: 'drop-shadow(0 1px 2px #1976d2)', color: '#2196f3' }} />
             </li>
-            <Link to="dodajpsa">
+            <Link to="/dodajpsa">
               <li title={t('adddog.title')}>
                 <span className="eky-icon eky-add-dog">+</span>
               </li>
@@ -133,7 +133,7 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
                 <span className="eky-icon eky-user"></span>
               </li>
             ) : (
-              <Link to="logiranje">
+              <Link to="/logiranje">
                 <li title={t('nav.login')}>
                   <span className="eky-icon eky-user"></span>
                 </li>

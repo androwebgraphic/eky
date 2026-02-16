@@ -131,18 +131,25 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   // Adoption state
   const [adoptionStatusState, setAdoptionStatus] = useState<string | undefined>(adoptionStatus);
   const [adoptionQueueState, setAdoptionQueue] = useState<any>(adoptionQueue);
-
-  // Sync with props if dog changes
-  React.useEffect(() => {
-    setAdoptionStatus(adoptionStatus);
-    setAdoptionQueue(adoptionQueue);
-  }, [_id, adoptionStatus, adoptionQueue]);
   const [adoptLoading, setAdoptLoading] = useState(false);
   const [adoptError, setAdoptError] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState('');
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [cancelSuccess, setCancelSuccess] = useState(false);
+
+  // Reset state when dog changes
+  React.useEffect(() => {
+    setAdoptionStatus(adoptionStatus);
+    setAdoptionQueue(adoptionQueue);
+    setAdoptLoading(false);
+    setAdoptError(null);
+    setCancelReason('');
+    setCancelLoading(false);
+    setCancelError(null);
+    setCancelSuccess(false);
+    console.log('[DogDetails] Reset state for dog:', _id);
+  }, [_id]);
     // Odustani handler
     const handleCancelAdoption = async () => {
       if (!_id) return;
@@ -353,14 +360,33 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   };
 
   return (
-    <div className="card-details">
+    <>
+      <style>{`
+        @media (max-width: 600px) {
+          .dog-details-mobile-actions button {
+            width: 100% !important;
+            margin-bottom: 12px !important;
+            box-sizing: border-box !important;
+            display: block !important;
+            min-height: 50px !important;
+            font-size: 16px !important;
+            font-weight: bold !important;
+            padding: 12px 16px !important;
+            text-align: center !important;
+          }
+          .dog-details-mobile-actions button#add-to-list {
+            margin-bottom: 16px !important;
+          }
+        }
+      `}</style>
+      <div className="card-details">
       <div className="img" style={{ width: '100%', maxWidth: 240, margin: '0 auto', aspectRatio: '1/1', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8f8', minHeight: 0, maxHeight: 240, boxSizing: 'border-box', marginTop: 12, marginBottom: 12, borderRadius: 12 }}>
         {sliderImages.length > 0 && (
           <DogImageSlider images={sliderImages} alt={name} />
         )}
       </div>
       <div className="description">
-        <h3>
+        <h3 style={{ color: '#75171a', textAlign: 'center' }}>
           <strong>{t('fields.name')}</strong> {name}
         </h3>
         {breed && (
@@ -384,7 +410,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         {(place || location) && (
           <p className="meta">
             <span className="eky-icon eky-map"></span>
-            <strong>{t('fields.location')}</strong> 
+            <strong>{t('fields.location')}</strong>
             <span
               style={{ cursor: location ? 'pointer' : 'default', textDecoration: location ? 'underline' : 'none' }}
               onClick={location ? handleShowMap : undefined}
@@ -478,7 +504,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         {(vaccinated !== undefined || neutered !== undefined) && (
           <p className="meta">
             <span className="eky-icon eky-shield"></span>
-            <strong>{t('fields.vaccination')}</strong> 
+            <strong>{t('fields.vaccination')}</strong>
             {vaccinated === true && t('dogDetails.vaccinated')}
             {vaccinated === false && t('dogDetails.notVaccinated')}
             {neutered !== undefined && (
@@ -542,7 +568,18 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
             </div>
           )}
       </div>
-      <div className="call-to-action">
+      <div 
+        className="call-to-action dog-details-mobile-actions"
+        style={{
+          background: 'white',
+          padding: '16px',
+          width: '100%',
+          boxSizing: 'border-box',
+          borderTop: '3px solid #75171a',
+          marginTop: '20px',
+          paddingBottom: '20px'
+        }}
+      >
         {isAuthenticated && _id && !isOwner && (
           <>
             <button 
@@ -702,6 +739,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         )}
       </div>
     </div>
+    </>
   );
 };
 

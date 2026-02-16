@@ -43,16 +43,22 @@
     "p3": "Wishing you lots of happiness with your new friend"
   },
   "search": {
-    "placeholder": "Search by name, breed, or location...",
+    "placeholder": "Search by breed, size, or location...",
     "allGenders": "All genders",
     "allSizes": "All sizes",
     "allLocations": "All locations",
+    "allAges": "All ages",
     "noResults": "No dogs match your search criteria.",
     "showAdvanced": "Advanced Search",
     "hideAdvanced": "Hide Advanced",
     "gender": "Gender",
     "size": "Size",
-    "location": "Location"
+    "location": "Location",
+    "age": "Age",
+    "age.puppy": "Puppy (0-1 year)",
+    "age.young": "Young (1-3 years)",
+    "age.adult": "Adult (3-8 years)",
+    "age.senior": "Senior (8+ years)"
   },
   "doglist": {
     "title": "Choose your forever friend",

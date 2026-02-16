@@ -42,16 +42,22 @@
     "p3": "Želim Vam puno sreće i zadovoljstva s novim prijateljem"
   },
   "search": {
-    "placeholder": "Pretraži po imenu, pasmini ili lokaciji...",
+    "placeholder": "Pretraži po pasmini, veličini ili lokaciji...",
     "allGenders": "Svi spolovi",
     "allSizes": "Sve veličine",
     "allLocations": "Sve lokacije",
+    "allAges": "Sve starosti",
     "noResults": "Nema pasa koji odgovaraju vašim kriterijima pretrage.",
     "showAdvanced": "Napredna pretraga",
     "hideAdvanced": "Sakrij napredno",
     "gender": "Spol",
     "size": "Veličina",
-    "location": "Lokacija"
+    "location": "Lokacija",
+    "age": "Starost",
+    "age.puppy": "Štene (0-1 god)",
+    "age.young": "Mladi (1-3 god)",
+    "age.adult": "Odrasli (3-8 god)",
+    "age.senior": "Stariji (8+ god)"
   },
   "doglist": {
     "title": "Pronađi svog zauvijek prijatelja",

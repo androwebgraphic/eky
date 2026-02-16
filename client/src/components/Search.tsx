@@ -8,9 +8,8 @@ interface SearchProps {
   onGenderChange: (gender: string) => void;
   sizeFilter: string;
   onSizeChange: (size: string) => void;
-  locationFilter: string;
-  onLocationChange: (location: string) => void;
-  availableLocations: string[];
+  ageFilter: string;
+  onAgeChange: (age: string) => void;
 }
 
 const Search: React.FC<SearchProps> = ({
@@ -20,9 +19,8 @@ const Search: React.FC<SearchProps> = ({
   onGenderChange,
   sizeFilter,
   onSizeChange,
-  locationFilter,
-  onLocationChange,
-  availableLocations
+  ageFilter,
+  onAgeChange,
 }) => {
   const { t } = useTranslation();
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -38,13 +36,14 @@ const Search: React.FC<SearchProps> = ({
         display: 'flex',
         alignItems: 'center',
         gap: '0.5rem',
-        marginBottom: showAdvanced ? '0.5rem' : '0'
+        marginBottom: showAdvanced ? '0.5rem' : '0',
+        flexWrap: 'wrap'
       }}>
         <div style={{ flex: '1', minWidth: '150px' }}>
           <input 
             type="search" 
             id="Search" 
-            placeholder={t('search.placeholder')}
+            placeholder={t('search.placeholder') || 'Search by breed, size, or location...'}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             style={{
@@ -52,7 +51,7 @@ const Search: React.FC<SearchProps> = ({
               padding: '0.375rem',
               borderRadius: '7px',
               border: '1px solid #ddd',
-              fontSize: '0.875rem',
+              fontSize: '1.2rem',
               lineHeight: '1.2'
             }}
           />
@@ -143,7 +142,7 @@ const Search: React.FC<SearchProps> = ({
             </select>
           </div>
           
-          <div style={{ minWidth: '110px', flex: '1' }}>
+          <div style={{ minWidth: '100px', flex: '1' }}>
             <label style={{ 
               display: 'block', 
               fontSize: '0.75rem', 
@@ -151,24 +150,25 @@ const Search: React.FC<SearchProps> = ({
               marginBottom: '0.25rem',
               color: '#666'
             }}>
-              {t('search.location') || 'Location'}
+              {t('search.age') || 'Age'}
             </label>
             <select 
-              value={locationFilter} 
-              onChange={(e) => onLocationChange(e.target.value)}
+              value={ageFilter} 
+              onChange={(e) => onAgeChange(e.target.value)}
               style={{
                 width: '100%',
                 padding: '0.375rem',
-                borderRadius: '3px',
+                borderRadius: '7px',
                 border: '1px solid #ddd',
                 fontSize: '0.875rem',
                 lineHeight: '1.2'
               }}
             >
-              <option value="">{t('search.allLocations')}</option>
-              {availableLocations.map(location => (
-                <option key={location} value={location}>{location}</option>
-              ))}
+              <option value="">{t('search.allAges') || 'All Ages'}</option>
+              <option value="puppy">{t('search.age.puppy') || 'Puppy (0-1 year)'}</option>
+              <option value="young">{t('search.age.young') || 'Young (1-3 years)'}</option>
+              <option value="adult">{t('search.age.adult') || 'Adult (3-8 years)'}</option>
+              <option value="senior">{t('search.age.senior') || 'Senior (8+ years)'}</option>
             </select>
           </div>
         </div>

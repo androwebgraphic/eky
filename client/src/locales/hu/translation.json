@@ -42,16 +42,22 @@
     "p3": "Sok boldogságot kívánok az új barátoddal"
   },
   "search": {
-    "placeholder": "Keresd meg örök barátod :)",
+    "placeholder": "Keresés fajta, méret vagy helyszín alapján...",
     "allGenders": "Minden nem",
     "allSizes": "Minden méret",
     "allLocations": "Minden helyszín",
+    "allAges": "Minden kor",
     "noResults": "Nincs kutya, aki megfelel a keresési feltételeidnek.",
     "showAdvanced": "Részletes keresés",
     "hideAdvanced": "Részletes keresés elrejtése",
     "gender": "Nem",
     "size": "Méret",
-    "location": "Helyszín"
+    "location": "Helyszín",
+    "age": "Kor",
+    "age.puppy": "Kiskutya (0-1 év)",
+    "age.young": "Fiatal (1-3 év)",
+    "age.adult": "Felnőtt (3-8 év)",
+    "age.senior": "Idős (8+ év)"
   },
   "gender": {
     "male": "Hím",

@@ -266,15 +266,14 @@ function DogList() {
 			>
 				{filteredDogs.length === 0 ? (
 					<div>{t('doglist.empty') || 'No dogs found.'}</div>
-				) : (
+				) : isDesktop ? (
 					<div
 						style={{
-							display: isDesktop ? 'flex' : 'block',
-							flexDirection: isDesktop ? 'row' : undefined,
-							gap: isDesktop ? 16 : undefined,
-							flexWrap: isDesktop ? 'wrap' : undefined,
-							alignItems: isDesktop ? 'flex-start' : undefined,
-							width: isDesktop ? undefined : '100%',
+							display: 'flex',
+							flexDirection: 'row',
+							gap: 16,
+							flexWrap: 'wrap',
+							alignItems: 'flex-start',
 						}}
 					>
 						{filteredDogs.map(dog => {
@@ -304,47 +303,82 @@ function DogList() {
 							const canEdit = isOwner || isSuperAdmin;
 
 							return (
-								<div
+								<CardSmall
 									key={dog._id}
-									style={
-										isDesktop
-											? {
-													background: '#fafbfc',
-													borderRadius: 16,
-													boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
-													padding: 16,
-													display: 'block',
-													minWidth: 280,
-													maxWidth: 400,
-													width: 'auto',
-													verticalAlign: 'top',
-												}
-											: {}
-									}
-								>
-									<CardSmall
-										{...dog}
-										images={dedupedImages}
-										canEdit={canEdit}
-										onEdit={() => handleEdit(dog)}
-										onRemove={() => handleRemove(dog)}
-										onViewDetails={e => {
-											// Always close any open modals before opening new details
-											setEditDog(null);
-											setDetailsDog(null);
-											setMapDog(null);
-											if (e && Object.keys(e).length === 0) {
-												// Location click - open map only
-												openMapForDog(dog);
-											} else {
-												handleDetails(dog);
-											}
-										}}
-									/>
-								</div>
+									{...dog}
+									images={dedupedImages}
+									canEdit={canEdit}
+									onEdit={() => handleEdit(dog)}
+									onRemove={() => handleRemove(dog)}
+									onViewDetails={e => {
+										// Always close any open modals before opening new details
+										setEditDog(null);
+										setDetailsDog(null);
+										setMapDog(null);
+										if (e && Object.keys(e).length === 0) {
+											// Location click - open map only
+											openMapForDog(dog);
+										} else {
+											handleDetails(dog);
+										}
+									}}
+								/>
 							);
 						})}
 					</div>
+				) : (
+					<>
+						{filteredDogs.map(dog => {
+						// Deduplicate images by base name before passing to CardSmall
+						const getImageBase = (url: string) => {
+							let cleanUrl = url.split('?')[0];
+							const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
+							const base = filename.replace(/(-\d{3,}(?:-[a-z0-9]+)?-(?:320|640|1024|orig))?(-(?:320|640|1024|orig))?(\.(jpg|jpeg|png|webp))$/i, '')
+								.replace(/(-(?:320|640|1024|orig))?(\.(jpg|jpeg|png|webp))$/i, '')
+								.replace(/(\.(jpg|jpeg|png|webp))$/i, '');
+							return base;
+						};
+						let dedupedImages = dog.images;
+						if (Array.isArray(dog.images)) {
+							dedupedImages = dog.images.filter((img, idx, arr) => {
+								if (!img || !img.url) return false;
+								const base = getImageBase(img.url);
+								return arr.findIndex(other => other && other.url && getImageBase(other.url) === base) === idx;
+							});
+						}
+						const isOwner = user && dog.user && (
+							typeof dog.user === 'string' 
+								? dog.user === user._id 
+								: dog.user._id === user._id
+						);
+						const isSuperAdmin = user?.role === 'superadmin';
+						const canEdit = isOwner || isSuperAdmin;
+
+						return (
+							<CardSmall
+								key={dog._id}
+								{...dog}
+								images={dedupedImages}
+								canEdit={canEdit}
+								onEdit={() => handleEdit(dog)}
+								onRemove={() => handleRemove(dog)}
+								onViewDetails={e => {
+									// Always close any open modals before opening new details
+									setEditDog(null);
+									setDetailsDog(null);
+									setMapDog(null);
+									if (e && Object.keys(e).length === 0) {
+										// Location click - open map only
+										openMapForDog(dog);
+									} else {
+										handleDetails(dog);
+									}
+								}}
+							/>
+						);
+						})
+					}
+					</>
 				)}
 			</main>
 			{editDog && (
@@ -402,8 +436,8 @@ function DogList() {
 											position: 'absolute',
 											top: 12,
 											right: 12,
-											width: 22,
-											height: 22,
+											width: 28,
+											height: 28,
 											background: '#e74c3c',
 											border: 'none',
 											borderRadius: '50%',
@@ -420,14 +454,12 @@ function DogList() {
 									>
 										<span style={{
 											color: '#fff',
-											fontSize: '2rem',
+											fontSize: '24px',
 											fontWeight: 900,
-											lineHeight: 1,
-											display: 'flex',
-											alignItems: 'center',
-											justifyContent: 'center',
+											lineHeight: '28px',
+											display: 'block',
+											textAlign: 'center',
 											width: '100%',
-											height: '100%',
 										}}>×</span>
 									</button>
 							<DogDetails
@@ -487,29 +519,30 @@ function DogList() {
 									position: 'absolute',
 									top: 8,
 									right: 8,
-									width: 36,
-									height: 36,
+									width: 28,
+									height: 28,
 									background: '#e74c3c',
-									color: '#fff',
 									border: 'none',
 									borderRadius: '50%',
-									fontSize: '1.5rem',
-									fontWeight: 'bold',
-									cursor: 'pointer',
-									zIndex: 10000,
-									boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-									padding: 0,
 									display: 'flex',
 									alignItems: 'center',
-									justifyContent: 'center'
+									justifyContent: 'center',
+									padding: 0,
+									cursor: 'pointer',
+									zIndex: 10000,
+									boxShadow: '0 2px 8px rgba(231,76,60,0.10)',
 								}}
 								aria-label="Close"
 								title="Close"
 							>
 								<span style={{
-									fontSize: '1.8rem',
-									lineHeight: 1,
-									color: '#fff'
+									color: '#fff',
+									fontSize: '24px',
+									fontWeight: 900,
+									lineHeight: '28px',
+									display: 'block',
+									textAlign: 'center',
+									width: '100%',
 								}}>×</span>
 							</button>
 							<DogDetails
@@ -569,21 +602,31 @@ function DogList() {
 								position: 'absolute',
 								top: 12,
 								right: 12,
-								width: 36,
-								height: 36,
+								width: 28,
+								height: 28,
 								background: '#e74c3c',
-								color: '#fff',
 								border: 'none',
 								borderRadius: '50%',
-								fontSize: '1.5rem',
-								fontWeight: 'bold',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+								padding: 0,
 								cursor: 'pointer',
 								zIndex: 2,
+								boxShadow: '0 2px 8px rgba(231,76,60,0.10)',
 							}}
 							aria-label="Close"
 							title="Close"
 						>
-							×
+							<span style={{
+								color: '#fff',
+								fontSize: '24px',
+								fontWeight: 900,
+								lineHeight: '28px',
+								display: 'block',
+								textAlign: 'center',
+								width: '100%',
+							}}>×</span>
 						</button>
 						<h3 style={{ marginTop: 0, marginBottom: 16 }}>
 							📍 {mapDog.name} - {mapDog.location}

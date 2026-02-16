@@ -354,7 +354,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
 
   return (
     <div className="card-details">
-      <div className="img" style={{ width: '100%', maxWidth: 400, margin: '0 auto', aspectRatio: '1/1', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8f8', minHeight: 0, maxHeight: 400, boxSizing: 'border-box', marginTop: 16, marginBottom: 16, borderRadius: 16 }}>
+      <div className="img" style={{ width: '100%', maxWidth: 240, margin: '0 auto', aspectRatio: '1/1', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8f8', minHeight: 0, maxHeight: 240, boxSizing: 'border-box', marginTop: 12, marginBottom: 12, borderRadius: 12 }}>
         {sliderImages.length > 0 && (
           <DogImageSlider images={sliderImages} alt={name} />
         )}
@@ -402,34 +402,32 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 onClick={() => setShowMap(false)}
                 style={{
                   position: 'absolute',
-                  top: 15,
-                  right: 15,
-                  width: 56,
-                  height: 56,
-                  backgroundColor: '#e74c3c',
-                  color: '#fff',
+                  top: 12,
+                  right: 12,
+                  width: 28,
+                  height: 28,
+                  background: '#e74c3c',
                   border: 'none',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                  padding: 0,
                   cursor: 'pointer',
                   zIndex: 2147483647,
-                  padding: 0
+                  boxShadow: '0 2px 8px rgba(231,76,60,0.10)',
                 }}
-                title={t('common.close')}
                 aria-label={t('common.close')}
+                title={t('common.close')}
               >
                 <span style={{
-                  fontSize: 40,
+                  color: '#fff',
+                  fontSize: '24px',
                   fontWeight: 900,
-                  lineHeight: '56px',
-                  width: '100%',
-                  textAlign: 'center',
+                  lineHeight: '28px',
                   display: 'block',
-                  userSelect: 'none',
-                  letterSpacing: 2
+                  textAlign: 'center',
+                  width: '100%',
                 }}>×</span>
               </button>
               <h3 style={{ marginBottom: 15, textAlign: 'center', color: '#333' }}>{place || location}</h3>
@@ -530,19 +528,17 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                   </span>
                 )}
               </p>
+              {owner.username && owner.username !== owner.name && (
+                <p className="meta" style={{ marginBottom: '0.75rem', fontSize: '0.9rem' }}>
+                  <strong>{t('fields.username') || 'Username'}:</strong> {owner.username}
+                </p>
+              )}
               {owner.person && (
                 <p className="meta" style={{ marginBottom: '0.75rem' }}>
                   <strong>{t('fields.userType') || 'Type'}:</strong> {t(`registerOptions.${owner.person}`) || owner.person}
                 </p>
               )}
-              {!isOwner && isAuthenticated && owner.phone && (
-                <p className="meta" style={{ marginBottom: '0.75rem' }}>
-                  <strong>{t('fields.phone') || 'Phone'}:</strong>
-                  <a href={`tel:${owner.phone}`} style={{ color: '#007bff', textDecoration: 'none', marginLeft: '0.5rem', fontSize: '1.35rem', fontWeight: 'bold' }}>
-                    {owner.phone}
-                  </a>
-                </p>
-              )}
+              {/* Phone and email hidden for privacy */}
             </div>
           )}
       </div>

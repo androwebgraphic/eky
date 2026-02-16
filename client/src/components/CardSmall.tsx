@@ -34,6 +34,15 @@ export interface CardSmallProps {
 	images?: ImageType[];
 	adoptionStatus?: string;
 	adoptionQueue?: any[];
+	user?: {
+		_id: string;
+		name: string;
+		username?: string;
+		email?: string;
+		phone?: string;
+		person?: 'private' | 'organization';
+	};
+	createdAt?: string;
 }
 
 const CardSmall: React.FC<CardSmallProps> = (props) => {
@@ -55,6 +64,8 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		vaccinated,
 		images,
 		adoptionStatus,
+		user,
+		createdAt,
 	} = props;
 
 	function toAbsUrl(url?: string) {
@@ -245,9 +256,29 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 			<style>{`
 				@media (max-width: 600px) {
 					.card.card-small {
-						min-width: 92vw !important;
-						max-width: none !important;
+						borderRadius: 16 !important;
+						box-shadow: 0 2px 16px rgba(0,0,0,0.06) !important;
+						padding: 16px !important;
+						min-width: 280 !important;
+						maxWidth: none !important;
 						flex: 0 0 92vw !important;
+					}
+					.card.card-small > div[style*="font-weight: 700"] {
+						font-size: 24px !important;
+					}
+					.card.card-small > div > div:nth-child(2) {
+						font-size: 18px !important;
+					}
+					.card.card-small > div > div:nth-child(3),
+					.card.card-small > div > div:nth-child(4),
+					.card.card-small > div > div:nth-child(5) {
+						font-size: 17px !important;
+					}
+					.card.card-small > div > div:nth-child(6),
+					.card.card-small > div > div:nth-child(7),
+					.card.card-small > div > div:nth-child(8),
+					.card.card-small > div > div:nth-child(9) {
+						font-size: 16px !important;
 					}
 				}
 			`}</style>
@@ -256,19 +287,20 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 				style={{
 					display: 'flex',
 					flexDirection: 'column',
-					borderRadius: 12,
-					boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+					borderRadius: 16,
+					boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
 					background: '#fff',
+					padding: 16,
 					margin: '16px auto',
 					width: '100%',
 					maxWidth: 420,
+					minWidth: 280,
 					overflow: 'hidden',
 					position: 'relative',
 					boxSizing: 'border-box',
 				}}
 			>
-				<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', width: '100%', position: 'relative' }}>
-					{hasVideoUrl && !videoError ? (
+				{hasVideoUrl && !videoError ? (
 						<div style={{ cursor: 'pointer' }} onClick={e => onViewDetails && onViewDetails(e)} title={t('dogDetails.showMap', 'Show details')}>
 							<video
 								controls
@@ -337,12 +369,27 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 						</div>
 					)}
 					<div style={{ padding: '16px', width: '100%' }}>
+						{adoptionStatus && adoptionStatus !== 'available' && (
+							<div style={{
+								background: adoptionStatus === 'adopted' ? '#4caf50' : '#ff9800',
+								color: '#fff',
+								padding: '4px 8px',
+								borderRadius: '4px',
+								fontSize: 12,
+								fontWeight: 600,
+								marginBottom: 8,
+								textAlign: 'center',
+								display: 'inline-block',
+								width: '100%',
+								boxSizing: 'border-box'
+							}}>
+								{t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)}
+							</div>
+						)}
 						<div style={{ fontWeight: 700, fontSize: 20, marginBottom: 4 }}>{name}</div>
 						<div style={{ color: '#666', fontSize: 15, marginBottom: 4 }}>{t('fields.breed', 'Breed')}: {breed}</div>
-						<div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>
-							{age !== undefined && <span>{t('fields.age', 'Age')}: {age} </span>}
-							{gender && <span>{t('fields.gender', 'Gender')}: {t(`gender.${gender}`, gender)}</span>}
-						</div>
+						{age !== undefined && <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>{t('fields.age', 'Age')}: {age}</div>}
+						{gender && <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>{t('fields.gender', 'Gender')}: {t(`gender.${gender}`, gender)}</div>}
 						{(place || (props as any).location) && (
 							<div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>
 								{t('fields.location', 'Location')}: 
@@ -356,9 +403,20 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 							</div>
 						)}
 						{vaccinated && <div style={{ color: '#388e3c', fontSize: 13, marginBottom: 4 }}>{t('fields.vaccinated', 'Vaccinated')}</div>}
-						{adoptionStatus && <div style={{ color: '#1976d2', fontSize: 13, marginBottom: 4 }}>{t('fields.adoptionStatus', 'Adoption Status')}: {t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)}</div>}
+						{user && (
+							<div style={{ color: '#666', fontSize: 12, marginBottom: 4 }}>
+								<span>{t('fields.postedBy', 'Posted by')}:</span>{' '}
+								<span style={{ fontWeight: 600 }}>
+									{user.username || user.name}
+								</span>
+							</div>
+						)}
+						{createdAt && (
+							<div style={{ color: '#999', fontSize: 11, marginBottom: 4 }}>
+								{new Date(createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+							</div>
+						)}
 					</div>
-				</div>
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', alignItems: 'center', padding: '8px 8px 16px 8px', width: '100%' }}>
 					<button type="button" onClick={onViewDetails} style={{ ...styles.details, flex: '1 1 auto', minWidth: 'fit-content', height: 32, fontSize: 12, padding: '0 12px', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>{t('button.viewDetails', 'Details')}</button>
 					<button 
@@ -366,7 +424,10 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 						onClick={handleAdopt} 
 						disabled={adoptionStatus && adoptionStatus !== 'available'}
 						style={{
-							...styles.adopt,
+							background: adoptionStatus && adoptionStatus !== 'available' ? '#9e9e9e' : '#43a047',
+							color: '#fff',
+							border: 'none',
+							fontWeight: 600,
 							flex: '1 1 auto',
 							minWidth: 'fit-content',
 							height: 32,
@@ -379,9 +440,13 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 							alignItems: 'center',
 							justifyContent: 'center',
 							whiteSpace: 'nowrap',
-							opacity: (adoptionStatus && adoptionStatus !== 'available') ? 0.5 : 1
 						}}
-					>{t('adopt', t('button.adopt', 'Adoptieren'))}</button>
+					>
+						{adoptionStatus && adoptionStatus !== 'available' 
+							? t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)
+							: t('adopt', t('button.adopt', 'Adoptieren'))
+						}
+					</button>
 					<button
 						type="button"
 						onClick={handleWishlist}

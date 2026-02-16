@@ -66,7 +66,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
 
   // If _showMap is true and location exists, trigger geocoding on mount
   React.useEffect(() => {
-    if (_showMap && location) {
+      if (_showMap && location) {
       (async () => {
         setLoadingCoords(true);
         setCoordsError(null);
@@ -96,13 +96,26 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   }, [_showMap, location]);
   const { t } = useTranslation();
   const { user: currentUser, isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist } = useAuth();
-  const isOwner = !!(currentUser && owner && currentUser._id === owner._id);
+  
+  // Safely check if current user is the owner
+  // If owner data is missing or incomplete, assume NOT owner to allow buttons to show
+  const isOwner = !!(
+    currentUser && 
+    owner && 
+    typeof owner._id === 'string' && 
+    typeof currentUser._id === 'string' &&
+    currentUser._id === owner._id
+  );
+  
   // DEBUG: Log context and props to diagnose button visibility
   console.log('[DogDetails DEBUG] currentUser:', currentUser);
   console.log('[DogDetails DEBUG] owner:', owner);
+  console.log('[DogDetails DEBUG] owner._id:', owner?._id);
+  console.log('[DogDetails DEBUG] currentUser._id:', currentUser?._id);
   console.log('[DogDetails DEBUG] isOwner:', isOwner);
   console.log('[DogDetails DEBUG] isAuthenticated:', isAuthenticated);
   console.log('[DogDetails DEBUG] _id:', _id);
+  console.log('[DogDetails DEBUG] shouldShowButtons:', isAuthenticated && _id && !isOwner);
 
   const handleWishlistToggle = async () => {
     if (!_id || !isAuthenticated) {
@@ -321,8 +334,8 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
       return;
     }
 
-  // Debug log for sliderImages
-  console.log('DogDetails sliderImages:', sliderImages);
+    // Debug log for sliderImages
+    console.log('DogDetails sliderImages:', sliderImages);
     setLoadingCoords(true);
     setCoordsError(null);
     try {
@@ -569,7 +582,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
           )}
       </div>
       <div 
-        className="call-to-action dog-details-mobile-actions"
+        className="card-actions call-to-action dog-details-mobile-actions"
         style={{
           background: 'white',
           padding: '16px',
@@ -577,10 +590,15 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
           boxSizing: 'border-box',
           borderTop: '3px solid #75171a',
           marginTop: '20px',
-          paddingBottom: '20px'
+          paddingBottom: '20px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          alignItems: 'stretch'
         }}
       >
-        {isAuthenticated && _id && !isOwner && (
+        {/* Show buttons for authenticated users - show all buttons and handle owner check inside each button */}
+        {isAuthenticated && _id && (
           <>
             <button 
               id="add-to-list" 
@@ -601,7 +619,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
               <div style={{ marginTop: 16 }}>
                 {/* Adopter: can confirm or cancel if not yet confirmed */}
                 {adoptionQueueState.adopter === currentUser._id && !adoptionQueueState.adopterConfirmed && (
-                  <>
+                  <div>
                     <button
                       className="details"
                       style={{ backgroundColor: '#28a745', color: 'white', marginRight: 8 }}
@@ -648,7 +666,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                     >
                       {cancelLoading ? (t('button.cancelling') || 'Odustajanje...') : (t('button.cancelAdoption') || 'Odustani od posvajanja')}
                     </button>
-                  </>
+                  </div>
                 )}
                 {/* Owner: can confirm if not yet confirmed */}
                 {owner && owner._id === currentUser._id && !adoptionQueueState.ownerConfirmed && (
@@ -699,7 +717,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 )}
               </div>
             ) : adoptionStatusState === 'pending' ? (
-              <>
+              <div>
                 <button
                   id="adopt"
                   className="details"
@@ -709,13 +727,13 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                   {t('button.requested') || 'Zahtjev poslan'}
                 </button>
                 <div style={{ marginTop: 8, color: '#555' }}>{t('dogDetails.waitingForConfirmation') || 'Čeka potvrdu vlasnika.'}</div>
-              </>
+              </div>
             ) : adoptionStatusState === 'pending' && !adoptionQueueState ? (
-                <div style={{ color: 'orange', marginTop: 12 }}>
-                  {t('dogDetails.ambiguousAdoptionState') || 'Adoption is pending, but details are unavailable. Please refresh or contact support.'}
-                </div>
+              <div style={{ color: 'orange', marginTop: 12 }}>
+                {t('dogDetails.ambiguousAdoptionState') || 'Adoption is pending, but details are unavailable. Please refresh or contact support.'}
+              </div>
             ) : (
-              <>
+              <div>
                 <button
                   id="adopt"
                   className="details"
@@ -733,12 +751,12 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                     {t('dogDetails.noAdoptionInfo') || 'No adoption information available for this dog.'}
                   </div>
                 )}
-              </>
+              </div>
             )}
           </>
         )}
       </div>
-    </div>
+      </div>
     </>
   );
 };

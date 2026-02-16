@@ -467,6 +467,7 @@ function DogList() {
 										}}>×</span>
 									</button>
 							<DogDetails
+								key={detailsDog._id}
 								{...detailsDog}
 								gender={
 									detailsDog.gender === 'male' || detailsDog.gender === 'female'
@@ -550,6 +551,7 @@ function DogList() {
 								}}>×</span>
 							</button>
 							<DogDetails
+								key={detailsDog._id}
 								{...detailsDog}
 								gender={
 									detailsDog.gender === 'male' || detailsDog.gender === 'female'

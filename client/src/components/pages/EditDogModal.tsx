@@ -39,14 +39,25 @@ interface EditDogModalProps {
   modalPosition?: {x: number, y: number};
 }
 
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const getApiUrl = () => {
+  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+  const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
+  return `${protocol}//${hostname}:3001`;
+};
+
   const getImageUrl = (url: string) => {
     if (!url) return '';
-    // Handle both /uploads/ and /u/ prefixes
-    if (url.startsWith('/uploads/') || url.startsWith('/u/')) {
-      return `${API_URL}${url}`;
+    // Handle absolute URLs (http:// or https://)
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
     }
-    return url;
+    // Handle absolute paths starting with /
+    if (url.startsWith('/')) {
+      return `${getApiUrl()}${url}`;
+    }
+    // Handle relative paths (uploads/, u/dogs/, etc.)
+    return `${getApiUrl()}/${url.replace(/^\/+/, '')}`;
   };
 
   // Deduplicate images by base name
@@ -87,7 +98,8 @@ interface EditDogModalProps {
 function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps) {
   const isMounted = useRef(true);
   const { t } = useTranslation();
-  const { token } = useAuth();
+  const { token, isAuthenticated } = useAuth();
+  const headerHeight = isAuthenticated ? 60 : 120;
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<any[]>([]);
@@ -160,14 +172,15 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
       if (!isMounted.current) return;
       setSubmitting(true);
       setSubmitError(null);
+      
       let resp;
       const hasNewFiles = mediaFiles.length > 0;
       const hasRemovedImages = existingImages.length !== (dog.images ? dog.images.length : 0);
       const hasPhotoChanges = hasNewFiles || hasRemovedImages;
+      
       if (hasPhotoChanges) {
         const formData = new FormData();
         Object.entries(fields).forEach(([k, v]) => {
-          // Skip undefined, null, empty string, or string "null" values
           if (v !== undefined && v !== null && v !== '' && v !== 'null') {
             formData.append(k, v as any);
           }
@@ -182,7 +195,7 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
           headers['Authorization'] = `Bearer ${token}`;
         }
         try {
-          resp = await fetch(`${API_URL}/api/dogs/${dog._id}`, {
+          resp = await fetch(`${getApiUrl()}/api/dogs/${dog._id}`, {
             method: 'PATCH',
             body: formData,
             headers
@@ -197,7 +210,6 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
       } else {
         const bodyData: any = {};
         Object.entries(fields).forEach(([k, v]) => {
-          // Skip undefined, null, empty string, or string "null" values
           if (v !== undefined && v !== null && v !== '' && v !== 'null') {
             bodyData[k] = v;
           }
@@ -206,37 +218,50 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
-        resp = await fetch(`${API_URL}/api/dogs/${dog._id}`, {
+        resp = await fetch(`${getApiUrl()}/api/dogs/${dog._id}`, {
           method: 'PATCH',
           headers,
           body: JSON.stringify(bodyData)
         });
       }
+      
       if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}));
+        console.error('[EDITDOG] Update failed:', errData);
         throw new Error(errData.message || 'Failed to update dog');
       }
-      // Always fetch the latest dog data after update
+      
+      let updatedDog;
+      try {
+        updatedDog = await resp.json();
+        console.log('[EDITDOG] Updated dog from response:', updatedDog);
+      } catch (e) {
+        console.error('[EDITDOG] Failed to parse response:', e);
+        throw new Error('Failed to parse server response');
+      }
+      
       if (isMounted.current) {
         setMediaFiles([]);
         setMediaPreviews([]);
       }
-      try {
-        const freshResp = await fetch(`${API_URL}/api/dogs/${dog._id}?cb=${Date.now()}`);
-        if (freshResp.ok) {
-          const freshDog = await freshResp.json();
-          if (isMounted.current) onSave(freshDog);
-        } else {
-          const updatedDog = await resp.json();
-          if (isMounted.current) onSave(updatedDog);
+      
+      console.log('[EDITDOG] Calling onSave with updated dog:', updatedDog);
+      if (isMounted.current) {
+        try {
+          onSave(updatedDog);
+          console.log('[EDITDOG] onSave callback completed');
+        } catch (saveError) {
+          console.error('[EDITDOG] onSave callback error:', saveError);
+          // Don't throw, just log and continue to close modal
         }
-      } catch (e) {
-        const updatedDog = await resp.json();
-        if (isMounted.current) onSave(updatedDog);
       }
-      if (isMounted.current) onClose();
+      
+      if (isMounted.current) {
+        onClose();
+      }
     } catch (err: any) {
       if (!isMounted.current) return;
+      console.error('[EDITDOG] Submit error:', err);
       if (mediaFiles.length > 0 && (err.message === 'Failed to fetch' || err.message === 'NetworkError when attempting to fetch resource.')) {
         setSubmitError('Failed to upload images. Please check your connection or try again.');
       } else {
@@ -248,48 +273,52 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
   };
 
   return ReactDOM.createPortal(
-    <div 
-      className="edit-modal-overlay"
-      style={{
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '85vw',
-        maxWidth: '550px',
-        height: 'auto',
-        maxHeight: '90vh',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        borderRadius: '12px',
-        zIndex: 2147483647,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '16px',
-        boxSizing: 'border-box',
-        pointerEvents: 'auto' // Enable clicks on modal
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
-      }}
+      <div 
+        className="edit-modal-overlay"
+        style={{
+          position: 'fixed',
+          top: window.innerWidth > 768 ? '0' : '70px',
+          left: '0',
+          right: '0',
+          bottom: window.innerWidth > 768 ? '0' : '170px',
+          width: '100vw',
+          height: window.innerWidth > 768 ? '100vh' : 'calc(100vh - 240px)',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          zIndex: 2147483647,
+          display: 'flex',
+          alignItems: window.innerWidth > 768 ? 'center' : 'flex-start',
+          justifyContent: 'center',
+          padding: window.innerWidth > 768 ? '16px' : '0',
+          boxSizing: 'border-box',
+          pointerEvents: 'auto',
+          overflow: 'hidden',
+          overscrollBehavior: 'contain'
+        }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }}
     >
       <div 
         style={{
           backgroundColor: 'white',
-          borderRadius: window.innerWidth > 768 ? '12px' : '0',
-          padding: '1.5rem',
-          paddingTop: window.innerWidth > 768 ? '1.5rem' : '3.5rem',
-          paddingBottom: window.innerWidth > 768 ? '1.5rem' : '6rem',
-          width: window.innerWidth > 768 ? '100%' : '100vw',
-          height: window.innerWidth > 768 ? 'auto' : '100vh',
-          maxWidth: window.innerWidth > 768 ? '600px' : '100vw',
-          maxHeight: window.innerWidth > 768 ? '90vh' : '100vh',
+          borderRadius: window.innerWidth > 768 ? '12px' : '12px',
+          padding: window.innerWidth > 768 ? '1.5rem' : '0.5rem',
+          paddingTop: window.innerWidth > 768 ? '1.5rem' : '3rem',
+          paddingBottom: window.innerWidth > 768 ? '1.5rem' : '0.5rem',
+          width: window.innerWidth > 768 ? '85vw' : 'calc(90vw - 1rem)',
+          maxWidth: window.innerWidth > 768 ? '550px' : 'calc(90vw - 1rem)',
+          height: window.innerWidth > 768 ? 'auto' : 'calc(100vh - 260px)',
+          maxHeight: window.innerWidth > 768 ? '90vh' : 'calc(100vh - 260px)',
           overflowY: 'auto',
+          overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch',
           position: 'relative',
           zIndex: 2147483647,
+          touchAction: 'pan-y',
+          overscrollBehavior: 'contain',
+          boxShadow: window.innerWidth > 768 ? '0 4px 24px rgba(0,0,0,0.2)' : '0 4px 24px rgba(0,0,0,0.3)'
         }}
       >
         <button 
@@ -300,8 +329,7 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
         </button>
         <h2 style={{ 
           marginBottom: '1rem',
-          position: window.innerWidth <= 768 ? 'sticky' : 'static',
-          top: window.innerWidth <= 768 ? '0' : 'auto',
+          position: window.innerWidth <= 768 ? 'static' : 'static',
           backgroundColor: 'white',
           zIndex: 100,
           paddingTop: window.innerWidth <= 768 ? '0.5rem' : '0'
@@ -325,6 +353,13 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
               multiple
               onChange={e => {
                 const files = Array.from(e.target.files || []);
+                // Validate file sizes (max 10MB per file)
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                const oversizedFiles = files.filter(f => f.size > maxSize);
+                if (oversizedFiles.length > 0) {
+                  alert(`Some files are too large. Maximum size is 10MB per file.\n\nOversized files:\n${oversizedFiles.map(f => f.name).join('\n')}`);
+                  return;
+                }
                 setMediaFiles(prev => [...prev, ...files]);
                 setMediaPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
               }}
@@ -375,33 +410,47 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
                         style={{ position: 'absolute', top: window.innerWidth <= 768 ? 8 : 2, left: window.innerWidth <= 768 ? 8 : 2, zIndex: 3, width: window.innerWidth <= 768 ? 32 : 20, height: window.innerWidth <= 768 ? 32 : 20, accentColor: '#e74c3c', background: '#fff', border: '2px solid #e74c3c', borderRadius: 6, boxShadow: window.innerWidth <= 768 ? '0 2px 8px rgba(0,0,0,0.12)' : 'none' }}
                         title="Select to delete"
                       />
-                      <img 
-                        src={getImageUrl(img.url)} 
-                        alt={`img-${idx}`} 
-                        width={window.innerWidth <= 768 ? 120 : 80} 
-                        height={window.innerWidth <= 768 ? 120 : 80}
-                        style={{ 
-                          opacity: selectedToDelete.has(idx) ? 0.5 : 1, 
-                          borderRadius: 8, 
-                          marginTop: window.innerWidth <= 768 ? 12 : 0,
-                          objectFit: 'cover',
-                          backgroundColor: '#f0f0f0',
-                          border: '1px solid #ddd',
-                          display: 'block'
-                        }}
-                        onError={(e: any) => {
-                          console.error('[EDITDOG] Image load error:', {
-                            src: getImageUrl(img.url),
-                            originalUrl: img.url,
-                            error: e,
-                            imgWidth: img.width,
-                            imgHeight: img.height
-                          });
-                        }}
-                        onLoad={(e: any) => {
-                          console.log('[EDITDOG] Image loaded successfully:', getImageUrl(img.url));
-                        }}
-                      />
+                      <div style={{
+                        width: window.innerWidth <= 768 ? 120 : 80,
+                        height: window.innerWidth <= 768 ? 120 : 80,
+                        borderRadius: 8,
+                        marginTop: window.innerWidth <= 768 ? 12 : 0,
+                        overflow: 'hidden',
+                        display: 'block',
+                        backgroundColor: '#f0f0f0',
+                        border: '1px solid #ddd'
+                      }}>
+                        <img 
+                          src={getImageUrl(img.url)} 
+                          alt={`img-${idx}`} 
+                          style={{ 
+                            width: '100%',
+                            height: '100%',
+                            opacity: selectedToDelete.has(idx) ? 0.5 : 1, 
+                            objectFit: 'cover',
+                            display: 'block'
+                          }}
+                          onError={(e: any) => {
+                            console.error('[EDITDOG] Image load error:', {
+                              src: getImageUrl(img.url),
+                              originalUrl: img.url,
+                              API_URL: getApiUrl(),
+                              error: e,
+                              imgWidth: img.width,
+                              imgHeight: img.height
+                            });
+                            // Hide broken image
+                            e.currentTarget.style.display = 'none';
+                            // Show error in parent div
+                            if (e.currentTarget.parentElement) {
+                              e.currentTarget.parentElement.innerHTML = '<span style="color:red;font-size:10px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;padding:4px;">Failed<br/>to load</span>';
+                            }
+                          }}
+                          onLoad={(e: any) => {
+                            console.log('[EDITDOG] Image loaded successfully:', getImageUrl(img.url));
+                          }}
+                        />
+                      </div>
                       <button
                         type="button"
                         style={{ position: 'absolute', top: window.innerWidth <= 768 ? 8 : 2, right: window.innerWidth <= 768 ? 8 : 2, background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '50%', width: window.innerWidth <= 768 ? 32 : 20, height: window.innerWidth <= 768 ? 32 : 20, minWidth: window.innerWidth <= 768 ? 32 : 20, minHeight: window.innerWidth <= 768 ? 32 : 20, maxWidth: window.innerWidth <= 768 ? 32 : 20, maxHeight: window.innerWidth <= 768 ? 32 : 20, cursor: 'pointer', fontWeight: 'bold', fontSize: window.innerWidth <= 768 ? 22 : 14, lineHeight: window.innerWidth <= 768 ? '32px' : '20px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: window.innerWidth <= 768 ? '0 2px 8px rgba(0,0,0,0.12)' : 'none' }}
@@ -651,7 +700,7 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
             `}</style>
             <div style={{ 
               display: 'flex',
-              flexDirection: window.innerWidth > 768 ? 'row' : 'column',
+              flexDirection: 'row',
               gap: '1rem',
               padding: '0.75rem',
               backgroundColor: '#f8f9fa',
@@ -686,7 +735,7 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
             id="health" 
             style={{
               display: 'flex',
-              flexDirection: window.innerWidth > 768 ? 'row' : 'column',
+              flexDirection: 'row',
               gap: '1rem',
               padding: '1rem',
               backgroundColor: '#f8f9fa',
@@ -733,15 +782,8 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
               gap: '1rem',
               marginTop: '1.5rem',
               paddingTop: '1rem',
-              position: window.innerWidth <= 768 ? 'fixed' : 'static',
-              bottom: window.innerWidth <= 768 ? '0' : 'auto',
-              left: window.innerWidth <= 768 ? '0' : 'auto',
-              right: window.innerWidth <= 768 ? '0' : 'auto',
-              padding: window.innerWidth <= 768 ? '1rem' : '1rem 0',
-              backgroundColor: 'white',
-              borderTop: window.innerWidth <= 768 ? '1px solid #ddd' : 'none',
-              boxShadow: window.innerWidth <= 768 ? '0 -2px 10px rgba(0,0,0,0.1)' : 'none',
-              zIndex: window.innerWidth <= 768 ? 1000 : 'auto'
+              paddingBottom: window.innerWidth > 768 ? '2rem' : '1rem',
+              position: 'static'
             }}
           >
             <button 

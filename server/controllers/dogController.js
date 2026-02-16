@@ -29,17 +29,17 @@ const updateDog = async (req, res) => {
       console.warn('[UPDATE DEBUG] Not authorized to update dog. req.user._id:', req.user._id, 'dog.user:', dog.user);
       return res.status(403).json({ message: 'Not authorized to update this dog' });
     }
-    // Get keepImages from request body or default to empty array
+    // Get keepImages from request body or default to all current images
     let keepImages = req.body.keepImages;
     if (typeof keepImages === 'string') {
       try {
-        // Accept both '[]' and '' as empty
-        keepImages = keepImages.trim() === '' ? [] : JSON.parse(keepImages);
+        // Accept both '[]' and '' as keep all existing images
+        keepImages = keepImages.trim() === '' ? dog.images.map(img => img.url) : JSON.parse(keepImages);
       } catch (e) {
-        keepImages = [];
+        keepImages = dog.images.map(img => img.url);
       }
     }
-    if (!Array.isArray(keepImages)) keepImages = [];
+    if (!Array.isArray(keepImages)) keepImages = dog.images.map(img => img.url);
 
     // Update all editable fields from req.body
     const editableFields = [
@@ -121,13 +121,7 @@ const updateDog = async (req, res) => {
           mediaFile.mimetype === 'image/heif' ||
           (mediaFile.originalname && /.heic|.heif$/i.test(mediaFile.originalname))
         ) {
-          try {
-            processedBuffer = await heicBufferToJpeg(mediaFile.buffer);
-            console.log(`[HEIC/HEIF] heic-convert: Converted ${mediaFile.originalname} to JPEG for processing.`);
-          } catch (err) {
-            console.warn(`[HEIC/HEIF] heic-convert failed for ${mediaFile.originalname}. Rejecting upload.`);
-            throw new Error('HEIC/HEIF images are not supported on this server. Please export as JPEG and try again.');
-          }
+          throw new Error('HEIC/HEIF images are not supported. Please convert to JPEG or PNG before uploading.');
         }
         if (mediaFile.mimetype.startsWith('image/')) {
           const imageVariants = [];

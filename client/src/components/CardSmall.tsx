@@ -85,10 +85,12 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		if (/^https?:\/\//.test(url)) {
 			return url + (url.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
 		}
-		if (url.startsWith('/uploads/') || url.startsWith('/u/dogs/')) {
+		// Handle absolute paths starting with /
+		if (url.startsWith('/')) {
 			return apiBase + url + '?cb=' + cacheBuster;
 		}
-		return url;
+		// Handle relative paths (uploads/, u/dogs/, etc.)
+		return apiBase + '/' + url.replace(/^\/+/, '') + '?cb=' + cacheBuster;
 	}
 
 	let largestImgUrl: string | undefined = undefined;
@@ -131,6 +133,26 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 
 	const [imgError, setImgError] = React.useState(false);
 	const [videoError, setVideoError] = React.useState(false);
+	const [imgLoaded, setImgLoaded] = React.useState(false);
+	const [isRetrying, setIsRetrying] = React.useState(false);
+	const [retryCount, setRetryCount] = React.useState(0);
+
+	// Handle image error with retry logic
+	const handleImgError = React.useCallback(() => {
+		if (retryCount < 2) {
+			// Retry up to 2 times
+			setIsRetrying(true);
+			setTimeout(() => {
+				setRetryCount(prev => prev + 1);
+				setIsRetrying(false);
+				// Force re-render by toggling error state
+				setImgError(false);
+			}, 500);
+		} else {
+			// After retries, show error
+			setImgError(true);
+		}
+	}, [retryCount]);
 
 	const hasVideoUrl = video && typeof video.url === 'string' && video.url.length > 0;
 	const videoUrl = hasVideoUrl ? toAbsUrl(video.url) : undefined;
@@ -323,23 +345,27 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 						<div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>{t('alerts.videoFailedToLoad')}</div>
 					) : largestImgUrl && !imgError ? (
 						<img
+							key={`main-${retryCount}`}
 							src={largestImgUrl}
 							alt={name}
-							style={{ width: '100%', height: '200px', objectFit: 'contain', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', cursor: 'pointer', background: '#f5f5f5' }}
+							style={{ width: '100%', height: '200px', objectFit: 'contain', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', cursor: 'pointer', background: '#f5f5f5', opacity: isRetrying ? 0.5 : 1 }}
 							loading="lazy"
-							onError={() => setImgError(true)}
+							onError={handleImgError}
+							onLoad={() => setImgLoaded(true)}
 							onClick={e => onViewDetails && onViewDetails(e)}
 							title={t('dogDetails.showMap', 'Show details')}
 						/>
 					) : imgError ? (
-						<div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>Image failed to load</div>
+						<div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>{t('alerts.imageFailedToLoad') || 'Image failed to load'}</div>
 					) : thumbUrl && !imgError ? (
 						<img
+							key={`thumb-${retryCount}`}
 							src={thumbUrl}
 							alt={name}
-							style={{ width: '100%', height: '200px', objectFit: 'contain', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', cursor: 'pointer', background: '#f5f5f5' }}
+							style={{ width: '100%', height: '200px', objectFit: 'contain', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', cursor: 'pointer', background: '#f5f5f5', opacity: isRetrying ? 0.5 : 1 }}
 							loading="lazy"
-							onError={() => setImgError(true)}
+							onError={handleImgError}
+							onLoad={() => setImgLoaded(true)}
 							onClick={e => onViewDetails && onViewDetails(e)}
 							title={t('dogDetails.showMap', 'Show details')}
 						/>
@@ -391,7 +417,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 								{t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)}
 							</div>
 						)}
-						<div style={{ fontWeight: 700, fontSize: 20, marginBottom: 4, color: '#75171a', textAlign: 'center' }}>{name}</div>
+						<div style={{ fontWeight: 700, fontSize: 24, marginBottom: 4, color: '#75171a', textAlign: 'center' }}>{name}</div>
 						<div style={{ color: '#666', fontSize: 15, marginBottom: 4 }}><strong>{t('fields.breed', 'Breed')}</strong> {breed}</div>
 						{age !== undefined && <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}><strong>{t('fields.age', 'Age')}</strong> {age}</div>}
 						{gender && <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}><strong>{t('fields.gender', 'Gender')}</strong> {t(`gender.${gender}`, gender)}</div>}
@@ -457,8 +483,8 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 						type="button"
 						onClick={handleWishlist}
 						style={{
-							background: isInWishlist && props._id && isInWishlist(props._id) ? '#ff4444' : '#43a047',
-							color: '#fff',
+							background: isInWishlist && props._id && isInWishlist(props._id) ? '#a67c52' : '#dbb69d',
+							color: '#75171a',
 							border: 'none',
 							fontWeight: 600,
 							flex: '1 1 auto',
@@ -473,15 +499,15 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 							alignItems: 'center',
 							justifyContent: 'center',
 							opacity: wishlistLoading ? 0.7 : 1,
-							boxShadow: isInWishlist && props._id && isInWishlist(props._id) ? '0 0 0 2px #ff4444' : '0 0 0 2px #43a047',
+							boxShadow: isInWishlist && props._id && isInWishlist(props._id) ? '0 0 0 2px #a67c52' : '0 0 0 2px #dbb69d',
 							transition: 'background 0.2s, box-shadow 0.2s',
 							whiteSpace: 'nowrap',
 						}}
 						disabled={wishlistLoading}
 					>
 						{isInWishlist && props._id && isInWishlist(props._id)
-							? <><span style={{fontSize:16,marginRight:4}}>💔</span>{t('button.removeFromList', 'Entfernen')}</>
-							: <><span style={{fontSize:16,marginRight:4}}>❤️</span>{t('button.addToList', 'Zur Liste')}</>}
+							? <><div style={{position:'relative',fontSize:16,marginRight:4,display:'inline-block'}}>❤️<span style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',color:'#4CAF50',fontSize:10,fontWeight:'bold'}}>✓</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4}}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></>
+							: <><span style={{fontSize:16,marginRight:4}}>❤️</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4}}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></>}
 					</button>
 					{canEdit && (
 						<button type="button" onClick={onEdit} style={{ ...styles.edit, flex: '1 1 auto', minWidth: 'fit-content', height: 32, fontSize: 12, padding: '0 12px', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>{t('edit', t('button.edit', 'Bearbeiten'))}</button>

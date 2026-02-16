@@ -1,5 +1,86 @@
 /* edit-modal.css: Styles for the Edit Dog Modal */
 
+.editdog-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 32px;
+  text-align: center;
+  cursor: pointer;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.editdog-close-btn:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
+
+.editdog-close-btn:active {
+  transform: scale(0.95);
+}
+
+.editdog-submit-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #75171a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.editdog-submit-btn:hover:not(:disabled) {
+  background: #5a1215;
+}
+
+.editdog-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.editdog-reset-photos-btn {
+  padding: 0.5rem 1rem;
+  background: #e67e22;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.editdog-reset-photos-btn:hover {
+  background: #d35400;
+}
+
+@media (max-width: 768px) {
+  .editdog-close-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 28px;
+    line-height: 40px;
+    top: 16px;
+    right: 16px;
+  }
+}
+
 .edit-dog-modal {
   background: #fff;
   border-radius: 8px;

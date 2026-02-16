@@ -376,7 +376,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
     <>
       <style>{`
         @media (max-width: 600px) {
-          .dog-details-mobile-actions button {
+          .dog-details-mobile-actions button:not(#add-to-list) {
             width: 100% !important;
             margin-bottom: 12px !important;
             box-sizing: border-box !important;
@@ -389,6 +389,29 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
           }
           .dog-details-mobile-actions button#add-to-list {
             margin-bottom: 16px !important;
+            width: auto !important;
+            height: 32px !important;
+            font-size: 11px !important;
+            padding: 0 8px !important;
+            font-weight: 600 !important;
+            color: #75171a !important;
+          }
+          .dog-details-buttons-container {
+            flex-direction: column !important;
+          }
+        }
+        @media (min-width: 601px) {
+          .dog-details-buttons-container {
+            display: flex;
+            gap: 12px;
+            flex-direction: row;
+          }
+          .dog-details-buttons-container button {
+            flex: 1;
+            margin-left: 0 !important;
+          }
+          .dog-details-buttons-container button#add-to-list {
+            flex: 0 0 auto !important;
           }
         }
       `}</style>
@@ -399,8 +422,8 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         )}
       </div>
       <div className="description">
-        <h3 style={{ color: '#75171a', textAlign: 'center' }}>
-          <strong>{t('fields.name')}</strong> {name}
+        <h3 style={{ color: '#75171a', textAlign: 'center', fontSize: 28 }}>
+          {name}
         </h3>
         {breed && (
           <p className="meta">
@@ -600,22 +623,40 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         {/* Show buttons for authenticated users - show all buttons and handle owner check inside each button */}
         {isAuthenticated && _id && (
           <>
-            <button 
-              id="add-to-list" 
-              className="details"
-              onClick={() => {
-                handleWishlistToggle();
-              }}
-              style={{
-                backgroundColor: isInWishlist(_id) ? '#ff4444' : '#4CAF50',
-                color: 'white'
-              }}
-            >
-              {isInWishlist(_id) ? '💔 ' + t('button.removeFromList') : '❤️ ' + t('button.addToList')}
-            </button>
-            {/* ADOPT/CONFIRM/CANCEL LOGIC (improved for both adopter and owner) */}
-            {/* Adoption UI logic fallback: if state is ambiguous, show info */}
-            {adoptionStatusState === 'pending' && adoptionQueueState && currentUser ? (
+            <div className="dog-details-buttons-container">
+              <button 
+                id="add-to-list" 
+                className="details"
+                onClick={() => {
+                  handleWishlistToggle();
+                }}
+                style={{
+                  backgroundColor: '#4CAF50',
+                  color: 'white',
+                  border: 'none',
+                  fontWeight: 600,
+                  height: 32,
+                  fontSize: 11,
+                  padding: '0 8px',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: isInWishlist(_id) ? '0 0 0 2px #4CAF50' : '0 0 0 2px #4CAF50',
+                  transition: 'background 0.2s, box-shadow 0.2s',
+                  whiteSpace: 'nowrap',
+                  flex: '0 0 auto'
+                }}
+              >
+                {isInWishlist(_id)
+                  ? <><div style={{position:'relative',fontSize:18,marginRight:4,display:'inline-block'}}>❤️<span style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',color:'#4CAF50',fontSize:12,fontWeight:'bold'}}>✓</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4}}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></>
+                  : <><span style={{fontSize:18,marginRight:4}}>❤️</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4}}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></>}
+              </button>
+              {/* ADOPT/CONFIRM/CANCEL LOGIC (improved for both adopter and owner) */}
+              {/* Adoption UI logic fallback: if state is ambiguous, show info */}
+              {adoptionStatusState === 'pending' && adoptionQueueState && currentUser ? (
               <div style={{ marginTop: 16 }}>
                 {/* Adopter: can confirm or cancel if not yet confirmed */}
                 {adoptionQueueState.adopter === currentUser._id && !adoptionQueueState.adopterConfirmed && (
@@ -732,14 +773,14 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
               <div style={{ color: 'orange', marginTop: 12 }}>
                 {t('dogDetails.ambiguousAdoptionState') || 'Adoption is pending, but details are unavailable. Please refresh or contact support.'}
               </div>
-            ) : (
+              ) : (
               <div>
                 <button
                   id="adopt"
                   className="details"
                   onClick={handleAdopt}
                   disabled={adoptLoading || adoptionStatusState === 'adopted'}
-                  style={{ marginLeft: 12, backgroundColor: '#007bff', color: 'white' }}
+                  style={{ marginLeft: 12, backgroundColor: '#dbb69d', color: '#75171a', padding: '16px 24px', fontSize: '18px', fontWeight: 'bold', minHeight: '56px' }}
                 >
                   {adoptLoading
                     ? t('button.sending') || 'Slanje...'
@@ -753,6 +794,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 )}
               </div>
             )}
+            </div>
           </>
         )}
       </div>

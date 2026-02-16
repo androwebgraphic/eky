@@ -131,10 +131,16 @@ function DogList() {
 		}
 	};
 
-	useEffect(() => {
+		useEffect(() => {
 		const fetchDogs = () => {
 			setLoading(true);
-			fetch(`${getApiUrl()}/api/dogs`)
+			const headers: Record<string, string> = {};
+			// Get token from context or fallback to localStorage
+			const authToken = token || localStorage.getItem('token');
+			if (authToken) {
+				headers['Authorization'] = `Bearer ${authToken}`;
+			}
+			fetch(`${getApiUrl()}/api/dogs`, { headers })
 				.then(res => res.json())
 				.then(data => {
 					setDogs(Array.isArray(data) ? data : []);
@@ -147,60 +153,24 @@ function DogList() {
 		};
 
 		fetchDogs();
-
-		// Listen for dog update events (e.g., when adoption status changes)
-		const handleDogUpdated = () => {
-			fetchDogs();
-		};
-
-		window.addEventListener('dogUpdated', handleDogUpdated);
-
-		return () => {
-			window.removeEventListener('dogUpdated', handleDogUpdated);
-		};
-	}, []);
+	}, [token]);
 
 	const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 900;
 	const handleEdit = (dog: DogDetailsProps) => setEditDog(dog);
 	const handleRemove = (dog: DogDetailsProps) => setRemoveDog(dog);
 	const handleDetails = (dog: DogDetailsProps) => setDetailsDog(dog);
 	const handleEditSave = async (updatedDog: any) => {
-		// Use FormData for PATCH with files
-		const formData = new FormData();
-		// Append all fields except images
-		Object.entries(updatedDog).forEach(([key, value]) => {
-			if (key === 'images' && Array.isArray(value)) {
-				value.forEach((file: File) => {
-					formData.append('media', file);
-				});
-			} else if (value !== undefined && value !== null) {
-				// Only append string or Blob/File, otherwise convert to string
-				   // Special handling for gender: skip if null, 'null', or empty string
-				   if (
-					   key === 'gender' &&
-					   (value === null || value === 'null' || value === '')
-				   ) {
-					   // Do not append gender field
-					   return;
-				   }
-				   if (typeof value === 'string' || value instanceof Blob) {
-					   formData.append(key, value);
-				   } else {
-					   formData.append(key, String(value));
-				   }
-			}
-		});
-		await fetch(`${getApiUrl()}/api/dogs/${updatedDog._id}`, {
-			method: 'PATCH',
-			body: formData,
-			credentials: 'include',
-		});
+		// Refetch all dogs from server to ensure fresh data with all images
 		setEditDog(null);
 		setLoading(true);
 		fetch(`${getApiUrl()}/api/dogs`)
 			.then(res => res.json())
 			.then(data => {
 				setDogs(Array.isArray(data) ? data : []);
+				setLoading(false);
+			})
+			.catch(err => {
+				setError('Failed to refresh dogs after update');
 				setLoading(false);
 			});
 	};

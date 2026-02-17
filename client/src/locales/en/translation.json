@@ -9,7 +9,8 @@
     "login": "Login",
     "register": "Register",
     "dogs": "Dogs",
-    "adoptionRequests": "Requests"
+    "adoptionRequests": "Requests",
+    "mustBeLoggedIn": "You must be logged in"
   },
   "button": {
     "findFriend": "Find your forever friend",
@@ -337,5 +338,13 @@
     "errorSendingAdoptionRequest": "An error occurred while sending the adoption request. Check browser console (F12) for details.",
     "videoFailedToLoad": "Video failed to load",
     "imageFailedToLoad": "Image failed to load"
+  },
+  "footer": {
+    "dogs": "Dogs",
+    "chat": "Chat",
+    "addDog": "Add Dog",
+    "profile": "Profile",
+    "login": "Login",
+    "search": "Search"
   }
 }

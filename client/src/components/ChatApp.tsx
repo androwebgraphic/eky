@@ -577,99 +577,25 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
   return (
     <div className="chat-app-container" style={{ display: 'flex', height: '100%' }}>
       <div className="chat-app-sidebar" style={{ width: 220, borderRight: '1px solid #eee', background: '#fafbfc', padding: 0 }}>
-        <div style={{ display: 'flex', borderBottom: '1px solid #eee' }}>
-          <button
-            onClick={() => setActiveTab('chats')}
-            style={{
-              flex: 1,
-              padding: '12px 16px',
-              background: activeTab === 'chats' ? '#e6f7ff' : 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '14px'
-            }}
-          >
-            {t('nav.dogs') || 'Chats'}
-          </button>
-          <button
-            onClick={() => setActiveTab('requests')}
-            style={{
-              flex: 1,
-              padding: '12px 16px',
-              background: activeTab === 'requests' ? '#e6f7ff' : 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '14px'
-            }}
-          >
-            {t('nav.adoptionRequests') || 'Requests'}
-          </button>
-        </div>
-        {activeTab === 'chats' && (
-          <>
-            <div style={{ fontWeight: 'bold', padding: '12px 16px', borderBottom: '1px solid #eee' }}>{t('onlineUsers') || 'Online Users'}</div>
-            {onlineUsers.length === 0 ? (
-              <div style={{ padding: 16, color: '#888' }}>{t('noUsersOnline') || 'No users online.'}</div>
-            ) : (
-              <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {onlineUsers.map(u => (
-                  <li key={u._id} 
-                      style={{ display: 'flex', alignItems: 'center', padding: '10px 16px', cursor: 'pointer', background: selectedConvo && selectedConvo.participants.includes(u._id) ? '#e6f7ff' : 'transparent' }}
-                      onClick={() => startConversation(u._id)}>
-                    <img 
-                      src={getProfilePic(u)}
-                      alt={u.userName || 'User'}
-                      style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 12, objectFit: 'cover', border: '1px solid #ddd' }} 
-                    />
-                    <span style={{ flex: 1 }}>{u.userName || u._id}</span>
-                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#4caf50', display: 'inline-block', marginLeft: 8 }} title="Online"></span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
-        {activeTab === 'requests' && (
-          <>
-            <div style={{ fontWeight: 'bold', padding: '12px 16px', borderBottom: '1px solid #eee' }}>{t('adoption.title') || 'Requests'}</div>
-            {loadingRequests ? (
-              <div style={{ padding: 16, color: '#888' }}>{t('adoption.loading') || 'Loading...'}</div>
-            ) : adoptionRequests.length === 0 ? (
-              <div style={{ padding: 16, color: '#888' }}>{t('adoption.noRequests') || 'No adoption requests found.'}</div>
-            ) : (
-              <ul style={{ listStyle: 'none', margin: 0, padding: 0, maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
-                {adoptionRequests.map((req: any) => (
-                  <li key={req._id} style={{ padding: '12px 16px', borderBottom: '1px solid #eee' }}>
-                    <div style={{ fontWeight: 'bold', marginBottom: 4 }}>{req.dog?.name || t('adoptionRequests.unknownDog')}</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>{t('adoption.adopter') || 'Adopter:'} {req.adopter?.name || req.adopter?.username || 'Unknown'}</div>
-                    <div style={{ fontSize: '12px', color: '#888' }}>{t('adoption.status.' + req.status) || req.status}</div>
-                    <button
-                      onClick={() => {
-                        setActiveTab('chats');
-                        if (req.adopter && req.adopter._id) {
-                          startConversation(req.adopter._id);
-                        }
-                      }}
-                      style={{
-                        marginTop: 8,
-                        background: '#1890ff',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 4,
-                        padding: '6px 12px',
-                        cursor: 'pointer',
-                        fontSize: '12px'
-                      }}
-                    >
-                      {t('adoption.goToChat') || 'Go to Chat'}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
+        <div style={{ fontWeight: 'bold', padding: '12px 16px', borderBottom: '1px solid #eee' }}>{t('onlineUsers') || 'Online Users'}</div>
+        {onlineUsers.length === 0 ? (
+          <div style={{ padding: 16, color: '#888' }}>{t('noUsersOnline') || 'No users online.'}</div>
+        ) : (
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {onlineUsers.map(u => (
+              <li key={u._id} 
+                  style={{ display: 'flex', alignItems: 'center', padding: '10px 16px', cursor: 'pointer', background: selectedConvo && selectedConvo.participants.includes(u._id) ? '#e6f7ff' : 'transparent' }}
+                  onClick={() => startConversation(u._id)}>
+                <img 
+                  src={getProfilePic(u)}
+                  alt={u.userName || 'User'}
+                  style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 12, objectFit: 'cover', border: '1px solid #ddd' }} 
+                />
+                <span style={{ flex: 1 }}>{u.userName || u._id}</span>
+                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#4caf50', display: 'inline-block', marginLeft: 8 }} title="Online"></span>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>

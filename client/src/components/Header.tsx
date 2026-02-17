@@ -290,7 +290,7 @@ const Header: React.FC = () => {
                 whiteSpace: 'normal',
               }}
             >
-              Morate biti prijavljeni
+              {t('nav.mustBeLoggedIn')}
             </p>
           </div>
 

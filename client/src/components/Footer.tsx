@@ -118,29 +118,35 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
             <Link to="/psi">
               <li title={t('nav.dogs')}>
                 <span className="eky-icon eky-eky"></span>
+                <span className="desktop-label">{t('footer.dogs')}</span>
               </li>
             </Link>
-            <li title={t('button.chat') || 'Chat'} onClick={typeof onChatClick === 'function' ? onChatClick : undefined} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: 40 }}>
-              <img src="/img/paper-airplane.svg" alt="Chat" style={{ width: 28, height: 28, display: 'block', filter: 'drop-shadow(0 1px 2px #1976d2)', color: '#2196f3' }} />
+            <li title={t('button.chat') || 'Chat'} onClick={typeof onChatClick === 'function' ? onChatClick : undefined}>
+              <img src="/img/paper-airplane.svg" alt="Chat" style={{ width: 28, height: 28, display: 'inline-block', filter: 'drop-shadow(0 1px 2px #1976d2)', color: '#2196f3' }} />
+              <span className="desktop-label">{t('footer.chat')}</span>
             </li>
             <Link to="/dodajpsa">
               <li title={t('adddog.title')}>
                 <span className="eky-icon eky-add-dog">+</span>
+                <span className="desktop-label">{t('footer.addDog')}</span>
               </li>
             </Link>
             {isAuthenticated && user ? (
-              <li title={`${user.username} - ${t('userProfile.welcome') || 'User Profile'}`} onClick={handleUserIconClick} style={{ cursor: 'pointer' }}>
+              <li title={`${user.username} - ${t('userProfile.welcome') || 'User Profile'}`} onClick={handleUserIconClick}>
                 <span className="eky-icon eky-user"></span>
+                <span className="desktop-label">{t('footer.profile')}</span>
               </li>
             ) : (
               <Link to="/logiranje">
                 <li title={t('nav.login')}>
                   <span className="eky-icon eky-user"></span>
+                  <span className="desktop-label">{t('footer.login')}</span>
                 </li>
               </Link>
             )}
-            <li title={t('search.placeholder')} onClick={handleSearchIconClick} style={{ cursor: 'pointer' }}>
+            <li title={t('search.placeholder')} onClick={handleSearchIconClick}>
               <span className="eky-icon eky-search"></span>
+              <span className="desktop-label">{t('footer.search')}</span>
             </li>
           </ul>
 

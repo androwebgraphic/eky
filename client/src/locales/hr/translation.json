@@ -9,7 +9,8 @@
     "login": "Logiraj se",
     "register": "Registracija",
     "dogs": "Psi",
-    "adoptionRequests": "Zahtjevi"
+    "adoptionRequests": "Zahtjevi",
+    "mustBeLoggedIn": "Morate biti prijavljeni"
   },
   "button": {
     "findFriend": "Pronađi zauvijek prijatelja",
@@ -300,5 +301,13 @@
     "errorSendingAdoptionRequest": "Dogodila se greška prilikom slanja zahtjeva za posvajanje. Provjerite konzolu preglednika (F12) za detalje.",
     "videoFailedToLoad": "Video se nije učitao",
     "imageFailedToLoad": "Slika se nije učitala"
+  },
+  "footer": {
+    "dogs": "Psi",
+    "chat": "Razgovor",
+    "addDog": "Dodaj psa",
+    "profile": "Profil",
+    "login": "Prijavi se",
+    "search": "Pretraga"
   }
 }

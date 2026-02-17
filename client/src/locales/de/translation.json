@@ -9,7 +9,8 @@
     "login": "Anmelden",
     "register": "Registrieren",
     "dogs": "Hunde",
-    "adoptionRequests": "Anfragen"
+    "adoptionRequests": "Anfragen",
+    "mustBeLoggedIn": "Sie müssen angemeldet sein"
   },
   "button": {
     "findFriend": "Finde deinen treuen Freund",
@@ -164,7 +165,7 @@
     "notVaccinated": "Nicht geimpft",
     "neutered": "Kastriert",
     "notNeutered": "Nicht kastriert",
-    "approximateLocation": "Ungefähre Lage angezeigt",
+    "approximateLocation": "Ungefährre Lage angezeigt",
     "searchBasedLocation": "Standort basierend auf Suche",
     "loadingMap": "Karte wird geladen...",
     "mapPreview": "Kartenvorschau",
@@ -281,5 +282,13 @@
     "errorSendingAdoptionRequest": "Beim Senden der Adoptionsanfrage ist ein Fehler aufgetreten. Überprüfen Sie die Browser-Konsole (F12) für Details.",
     "videoFailedToLoad": "Video konnte nicht geladen werden",
     "imageFailedToLoad": "Bild konnte nicht geladen werden"
+  },
+  "footer": {
+    "dogs": "Hunde",
+    "chat": "Chat",
+    "addDog": "Hund hinzufügen",
+    "profile": "Profil",
+    "login": "Anmelden",
+    "search": "Suche"
   }
 }

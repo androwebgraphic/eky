@@ -1556,3 +1556,14 @@ h1.extra-large {
   color: #fff;
   border: 2px solid #a11a1a;
 }
+
+/* Footer navigation - hide labels on mobile, show on desktop */
+#footer-nav .desktop-label {
+  display: none !important;
+}
+
+@media (min-width: 769px) {
+  #footer-nav .desktop-label {
+    display: inline-block !important;
+  }
+}

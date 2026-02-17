@@ -303,7 +303,7 @@ function DogList() {
 					</div>
 				) : (
 					<div style={{ padding: '0 16px' }}>
-						{filteredDogs.map(dog => {
+						{filteredDogs.map((dog, index) => {
 						// Deduplicate images by base name before passing to CardSmall
 						const getImageBase = (url: string) => {
 							let cleanUrl = url.split('?')[0];
@@ -329,28 +329,29 @@ function DogList() {
 						const isSuperAdmin = user?.role === 'superadmin';
 						const canEdit = isOwner || isSuperAdmin;
 
-						return (
-							<CardSmall
-								key={dog._id}
-								{...dog}
-								images={dedupedImages}
-								canEdit={canEdit}
-								onEdit={() => handleEdit(dog)}
-								onRemove={() => handleRemove(dog)}
-								onViewDetails={e => {
-									// Always close any open modals before opening new details
-									setEditDog(null);
-									setDetailsDog(null);
-									setMapDog(null);
-									if (e && Object.keys(e).length === 0) {
-										// Location click - open map only
-										openMapForDog(dog);
-									} else {
-										handleDetails(dog);
-									}
-								}}
-							/>
-						);
+							return (
+								<div key={dog._id} style={{ marginBottom: index < filteredDogs.length - 1 ? '20px' : '0' }}>
+									<CardSmall
+										{...dog}
+										images={dedupedImages}
+										canEdit={canEdit}
+										onEdit={() => handleEdit(dog)}
+										onRemove={() => handleRemove(dog)}
+										onViewDetails={e => {
+											// Always close any open modals before opening new details
+											setEditDog(null);
+											setDetailsDog(null);
+											setMapDog(null);
+											if (e && Object.keys(e).length === 0) {
+												// Location click - open map only
+												openMapForDog(dog);
+											} else {
+												handleDetails(dog);
+											}
+										}}
+									/>
+								</div>
+							);
 						})
 					}
 					</div>

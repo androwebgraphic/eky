@@ -116,6 +116,38 @@ const RegisterForm: React.FC = () => {
         <input type="password" id="register-passwordAgain" name="passwordAgain" autoComplete="new-password" placeholder={t('register.passwordAgain')} {...register('passwordAgain')} />
         <p className="error">{errors.passwordAgain?.message as string}</p>
 
+        <div style={{ margin: '1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <label htmlFor="register-remember" style={{ cursor: 'pointer', fontSize: '1rem' }}>
+            <input 
+              type="checkbox" 
+              id="register-remember" 
+              name="remember" 
+              autoComplete="off" 
+              {...register('remember')}
+              style={{
+                width: '20px',
+                height: '20px',
+                cursor: 'pointer',
+                accentColor: '#1976d2'
+              }}
+            />
+            <span style={{ marginLeft: '0.5rem', cursor: 'pointer' }}>{t('register.remember')}</span>
+          </label>
+        </div>
+
+        <div style={{ margin: '1rem 0' }}>
+          <p style={{ margin: 0, marginBottom: '0.5rem', fontSize: '1rem' }}>
+            <strong>{t('register.already')}</strong>
+          </p>
+          <p 
+            className="log" 
+            onClick={() => { navigate('/logiranje'); }}
+            style={{ margin: 0, cursor: 'pointer', color: '#1976d2' }}
+          >
+            {t('nav.login')}...
+          </p>
+        </div>
+
         <div style={{ margin: '1rem 0' }}>
           <input
             type="checkbox"
@@ -128,11 +160,36 @@ const RegisterForm: React.FC = () => {
             <span style={{ cursor: 'pointer', color: '#1976d2', textDecoration: 'underline' }} onClick={e => { e.preventDefault(); setShowTerms(true); }}>
               {t('terms_of_use_title')}
             </span>
-            {` ` + t('Accept')}
           </label>
         </div>
-        <button type="submit" id="register" name="register" className="details" disabled={isSubmitting || !acceptedTerms}>
-          {isSubmitting ? t('button.submitting') || 'Submitting...' : (t('button.register') || 'Register')}
+        <button 
+          type="submit" 
+          id="register" 
+          name="register" 
+          className="details" 
+          disabled={isSubmitting || !acceptedTerms}
+          style={{
+            padding: '0.75rem 1.5rem',
+            backgroundColor: '#4caf50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            cursor: isSubmitting || !acceptedTerms ? 'not-allowed' : 'pointer',
+            transition: 'background-color 0.2s',
+            whiteSpace: 'nowrap'
+          }}
+          onMouseOver={(e) => {
+            if (!isSubmitting && acceptedTerms) {
+              e.currentTarget.style.backgroundColor = '#388e3c';
+            }
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#4caf50';
+          }}
+        >
+          {isSubmitting ? (t('button.submitting') || 'Submitting...') : (t('button.register') || 'Register')}
         </button>
       </form>
       <TermsModal
@@ -143,15 +200,6 @@ const RegisterForm: React.FC = () => {
           setShowTerms(false);
         }}
       />
-      <p>
-        {t('register.remember')} <input type="checkbox" id="register-remember" name="remember" autoComplete="off" {...register('remember')} />
-      </p>
-      <p>
-        <strong>{t('register.already')}</strong>
-      </p>
-      <p className="log" onClick={() => { navigate('/logiranje'); }}>
-        {t('nav.login')}...
-      </p>
 
       {/* ...removed alternative social register... */}
     </main>

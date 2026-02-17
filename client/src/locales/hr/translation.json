@@ -129,7 +129,14 @@
     "female": "Ženka"
   },
   "adddogExtra": {
-    "ageNote": "Možete upisati i decimalnu vrijednost (npr. 3.6 godina)"
+    "ageNote": "Možete upisati i decimalnu vrijednost (npr. 3.6 godina)",
+    "ageCategory": "Kategorija starosti (Brzi odabir)",
+    "selectAgeCategory": "-- Odaberite kategoriju starosti --",
+    "ageCategory.puppy": "Štene (0-1 god)",
+    "ageCategory.youngAdult": "Mladi odrasli (1-3 god)",
+    "ageCategory.adult": "Odrasli (3-7 god)",
+    "ageCategory.senior": "Stariji (7-10 god)",
+    "ageCategory.seniorPlus": "Stariji+ (10+ god)"
   },
   "social": {},
   "share": {

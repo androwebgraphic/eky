@@ -113,7 +113,14 @@
     "large": "Groß"
   },
   "adddogExtra": {
-    "ageNote": "Sie können einen Dezimalwert eingeben (z. B. 3,6 Jahre)"
+    "ageNote": "Sie können einen Dezimalwert eingeben (z. B. 3,6 Jahre)",
+    "ageCategory": "Alterskategorie (Schnellauswahl)",
+    "selectAgeCategory": "-- Alterskategorie auswählen --",
+    "ageCategory.puppy": "Welpe (0-1 Jahr)",
+    "ageCategory.youngAdult": "Junger Hund (1-3 Jahre)",
+    "ageCategory.adult": "Erwachsener (3-7 Jahre)",
+    "ageCategory.senior": "Senior (7-10 Jahre)",
+    "ageCategory.seniorPlus": "Senior+ (10+ Jahre)"
   },
   "social": {
     

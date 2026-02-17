@@ -5,6 +5,175 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import '../../css/edit-modal.css';
 
+// Comprehensive list of dog breeds with "Mixed Breed" at the top
+const DOG_BREEDS = [
+  'Mixed Breed',
+  'Afghan Hound',
+  'Airedale Terrier',
+  'Akita',
+  'Alaskan Malamute',
+  'American Bulldog',
+  'American Cocker Spaniel',
+  'American Eskimo Dog',
+  'American Foxhound',
+  'American Pit Bull Terrier',
+  'American Staffordshire Terrier',
+  'American Water Spaniel',
+  'Anatolian Shepherd Dog',
+  'Australian Cattle Dog',
+  'Australian Kelpie',
+  'Australian Shepherd',
+  'Australian Terrier',
+  'Basenji',
+  'Basset Hound',
+  'Beagle',
+  'Bearded Collie',
+  'Bedlington Terrier',
+  'Belgian Malinois',
+  'Belgian Sheepdog',
+  'Belgian Tervuren',
+  'Bernese Mountain Dog',
+  'Bichon Frise',
+  'Black and Tan Coonhound',
+  'Bloodhound',
+  'Border Collie',
+  'Border Terrier',
+  'Borzoi',
+  'Boston Terrier',
+  'Bouvier des Flandres',
+  'Boxer',
+  'Briard',
+  'Brittany',
+  'Brussels Griffon',
+  'Bull Terrier',
+  'Bulldog',
+  'Bullmastiff',
+  'Cairn Terrier',
+  'Canaan Dog',
+  'Cardigan Welsh Corgi',
+  'Cavalier King Charles Spaniel',
+  'Chesapeake Bay Retriever',
+  'Chihuahua',
+  'Chinese Crested',
+  'Chinese Shar-Pei',
+  'Chow Chow',
+  'Clumber Spaniel',
+  'Cocker Spaniel',
+  'Collie',
+  'Curly-Coated Retriever',
+  'Dachshund',
+  'Dalmatian',
+  'Dandie Dinmont Terrier',
+  'Doberman Pinscher',
+  'Dogue de Bordeaux',
+  'English Cocker Spaniel',
+  'English Foxhound',
+  'English Setter',
+  'English Springer Spaniel',
+  'English Toy Spaniel',
+  'Field Spaniel',
+  'Finnish Lapphund',
+  'Finnish Spitz',
+  'Flat-Coated Retriever',
+  'French Bulldog',
+  'German Pinscher',
+  'German Shepherd Dog',
+  'German Shorthaired Pointer',
+  'German Wirehaired Pointer',
+  'Giant Schnauzer',
+  'Glen of Imaal Terrier',
+  'Golden Retriever',
+  'Gordon Setter',
+  'Great Dane',
+  'Great Pyrenees',
+  'Greater Swiss Mountain Dog',
+  'Greyhound',
+  'Harrier',
+  'Havanese',
+  'Ibizan Hound',
+  'Irish Setter',
+  'Irish Terrier',
+  'Irish Water Spaniel',
+  'Irish Wolfhound',
+  'Italian Greyhound',
+  'Jack Russell Terrier',
+  'Japanese Chin',
+  'Keeshond',
+  'Kerry Blue Terrier',
+  'Komondor',
+  'Kuvasz',
+  'Labrador Retriever',
+  'Lakeland Terrier',
+  'Lhasa Apso',
+  'Lowchen',
+  'Maltese',
+  'Manchester Terrier',
+  'Mastiff',
+  'Miniature Bull Terrier',
+  'Miniature Pinscher',
+  'Miniature Schnauzer',
+  'Neapolitan Mastiff',
+  'Newfoundland',
+  'Norfolk Terrier',
+  'Norwegian Buhund',
+  'Norwegian Elkhound',
+  'Norwegian Lundehund',
+  'Norwich Terrier',
+  'Nova Scotia Duck Tolling Retriever',
+  'Old English Sheepdog',
+  'Otterhound',
+  'Papillon',
+  'Parson Russell Terrier',
+  'Pekingese',
+  'Pembroke Welsh Corgi',
+  'Pharaoh Hound',
+  'Plott',
+  'Pointer',
+  'Pomeranian',
+  'Poodle',
+  'Portuguese Water Dog',
+  'Pug',
+  'Puli',
+  'Pyrenean Shepherd',
+  'Rhodesian Ridgeback',
+  'Rottweiler',
+  'Saint Bernard',
+  'Saluki',
+  'Samoyed',
+  'Schipperke',
+  'Scottish Deerhound',
+  'Scottish Terrier',
+  'Sealyham Terrier',
+  'Shetland Sheepdog',
+  'Shiba Inu',
+  'Shih Tzu',
+  'Siberian Husky',
+  'Silky Terrier',
+  'Skye Terrier',
+  'Smooth Fox Terrier',
+  'Soft Coated Wheaten Terrier',
+  'Spanish Water Dog',
+  'Spinone Italiano',
+  'St. Bernard',
+  'Staffordshire Bull Terrier',
+  'Standard Schnauzer',
+  'Sussex Spaniel',
+  'Swedish Vallhund',
+  'Tibetan Mastiff',
+  'Tibetan Spaniel',
+  'Tibetan Terrier',
+  'Toy Fox Terrier',
+  'Vizsla',
+  'Weimaraner',
+  'Welsh Springer Spaniel',
+  'Welsh Terrier',
+  'West Highland White Terrier',
+  'Whippet',
+  'Wire Fox Terrier',
+  'Wirehaired Pointing Griffon',
+  'Yorkshire Terrier'
+];
+
 // Portal container for modal
 const modalRoot = document.getElementById('editdog-modal-root') || (() => {
   const root = document.createElement('div');
@@ -25,6 +194,7 @@ interface EditDogFormData {
   color?: string;
   location?: string;
   age?: number;
+  ageCategory?: string;
   description?: string;
   size?: 'small' | 'medium' | 'large';
   gender?: 'male' | 'female';
@@ -99,6 +269,7 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
   const isMounted = useRef(true);
   const { t } = useTranslation();
   const { token, isAuthenticated } = useAuth();
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<EditDogFormData>({ defaultValues: dog });
   const headerHeight = isAuthenticated ? 60 : 120;
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
@@ -153,7 +324,19 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
   const [selectedToDelete, setSelectedToDelete] = useState<Set<number>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<EditDogFormData>({ defaultValues: dog });
+
+  // Watch age category changes
+  const watchAgeCategory = watch('ageCategory');
+
+  // Update age when category is selected
+  useEffect(() => {
+    if (watchAgeCategory) {
+      const ageValue = parseFloat(watchAgeCategory);
+      if (!isNaN(ageValue)) {
+        setValue('age', ageValue);
+      }
+    }
+  }, [watchAgeCategory, setValue]);
 
 
   useEffect(() => {
@@ -558,6 +741,7 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
                 name="breed"
                 type="text" 
                 autoComplete="off"
+                list="dog-breeds"
                 {...register('breed')} 
                 style={{
                   width: '100%',
@@ -568,6 +752,13 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
                   boxSizing: 'border-box'
                 }}
               />
+              <datalist id="dog-breeds">
+                {DOG_BREEDS.map((breed) => (
+                  <option key={breed} value={breed}>
+                    {breed}
+                  </option>
+                ))}
+              </datalist>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label htmlFor="editdog-color" style={{ fontWeight: 'bold' }}>{t('adddog.color')}</label>
@@ -614,22 +805,30 @@ function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label htmlFor="editdog-age" style={{ fontWeight: 'bold' }}>{t('adddog.age')}</label>
-              <input 
-                id="editdog-age"
-                name="age"
-                type="number" 
+              <label htmlFor="editdog-age-category" style={{ fontWeight: 'bold' }}>{t('adddogExtra.ageCategory')}</label>
+              <select 
+                id="editdog-age-category"
+                name="ageCategory"
                 autoComplete="off"
-                {...register('age', { valueAsNumber: true })} 
+                {...register('ageCategory')}
                 style={{
                   width: '100%',
                   padding: '0.75rem',
                   border: '2px solid #ddd',
                   borderRadius: '8px',
                   fontSize: '1rem',
+                  backgroundColor: '#fff',
                   boxSizing: 'border-box'
                 }}
-              />
+              >
+                <option value="">{t('adddogExtra.selectAgeCategory')}</option>
+                <option value="0.5">{t('adddogExtra.ageCategory.puppy')}</option>
+                <option value="2">{t('adddogExtra.ageCategory.youngAdult')}</option>
+                <option value="5">{t('adddogExtra.ageCategory.adult')}</option>
+                <option value="8.5">{t('adddogExtra.ageCategory.senior')}</option>
+                <option value="11">{t('adddogExtra.ageCategory.seniorPlus')}</option>
+              </select>
+              <input type="hidden" {...register('age', { valueAsNumber: true })} />
             </div>
           </div>
 

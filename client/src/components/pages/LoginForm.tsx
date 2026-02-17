@@ -34,9 +34,14 @@ const LoginForm: React.FC = () => {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: yupResolver(schema),
+    defaultValues: {
+      remember: false
+    }
   });
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
@@ -65,9 +70,13 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <main>
-      <h2>{t('login.title')}</h2>
-      <form id="login-form" onSubmit={handleSubmit(onSubmit)}>
+    <main style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <h2 style={{ margin: 0 }}>{t('login.title')}</h2>
+      <form 
+        id="login-form" 
+        onSubmit={handleSubmit(onSubmit)}
+        style={{ marginTop: 0 }}
+      >
         {loginError && (
           <div className="error" style={{ marginBottom: '1rem', padding: '0.5rem', backgroundColor: '#ffebee', border: '1px solid #e57373', borderRadius: '4px' }}>
             {loginError}
@@ -82,26 +91,89 @@ const LoginForm: React.FC = () => {
         <input type="password" id="login-password" name="password" autoComplete="current-password" placeholder={t('register.password')} {...register('password')} />
         <p className="error">{errors.password?.message as string}</p>
 
-        <button id="login" className="details" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (t('button.submitting') || 'Submitting...') : (t('button.login') || 'Login')}
-        </button>
-        
-        {/* Debug button - Remove after testing */}
-        <button 
-          type="button" 
-          onClick={() => {
-            console.log('🔍 DEBUG: Current state - isSubmitting:', isSubmitting, 'loginError:', loginError);
-            setIsSubmitting(false); // Force reset
-          }}
-          style={{ marginLeft: '10px', backgroundColor: '#ff9800', color: 'white', padding: '5px 10px', border: 'none', borderRadius: '4px' }}
-        >
-          Reset Button
-        </button>
-      </form>
+        <label htmlFor="login-remember" style={{ 
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          marginTop: '0.5rem',
+          marginBottom: '1rem'
+        }}>
+          <input 
+            type="checkbox" 
+            id="login-remember" 
+            name="remember" 
+            checked={watch('remember') === true}
+            onChange={(e) => setValue('remember', e.target.checked)}
+            autoComplete="off" 
+            style={{
+              width: '20px',
+              height: '20px',
+              cursor: 'pointer',
+              accentColor: '#1976d2'
+            }}
+          />
+          <span style={{ cursor: 'pointer', fontSize: '1rem' }}>{t('login.remember')}</span>
+        </label>
 
-      <p>
-        {t('login.remember')} <input type="checkbox" id="login-remember" name="remember" autoComplete="off" {...register('remember')} />
-      </p>
+        {/* Action buttons side by side */}
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button 
+            id="login" 
+            type="submit" 
+            disabled={isSubmitting}
+            style={{
+              flex: '2.5',
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#4caf50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
+              transition: 'background-color 0.2s',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseOver={(e) => {
+              if (!isSubmitting) {
+                e.currentTarget.style.backgroundColor = '#388e3c';
+              }
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = '#4caf50';
+            }}
+          >
+            {isSubmitting ? (t('button.submitting') || 'Submitting...') : (t('button.login') || 'Login')}
+          </button>
+          
+          <button 
+            type="button"
+            onClick={() => navigate('/registracija')}
+            style={{
+              flex: '3',
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#75171a',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = '#5c1114';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = '#75171a';
+            }}
+          >
+            {t('button.register')}
+          </button>
+        </div>
+      </form>
       {/* ...removed alternative social login... */}
     </main>
   );

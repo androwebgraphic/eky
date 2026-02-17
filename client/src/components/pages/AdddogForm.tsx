@@ -10,6 +10,7 @@ interface AddDogFormData {
   color?: string;
   location: string;
   age: number;
+  ageCategory?: string;
   description: string;
   size: 'small' | 'medium' | 'large';
   gender?: 'male' | 'female';
@@ -20,15 +21,184 @@ interface AddDogFormData {
 // Use API URL from environment, fallback to localhost:3001
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
-// Media restrictions constants
+// Media restriction constants
 const MAX_IMAGES_NON_ADMIN = 3;
 const MAX_VIDEOS_NON_ADMIN = 1;
 const MAX_VIDEO_DURATION_SECONDS = 30;
 
+// Comprehensive list of dog breeds with "Mixed Breed" at the top
+const DOG_BREEDS = [
+  'Mixed Breed',
+  'Afghan Hound',
+  'Airedale Terrier',
+  'Akita',
+  'Alaskan Malamute',
+  'American Bulldog',
+  'American Cocker Spaniel',
+  'American Eskimo Dog',
+  'American Foxhound',
+  'American Pit Bull Terrier',
+  'American Staffordshire Terrier',
+  'American Water Spaniel',
+  'Anatolian Shepherd Dog',
+  'Australian Cattle Dog',
+  'Australian Kelpie',
+  'Australian Shepherd',
+  'Australian Terrier',
+  'Basenji',
+  'Basset Hound',
+  'Beagle',
+  'Bearded Collie',
+  'Bedlington Terrier',
+  'Belgian Malinois',
+  'Belgian Sheepdog',
+  'Belgian Tervuren',
+  'Bernese Mountain Dog',
+  'Bichon Frise',
+  'Black and Tan Coonhound',
+  'Bloodhound',
+  'Border Collie',
+  'Border Terrier',
+  'Borzoi',
+  'Boston Terrier',
+  'Bouvier des Flandres',
+  'Boxer',
+  'Briard',
+  'Brittany',
+  'Brussels Griffon',
+  'Bull Terrier',
+  'Bulldog',
+  'Bullmastiff',
+  'Cairn Terrier',
+  'Canaan Dog',
+  'Cardigan Welsh Corgi',
+  'Cavalier King Charles Spaniel',
+  'Chesapeake Bay Retriever',
+  'Chihuahua',
+  'Chinese Crested',
+  'Chinese Shar-Pei',
+  'Chow Chow',
+  'Clumber Spaniel',
+  'Cocker Spaniel',
+  'Collie',
+  'Curly-Coated Retriever',
+  'Dachshund',
+  'Dalmatian',
+  'Dandie Dinmont Terrier',
+  'Doberman Pinscher',
+  'Dogue de Bordeaux',
+  'English Cocker Spaniel',
+  'English Foxhound',
+  'English Setter',
+  'English Springer Spaniel',
+  'English Toy Spaniel',
+  'Field Spaniel',
+  'Finnish Lapphund',
+  'Finnish Spitz',
+  'Flat-Coated Retriever',
+  'French Bulldog',
+  'German Pinscher',
+  'German Shepherd Dog',
+  'German Shorthaired Pointer',
+  'German Wirehaired Pointer',
+  'Giant Schnauzer',
+  'Glen of Imaal Terrier',
+  'Golden Retriever',
+  'Gordon Setter',
+  'Great Dane',
+  'Great Pyrenees',
+  'Greater Swiss Mountain Dog',
+  'Greyhound',
+  'Harrier',
+  'Havanese',
+  'Ibizan Hound',
+  'Irish Setter',
+  'Irish Terrier',
+  'Irish Water Spaniel',
+  'Irish Wolfhound',
+  'Italian Greyhound',
+  'Jack Russell Terrier',
+  'Japanese Chin',
+  'Keeshond',
+  'Kerry Blue Terrier',
+  'Komondor',
+  'Kuvasz',
+  'Labrador Retriever',
+  'Lakeland Terrier',
+  'Lhasa Apso',
+  'Lowchen',
+  'Maltese',
+  'Manchester Terrier',
+  'Mastiff',
+  'Miniature Bull Terrier',
+  'Miniature Pinscher',
+  'Miniature Schnauzer',
+  'Neapolitan Mastiff',
+  'Newfoundland',
+  'Norfolk Terrier',
+  'Norwegian Buhund',
+  'Norwegian Elkhound',
+  'Norwegian Lundehund',
+  'Norwich Terrier',
+  'Nova Scotia Duck Tolling Retriever',
+  'Old English Sheepdog',
+  'Otterhound',
+  'Papillon',
+  'Parson Russell Terrier',
+  'Pekingese',
+  'Pembroke Welsh Corgi',
+  'Pharaoh Hound',
+  'Plott',
+  'Pointer',
+  'Pomeranian',
+  'Poodle',
+  'Portuguese Water Dog',
+  'Pug',
+  'Puli',
+  'Pyrenean Shepherd',
+  'Rhodesian Ridgeback',
+  'Rottweiler',
+  'Saint Bernard',
+  'Saluki',
+  'Samoyed',
+  'Schipperke',
+  'Scottish Deerhound',
+  'Scottish Terrier',
+  'Sealyham Terrier',
+  'Shetland Sheepdog',
+  'Shiba Inu',
+  'Shih Tzu',
+  'Siberian Husky',
+  'Silky Terrier',
+  'Skye Terrier',
+  'Smooth Fox Terrier',
+  'Soft Coated Wheaten Terrier',
+  'Spanish Water Dog',
+  'Spinone Italiano',
+  'St. Bernard',
+  'Staffordshire Bull Terrier',
+  'Standard Schnauzer',
+  'Sussex Spaniel',
+  'Swedish Vallhund',
+  'Tibetan Mastiff',
+  'Tibetan Spaniel',
+  'Tibetan Terrier',
+  'Toy Fox Terrier',
+  'Vizsla',
+  'Weimaraner',
+  'Welsh Springer Spaniel',
+  'Welsh Terrier',
+  'West Highland White Terrier',
+  'Whippet',
+  'Wire Fox Terrier',
+  'Wirehaired Pointing Griffon',
+  'Yorkshire Terrier'
+];
+
 const AdddogForm: React.FC = () => {
   const { t } = useTranslation();
   const { token, isAuthenticated, user } = useAuth();
-  const { register, handleSubmit, formState: { errors } } = useForm<AddDogFormData>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<AddDogFormData>({
     defaultValues: {
       vaccinated: false,
       neutered: false,
@@ -36,13 +206,41 @@ const AdddogForm: React.FC = () => {
   });
   const navigate = useNavigate();
   const isMountedRef = useRef(true);
-  
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // State for form status
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // State for media handling
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [smallPreview, setSmallPreview] = useState<string | null>(null);
+  const [isVideo, setIsVideo] = useState(false);
+  const [posterBlob, setPosterBlob] = useState<Blob | null>(null);
+  const [mediaError, setMediaError] = useState<string | null>(null);
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
+
   // Check if user is superadmin
   const isSuperAdmin = user?.role === 'superadmin';
 
+  // Watch age category changes
+  const watchAgeCategory = watch('ageCategory');
+
+  // Update age when category is selected
+  useEffect(() => {
+    if (watchAgeCategory) {
+      const ageValue = parseFloat(watchAgeCategory);
+      if (!isNaN(ageValue)) {
+        setValue('age', ageValue);
+      }
+    }
+  }, [watchAgeCategory, setValue]);
+
   useEffect(() => {
     console.log('🔐 AddDogForm auth state:', { isAuthenticated, hasToken: !!token, tokenLength: token?.length });
-    
+
     if (!isAuthenticated || !token) {
       console.warn('⚠️ User not authenticated, redirecting to login');
       navigate('/logiranje');
@@ -52,37 +250,33 @@ const AdddogForm: React.FC = () => {
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
+      // Cancel any pending fetch requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, []);
 
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
-  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
-  const [smallPreview, setSmallPreview] = useState<string | null>(null);
-  const [isVideo, setIsVideo] = useState(false);
-  const [posterBlob, setPosterBlob] = useState<Blob | null>(null);
-  const [mediaError, setMediaError] = useState<string | null>(null);
-  const [videoDuration, setVideoDuration] = useState<number | null>(null);
-  
-  // Get video duration
+  // Helper: Get video duration
   const getVideoDuration = (file: File): Promise<number> => {
     return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(file);
       const video = document.createElement('video');
       video.preload = 'metadata';
       video.src = url;
-      
-      video.onloadedmetadata = function() {
+
+      video.onloadedmetadata = function () {
         URL.revokeObjectURL(url);
         resolve(video.duration);
       };
-      video.onerror = function() {
+      video.onerror = function () {
         URL.revokeObjectURL(url);
         reject(new Error('Could not load video metadata'));
       };
     });
   };
 
-  // create poster image for a video file by capturing first frame in browser
+  // Helper: create poster image for a video file
   const createVideoPoster = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(file);
@@ -90,8 +284,8 @@ const AdddogForm: React.FC = () => {
       video.preload = 'metadata';
       video.muted = true;
       video.src = url;
-      // attempt to jump to 1s so a frame is available
-      video.currentTime = 1;
+      video.currentTime = 1; // Attempt to jump to 1s
+
       const cleanup = () => URL.revokeObjectURL(url);
 
       video.onloadeddata = function () {
@@ -114,7 +308,7 @@ const AdddogForm: React.FC = () => {
     });
   };
 
-  // create a small thumbnail for image preview (data URL)
+  // Helper: create a small thumbnail for image preview
   const createImageThumbnail = (file: File, size = 64): Promise<string> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -124,7 +318,6 @@ const AdddogForm: React.FC = () => {
         let width = size;
         let height = Math.round(size / ratio);
         if (ratio < 1) {
-          // portrait
           height = size;
           width = Math.round(size * ratio);
         }
@@ -152,10 +345,14 @@ const AdddogForm: React.FC = () => {
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
+
+    // Reset previous states
+    setMediaError(null);
+    setVideoDuration(null);
+    setPosterBlob(null);
     
-    // For non-superadmin users, validate media restrictions on client side
+    // For non-superadmin users, validate media restrictions
     if (!isSuperAdmin) {
-      // Validate video duration
       if (f.type.startsWith('video/')) {
         try {
           const duration = await getVideoDuration(f);
@@ -167,40 +364,53 @@ const AdddogForm: React.FC = () => {
         } catch (err) {
           console.warn('Could not get video duration', err);
         }
-      } else if (f.type.startsWith('image/')) {
-        // For images, we only have 1 file input, so if it's an image, check it's within limit
-        // Note: Since the form only allows 1 file at a time, and non-superadmin can only upload 3 images,
-        // we just validate that it's an image (the backend will validate total count if adding to existing)
-        setVideoDuration(null);
       }
-    } else {
-      // Superadmin - reset any previous errors
-      setMediaError(null);
-      setVideoDuration(null);
     }
-    
+
     setMediaFile(f);
 
-    // revoke previous object URL if necessary
+    // Revoke previous object URLs to avoid memory leaks
     if (mediaPreview && mediaPreview.startsWith('blob:')) {
-      try { URL.revokeObjectURL(mediaPreview); } catch (err) { /* ignore */ }
+      URL.revokeObjectURL(mediaPreview);
+    }
+    if (smallPreview && smallPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(smallPreview);
     }
 
-    const url = URL.create
+    // Create main preview URL
+    const url = URL.createObjectURL(f);
+    setMediaPreview(url);
 
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-      // Cancel any pending fetch requests
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+    const videoCheck = f.type.startsWith('video/');
+    setIsVideo(videoCheck);
+
+    // Generate thumbnails/posters
+    if (videoCheck) {
+      try {
+        const poster = await createVideoPoster(f);
+        setPosterBlob(poster);
+        // Create a local URL for the poster blob for UI display
+        const posterUrl = URL.createObjectURL(poster);
+        setSmallPreview(posterUrl);
+      } catch (err) {
+        console.error('Error generating video poster:', err);
+        setSmallPreview(null);
       }
-    };
-  }, []);
+    } else {
+      try {
+        // For images, create a base64 thumbnail
+        const thumb = await createImageThumbnail(f);
+        setSmallPreview(thumb);
+      } catch (err) {
+        console.error('Error generating image thumbnail:', err);
+        setSmallPreview(null);
+      }
+    }
+  };
 
   const onSubmit: SubmitHandler<AddDogFormData> = async (fields) => {
     console.log('Form submit triggered with fields:', fields);
-    
+
     // Basic validation
     if (!fields.name?.trim()) {
       setSubmitError(t('adddog.nameRequired'));
@@ -213,17 +423,11 @@ const AdddogForm: React.FC = () => {
     if (!mediaFile) {
       setMediaError(t('adddog.mediaRequired') || 'Image is required');
       return;
-    } else {
-      setMediaError(null);
     }
-    
+
     try {
       setSubmitting(true);
       setSubmitError(null);
-
-      console.log('Form data will be sent to:', API_URL);
-      console.log('Current hostname:', window.location.hostname);
-      console.log('Window location:', window.location.href);
 
       const formData = new FormData();
       formData.append('name', fields.name);
@@ -234,7 +438,6 @@ const AdddogForm: React.FC = () => {
       if (fields.size) formData.append('size', fields.size);
       if (fields.location) formData.append('location', fields.location);
 
-      // Always send boolean values for checkboxes
       formData.append('vaccinated', fields.vaccinated ? 'true' : 'false');
       formData.append('neutered', fields.neutered ? 'true' : 'false');
 
@@ -247,24 +450,14 @@ const AdddogForm: React.FC = () => {
       }
 
       console.log('Submitting to:', `${API_URL}/api/dogs`);
-      console.log('Form data fields:', Object.fromEntries(formData.entries()));
-      console.log('Media file present:', !!mediaFile);
-      console.log('🔑 Token present:', !!token);
-      console.log('🔑 Token value:', token ? `${token.substring(0, 20)}...` : 'NO TOKEN');
-      
+
       abortControllerRef.current = new AbortController();
-      
-      const headers: any = {
-        // Don't set Content-Type for FormData, let browser set it with boundary
-      };
-      
+
+      const headers: Record<string, string> = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
-        console.log('✅ Authorization header set');
-      } else {
-        console.error('❌ NO TOKEN - Authorization header NOT set');
       }
-      
+
       const resp = await fetch(`${API_URL}/api/dogs`, {
         method: 'POST',
         body: formData,
@@ -273,50 +466,36 @@ const AdddogForm: React.FC = () => {
       });
 
       if (!resp.ok) {
-        // try to get JSON message
         let errMsg = `Upload failed with status ${resp.status} (${resp.statusText})`;
-        console.error('Response not OK:', resp.status, resp.statusText);
         try {
           const body = await resp.json();
-          console.error('Error body:', body);
           errMsg = body.message || JSON.stringify(body);
         } catch (e) {
-          console.error('Could not parse error as JSON:', e);
           const txt = await resp.text();
-          console.error('Error text:', txt);
-          if (txt) errMsg = txt.substring(0, 200); // limit error message length
+          if (txt) errMsg = txt.substring(0, 200);
         }
-        console.error('API error:', errMsg);
-        setSubmitError(errMsg);
         throw new Error(errMsg);
       }
 
-      // success → show confirmation and then go to list
       if (isMountedRef.current) {
         setSuccessMessage(t('adddog.added'));
-        // keep message visible briefly before navigating
-        setTimeout(() => { 
-          if (isMountedRef.current) navigate('/psi'); 
+        setTimeout(() => {
+          if (isMountedRef.current) navigate('/psi');
         }, 1400);
       }
     } catch (err: any) {
-      // Ignore abort errors (expected when component unmounts)
       if (err.name === 'AbortError') {
         console.log('Request was aborted (component unmounted)');
         return;
       }
-      
+
       console.error('Add dog failed:', err);
-      console.error('Error type:', err.name);
-      console.error('Error message:', err.message);
-      console.error('Full error:', err);
-      
       let errorMessage = t('adddog.failed');
       if (err.message) {
         errorMessage += `: ${err.message}`;
       }
-      
-      if (isMountedRef.current && !submitError) {
+
+      if (isMountedRef.current) {
         setSubmitError(errorMessage);
       }
     } finally {
@@ -327,18 +506,32 @@ const AdddogForm: React.FC = () => {
   return (
     <main>
       <h2>{t('adddog.title')}</h2>
-      {/* Temporary debug info */}
-      <div style={{background: '#f0f0f0', padding: '8px', margin: '8px 0', fontSize: '11px', borderRadius: '4px'}}>
+      <div style={{ background: '#f0f0f0', padding: '8px', margin: '8px 0', fontSize: '11px', borderRadius: '4px' }}>
         <strong>Debug:</strong> API_URL = {API_URL} | hostname = {window.location.hostname}
       </div>
-      
+
       <form id="adddog-form" onSubmit={handleSubmit(onSubmit)}>
         <label htmlFor="adddog-name">{t('adddog.name')}</label>
         <input type="text" id="adddog-name" name="name" autoComplete="name" placeholder={t('adddog.name')} {...register('name', { required: true })} />
-        {errors.name && <div className="error" role="alert">{t('adddog.name')} is required</div> }
+        {errors.name && <div className="error" role="alert">{t('adddog.name')} is required</div>}
 
         <label htmlFor="adddog-breed">{t('adddog.breed')}</label>
-        <input type="text" id="adddog-breed" name="breed" autoComplete="off" placeholder={t('adddog.breed')} {...register('breed')} />
+        <input 
+          type="text" 
+          id="adddog-breed" 
+          name="breed" 
+          autoComplete="off" 
+          placeholder={t('adddog.breed')} 
+          list="dog-breeds"
+          {...register('breed')} 
+        />
+        <datalist id="dog-breeds">
+          {DOG_BREEDS.map((breed) => (
+            <option key={breed} value={breed}>
+              {breed}
+            </option>
+          ))}
+        </datalist>
 
         <label htmlFor="adddog-color">{t('adddog.color')}</label>
         <input type="text" id="adddog-color" name="color" autoComplete="off" placeholder={t('adddog.color')} {...register('color')} />
@@ -346,9 +539,16 @@ const AdddogForm: React.FC = () => {
         <label htmlFor="adddog-location">{t('adddog.location')}</label>
         <input type="text" id="adddog-location" name="location" autoComplete="address-level2" placeholder={t('adddog.location')} {...register('location', { required: true })} />
 
-        <label htmlFor="adddog-age">{t('adddog.age')}</label>
-        <small>{t('adddogExtra.ageNote')}</small>
-        <input type="number" id="adddog-age" name="age" autoComplete="off" placeholder={t('adddog.age')} step="0.1" {...register('age', { valueAsNumber: true })} />
+        <label htmlFor="adddog-age-category">{t('adddogExtra.ageCategory')}</label>
+        <select {...register('ageCategory')} id="adddog-age-category" name="ageCategory" autoComplete="off" style={{ marginBottom: '8px' }}>
+          <option value="">{t('adddogExtra.selectAgeCategory')}</option>
+          <option value="0.5">{t('adddogExtra.ageCategory.puppy')}</option>
+          <option value="2">{t('adddogExtra.ageCategory.youngAdult')}</option>
+          <option value="5">{t('adddogExtra.ageCategory.adult')}</option>
+          <option value="8.5">{t('adddogExtra.ageCategory.senior')}</option>
+          <option value="11">{t('adddogExtra.ageCategory.seniorPlus')}</option>
+        </select>
+        <input type="hidden" {...register('age', { valueAsNumber: true })} />
 
         <label htmlFor="adddog-description">{t('adddog.description')}</label>
         <textarea id="adddog-description" name="description" rows={3} cols={30} autoComplete="off" placeholder={t('adddog.description')} {...register('description')} />
@@ -397,7 +597,7 @@ const AdddogForm: React.FC = () => {
             <div id="media-preview">
               {isVideo ? (
                 <div className="preview-wrap">
-                  <video src={mediaPreview} controls width={150} poster={smallPreview || (posterBlob ? URL.createObjectURL(posterBlob) : undefined)}></video>
+                  <video src={mediaPreview} controls width={150} poster={smallPreview || undefined}></video>
                   <button type="button" className="view-full" onClick={() => window.open(mediaPreview, '_blank')}>View full</button>
                 </div>
               ) : (

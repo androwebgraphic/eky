@@ -129,7 +129,14 @@
     "failed": "A kutya hozzáadása sikertelen"
   },
   "adddogExtra": {
-    "ageNote": "Megadhat egy tizedes értéket (pl. 3,6 év)"
+    "ageNote": "Megadhat egy tizedes értéket (pl. 3,6 év)",
+    "ageCategory": "Kor kategória (Gyors választás)",
+    "selectAgeCategory": "-- Válasszon kor kategóriát --",
+    "ageCategory.puppy": "Kiskutya (0-1 év)",
+    "ageCategory.youngAdult": "Fiatal felnőtt (1-3 év)",
+    "ageCategory.adult": "Felnőtt (3-7 év)",
+    "ageCategory.senior": "Idős (7-10 év)",
+    "ageCategory.seniorPlus": "Idős+ (10+ év)"
   },
   "social": {},
   "share": {

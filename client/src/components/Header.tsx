@@ -12,6 +12,8 @@ const Header: React.FC = () => {
   const [uptime, setUptime] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const timerRef = useRef<number | null>(null);
   const headerRef = useRef<HTMLElement | null>(null);
 
@@ -59,6 +61,23 @@ const Header: React.FC = () => {
       document.removeEventListener('click', handleClickOutside);
     };
   }, [isExpanded]);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Toggle mobile menu
+  const toggleMobileMenu = () => {
+    console.log('Toggle mobile menu, current state:', mobileMenuOpen);
+    setMobileMenuOpen(prev => !prev);
+  };
 
   // Removed unused variable 'profileImageUrl'
   
@@ -113,7 +132,7 @@ const Header: React.FC = () => {
           </div>
         </header>
         
-        {/* Expanded dropdown panel - outside the header */}
+        {/* Expanded dropdown panel - outside header */}
         {isExpanded && user && (
             <div 
               style={{ 
@@ -202,14 +221,15 @@ const Header: React.FC = () => {
           )}
         </>
       ) : (
+         <>
          <header style={{
            position: 'fixed',
            top: '0',
            left: '0',
            right: '0',
-           minHeight: '7.5rem',
+           minHeight: '60px',
            zIndex: '1000',
-           padding: '18px 20px 12px 20px',
+           padding: '10px 20px',
            backgroundColor: '#75171a',
            color: '#f8f8f8',
            fontSize: '20px',
@@ -217,88 +237,136 @@ const Header: React.FC = () => {
            boxSizing: 'border-box',
            borderBottom: '2px solid #8a2419',
            display: 'flex',
-           flexDirection: 'column',
            alignItems: 'center',
-           justifyContent: 'flex-start',
+           justifyContent: 'space-between',
          }}>
-          <div
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '15px',
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-            }}
-          >
-            {/* Mobile: message above nav */}
-            <div
-              className="unauth-message-mobile"
+          {/* Mobile hamburger menu */}
+          {isMobile && (
+            <div 
+              onClick={toggleMobileMenu}
               style={{
-                width: '100%',
-                display: 'none',
-                justifyContent: 'center',
-                marginBottom: 6,
+                background: 'none',
+                border: 'none',
+                color: '#f8f8f8',
+                fontSize: '28px',
+                cursor: 'pointer',
+                padding: '5px',
+                marginRight: '10px',
+                zIndex: 1001,
+                minWidth: '40px',
+                minHeight: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
-              <p
-                style={{
-                  margin: '0 0 0 0',
-                  position: 'absolute',
-                  top: '3px',
-                  fontWeight: 'normal',
-                  fontSize: '0.85em',
-                  color: 'orange',
-                  textAlign: 'center',
-                  maxWidth: '500px',
-                  wordBreak: 'break-word',
-                  lineHeight: 1.2,
-                  overflow: 'hidden',
-                  whiteSpace: 'normal',
-                  display: 'inline-block',
-                }}
-              >
-                Morate biti prijavljeni
-              </p>
+              ☰
             </div>
-            {/* Desktop: message centered */}
-            <div
-              className="unauth-message-desktop"
-              style={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}
+          )}
+
+          {/* Message - centered */}
+          <div style={{
+            flexGrow: isMobile ? 0 : 1,
+            display: 'flex',
+            justifyContent: 'center',
+            position: isMobile ? 'relative' : 'absolute',
+            left: isMobile ? 'auto' : '50%',
+            transform: isMobile ? 'none' : 'translateX(-50%)',
+            maxWidth: '500px',
+            width: isMobile ? 'auto' : '100%',
+            marginLeft: isMobile ? 'auto' : 0,
+            marginRight: isMobile ? 'auto' : 0
+          }}>
+            <p
+              style={{
+                margin: 0,
+                fontWeight: 'normal',
+                fontSize: '0.9em',
+                color: 'orange',
+                textAlign: 'center',
+                wordBreak: 'break-word',
+                lineHeight: 1.2,
+                overflow: 'hidden',
+                whiteSpace: 'normal',
+              }}
             >
-              <p
-                style={{
-                  position: 'absolute',
-                  top: '3px',
-                  margin: 0,
-                  fontWeight: 'normal',
-                  fontSize: '0.85em',
-                  color: 'orange',
-                  textAlign: 'center',
-                  maxWidth: '500px',
-                  wordBreak: 'break-word',
-                  lineHeight: 1.2,
-                  overflow: 'hidden',
-                  whiteSpace: 'normal',
-                  display: 'inline-block',
-                }}
-              >
-                  Morate biti prijavljeni
-              </p>
-            </div>
-            {/* Left side: Navigation Links */}
-            <nav style={{ display: 'flex', alignItems: 'center', gap: '15px', flexShrink: 1 }}>
+              Morate biti prijavljeni
+            </p>
+          </div>
+
+          {/* Desktop navigation */}
+          {!isMobile && (
+            <nav style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '20px',
+              flexShrink: 0
+            }}>
               <Link to="/" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.about')}</Link>
               <Link to="psi" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.dogs')}</Link>
               <Link to="logiranje" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.login')}</Link>
               <Link to="registracija" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.register')}</Link>
+              <LanguageSelector />
             </nav>
-            {/* Right side: Language Selector */}
-            <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto', flexShrink: 1 }}>
+          )}
+
+          {/* Mobile language selector */}
+          {isMobile && (
+            <div>
               <LanguageSelector />
             </div>
-          </div>
+          )}
         </header>
+
+        {/* Mobile menu dropdown */}
+        {mobileMenuOpen && isMobile && (
+          <div
+            style={{
+              position: 'fixed',
+              top: '60px',
+              left: 0,
+              right: 0,
+              backgroundColor: '#75171a',
+              padding: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '15px',
+              borderBottom: '2px solid #8a2419',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              zIndex: 999
+            }}
+          >
+            <Link 
+              to="/" 
+              style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '18px', padding: '10px', borderBottom: '1px solid #8a2419' }}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('nav.about')}
+            </Link>
+            <Link 
+              to="psi" 
+              style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '18px', padding: '10px', borderBottom: '1px solid #8a2419' }}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('nav.dogs')}
+            </Link>
+            <Link 
+              to="logiranje" 
+              style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '18px', padding: '10px', borderBottom: '1px solid #8a2419' }}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('nav.login')}
+            </Link>
+            <Link 
+              to="registracija" 
+              style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '18px', padding: '10px' }}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('nav.register')}
+            </Link>
+          </div>
+        )}
+        </>
       )}
       
       {/* User Profile Modal */}

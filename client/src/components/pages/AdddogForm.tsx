@@ -20,9 +20,14 @@ interface AddDogFormData {
 // Use API URL from environment, fallback to localhost:3001
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
+// Media restrictions constants
+const MAX_IMAGES_NON_ADMIN = 3;
+const MAX_VIDEOS_NON_ADMIN = 1;
+const MAX_VIDEO_DURATION_SECONDS = 30;
+
 const AdddogForm: React.FC = () => {
   const { t } = useTranslation();
-  const { token, isAuthenticated } = useAuth();
+  const { token, isAuthenticated, user } = useAuth();
   const { register, handleSubmit, formState: { errors } } = useForm<AddDogFormData>({
     defaultValues: {
       vaccinated: false,
@@ -31,6 +36,9 @@ const AdddogForm: React.FC = () => {
   });
   const navigate = useNavigate();
   const isMountedRef = useRef(true);
+  
+  // Check if user is superadmin
+  const isSuperAdmin = user?.role === 'superadmin';
 
   useEffect(() => {
     console.log('🔐 AddDogForm auth state:', { isAuthenticated, hasToken: !!token, tokenLength: token?.length });
@@ -53,6 +61,26 @@ const AdddogForm: React.FC = () => {
   const [isVideo, setIsVideo] = useState(false);
   const [posterBlob, setPosterBlob] = useState<Blob | null>(null);
   const [mediaError, setMediaError] = useState<string | null>(null);
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
+  
+  // Get video duration
+  const getVideoDuration = (file: File): Promise<number> => {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.src = url;
+      
+      video.onloadedmetadata = function() {
+        URL.revokeObjectURL(url);
+        resolve(video.duration);
+      };
+      video.onerror = function() {
+        URL.revokeObjectURL(url);
+        reject(new Error('Could not load video metadata'));
+      };
+    });
+  };
 
   // create poster image for a video file by capturing first frame in browser
   const createVideoPoster = (file: File): Promise<Blob> => {
@@ -124,6 +152,33 @@ const AdddogForm: React.FC = () => {
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
+    
+    // For non-superadmin users, validate media restrictions on client side
+    if (!isSuperAdmin) {
+      // Validate video duration
+      if (f.type.startsWith('video/')) {
+        try {
+          const duration = await getVideoDuration(f);
+          setVideoDuration(duration);
+          if (duration > MAX_VIDEO_DURATION_SECONDS) {
+            setMediaError(`Video duration cannot exceed ${MAX_VIDEO_DURATION_SECONDS} seconds. Your video is ${Math.round(duration)} seconds.`);
+            return;
+          }
+        } catch (err) {
+          console.warn('Could not get video duration', err);
+        }
+      } else if (f.type.startsWith('image/')) {
+        // For images, we only have 1 file input, so if it's an image, check it's within limit
+        // Note: Since the form only allows 1 file at a time, and non-superadmin can only upload 3 images,
+        // we just validate that it's an image (the backend will validate total count if adding to existing)
+        setVideoDuration(null);
+      }
+    } else {
+      // Superadmin - reset any previous errors
+      setMediaError(null);
+      setVideoDuration(null);
+    }
+    
     setMediaFile(f);
 
     // revoke previous object URL if necessary
@@ -131,34 +186,7 @@ const AdddogForm: React.FC = () => {
       try { URL.revokeObjectURL(mediaPreview); } catch (err) { /* ignore */ }
     }
 
-    const url = URL.createObjectURL(f);
-    setMediaPreview(url);
-
-    if (f.type.startsWith('video/')) {
-      setIsVideo(true);
-      setSmallPreview(null);
-      try {
-        const poster = await createVideoPoster(f);
-        setPosterBlob(poster);
-      } catch (err) {
-        console.warn('Could not create poster image', err);
-      }
-    } else {
-      setIsVideo(false);
-      try {
-        const thumb = await createImageThumbnail(f, 64);
-        setSmallPreview(thumb);
-      } catch (err) {
-        console.warn('Could not create thumbnail', err);
-        setSmallPreview(null);
-      }
-    }
-  };
-
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
+    const url = URL.create
 
   useEffect(() => {
     return () => {

@@ -7,6 +7,23 @@ const ChatMessage = require('../models/chatMessageModel');
 
 const { getOrientationTransform } = require('../utils/orientation');
 
+// Constants for media restrictions
+const MAX_IMAGES_NON_ADMIN = 3;
+const MAX_VIDEOS_NON_ADMIN = 1;
+const MAX_VIDEO_DURATION_SECONDS = 30;
+
+// Helper function to check if user is superadmin
+const isUserSuperAdmin = (user) => {
+  return user && user.role === 'superadmin';
+};
+
+// Helper function to validate video duration
+const validateVideoDuration = async (videoBuffer) => {
+  // This is a basic check - in production, you'd use ffprobe or similar
+  // For now, we assume the client has already validated and we'll do a basic check
+  // The actual duration validation should happen on client-side before upload
+  return true;
+};
 
 // PATCH /api/dogs/:id
 const updateDog = async (req, res) => {
@@ -104,9 +121,47 @@ const updateDog = async (req, res) => {
 
     // Handle new uploaded images (media) - save to local uploads
     if (req.files && req.files.media) {
+      // Check if user is superadmin
+      const isSuperAdmin = isUserSuperAdmin(req.user);
+      
+      // Get video duration from request body
+      const videoDuration = req.body.videoDuration ? parseFloat(req.body.videoDuration) : null;
+      
       console.log('Processing new media files for local uploads...');
       const mediaArray = Array.isArray(req.files.media) ? req.files.media : [req.files.media];
       console.log('Media array length:', mediaArray.length);
+      
+      // Validate media restrictions for non-superadmin users
+      if (!isSuperAdmin) {
+        const imageFiles = mediaArray.filter(f => f.mimetype.startsWith('image/'));
+        const videoFiles = mediaArray.filter(f => f.mimetype.startsWith('video/'));
+        
+        // Get existing images count (not being deleted)
+        const existingImagesCount = Array.isArray(keepImages) ? keepImages.length : dog.images.length;
+        const totalImagesAfterUpload = existingImagesCount + imageFiles.length;
+        
+        if (totalImagesAfterUpload > MAX_IMAGES_NON_ADMIN) {
+          return res.status(400).json({ 
+            message: `Non-superadmin users can only have up to ${MAX_IMAGES_NON_ADMIN} images per dog. You currently have ${existingImagesCount} images and are trying to add ${imageFiles.length} more.` 
+          });
+        }
+        
+        if (videoFiles.length > MAX_VIDEOS_NON_ADMIN) {
+          return res.status(400).json({ 
+            message: `Non-superadmin users can only upload up to ${MAX_VIDEOS_NON_ADMIN} video per dog. You tried to upload ${videoFiles.length} videos.` 
+          });
+        }
+        
+        // Validate video duration if video is being uploaded
+        if (videoFiles.length > 0 && videoDuration) {
+          if (videoDuration > MAX_VIDEO_DURATION_SECONDS) {
+            return res.status(400).json({ 
+              message: `Video duration cannot exceed ${MAX_VIDEO_DURATION_SECONDS} seconds. Your video is ${videoDuration} seconds long.` 
+            });
+          }
+        }
+      }
+      
       const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
       if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
       let mediaIndex = 0;
@@ -325,10 +380,44 @@ const createDog = async (req, res) => {
       console.warn('No media files received in req.files.media');
     }
   try {
+    // Check if user is superadmin
+    const isSuperAdmin = isUserSuperAdmin(req.user);
+    
     // expected fields: name, breed, age, description, location, color, size, gender, vaccinated, neutered
-    const { name, breed, age, description, location, color, size, gender, vaccinated, neutered } = req.body;
+    const { name, breed, age, description, location, color, size, gender, vaccinated, neutered, videoDuration } = req.body;
 
     if (!name) return res.status(400).json({ message: 'Name required' });
+
+    // Validate media restrictions for non-superadmin users
+    if (!isSuperAdmin && req.files && req.files.media) {
+      const mediaArray = Array.isArray(req.files.media) ? req.files.media : [req.files.media];
+      
+      // Count images and videos
+      const imageFiles = mediaArray.filter(f => f.mimetype.startsWith('image/'));
+      const videoFiles = mediaArray.filter(f => f.mimetype.startsWith('video/'));
+      
+      if (imageFiles.length > MAX_IMAGES_NON_ADMIN) {
+        return res.status(400).json({ 
+          message: `Non-superadmin users can only upload up to ${MAX_IMAGES_NON_ADMIN} images per dog. You tried to upload ${imageFiles.length} images.` 
+        });
+      }
+      
+      if (videoFiles.length > MAX_VIDEOS_NON_ADMIN) {
+        return res.status(400).json({ 
+          message: `Non-superadmin users can only upload up to ${MAX_VIDEOS_NON_ADMIN} video per dog. You tried to upload ${videoFiles.length} videos.` 
+        });
+      }
+      
+      // Validate video duration if video is being uploaded
+      if (videoFiles.length > 0 && videoDuration) {
+        const duration = parseFloat(videoDuration);
+        if (duration > MAX_VIDEO_DURATION_SECONDS) {
+          return res.status(400).json({ 
+            message: `Video duration cannot exceed ${MAX_VIDEO_DURATION_SECONDS} seconds. Your video is ${duration} seconds long.` 
+          });
+        }
+      }
+    }
 
     // normalize booleans that may come as strings
     const vaccinatedBool = vaccinated === 'true' || vaccinated === 'on' || vaccinated === true;

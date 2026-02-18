@@ -641,10 +641,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   </label>
                   <input
                     type="text"
-                    id="profileContactNum"
-                    name="contactNum"
+                    id="profilePhone"
+                    name="phone"
                     value={formData.phone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    onChange={handleInputChange}
                     style={{
                       width: '100%',
                       padding: '8px 12px',
@@ -653,9 +653,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       fontSize: '16px',
                       background: '#fff'
                     }}
-                    autoComplete="off"
-                    data-form-type="other"
-                    data-lpignore="true"
+                    autoComplete="tel"
                   />
                 </div>
 

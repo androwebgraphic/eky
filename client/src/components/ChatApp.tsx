@@ -66,7 +66,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
   const [userWithBlocks] = useState<UserWithBlocks | null>(null);
   const [confirmingAdoption, setConfirmingAdoption] = useState(false);
   const [chatVisible, setChatVisible] = useState(true);
-  const [activeTab, setActiveTab] = useState<'chats' | 'requests'>('chats');
   const [adoptionRequests, setAdoptionRequests] = useState<any[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const socketRef = useRef<any>(null);

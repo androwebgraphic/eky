@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import DogImageSlider from '../DogImageSlider';
 import { useTranslation } from 'react-i18next';
-// import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../../contexts/AuthContext';
 

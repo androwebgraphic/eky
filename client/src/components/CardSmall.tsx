@@ -133,7 +133,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 
 	const [imgError, setImgError] = React.useState(false);
 	const [videoError, setVideoError] = React.useState(false);
-	const [imgLoaded, setImgLoaded] = React.useState(false);
+	const [, setImgLoaded] = React.useState(false);
 	const [isRetrying, setIsRetrying] = React.useState(false);
 	const [retryCount, setRetryCount] = React.useState(0);
 

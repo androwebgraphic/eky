@@ -206,7 +206,6 @@ interface EditDogModalProps {
   dog: any;
   onClose: () => void;
   onSave: (updatedDog: any) => void;
-  modalPosition?: {x: number, y: number};
 }
 
 const getApiUrl = () => {
@@ -265,7 +264,7 @@ const getApiUrl = () => {
     return base;
   };
 
-function EditDogModal({ dog, onClose, onSave, modalPosition }: EditDogModalProps) {
+function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
   const isMounted = useRef(true);
   const { t } = useTranslation();
   const { token, isAuthenticated } = useAuth();

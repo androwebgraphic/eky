@@ -127,6 +127,7 @@ input, textarea, select, button {
   max-width: 100%;
   font-size: 16px;
   -webkit-appearance: none;
+          appearance: none;
   border-radius: 0;
 }
 
@@ -136,6 +137,7 @@ input[type="password"],
 input[type="search"],
 textarea {
   -webkit-appearance: none;
+          appearance: none;
   -webkit-border-radius: 0;
   border-radius: 0;
 }

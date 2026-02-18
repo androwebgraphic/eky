@@ -251,17 +251,23 @@ img.welcome {
 
 #Wrap > *:nth-child(1) {
   -ms-grid-row: 1;
+      grid-row: 1;
   -ms-grid-column: 1;
+      grid-column: 1;
 }
 
 #Wrap > *:nth-child(2) {
   -ms-grid-row: 2;
+      grid-row: 2;
   -ms-grid-column: 1;
+      grid-column: 1;
 }
 
 #Wrap > *:nth-child(3) {
   -ms-grid-row: 3;
+      grid-row: 3;
   -ms-grid-column: 1;
+      grid-column: 1;
 }
 
 img {
@@ -456,6 +462,7 @@ h1 {
   background: -webkit-gradient(linear, left bottom, left top, from(#42210B), to(#B16C2E));
   background: linear-gradient(to top, #42210B 0%, #B16C2E 100%);
   -webkit-background-clip: text;
+          background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

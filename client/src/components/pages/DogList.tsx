@@ -187,7 +187,6 @@ function DogList() {
 				method: 'DELETE',
 				headers
 			});
-			const data = await resp.json();
 			if (!resp.ok) {
 				setRemoveDog(null);
 				return;

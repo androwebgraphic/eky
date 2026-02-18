@@ -22,8 +22,6 @@ interface AddDogFormData {
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 // Media restriction constants
-const MAX_IMAGES_NON_ADMIN = 3;
-const MAX_VIDEOS_NON_ADMIN = 1;
 const MAX_VIDEO_DURATION_SECONDS = 30;
 
 // Comprehensive list of dog breeds with "Mixed Breed" at the top

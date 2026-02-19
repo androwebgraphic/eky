@@ -34,7 +34,7 @@ interface UserProfileModalProps {
 
 const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) => {
   const { user, token, logout, updateUser, getWishlist, removeFromWishlist } = useAuth();
-    const typedUser = user as User;
+  const typedUser = user as User;
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<'profile' | 'wishlist'>('profile');
@@ -441,121 +441,65 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
           e.stopPropagation();
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexShrink: 0 }}>
-          <h2 style={{ margin: 0, color: '#333' }}>{t('userProfile.title')}</h2>
+        <div className="modal-header">
+          <h2>{t('userProfile.title')}</h2>
           <button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               handleModalClose();
             }}
-            style={{
-              background: '#e74c3c',
-              border: 'none',
-              width: '22px',
-              height: '22px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 0,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(231,76,60,0.10)',
-              zIndex: 10000
-            }}
+            className="modal-close-btn"
             aria-label="Close"
             title="Close"
             type="button"
           >
-            <span style={{
-              color: '#fff',
-              fontSize: '2rem',
-              fontWeight: 900,
-              lineHeight: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              height: '100%'
-            }}>×</span>
+            <span>×</span>
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div style={{ display: 'flex', marginBottom: '20px', borderBottom: '1px solid #ddd', flexShrink: 0 }}>
+        <div className="modal-tabs">
           <button
             onClick={() => setActiveTab('profile')}
-            style={{
-              padding: '10px 20px',
-              border: 'none',
-              background: activeTab === 'profile' ? '#2196F3' : 'transparent',
-              color: activeTab === 'profile' ? 'white' : '#666',
-              cursor: 'pointer',
-              borderRadius: '4px 4px 0 0',
-              marginRight: '5px'
-            }}
+            className={`modal-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
           >
             {t('userProfile.profileTab')}
           </button>
           <button
             onClick={() => setActiveTab('wishlist')}
-            style={{
-              padding: '10px 20px',
-              border: 'none',
-              background: activeTab === 'wishlist' ? '#2196F3' : 'transparent',
-              color: activeTab === 'wishlist' ? 'white' : '#666',
-              cursor: 'pointer',
-              borderRadius: '4px 4px 0 0'
-            }}
+            className={`modal-tab-btn ${activeTab === 'wishlist' ? 'active' : ''}`}
           >
             {t('userProfile.wishlistTab')} ({wishlist.length})
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
+        <div className="modal-content">
           {error && (
-            <div style={{
-              backgroundColor: '#ffebee',
-              color: '#c62828',
-              padding: '12px',
-              borderRadius: '4px',
-              marginBottom: '16px'
-            }}>
+            <div className="modal-alert error">
               {error}
             </div>
           )}
 
           {success && (
-            <div style={{
-              backgroundColor: '#e8f5e8',
-              color: '#2e7d32',
-              padding: '12px',
-              borderRadius: '4px',
-              marginBottom: '16px'
-            }}>
+            <div className="modal-alert success">
               {success}
             </div>
           )}
 
         {activeTab === 'profile' && (
           <>
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+            <div className="profile-header">
+              <div className="profile-info">
                 <img 
                   key={profilePicKey}
                   src={profilePicturePreview || getProfileImageUrl((user as any)?.profilePicture)}
                   alt={user && user.username ? `${user.username}'s profile` : 'User profile'} 
-                  style={{ 
-                    width: '60px', 
-                    height: '60px', 
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    border: '2px solid #ddd'
-                  }}
+                  className="profile-avatar-small"
                 />
-                <div>
-                  <h3 style={{ margin: '0 0 4px 0' }}>{user ? user.username : ''}</h3>
-                  {user && <span style={{ color: '#4CAF50', fontSize: '14px' }}>{t('userProfile.online')}</span>}
+                <div className="profile-info-text">
+                  <h3>{user ? user.username : ''}</h3>
+                  {user && <span className="online-status">{t('userProfile.online')}</span>}
                 </div>
               </div>
             </div>

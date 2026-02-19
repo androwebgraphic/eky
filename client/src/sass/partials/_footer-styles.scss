@@ -1,0 +1,344 @@
+// Footer component styles
+// For Footer component
+
+.footer-desktop {
+  width: 100%;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: 1000;
+
+  .footer-nav {
+    ul {
+      width: 100%;
+      padding: 1rem;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      align-items: center;
+      gap: 0.5rem;
+      background: #72211f;
+      box-shadow: 0.1rem 0.1rem 0.8rem #535151;
+      height: auto;
+      min-height: 4rem;
+
+      @media (max-width: 768px) {
+        padding: 0.75rem;
+        gap: 0.4rem;
+        min-height: 3.5rem;
+      }
+
+      @media (max-width: 480px) {
+        padding: 0.5rem;
+        gap: 0.3rem;
+        min-height: 3rem;
+      }
+
+      .footer-link {
+        cursor: pointer;
+        color: #f5f5f5;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: color 0.2s;
+
+        &:hover {
+          color: #cdf0fb;
+        }
+
+        .footer-icon {
+          width: 28px;
+          height: 28px;
+          display: inline-block;
+          filter: drop-shadow(0 1px 2px #1976d2);
+          color: #2196f3;
+        }
+
+        .desktop-label {
+          display: none;
+        }
+
+        @media (min-width: 769px) {
+          .desktop-label {
+            display: inline-block;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Search modal in footer
+.footer-search-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.footer-search-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+
+  .search-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #333;
+    }
+
+    .search-modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      color: #666;
+      padding: 0.5rem;
+
+      &:hover {
+        color: #333;
+      }
+    }
+  }
+
+  .search-modal-input {
+    margin-bottom: 1rem;
+
+    .search-input {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      outline: none;
+
+      &:focus {
+        border-color: #72211f;
+      }
+    }
+  }
+
+  .search-history {
+    margin-bottom: 1rem;
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+
+      .history-label {
+        font-size: 14px;
+        color: #666;
+        font-weight: bold;
+      }
+
+      .clear-history-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 12px;
+        color: #999;
+
+        &:hover {
+          color: #666;
+        }
+      }
+    }
+
+    .history-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+
+      .history-tag {
+        padding: 8px 16px;
+        background: #f0f0f0;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #333;
+        transition: all 0.2s;
+
+        &:hover {
+          background: #e0e0e0;
+        }
+      }
+    }
+  }
+
+  .search-quick-filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+
+    .quick-filter-btn {
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid #72211f;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #72211f;
+      transition: all 0.2s;
+
+      &:hover,
+      &.active {
+        background: #72211f;
+        color: #fff;
+      }
+    }
+  }
+
+  .search-location-filter {
+    margin-bottom: 1rem;
+
+    .location-label {
+      font-weight: 500;
+      color: #666;
+      margin-right: 8px;
+    }
+
+    .location-select {
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #fff;
+      cursor: pointer;
+    }
+  }
+
+  .search-submit-btn {
+    width: 100%;
+    padding: 12px 24px;
+    background: #72211f;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #5a1a19;
+    }
+
+    &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Language selector styles
+.language-selector {
+  position: relative;
+  display: inline-block;
+
+  .language-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    font-size: 14px;
+    color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .current-lang {
+      font-weight: 600;
+    }
+
+    .dropdown-arrow {
+      font-size: 8px;
+      margin-left: 2px;
+      opacity: 0.8;
+    }
+  }
+
+  .language-dropdown {
+    position: fixed;
+    top: auto;
+    right: 10px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    min-width: 120px;
+    padding: 8px 0;
+
+    .dropdown-item {
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      &:hover {
+        background: #f5f5f5;
+      }
+
+      .flag {
+        font-size: 20px;
+      }
+
+      .lang-name {
+        color: #333;
+      }
+    }
+  }
+}
+
+// Chat button in footer
+.footer-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #f5f5f5;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #cdf0fb;
+  }
+
+  .chat-icon {
+    width: 28px;
+    height: 28px;
+    display: inline-block;
+    filter: drop-shadow(0 1px 2px #1976d2);
+    color: #2196f3;
+  }
+
+  .chat-label {
+    display: none;
+  }
+
+  @media (min-width: 769px) {
+    .chat-label {
+      display: inline-block;
+    }
+  }
+}

@@ -1,0 +1,483 @@
+.card-small {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  -webkit-transition: -webkit-box-shadow 0.2s;
+  transition: -webkit-box-shadow 0.2s;
+  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, -webkit-box-shadow 0.2s;
+}
+.card-small:hover {
+  -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.card-small .card-small-image-wrapper {
+  position: relative;
+  cursor: pointer;
+  width: 100%;
+}
+.card-small .card-small-image-wrapper .card-small-video {
+  width: 100%;
+  height: 200px;
+  -o-object-fit: contain;
+     object-fit: contain;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  background: #f5f5f5;
+}
+.card-small .card-small-image-wrapper .card-small-image {
+  width: 100%;
+  height: 200px;
+  -o-object-fit: contain;
+     object-fit: contain;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  cursor: pointer;
+  background: #f5f5f5;
+}
+.card-small .card-small-image-wrapper .card-small-image.loading {
+  opacity: 0.5;
+}
+.card-small .card-small-image-wrapper .card-small-image-error {
+  width: 100%;
+  height: 200px;
+  background: #eee;
+  color: red;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  font-size: 14px;
+}
+.card-small .card-small-image-wrapper .card-small-placeholder {
+  width: 100%;
+  height: 200px;
+  background: #eee;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+.card-small .card-small-image-wrapper .multi-photo-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  -webkit-transition: background 0.2s;
+  transition: background 0.2s;
+}
+.card-small .card-small-image-wrapper .multi-photo-indicator:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+.card-small .card-small-image-wrapper .multi-photo-indicator .multi-photo-icon {
+  font-size: 18px;
+}
+.card-small .card-small-content {
+  padding: 16px;
+  width: 100%;
+}
+.card-small .card-small-content .adoption-status-badge {
+  background: #ff9800;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.card-small .card-small-content .adoption-status-badge.adopted {
+  background: #4caf50;
+}
+.card-small .card-small-content .card-small-name {
+  font-weight: 700;
+  font-size: 24px;
+  margin-bottom: 4px;
+  color: #75171a;
+  text-align: center;
+}
+.card-small .card-small-content .card-small-field {
+  font-size: 15px;
+  margin-bottom: 4px;
+  color: #666;
+  text-align: center;
+}
+.card-small .card-small-content .card-small-field .field-label {
+  font-weight: bold;
+}
+.card-small .card-small-content .card-small-field .field-value {
+  color: #666;
+}
+.card-small .card-small-content .card-small-field.secondary {
+  font-size: 14px;
+  color: #888;
+}
+.card-small .card-small-content .card-small-field.tertiary {
+  font-size: 13px;
+  color: #888;
+}
+.card-small .card-small-content .card-small-location {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 4px;
+  text-align: center;
+}
+.card-small .card-small-content .card-small-location .location-text {
+  cursor: pointer;
+  color: #1976d2;
+  text-decoration: underline;
+  margin-left: 4px;
+}
+.card-small .card-small-content .card-small-health {
+  color: #388e3c;
+  font-size: 13px;
+  margin-bottom: 4px;
+  text-align: center;
+}
+.card-small .card-small-content .card-small-user {
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 4px;
+  text-align: center;
+}
+.card-small .card-small-content .card-small-user .user-label {
+  margin-right: 4px;
+}
+.card-small .card-small-content .card-small-user .user-name {
+  font-weight: 600;
+}
+.card-small .card-small-content .card-small-date {
+  color: #999;
+  font-size: 11px;
+  margin-bottom: 4px;
+  text-align: center;
+}
+.card-small .card-small-actions {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  gap: 8px;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 8px 8px 16px 8px;
+  width: 100%;
+}
+.card-small .card-small-actions .card-small-btn {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  min-width: -webkit-fit-content;
+  min-width: -moz-fit-content;
+  min-width: fit-content;
+  height: 32px;
+  font-size: 12px;
+  padding: 0 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  white-space: nowrap;
+  border: none;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
+}
+.card-small .card-small-actions .card-small-btn.btn-details {
+  background: #72211f;
+  color: #fbe1cd;
+}
+.card-small .card-small-actions .card-small-btn.btn-adopt {
+  background: #43a047;
+  color: #fff;
+}
+.card-small .card-small-actions .card-small-btn.btn-adopt:disabled {
+  background: #9e9e9e;
+  cursor: not-allowed;
+}
+.card-small .card-small-actions .card-small-btn.btn-wishlist {
+  background: #dbb69d;
+  color: #72211f;
+}
+.card-small .card-small-actions .card-small-btn.btn-wishlist.in-wishlist {
+  background: #a67c52;
+}
+.card-small .card-small-actions .card-small-btn.btn-edit {
+  background: #d77f6c;
+  color: #72211f;
+}
+.card-small .card-small-actions .card-small-btn.btn-remove {
+  background: #e74c3c;
+  color: #fff;
+}
+.card-small .card-small-actions .card-small-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+.card-small .card-small-actions .wishlist-heart {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  gap: 4px;
+}
+.card-small .card-small-actions .wishlist-heart .heart-icon {
+  font-size: 16px;
+  margin-right: 4px;
+  position: relative;
+}
+.card-small .card-small-actions .wishlist-heart .heart-icon.has-check {
+  position: relative;
+}
+.card-small .card-small-actions .wishlist-heart .heart-icon.has-check .check-mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  color: #4CAF50;
+  font-size: 10px;
+  font-weight: bold;
+}
+.card-small .card-small-actions .wishlist-heart .menu-icon {
+  margin-left: 4px;
+}
+
+.dog-details .dog-details-image {
+  width: 100%;
+  max-width: 240px;
+  margin: 0 auto;
+  aspect-ratio: 1/1;
+  overflow: hidden;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  background: #f8f8f8;
+  min-height: 0;
+  max-height: 240px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+}
+.dog-details .dog-details-name {
+  color: #75171a;
+  text-align: center;
+  font-size: 28px;
+  margin-top: 0;
+}
+.dog-details .dog-details-location .location-link {
+  cursor: pointer;
+  text-decoration: underline;
+}
+.dog-details .dog-details-location .location-link:hover {
+  color: #1976d2;
+}
+.dog-details .dog-details-location .loading-indicator {
+  margin-left: 8px;
+}
+.dog-details .dog-details-location .error-message {
+  color: red;
+  margin-left: 8px;
+}
+.dog-details .dog-details-owner {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 2px solid #ddd;
+}
+@media (max-width: 768px) {
+  .dog-details .dog-details-owner {
+    margin-top: 1rem;
+    padding-top: 1rem;
+  }
+}
+.dog-details .dog-details-owner .owner-title {
+  margin-bottom: 1rem;
+}
+.dog-details .dog-details-owner .owner-info {
+  margin-bottom: 0.75rem;
+  font-size: 13px;
+}
+.dog-details .dog-details-owner .owner-username {
+  font-size: 0.9rem;
+}
+.dog-details .dog-details-actions {
+  background: white;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+@media (max-width: 768px) {
+  .dog-details .dog-details-actions {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+            align-items: stretch;
+    padding: 16px;
+  }
+}
+.dog-details .dog-details-actions .details-action-btn {
+  padding: 16px 24px;
+  font-size: 18px;
+  font-weight: bold;
+  min-height: 56px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
+}
+.dog-details .dog-details-actions .details-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.dog-details .dog-details-actions .details-action-btn.btn-view {
+  background: #72211f;
+  color: #fff;
+  margin-right: 8px;
+}
+.dog-details .dog-details-actions .details-action-btn.btn-confirm {
+  background: #28a745;
+  color: white;
+  margin-right: 8px;
+}
+.dog-details .dog-details-actions .details-action-btn.btn-cancel {
+  background: #e74c3c;
+  color: white;
+  margin-left: 0;
+}
+.dog-details .dog-details-actions .details-action-btn.btn-adopt {
+  background: #4CAF50;
+  color: #f8f8f8;
+  margin-left: 12px;
+}
+.dog-details .dog-details-actions .details-action-btn.btn-adopt:disabled {
+  background: #aaa;
+}
+.dog-details .dog-details-actions .details-action-btn.btn-disabled {
+  background: #aaa;
+  color: white;
+  margin-left: 12px;
+}
+.dog-details .dog-details-actions .adoption-reason-input {
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+.dog-details .adoption-status {
+  color: orange;
+  margin-top: 12px;
+  text-align: center;
+}
+.dog-details .adoption-status .status-message {
+  margin-top: 8px;
+  color: #555;
+}
+.dog-details .adoption-status .status-complete {
+  color: green;
+}
+.dog-details .adoption-status .status-waiting {
+  color: #555;
+}
+.dog-details .adoption-status .status-error {
+  color: red;
+  margin-top: 8px;
+}
+.dog-details .adoption-status .status-cancel-success {
+  color: green;
+  margin-top: 8px;
+}
+.dog-details .adoption-status .status-ambiguous {
+  color: orange;
+  margin-top: 12px;
+}
+.dog-details .adoption-status .status-no-info {
+  color: orange;
+  margin-top: 12px;
+}
+.dog-details .details-wishlist-btn {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background: #dbb69d;
+  padding: 16px 24px;
+  border-radius: 6px;
+}
+.dog-details .details-wishlist-btn .wishlist-heart-container {
+  position: relative;
+  font-size: 18px;
+  margin-right: 4px;
+  display: inline-block;
+}
+.dog-details .details-wishlist-btn .wishlist-heart-container .wishlist-check {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  color: #4CAF50;
+  font-size: 12px;
+  font-weight: bold;
+}
+.dog-details .details-wishlist-btn .menu-icon {
+  margin-left: 4px;
+}

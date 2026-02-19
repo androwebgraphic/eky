@@ -1,0 +1,182 @@
+.edit {
+  border-radius: 15px !important;
+  padding: 0.2em 0.7em !important;
+  background: rgb(215.1275862069, 110.9448275862, 108.3724137931) !important;
+  color: #72211f !important;
+  border: none !important;
+}
+
+.remove {
+  border-radius: 15px !important;
+  padding: 0.2em 0.7em !important;
+}
+
+.editdog-close-btn {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  width: 3rem;
+  height: 3rem;
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 2.8rem;
+  font-weight: 300;
+  line-height: 1;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding: 0;
+  -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  z-index: 2147483648;
+}
+
+.editdog-reset-photos-btn {
+  margin-left: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.editdog-delete-img-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 22px;
+  padding: 0;
+}
+
+.editdog-submit-btn {
+  padding: 1rem 2rem;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  -webkit-transition: background-color 0.2s;
+  transition: background-color 0.2s;
+}
+
+.editdog-submit-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.view-details-btn {
+  background: #72211f;
+  color: #fbe1cd;
+  border: 2px solid #1f4b72;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  -webkit-transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s;
+}
+
+.view-details-btn:hover, .view-details-btn:focus {
+  background: #1f4b72;
+  color: #cdf0fb;
+}
+
+.adopt-btn {
+  background: #72211f;
+  color: #fbe1cd;
+  border: 2px solid #1f4b72;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  -webkit-transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s;
+}
+
+.adopt-btn:hover, .adopt-btn:focus {
+  background: #1f4b72;
+  color: #cdf0fb;
+}
+
+.adopt-btn:disabled {
+  background: #aaa;
+  color: white;
+}
+
+.cancel-adopt-btn {
+  background: #e74c3c;
+  color: #fff;
+  border: 2px solid #a11a1a;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  -webkit-transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s;
+}
+
+.cancel-adopt-btn:hover, .cancel-adopt-btn:focus {
+  background: #a11a1a;
+  color: #fff;
+}
+
+.like {
+  background: #fbe1cd;
+  color: #72211f;
+  border: 2px solid #1f4b72;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  margin-left: 8px;
+  cursor: pointer;
+  -webkit-transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s;
+}
+
+.like.liked {
+  background: #1f4b72;
+  color: #cdf0fb;
+}
+
+.wishlist {
+  background: #fbe1cd;
+  color: #72211f;
+  border: 2px solid #1f4b72;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  margin-left: 8px;
+  cursor: pointer;
+  -webkit-transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s;
+}
+
+.wishlist.in-wishlist {
+  background: #ff4444;
+  color: #fff;
+  border: 2px solid #a11a1a;
+}

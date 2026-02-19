@@ -1,0 +1,7 @@
+.eky-chat {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background: url("../../img/chat-icon.svg") no-repeat center center;
+  background-size: contain;
+}

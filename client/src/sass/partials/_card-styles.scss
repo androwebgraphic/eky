@@ -3,14 +3,41 @@
 
 .card-small {
   display: flex;
+  flex-direction: column;
   border: 1px solid #ddd;
   border-radius: 12px;
   overflow: hidden;
   background: #fff;
   transition: box-shadow 0.2s;
+  position: relative;
 
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    
+    .card-small-image-wrapper {
+      flex: 0 0 auto;
+      width: 50%;
+    }
+
+    .card-small-content {
+      flex: 1;
+      width: 50%;
+    }
+
+    .card-small-actions {
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 1px solid #eee;
+    }
   }
 
   .card-small-image-wrapper {
@@ -90,6 +117,10 @@
   .card-small-content {
     padding: 16px;
     width: 100%;
+
+    @media (min-width: 768px) {
+      padding-bottom: 80px;
+    }
 
     .adoption-status-badge {
       background: #ff9800;
@@ -186,6 +217,7 @@
 
   .card-small-actions {
     display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
     gap: 8px;
     justify-content: center;

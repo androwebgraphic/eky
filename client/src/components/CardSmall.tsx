@@ -290,200 +290,115 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 	};
 
 	return (
-		<>
-			<style>{`
-				@media (max-width: 600px) {
-					.card.card-small {
-						borderRadius: 16 !important;
-						box-shadow: 0 2px 16px rgba(0,0,0,0.06) !important;
-						padding: 16px !important;
-						min-width: 280 !important;
-						maxWidth: none !important;
-						flex: 0 0 92vw !important;
-					}
-					.card.card-small > div[style*="font-weight: 700"] {
-						font-size: 24px !important;
-					}
-					.card.card-small > div > div:nth-child(2) {
-						font-size: 18px !important;
-					}
-					.card.card-small > div > div:nth-child(3),
-					.card.card-small > div > div:nth-child(4),
-					.card.card-small > div > div:nth-child(5) {
-						font-size: 17px !important;
-					}
-					.card.card-small > div > div:nth-child(6),
-					.card.card-small > div > div:nth-child(7),
-					.card.card-small > div > div:nth-child(8),
-					.card.card-small > div > div:nth-child(9) {
-						font-size: 16px !important;
-					}
-				}
-			`}</style>
-			<div
-				className="card card-small"
-				style={{
-				display: 'flex',
-				flexDirection: 'column',
-				borderRadius: 16,
-				boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
-				background: '#fff',
-				padding: 16,
-				margin: 0,
-				width: '100%',
+		<div
+			className="card card-small"
+			style={{
 				maxWidth: window.innerWidth > 768 ? 375 : 420,
-				minWidth: 280,
-				overflow: 'hidden',
-				position: 'relative',
-				boxSizing: 'border-box',
-				}}
-			>
-				{hasVideoUrl && !videoError ? (
-						<div style={{ cursor: 'pointer' }} onClick={e => onViewDetails && onViewDetails(e)} title={t('dogDetails.showMap', 'Show details')}>
-							<video
-								controls
-								width="100%"
-								height="200"
-								poster={posterUrl}
-								style={{ width: '100%', height: '200px', objectFit: 'contain', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', background: '#f5f5f5' }}
-								onError={() => setVideoError(true)}
+			}}
+		>
+				<div className="card-small-image-wrapper">
+					{hasVideoUrl && !videoError ? (
+							<div onClick={e => onViewDetails && onViewDetails(e)} title={t('dogDetails.showMap', 'Show details')}>
+								<video
+									controls
+									width="100%"
+									height="200"
+									poster={posterUrl}
+									className="card-small-video"
+									onError={() => setVideoError(true)}
+									onClick={e => onViewDetails && onViewDetails(e)}
+								>
+									<source src={videoUrl} />
+								</video>
+							</div>
+						) : videoError ? (
+							<div className="card-small-image-error">{t('alerts.videoFailedToLoad')}</div>
+						) : largestImgUrl && !imgError ? (
+							<img
+								key={`main-${retryCount}`}
+								src={largestImgUrl}
+								alt={name}
+								className={`card-small-image ${isRetrying ? 'loading' : ''}`}
+								loading="lazy"
+								onError={handleImgError}
+								onLoad={() => setImgLoaded(true)}
 								onClick={e => onViewDetails && onViewDetails(e)}
+								title={t('dogDetails.showMap', 'Show details')}
+							/>
+						) : imgError ? (
+							<div className="card-small-image-error">{t('alerts.imageFailedToLoad') || 'Image failed to load'}</div>
+						) : thumbUrl && !imgError ? (
+							<img
+								key={`thumb-${retryCount}`}
+								src={thumbUrl}
+								alt={name}
+								className={`card-small-image ${isRetrying ? 'loading' : ''}`}
+								loading="lazy"
+								onError={handleImgError}
+								onLoad={() => setImgLoaded(true)}
+								onClick={e => onViewDetails && onViewDetails(e)}
+								title={t('dogDetails.showMap', 'Show details')}
+							/>
+						) : (
+							<div className="card-small-placeholder" />
+						)}
+						{uniqueImages.length > 1 && (
+							<div
+								className="multi-photo-indicator"
+								title={t('dogDetails.showMoreImages', 'View all images')}
 							>
-								<source src={videoUrl} />
-							</video>
+								<span className="multi-photo-icon">
+									<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+									{uniqueImages.length}
+								</span>
+							</div>
+						)}
+				</div>
+				<div className="card-small-content">
+					{adoptionStatus && adoptionStatus !== 'available' && (
+						<div className={`adoption-status-badge ${adoptionStatus === 'adopted' ? 'adopted' : ''}`}>
+							{t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)}
 						</div>
-					) : videoError ? (
-						<div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>{t('alerts.videoFailedToLoad')}</div>
-					) : largestImgUrl && !imgError ? (
-						<img
-							key={`main-${retryCount}`}
-							src={largestImgUrl}
-							alt={name}
-							style={{ width: '100%', height: '200px', objectFit: 'contain', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', cursor: 'pointer', background: '#f5f5f5', opacity: isRetrying ? 0.5 : 1 }}
-							loading="lazy"
-							onError={handleImgError}
-							onLoad={() => setImgLoaded(true)}
-							onClick={e => onViewDetails && onViewDetails(e)}
-							title={t('dogDetails.showMap', 'Show details')}
-						/>
-					) : imgError ? (
-						<div style={{ width: '100%', height: '200px', background: '#eee', color: 'red', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>{t('alerts.imageFailedToLoad') || 'Image failed to load'}</div>
-					) : thumbUrl && !imgError ? (
-						<img
-							key={`thumb-${retryCount}`}
-							src={thumbUrl}
-							alt={name}
-							style={{ width: '100%', height: '200px', objectFit: 'contain', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', cursor: 'pointer', background: '#f5f5f5', opacity: isRetrying ? 0.5 : 1 }}
-							loading="lazy"
-							onError={handleImgError}
-							onLoad={() => setImgLoaded(true)}
-							onClick={e => onViewDetails && onViewDetails(e)}
-							title={t('dogDetails.showMap', 'Show details')}
-						/>
-					) : (
-						<div style={{ width: '100%', height: '200px', background: '#eee', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }} />
 					)}
-					{uniqueImages.length > 1 && (
-						<div
-							title={t('dogDetails.showMoreImages', 'View all images')}
-							style={{
-								position: 'absolute',
-								top: 10,
-								right: 10,
-								background: 'rgba(0,0,0,0.7)',
-								color: '#fff',
-								borderRadius: '50%',
-								width: 32,
-								height: 32,
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-								fontWeight: 700,
-								fontSize: 16,
-								zIndex: 2,
-								boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-							}}
-						>
-							<span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-								{uniqueImages.length}
+					<div className="card-small-name">{name}</div>
+					<div className="card-small-field"><strong className="field-label">{t('fields.breed', 'Breed')}</strong> {breed}</div>
+					{age !== undefined && <div className="card-small-field secondary"><strong className="field-label">{t('fields.age', 'Age')}</strong> {age}</div>}
+					{gender && <div className="card-small-field secondary"><strong className="field-label">{t('fields.gender', 'Gender')}</strong> {t(`gender.${gender}`, gender)}</div>}
+					{size && <div className="card-small-field secondary"><strong className="field-label">{t('fields.size', 'Size')}</strong> {t(`size.${size}`, size)}</div>}
+					{location && (
+						<div className="card-small-location">
+							<strong>{t('fields.location', 'Location')}</strong>
+							<span
+								className="location-text"
+								onClick={() => onViewDetails && onViewDetails({} as any)}
+								title={t('dogDetails.showMap', 'Show map')}
+							>
+								{location}
 							</span>
 						</div>
 					)}
-					<div style={{ padding: '16px', width: '100%' }}>
-						{adoptionStatus && adoptionStatus !== 'available' && (
-							<div style={{
-								background: adoptionStatus === 'adopted' ? '#4caf50' : '#ff9800',
-								color: '#fff',
-								padding: '4px 8px',
-								borderRadius: '4px',
-								fontSize: 12,
-								fontWeight: 600,
-								marginBottom: 8,
-								textAlign: 'center',
-								display: 'inline-block',
-								width: '100%',
-								boxSizing: 'border-box'
-							}}>
-								{t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)}
-							</div>
-						)}
-						<div style={{ fontWeight: 700, fontSize: 24, marginBottom: 4, color: '#75171a', textAlign: 'center' }}>{name}</div>
-						<div style={{ color: '#666', fontSize: 15, marginBottom: 4 }}><strong>{t('fields.breed', 'Breed')}</strong> {breed}</div>
-						{age !== undefined && <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}><strong>{t('fields.age', 'Age')}</strong> {age}</div>}
-						{gender && <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}><strong>{t('fields.gender', 'Gender')}</strong> {t(`gender.${gender}`, gender)}</div>}
-						{size && <div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}><strong>{t('fields.size', 'Size')}</strong> {t(`size.${size}`, size)}</div>}
-						{location && (
-							<div style={{ color: '#888', fontSize: 14, marginBottom: 4 }}>
-								<strong>{t('fields.location', 'Location')}</strong>
-								<span
-									style={{color:'#1976d2',marginLeft:4, cursor:'pointer', textDecoration:'underline'}}
-									onClick={() => onViewDetails && onViewDetails({} as any)}
-									title={t('dogDetails.showMap', 'Show map')}
-								>
-									{location}
-								</span>
-							</div>
-						)}
-						{vaccinated && <div style={{ color: '#388e3c', fontSize: 13, marginBottom: 4 }}>{t('fields.vaccinated', 'Vaccinated')}</div>}
-						{user && (
-							<div style={{ color: '#666', fontSize: 12, marginBottom: 4 }}>
-								<span>{t('fields.postedBy', 'Posted by')}:</span>{' '}
-								<span style={{ fontWeight: 600 }}>
-									{user.username || user.name}
-								</span>
-							</div>
-						)}
-						{createdAt && (
-							<div style={{ color: '#999', fontSize: 11, marginBottom: 4 }}>
-								{new Date(createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-							</div>
-						)}
-					</div>
-				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', alignItems: 'center', padding: '8px 8px 16px 8px', width: '100%' }}>
-					<button type="button" onClick={onViewDetails} style={{ ...styles.details, flex: '1 1 auto', minWidth: 'fit-content', height: 32, fontSize: 12, padding: '0 12px', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>{t('button.viewDetails', 'Details')}</button>
+					{vaccinated && <div className="card-small-health">{t('fields.vaccinated', 'Vaccinated')}</div>}
+					{user && (
+						<div className="card-small-user">
+							<span className="user-label">{t('fields.postedBy', 'Posted by')}:</span>{' '}
+							<span className="user-name">
+								{user.username || user.name}
+							</span>
+						</div>
+					)}
+					{createdAt && (
+						<div className="card-small-date">
+							{new Date(createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+						</div>
+					)}
+				</div>
+				<div className="card-small-actions">
+					<button type="button" onClick={onViewDetails} className="card-small-btn btn-details">{t('button.viewDetails', 'Details')}</button>
 					<button 
 						type="button" 
 						onClick={handleAdopt} 
 						disabled={adoptionStatus && adoptionStatus !== 'available'}
-						style={{
-							background: adoptionStatus && adoptionStatus !== 'available' ? '#9e9e9e' : '#43a047',
-							color: '#fff',
-							border: 'none',
-							fontWeight: 600,
-							flex: '1 1 auto',
-							minWidth: 'fit-content',
-							height: 32,
-							fontSize: 12,
-							padding: '0 12px',
-							borderRadius: 6,
-							cursor: (adoptionStatus && adoptionStatus !== 'available') ? 'not-allowed' : 'pointer',
-							textAlign: 'center',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							whiteSpace: 'nowrap',
-						}}
+						className="card-small-btn btn-adopt"
 					>
 						{adoptionStatus && adoptionStatus !== 'available' 
 							? t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)
@@ -493,42 +408,21 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 					<button
 						type="button"
 						onClick={handleWishlist}
-						style={{
-							background: isInWishlist && props._id && isInWishlist(props._id) ? '#a67c52' : '#dbb69d',
-							color: '#75171a',
-							border: 'none',
-							fontWeight: 600,
-							flex: '1 1 auto',
-							minWidth: 'fit-content',
-							height: 32,
-							fontSize: 11,
-							padding: '0 8px',
-							borderRadius: 6,
-							cursor: wishlistLoading ? 'wait' : 'pointer',
-							textAlign: 'center',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							opacity: wishlistLoading ? 0.7 : 1,
-							boxShadow: isInWishlist && props._id && isInWishlist(props._id) ? '0 0 0 2px #a67c52' : '0 0 0 2px #dbb69d',
-							transition: 'background 0.2s, box-shadow 0.2s',
-							whiteSpace: 'nowrap',
-						}}
+						className={`card-small-btn btn-wishlist ${isInWishlist && props._id && isInWishlist(props._id) ? 'in-wishlist' : ''}`}
 						disabled={wishlistLoading}
 					>
 						{isInWishlist && props._id && isInWishlist(props._id)
-							? <><div style={{position:'relative',fontSize:16,marginRight:4,display:'inline-block'}}>❤️<span style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',color:'#4CAF50',fontSize:10,fontWeight:'bold'}}>✓</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4}}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></>
-							: <><span style={{fontSize:16,marginRight:4}}>❤️</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4}}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></>}
+							? <div className="wishlist-heart"><span className="check-mark">✓</span>❤️<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+							: <div className="wishlist-heart"><span>❤️</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>}
 					</button>
 					{canEdit && (
-						<button type="button" onClick={onEdit} style={{ ...styles.edit, flex: '1 1 auto', minWidth: 'fit-content', height: 32, fontSize: 12, padding: '0 12px', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>{t('edit', t('button.edit', 'Bearbeiten'))}</button>
+						<button type="button" onClick={onEdit} className="card-small-btn btn-edit">{t('edit', t('button.edit', 'Bearbeiten'))}</button>
 					)}
 					{canEdit && (
-						<button type="button" onClick={onRemove} style={{ ...styles.remove, flex: '1 1 auto', minWidth: 'fit-content', height: 32, fontSize: 12, padding: '0 12px', borderRadius: 6, cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}>{t('remove', t('button.remove', 'Entfernen'))}</button>
+						<button type="button" onClick={onRemove} className="card-small-btn btn-remove">{t('remove', t('button.remove', 'Entfernen'))}</button>
 					)}
 				</div>
 			</div>
-		</>
 	);
 }
 

@@ -507,56 +507,38 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
             {isEditing ? (
               <form onSubmit={handleUpdateProfile}>
                 {/* Profile Picture Section */}
-                <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-                  <div style={{ marginBottom: '15px' }}>
+                <div className="profile-picture-section">
+                  <div className="profile-picture-wrapper">
                     <img 
                       key={profilePicKey}
                       src={profilePicturePreview || getProfileImageUrl((user as any)?.profilePicture)}
                       alt={user.username ? `${user.username}'s profile` : 'User profile'}
-                      style={{ 
-                        width: '100px', 
-                        height: '100px', 
-                        borderRadius: '50%', 
-                        objectFit: 'cover',
-                        border: '3px solid #ddd'
-                      }} 
+                      className="profile-picture"
                     />
                   </div>
-                  <div style={{ marginBottom: '15px' }}>
+                  <div>
                     <label
                       htmlFor="profilePictureInput"
-                      style={{
-                        display: 'inline-block',
-                        padding: '8px 16px',
-                        backgroundColor: '#f0f0f0',
-                        border: '1px solid #ddd',
-                        borderRadius: '20px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        color: '#333',
-                        width: '100%',
-                        textAlign: 'center'
-                      }}
+                      className="profile-upload-label"
                       tabIndex={0}
                     >
                       <input
                         type="file"
                         accept="image/*"
                         onChange={handleProfilePictureChange}
-                        style={{ display: 'none' }}
                         id="profilePictureInput"
                         aria-label="Profile picture"
                         autoComplete="photo"
                       />
-                      <span role="button" style={{fontSize: '18px', verticalAlign: 'middle'}}>
+                      <span role="button" className="upload-icon">
                         📷 {t('userProfile.changePhoto')}
                       </span>
                     </label>
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+                <div className="modal-form-group">
+                  <label>
                     {t('userProfile.fullName')}
                   </label>
                   <input
@@ -565,22 +547,13 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      fontSize: '16px',
-                      WebkitUserSelect: 'text',
-                      userSelect: 'text'
-                    }}
                     required
                     autoComplete="name"
                   />
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+                <div className="modal-form-group">
+                  <label>
                     {t('userProfile.phone')}
                   </label>
                   <input
@@ -589,20 +562,12 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      fontSize: '16px',
-                      background: '#fff'
-                    }}
                     autoComplete="tel"
                   />
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+                <div className="modal-form-group">
+                  <label>
                     {t('userProfile.email')}
                   </label>
                   <input
@@ -611,22 +576,13 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      fontSize: '16px',
-                      WebkitUserSelect: 'text',
-                      userSelect: 'text'
-                    }}
                     required
                     autoComplete="email"
                   />
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+                <div className="modal-form-group">
+                  <label>
                     {t('userProfile.username')}
                   </label>
                   <input
@@ -635,63 +591,29 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                     name="username"
                     value={formData.username}
                     onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      fontSize: '16px',
-                      WebkitUserSelect: 'text',
-                      userSelect: 'text'
-                    }}
                     required
                     autoComplete="username"
                   />
                 </div>
 
                 {/* Password Change Section */}
-                <div style={{ 
-                  marginBottom: '20px', 
-                  padding: '15px', 
-                  backgroundColor: '#f8f9fa', 
-                  borderRadius: '8px', 
-                  border: '1px solid #e9ecef' 
-                }}>
-                  <h4 style={{ margin: '0 0 10px 0', color: '#333', fontSize: '16px' }}>{t('userProfile.password')}</h4>
-                  <p style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#666' }}>
-                    {t('userProfile.passwordInfo')}
-                  </p>
+                <div className="password-section">
+                  <h4>{t('userProfile.password')}</h4>
+                  <p>{t('userProfile.passwordInfo')}</p>
                   <button
                     type="button"
                     onClick={handlePasswordReset}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#6c757d',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '20px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '500'
-                    }}
+                    className="modal-btn btn-info"
                   >
                     🔑 {t('userProfile.sendPasswordReset')}
                   </button>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                <div className="modal-button-group">
                   <button
                     type="submit"
                     disabled={loading}
-                    style={{
-                      padding: '10px 20px',
-                      backgroundColor: '#4CAF50',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      opacity: loading ? 0.6 : 1
-                    }}
+                    className="modal-btn btn-primary"
                   >
                     {loading ? t('userProfile.saving') : t('userProfile.saveChanges')}
                   </button>
@@ -701,59 +623,37 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                       console.log('Cancel button clicked');
                       setIsEditing(false);
                     }}
-                    style={{
-                      padding: '10px 20px',
-                      backgroundColor: '#757575',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
+                    className="modal-btn btn-secondary"
                   >
                     {t('userProfile.cancel')}
                   </button>
                 </div>
               </form>
             ) : (
-              <div>
-                <div style={{ marginBottom: '16px' }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{t('userProfile.fullName')}:</span> {user ? user.name : ''}
+              <div className="profile-display">
+                <div className="profile-field">
+                  <span className="field-label">{t('userProfile.fullName')}:</span> {user ? user.name : ''}
                 </div>
-                <div style={{ marginBottom: '16px' }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{t('userProfile.email')}:</span> {user ? user.email : ''}
+                <div className="profile-field">
+                  <span className="field-label">{t('userProfile.email')}:</span> {user ? user.email : ''}
                 </div>
-                <div style={{ marginBottom: '20px' }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{t('userProfile.username')}:</span> {user ? user.username : ''}
+                <div className="profile-field">
+                  <span className="field-label">{t('userProfile.username')}:</span> {user ? user.username : ''}
                 </div>
-                <div style={{ marginBottom: '16px' }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{t('userProfile.phone')}:</span> {typedUser ? typedUser.phone : ''}
+                <div className="profile-field">
+                  <span className="field-label">{t('userProfile.phone')}:</span> {typedUser ? typedUser.phone : ''}
                 </div>
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <div className="modal-button-group">
                   <button
                     onClick={() => setIsEditing(true)}
-                    style={{
-                      padding: '10px 20px',
-                      backgroundColor: '#2196F3',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
+                    className="modal-btn btn-primary"
                   >
                     {t('userProfile.editProfile')}
                   </button>
                   <button
                     onClick={handleDeleteAccount}
                     disabled={loading}
-                    style={{
-                      padding: '10px 20px',
-                      backgroundColor: '#f44336',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      opacity: loading ? 0.6 : 1
-                    }}
+                    className="modal-btn btn-danger"
                   >
                     {loading ? t('userProfile.deleting') : t('userProfile.deleteAccount')}
                   </button>
@@ -766,30 +666,19 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         {/* Wishlist Tab Content */}
         {activeTab === 'wishlist' && (
           <div>
-            <h3 style={{ marginBottom: '20px', fontSize: '1.2em' }}>{t('userProfile.myWishlist')} ({wishlist.length})</h3>
+            <h3 className="wishlist-title">{t('userProfile.myWishlist')} ({wishlist.length})</h3>
             
             {loadingWishlist ? (
-              <div style={{ textAlign: 'center', padding: '40px', fontSize: '1.1em' }}>{t('userProfile.loadingWishlist')}</div>
+              <div className="wishlist-loading">{t('userProfile.loadingWishlist')}</div>
             ) : wishlist.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px', color: '#666', fontSize: '1.1em' }}>
+              <div className="wishlist-empty-state">
                 <p>{t('userProfile.emptyWishlist')}</p>
                 <p>{t('userProfile.emptyWishlistHint')}</p>
               </div>
             ) : (
-              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <div className="wishlist-scroll-container">
                 {wishlist.map((dog: any) => (
-                  <div 
-                    key={dog._id}
-                    style={{
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      padding: '15px',
-                      marginBottom: '15px',
-                      display: 'flex',
-                      gap: '15px',
-                      alignItems: 'center'
-                    }}
-                  >
+                  <div key={dog._id} className="wishlist-dog-item">
                     <img
                       src={(() => {
                         const url = dog.thumbnail?.url || dog.images?.[0]?.url;
@@ -799,33 +688,26 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                           const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
                           return apiBase + url;
                         }
-                        // Fallback to placeholder if not a valid path
                         return '../img/placeholder-dog.jpg';
                       })()}
                       alt={dog.name}
-                      style={{
-                        width: '60px',
-                        height: '60px',
-                        borderRadius: '8px',
-                        objectFit: 'cover'
-                      }}
+                      className="wishlist-dog-image"
                     />
-                    <div style={{ flex: 1 }}>
-                      <h4 style={{ margin: '0 0 5px 0', color: '#333' }}>{dog.name}</h4>
-                      <p style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666' }}>
+                    <div className="wishlist-dog-info">
+                      <h4>{dog.name}</h4>
+                      <p>
                         {dog.breed} • {dog.age} years • {dog.size} • {dog.location || dog.place}
                       </p>
                       {dog.description && (
-                        <p style={{ margin: '0', fontSize: '13px', color: '#888', maxWidth: '300px' }}>
+                        <p className="dog-description">
                           {dog.description.length > 100 ? dog.description.substring(0, 100) + '...' : dog.description}
                         </p>
                       )}
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div className="wishlist-dog-actions">
                       {(dog.adoptionStatus === 'pending' && dog.adoptionQueue && user && dog.adoptionQueue.adopter === user._id) ? (
                         <button
                           onClick={async () => {
-                            // Odustani (cancel adoption)
                             try {
                               const API_URL = getApiUrl();
                               const resp = await fetch(`${API_URL}/api/dogs/${dog._id}/adopt-cancel`, {
@@ -843,32 +725,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                               alert(e.message || 'Error');
                             }
                           }}
-                          style={{
-                            padding: '8px 16px',
-                            backgroundColor: '#e74c3c',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                            whiteSpace: 'nowrap'
-                          }}
+                          className="wishlist-action-btn btn-cancel"
                         >
                           {t('button.cancelAdoption') || 'Odustani od posvajanja'}
                         </button>
                       ) : dog.adoptionStatus === 'pending' ? (
                         <button
                           disabled
-                          style={{
-                            padding: '8px 16px',
-                            backgroundColor: '#aaa',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'not-allowed',
-                            fontSize: '14px',
-                            whiteSpace: 'nowrap'
-                          }}
+                          className="wishlist-action-btn btn-disabled"
                         >
                           {t('button.requested') || 'Zahtjev poslan'}
                         </button>
@@ -877,24 +741,13 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                           onClick={() => {
                             handleAdopt(dog._id);
                           }}
-                          style={{
-                            padding: '8px 16px',
-                            backgroundColor: '#4CAF50',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                            whiteSpace: 'nowrap'
-                          }}
+                          className="wishlist-action-btn btn-adopt"
                         >
                           🏠 {t('button.adopt')}
                         </button>
                       )}
                       <button
                         onClick={async () => {
-                          // const removeKey = t('userProfile.remove');
-                          // const fallbackRemove = t('button.removeFromList');
                           setWishlist(prev => prev.filter((d: any) => d._id !== dog._id));
                           await removeFromWishlist(dog._id);
                           if (user) {
@@ -904,23 +757,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                             });
                           }
                         }}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#ff4444',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '20px',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          fontWeight: 600,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 4,
-                          boxShadow: '0 0 0 2px #ff4444',
-                          transition: 'background 0.2s, box-shadow 0.2s',
-                        }}
+                        className="wishlist-action-btn btn-remove"
                       >
-                        <span style={{fontSize:18}}>💔</span> {t('button.removeFromList', 'Entfernen')}
+                        <span className="heart-icon">💔</span> {t('button.removeFromList', 'Entfernen')}
                       </button>
                     </div>
                   </div>

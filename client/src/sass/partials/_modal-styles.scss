@@ -349,6 +349,24 @@
   }
 }
 
+// Wishlist section
+.wishlist-title {
+  margin-bottom: 20px;
+  font-size: 1.2em;
+}
+
+.wishlist-loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.1em;
+  color: #666;
+}
+
+.wishlist-scroll-container {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
 // Empty state
 .wishlist-empty-state {
   text-align: center;

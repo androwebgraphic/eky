@@ -574,93 +574,70 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
   };
 
   return (
-    <div className="chat-app-container" style={{ display: 'flex', height: '100%' }}>
-      <div className="chat-app-sidebar" style={{ width: 220, borderRight: '1px solid #eee', background: '#fafbfc', padding: 0 }}>
-        <div style={{ fontWeight: 'bold', padding: '12px 16px', borderBottom: '1px solid #eee' }}>{t('onlineUsers') || 'Online Users'}</div>
+    <div className="chat-app-container">
+      <div className="chat-app-sidebar">
+        <div className="chat-users-header">{t('onlineUsers') || 'Online Users'}</div>
         {onlineUsers.length === 0 ? (
-          <div style={{ padding: 16, color: '#888' }}>{t('noUsersOnline') || 'No users online.'}</div>
+          <div className="chat-users-empty">{t('noUsersOnline') || 'No users online.'}</div>
         ) : (
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          <ul className="chat-users-list">
             {onlineUsers.map(u => (
               <li key={u._id} 
-                  style={{ display: 'flex', alignItems: 'center', padding: '10px 16px', cursor: 'pointer', background: selectedConvo && selectedConvo.participants.includes(u._id) ? '#e6f7ff' : 'transparent' }}
+                  className={`chat-user-item ${selectedConvo && selectedConvo.participants.includes(u._id) ? 'selected' : ''}`}
                   onClick={() => startConversation(u._id)}>
                 <img 
                   src={getProfilePic(u)}
                   alt={u.userName || 'User'}
-                  style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 12, objectFit: 'cover', border: '1px solid #ddd' }} 
+                  className="chat-user-avatar"
                 />
-                <span style={{ flex: 1 }}>{u.userName || u._id}</span>
-                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#4caf50', display: 'inline-block', marginLeft: 8 }} title="Online"></span>
+                <span className="chat-user-name">{u.userName || u._id}</span>
+                <span className="chat-user-status" title="Online"></span>
               </li>
             ))}
           </ul>
         )}
       </div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div className="chat-app-main">
         {(!socketRef.current || !socketRef.current.connected) && (
-          <div style={{ background: '#fcc', color: '#900', padding: '8px', marginBottom: '8px', fontWeight: 'bold' }}>
+          <div className="chat-connection-alert">
             Socket not connected. Check backend/server.
           </div>
         )}
         {selectedConvo ? (
           <>
-            <div className="chat-app-header" style={{ borderBottom: '1px solid #eee', padding: '12px 16px', background: '#f7fafd' }}>
+            <div className="chat-app-header">
               {(() => {
                 const otherUser = onlineUsers.find(u => selectedConvo.participants.includes(u._id) && u._id !== user._id);
                 return (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="chat-header-user">
                     <img 
                       src={otherUser ? getProfilePic(otherUser) : '/img/chat-icon.svg'}
                       alt={otherUser?.userName || 'User'}
-                      style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '1px solid #ddd' }} 
+                      className="chat-header-avatar"
                     />
                     <span>{t('chatWith') || 'Chat with'} {otherUser?.userName || selectedConvo.participants.filter(id => id !== user._id).join(', ')}</span>
-                  </span>
+                  </div>
                 );
               })()}
-              <button
-                onClick={() => setChatVisible(false)}
-                style={{
-                  float: 'right',
-                  background: '#e74c3c',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: 22,
-                  height: 22,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginLeft: 16,
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(231,76,60,0.10)',
-                }}
-                title="Close chat"
-                aria-label="Close chat"
-              >
-                <span style={{
-                  color: '#fff',
-                  fontSize: '2rem',
-                  fontWeight: 900,
-                  lineHeight: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '100%',
-                  height: '100%',
-                }}>×</span>
-              </button>
-              <span style={{ float: 'right', display: 'flex', gap: 8 }}>
-                <button style={{ background: isBlocked ? '#ff9800' : '#eee', color: isBlocked ? '#fff' : '#333', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8 }} onClick={handleBlockUnblock}>
+              <div className="chat-header-actions">
+                <button
+                  onClick={() => setChatVisible(false)}
+                  className="chat-close-btn"
+                  title="Close chat"
+                  aria-label="Close chat"
+                >
+                  <span>×</span>
+                </button>
+                <button className={`chat-header-btn btn-block ${isBlocked ? 'blocked' : ''}`} onClick={handleBlockUnblock}>
                   {isBlocked ? (t('unblock') || 'Unblock') : (t('block') || 'Block')}
                 </button>
-                <button style={{ background: '#f44336', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8 }} onClick={handleDeleteConversation}>
+                <button className="chat-header-btn btn-delete" onClick={handleDeleteConversation}>
                   {t('deleteConversation') || 'Delete Conversation'}
                 </button>
-              </span>
+              </div>
             </div>
             {adoptionDogId && (
-              <div style={{ padding: '12px 16px', background: '#fffbe6', borderBottom: '1px solid #ffe58f', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div className="chat-adoption-notice">
                 <span>{t('adoptionPending') || 'Adoption pending for this dog.'}</span>
                 {(() => {
                   const status = dogStatusMap[adoptionDogId];
@@ -668,7 +645,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                     if (!confirmingAdoption && adoptionIsOwner) {
                       return (
                         <button
-                          style={{ background: '#4caf50', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8 }}
+                          className="chat-adoption-btn"
                           onClick={() => handleConfirmAdoption(adoptionDogId, true)}
                           disabled={confirmingAdoption}
                         >
@@ -678,7 +655,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                     } else if (!confirmingAdoption && !adoptionIsOwner) {
                       return (
                         <button
-                          style={{ background: '#4caf50', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8 }}
+                          className="chat-adoption-btn"
                           onClick={() => handleConfirmAdoption(adoptionDogId, false)}
                           disabled={confirmingAdoption}
                         >
@@ -687,114 +664,68 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                       );
                     } else {
                       return (
-                        <span style={{ marginLeft: 12, color: '#888' }}>{t('waitingForOtherParty') || 'Waiting for other party to confirm...'}</span>
+                        <span className="chat-waiting-message">{t('waitingForOtherParty') || 'Waiting for other party to confirm...'}</span>
                       );
                     }
                   }
                   return null;
                 })()}
                 {adoptionDogId && !adoptionIsOwner && (
-                  <button style={{ background: '#f44336', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', marginLeft: 8 }} onClick={() => handleCancelAdoption(adoptionDogId)}>{t('cancelAdoption') || 'Cancel Adoption'}</button>
+                  <button className="chat-adoption-btn" onClick={() => handleCancelAdoption(adoptionDogId)}>{t('cancelAdoption') || 'Cancel Adoption'}</button>
                 )}
               </div>
             )}
-            <div className="chat-app-messages" style={{ flex: 1, overflowY: 'auto', padding: 16, background: '#f9f9fb' }}>
+            <div className="chat-app-messages">
               {messages.length === 0 ? (
                 <div className="chat-app-empty">No messages yet.</div>
               ) : (
                 messages.map(msg => {
-                  // Determine if this is an adoption request message that needs action buttons
                   const isAdoptionRequest = msg.messageType === 'adoption_request' && msg.requiresAction && !msg.actionTakenBy;
-                  const isOwnerMessage = msg.recipient === user._id; // Owner received the request
+                  const isOwnerMessage = msg.recipient === user._id;
+                  const bubbleClass = isAdoptionRequest ? 'chat-app-bubble adoption-request' : 'chat-app-bubble';
                   
                   return (
                     <div key={msg._id} className={`chat-app-message${msg.sender === user._id ? ' self' : ''}`}>
-                      <span className="chat-app-bubble" style={{
-                        background: isAdoptionRequest ? '#e3f2fd' : undefined,
-                        border: isAdoptionRequest ? '2px solid #2196f3' : undefined
-                      }}>
+                      <span className={bubbleClass}>
                         {msg.message}
                       </span>
                       
-                      {/* Show action buttons for adoption requests */}
                       {isAdoptionRequest && isOwnerMessage && (
-                        <div style={{ marginTop: 8, display: 'flex', gap: 8, justifyContent: 'center' }}>
+                        <div className="chat-adoption-actions">
                           <button
                             onClick={() => handleAdoptionAction(msg._id, 'owner_confirm')}
-                            style={{
-                              background: '#4caf50',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: 4,
-                              padding: '6px 12px',
-                              cursor: 'pointer',
-                              fontSize: '12px'
-                            }}
+                            className="chat-adoption-action-btn btn-confirm"
                           >
                             {t('confirm') || 'Confirm'}
                           </button>
                           <button
                             onClick={() => handleAdoptionAction(msg._id, 'owner_deny')}
-                            style={{
-                              background: '#f44336',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: 4,
-                              padding: '6px 12px',
-                              cursor: 'pointer',
-                              fontSize: '12px'
-                            }}
+                            className="chat-adoption-action-btn btn-deny"
                           >
                             {t('deny') || 'Deny'}
                           </button>
                         </div>
                       )}
                       
-                      {/* Show confirm/cancel buttons for adopter after owner confirmed */}
                       {msg.messageType === 'adoption_confirmed' && msg.requiresAction && !msg.actionTakenBy && msg.recipient === user._id && (
-                        <div style={{ marginTop: 8, display: 'flex', gap: 8, justifyContent: 'center' }}>
+                        <div className="chat-message-status">
                           <button
                             onClick={() => handleAdoptionAction(msg._id, 'adopter_confirm')}
-                            style={{
-                              background: '#4caf50',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: 4,
-                              padding: '6px 12px',
-                              cursor: 'pointer',
-                              fontSize: '12px'
-                            }}
+                            className="chat-status-btn btn-confirm"
                           >
                             {t('confirmAdoption') || 'Confirm Adoption'}
                           </button>
                           <button
                             onClick={() => handleAdoptionAction(msg._id, 'adopter_cancel')}
-                            style={{
-                              background: '#f44336',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: 4,
-                              padding: '6px 12px',
-                              cursor: 'pointer',
-                              fontSize: '12px'
-                            }}
+                            className="chat-status-btn btn-cancel"
                           >
                             {t('cancel') || 'Cancel'}
                           </button>
                         </div>
                       )}
                       
-                      {/* Show system messages in different style */}
                       {(msg.messageType === 'adoption_denied' || msg.messageType === 'adoption_cancelled' || msg.messageType === 'adoption_completed') && (
-                        <div style={{ 
-                          marginTop: 8, 
-                          padding: '8px 12px', 
-                          background: msg.messageType === 'adoption_completed' ? '#e8f5e9' : '#ffebee',
-                          borderRadius: 4,
-                          fontSize: '12px',
-                          textAlign: 'center',
-                          border: `1px solid ${msg.messageType === 'adoption_completed' ? '#4caf50' : '#f44336'}`
-                        }}>
+                        <div className={`chat-message-final ${msg.messageType === 'adoption_completed' ? 'completed' : ''}`}>
                           {msg.message}
                         </div>
                       )}
@@ -803,21 +734,19 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                 })
               )}
             </div>
-            <div className="chat-app-input-row" style={{ borderTop: '1px solid #eee', padding: 12, background: '#fff' }}>
+            <div className="chat-app-input-row">
               <input
-                className="chat-app-input"
+                className="chat-input"
                 type="text"
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 placeholder={t('typeMessagePlaceholder') || 'Type a message...'}
-                style={{ width: '80%', marginRight: 8 }}
               />
               <button
-                className="chat-app-send-btn"
+                className="chat-send-btn"
                 onClick={sendMessage}
                 disabled={!input.trim()}
-                style={{ background: '#1890ff', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 16px' }}
               >{t('send') || 'Send'}</button>
             </div>
             {notification && (
@@ -825,7 +754,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
             )}
           </>
         ) : (
-          <div className="chat-app-empty" style={{ padding: 32, textAlign: 'center', color: '#888' }}>{t('selectUserToChat') || 'Select a user to start chatting.'}</div>
+          <div className="chat-app-empty">{t('selectUserToChat') || 'Select a user to start chatting.'}</div>
         )}
       </div>
     </div>

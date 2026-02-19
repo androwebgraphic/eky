@@ -88,44 +88,27 @@ const Header: React.FC = () => {
     <>
       {isAuthenticated ? (
         <>
-        <header
-          className="UserHeader"
-          style={{
-            margin: 0,
-            padding: 0,
-            top: 0,
-            left: 0,
-            width: '100vw',
-            background: '#75171a',
-            color: '#f8f8f8',
-            position: 'fixed',
-            zIndex: 1000,
-            borderTop: '4px solid #75171a',
-            minHeight: '60px',
-            boxSizing: 'border-box',
-          }}
-        >
-         
-          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+        <header className="UserHeader">
+          <div className="header-content-inner">
             {/* Left: Navigation Links */}
-            <nav style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <Link to="/" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.about')}</Link>
-              <Link to="psi" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.dogs')}</Link>
+            <nav className="header-nav-inner">
+              <Link to="/" className="header-nav-link-inner">{t('nav.about')}</Link>
+              <Link to="psi" className="header-nav-link-inner">{t('nav.dogs')}</Link>
             </nav>
-            <div style={{ flex: 1 }} />
+            <div className="header-flex-spacer" />
             {/* Right: Language Selector and User Info */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className="header-right-inner">
               <LanguageSelector />
               {user && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={e => { e.stopPropagation(); setIsExpanded(!isExpanded); }}>
+                <div className="header-user-info-inner" onClick={e => { e.stopPropagation(); setIsExpanded(!isExpanded); }}>
                   <img
                     src={user.profilePicture ? `${getApiUrl()}/u${user.profilePicture.replace('/uploads', '')}` : '../img/androcolored-80x80.jpg'}
                     alt={t('userHeader.avatarAlt')}
-                    style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', background: '#eee' }}
+                    className="header-avatar-inner"
                     onError={e => { (e.target as HTMLImageElement).src = '../img/androcolored-80x80.jpg'; }}
                   />
-                  <span style={{ color: '#f8f8f8', fontWeight: 600, fontSize: 15 }}>{user.username}</span>
-                  <span style={{ fontSize: 12, color: '#4CAF50', marginLeft: 2 }}>●</span>
+                  <span className="header-username-inner">{user.username}</span>
+                  <span className="header-online-dot">●</span>
                 </div>
               )}
             </div>
@@ -135,60 +118,35 @@ const Header: React.FC = () => {
         {/* Expanded dropdown panel - outside header */}
         {isExpanded && user && (
             <div 
-              style={{ 
-                position: 'fixed',
-                top: dropdownTop,
-                right: '20px',
-                backgroundColor: 'white',
-                color: '#333',
-                padding: '15px',
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                minWidth: '250px',
-                zIndex: 9999
-              }}
+              className="user-dropdown-panel"
+              style={{ top: dropdownTop }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 'bold', marginBottom: '10px' }}>
+              <div className="user-dropdown-header-inner">
                 {user.username}
-                <span
-                  style={{
-                    fontSize: '0.8em',
-                    color: '#4CAF50',
-                    fontWeight: 'normal'
-                  }}
-                >
+                <span className="user-dropdown-online-text">
                   ● Online
                 </span>
               </div>
 
-              <div style={{
-                marginBottom: '10px',
-                fontSize: '0.8em',
-                color: apiOk === null ? '#ffc107' : apiOk ? '#28a745' : '#dc3545'
-              }} title={apiOk === null ? 'Checking API…' : apiOk ? 'API OK' : 'API Down'}>
+              <div 
+                className={`user-dropdown-api ${apiOk === true ? 'ok' : apiOk === false ? 'down' : ''}`}
+                title={apiOk === null ? 'Checking API…' : apiOk ? 'API OK' : 'API Down'}
+              >
                 {apiOk === null ? 'API' : apiOk ? 'API OK' : 'API Down'}{uptime ? ` • ${Math.floor(uptime)}s` : ''}
               </div>
 
-              <p style={{ margin: '5px 0', fontSize: '13px' }}>Name: {user.name}</p>
-              <p style={{ margin: '5px 0', fontSize: '13px' }}>Email: {user.email}</p>
+              <p className="user-dropdown-info-item">Name: {user.name}</p>
+              <p className="user-dropdown-info-item">Email: {user.email}</p>
               
-              <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+              <div className="user-dropdown-buttons">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowProfileModal(true);
                     setIsExpanded(false);
                   }}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: '#666',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px'
-                  }}
+                  className="user-dropdown-btn profile"
                   title="User Menu"
                 >
                   ⚙️ Profile
@@ -199,22 +157,14 @@ const Header: React.FC = () => {
                     e.stopPropagation();
                     logout();
                   }}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: '#f44336',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px'
-                  }}
+                  className="user-dropdown-btn logout"
                 >
                   {t('button.logout') || 'Logout'}
                 </button>
               </div>
 
               {/* Collapse indicator */}
-              <div style={{ fontSize: '12px', color: '#666', marginTop: '10px', textAlign: 'center' }}>
+              <div className="user-dropdown-collapse">
                 ▼
               </div>
             </div>
@@ -222,90 +172,31 @@ const Header: React.FC = () => {
         </>
       ) : (
          <>
-         <header style={{
-           position: 'fixed',
-           top: '0',
-           left: '0',
-           right: '0',
-           minHeight: '60px',
-           zIndex: '1000',
-           padding: '10px 20px',
-           backgroundColor: '#75171a',
-           color: '#f8f8f8',
-           fontSize: '20px',
-           fontWeight: 'bold',
-           boxSizing: 'border-box',
-           borderBottom: '2px solid #8a2419',
-           display: 'flex',
-           alignItems: 'center',
-           justifyContent: 'space-between',
-         }}>
+         <header className="header-mobile-container">
           {/* Mobile hamburger menu */}
           {isMobile && (
             <div 
               onClick={toggleMobileMenu}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#f8f8f8',
-                fontSize: '28px',
-                cursor: 'pointer',
-                padding: '5px',
-                marginRight: '10px',
-                zIndex: 1001,
-                minWidth: '40px',
-                minHeight: '40px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
+              className="hamburger-menu-btn"
             >
               ☰
             </div>
           )}
 
           {/* Message - centered */}
-          <div style={{
-            flexGrow: isMobile ? 0 : 1,
-            display: 'flex',
-            justifyContent: 'center',
-            position: isMobile ? 'relative' : 'absolute',
-            left: isMobile ? 'auto' : '50%',
-            transform: isMobile ? 'none' : 'translateX(-50%)',
-            maxWidth: '500px',
-            width: isMobile ? 'auto' : '100%',
-            marginLeft: isMobile ? 'auto' : 0,
-            marginRight: isMobile ? 'auto' : 0
-          }}>
-            <p
-              style={{
-                margin: 0,
-                fontWeight: 'normal',
-                fontSize: '0.9em',
-                color: 'orange',
-                textAlign: 'center',
-                wordBreak: 'break-word',
-                lineHeight: 1.2,
-                overflow: 'hidden',
-                whiteSpace: 'normal',
-              }}
-            >
+          <div className={`header-message-wrapper ${isMobile ? 'mobile' : 'desktop'}`}>
+            <p className="header-message-text">
               {t('nav.mustBeLoggedIn')}
             </p>
           </div>
 
           {/* Desktop navigation */}
           {!isMobile && (
-            <nav style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '20px',
-              flexShrink: 0
-            }}>
-              <Link to="/" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.about')}</Link>
-              <Link to="psi" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.dogs')}</Link>
-              <Link to="logiranje" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.login')}</Link>
-              <Link to="registracija" style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '16px' }}>{t('nav.register')}</Link>
+            <nav className="header-nav-desktop">
+              <Link to="/" className="header-nav-link-inner">{t('nav.about')}</Link>
+              <Link to="psi" className="header-nav-link-inner">{t('nav.dogs')}</Link>
+              <Link to="logiranje" className="header-nav-link-inner">{t('nav.login')}</Link>
+              <Link to="registracija" className="header-nav-link-inner">{t('nav.register')}</Link>
               <LanguageSelector />
             </nav>
           )}
@@ -320,46 +211,31 @@ const Header: React.FC = () => {
 
         {/* Mobile menu dropdown */}
         {mobileMenuOpen && isMobile && (
-          <div
-            style={{
-              position: 'fixed',
-              top: '60px',
-              left: 0,
-              right: 0,
-              backgroundColor: '#75171a',
-              padding: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '15px',
-              borderBottom: '2px solid #8a2419',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-              zIndex: 999
-            }}
-          >
+          <div className="mobile-menu-dropdown">
             <Link 
               to="/" 
-              style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '18px', padding: '10px', borderBottom: '1px solid #8a2419' }}
+              className="mobile-nav-link"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t('nav.about')}
             </Link>
             <Link 
               to="psi" 
-              style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '18px', padding: '10px', borderBottom: '1px solid #8a2419' }}
+              className="mobile-nav-link"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t('nav.dogs')}
             </Link>
             <Link 
               to="logiranje" 
-              style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '18px', padding: '10px', borderBottom: '1px solid #8a2419' }}
+              className="mobile-nav-link"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t('nav.login')}
             </Link>
             <Link 
               to="registracija" 
-              style={{ color: '#f5f5f5', textDecoration: 'none', fontSize: '18px', padding: '10px' }}
+              className="mobile-nav-link"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t('nav.register')}

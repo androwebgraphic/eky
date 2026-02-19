@@ -122,7 +122,7 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
               </li>
             </Link>
             <li title={t('button.chat') || 'Chat'} onClick={typeof onChatClick === 'function' ? onChatClick : undefined}>
-              <img src="/img/paper-airplane.svg" alt="Chat" style={{ width: 28, height: 28, display: 'inline-block', filter: 'drop-shadow(0 1px 2px #1976d2)', color: '#2196f3' }} />
+              <img src="/img/paper-airplane.svg" alt="Chat" className="footer-icon" />
               <span className="desktop-label">{t('footer.chat')}</span>
             </li>
             <Link to="/dodajpsa">
@@ -165,119 +165,39 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
 
       {/* Search Modal */}
       {showSearchModal && ReactDOM.createPortal(
-        <div
-          style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '85vw',
-            maxWidth: '550px',
-            height: 'auto',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            borderRadius: '12px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 2147483647,
-            padding: '16px',
-            pointerEvents: 'auto'
-          }}
-          onClick={() => setShowSearchModal(false)}
-        >
-          <div
-            style={{
-              backgroundColor: '#fff',
-              borderRadius: '12px',
-              padding: '2rem',
-              maxWidth: '500px',
-              width: '90vw',
-              maxHeight: '80vh',
-              overflowY: 'auto',
-              position: 'relative'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="footer-search-modal" onClick={() => setShowSearchModal(false)}>
+          <div className="footer-search-content" onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ margin: 0, fontSize: '1.5rem', color: '#333' }}>{t('search.title') || 'Search Dogs'}</h2>
-              <button
-                onClick={() => setShowSearchModal(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '24px',
-                  cursor: 'pointer',
-                  color: '#666',
-                  padding: '5px'
-                }}
-                title="Close"
-              >
-                ×
-              </button>
+            <div className="search-modal-header">
+              <h2>{t('search.title') || 'Search Dogs'}</h2>
+              <button onClick={() => setShowSearchModal(false)} className="search-modal-close" title="Close">×</button>
             </div>
 
             {/* Search Input */}
-            <div style={{ marginBottom: '1rem' }}>
+            <div className="search-modal-input-group">
               <input
                 type="search"
                 placeholder={t('search.placeholder') || 'Search for dogs...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '2px solid #ddd',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  boxSizing: 'border-box'
-                }}
                 autoFocus
               />
             </div>
 
             {/* Search History */}
             {searchHistory.length > 0 && (
-              <div style={{ marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <label style={{ fontSize: '14px', color: '#666', fontWeight: 'bold' }}>
-                    {t('search.recentSearches') || 'Recent Searches:'}
-                  </label>
-                  <button
-                    onClick={clearSearchHistory}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#999',
-                      fontSize: '12px',
-                      cursor: 'pointer',
-                      textDecoration: 'underline'
-                    }}
-                  >
-                    Clear
-                  </button>
+              <div className="search-history-section">
+                <div className="search-history-header">
+                  <label>{t('search.recentSearches') || 'Recent Searches:'}</label>
+                  <button onClick={clearSearchHistory} className="clear-history-btn">Clear</button>
                 </div>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <div className="search-history-tags">
                   {searchHistory.map((term, index) => (
                     <button
                       key={index}
                       onClick={() => handleHistoryClick(term)}
-                      style={{
-                        padding: '8px 16px',
-                        border: '1px solid #ddd',
-                        borderRadius: '25px',
-                        background: searchTerm === term ? '#72211f' : '#f0f0f0',
-                        color: searchTerm === term ? 'white' : '#555',
-                        cursor: 'pointer',
-                        fontSize: '13px',
-                        maxWidth: '200px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        transition: 'all 0.2s ease',
-                        minWidth: 'fit-content'
-                      }}
+                      className={`search-history-tag ${searchTerm === term ? 'active' : ''}`}
                       title={term}
                     >
                       {term}
@@ -287,97 +207,40 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
               </div>
             )}
 
-
             {/* Quick Filters */}
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            <div className="search-quick-filters">
               <button
                 onClick={() => handleFilterClick('gender', 'male')}
-                style={{
-                  padding: '10px 20px',
-                  border: '1px solid #ddd',
-                  borderRadius: '30px',
-                  background: selectedGender === 'male' ? '#72211f' : '#f8f9fa',
-                  color: selectedGender === 'male' ? 'white' : '#333',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  transition: 'all 0.2s ease',
-                  minWidth: 'fit-content',
-                  whiteSpace: 'nowrap'
-                }}
+                className={`search-filter-btn ${selectedGender === 'male' ? 'active' : ''}`}
               >
                 {t('dog.male') || 'Male'}
               </button>
               <button
                 onClick={() => handleFilterClick('gender', 'female')}
-                style={{
-                  padding: '10px 20px',
-                  border: '1px solid #ddd',
-                  borderRadius: '30px',
-                  background: selectedGender === 'female' ? '#72211f' : '#f8f9fa',
-                  color: selectedGender === 'female' ? 'white' : '#333',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  transition: 'all 0.2s ease',
-                  minWidth: 'fit-content',
-                  whiteSpace: 'nowrap'
-                }}
+                className={`search-filter-btn ${selectedGender === 'female' ? 'active' : ''}`}
               >
                 {t('dog.female') || 'Female'}
               </button>
               <button
                 onClick={() => handleFilterClick('size', 'small')}
-                style={{
-                  padding: '10px 20px',
-                  border: '1px solid #ddd',
-                  borderRadius: '30px',
-                  background: selectedSize === 'small' ? '#72211f' : '#f8f9fa',
-                  color: selectedSize === 'small' ? 'white' : '#333',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  transition: 'all 0.2s ease',
-                  minWidth: 'fit-content',
-                  whiteSpace: 'nowrap'
-                }}
+                className={`search-filter-btn ${selectedSize === 'small' ? 'active' : ''}`}
               >
                 {t('dog.small') || 'Small'}
               </button>
               <button
                 onClick={() => handleFilterClick('size', 'large')}
-                style={{
-                  padding: '10px 20px',
-                  border: '1px solid #ddd',
-                  borderRadius: '30px',
-                  background: selectedSize === 'large' ? '#72211f' : '#f8f9fa',
-                  color: selectedSize === 'large' ? 'white' : '#333',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  transition: 'all 0.2s ease',
-                  minWidth: 'fit-content',
-                  whiteSpace: 'nowrap'
-                }}
+                className={`search-filter-btn ${selectedSize === 'large' ? 'active' : ''}`}
               >
                 {t('dog.large') || 'Large'}
               </button>
             </div>
 
             {/* Location Filter */}
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ fontWeight: 500, color: '#666', marginRight: 8 }}>{t('search.location') || 'Location'}:</label>
+            <div className="search-location-filter">
+              <label>{t('search.location') || 'Location'}:</label>
               <select
                 value={selectedLocation}
                 onChange={e => setSelectedLocation(e.target.value)}
-                style={{
-                  padding: '8px 16px',
-                  border: '1px solid #ddd',
-                  borderRadius: '25px',
-                  fontSize: '14px',
-                  minWidth: '120px',
-                  marginLeft: 8
-                }}
               >
                 <option value="">{t('search.allLocations') || 'All Locations'}</option>
                 {availableLocations.map(loc => (
@@ -387,24 +250,7 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
             </div>
 
             {/* Search Button */}
-            <button
-              onClick={handleSearch}
-              style={{
-                width: '100%',
-                padding: '14px 24px',
-                backgroundColor: '#72211f',
-                color: 'white',
-                border: 'none',
-                borderRadius: '25px',
-                fontSize: '16px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}
-              onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#5a1a18'}
-              onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#72211f'}
-            >
+            <button onClick={handleSearch} className="search-submit-btn">
               {t('button.search') || 'Search'}
             </button>
           </div>

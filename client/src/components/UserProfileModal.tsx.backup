@@ -44,19 +44,15 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>('');
   
   // Helper to get full image URL (robust)
-  const getProfileImageUrl = (profilePicture: string | undefined, cacheBuster?: string) => {
+  const getProfileImageUrl = (profilePicture: string | undefined) => {
     if (!profilePicture) return "../img/androcolored-80x80.jpg";
     let url = profilePicture.startsWith('/') ? profilePicture : '/' + profilePicture;
-    // Replace /uploads with /u for API endpoint
+    // Use /u/ for compatibility if needed
     url = url.replace('/uploads', '/u');
     // Always use API base for /uploads/ and /u/ paths
     if (url.startsWith('/uploads/') || url.startsWith('/u/')) {
       const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-      const fullUrl = apiBase + url;
-      if (cacheBuster) {
-        return fullUrl + `?t=${cacheBuster}`;
-      }
-      return fullUrl;
+      return apiBase + url;
     }
     // If already absolute URL, return as is
     if (/^https?:\/\//.test(url)) return url;
@@ -342,20 +338,28 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       if (response.ok) {
         setSuccess('Profile updated successfully!');
         
-        // Generate a unique cache buster timestamp to force browser to reload image
-        const cacheBuster = Date.now().toString();
-        console.log('[PROFILE UPDATE DEBUG] Using cacheBuster:', cacheBuster);
-        console.log('[PROFILE UPDATE DEBUG] Full data.user object:', JSON.stringify(data.user));
-
-        // Merge server data with current user to preserve all fields
-        const updatedUser = {
-          ...user,
-          ...data.user,
-          _profilePicCacheBuster: cacheBuster
-        };
-        console.log('[PROFILE UPDATE DEBUG] Final updatedUser:', JSON.stringify(updatedUser));
+        // Update both localStorage and AuthContext with new user data
+        const updatedUser = { 
+          ...user, 
+          name: data.user.name,
+          username: data.user.username,
+          email: data.user.email,
+          phone: data.user.phone,
+          ...(data.user.profilePicture && { profilePicture: data.user.profilePicture })
+        } as any;
         
-        updateUser(updatedUser);
+
+        // Extract timestamp from filename for cache busting
+        let cacheBuster = '';
+        if (data.user.profilePicture) {
+          const match = data.user.profilePicture.match(/profile-(\d+)/);
+          if (match && match[1]) {
+            cacheBuster = match[1];
+          }
+        }
+        console.log('[PROFILE UPDATE DEBUG] Using cacheBuster:', cacheBuster);
+
+        updateUser({ ...updatedUser, _profilePicCacheBuster: cacheBuster });
         setProfilePicKey(prev => prev + 1); // Force re-render
 
         // Reset profile picture state but keep the new image visible
@@ -489,7 +493,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
               <div className="profile-info">
                 <img 
                   key={profilePicKey}
-                  src={profilePicturePreview || getProfileImageUrl((user as any)?.profilePicture, (user as any)?._profilePicCacheBuster)}
+                  src={profilePicturePreview || getProfileImageUrl((user as any)?.profilePicture)}
                   alt={user && user.username ? `${user.username}'s profile` : 'User profile'} 
                   className="profile-avatar-small"
                 />
@@ -507,7 +511,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   <div className="profile-picture-wrapper">
                     <img 
                       key={profilePicKey}
-                      src={profilePicturePreview || getProfileImageUrl((user as any)?.profilePicture, (user as any)?._profilePicCacheBuster)}
+                      src={profilePicturePreview || getProfileImageUrl((user as any)?.profilePicture)}
                       alt={user.username ? `${user.username}'s profile` : 'User profile'}
                       className="profile-picture"
                     />

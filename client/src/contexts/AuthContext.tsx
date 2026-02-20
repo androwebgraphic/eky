@@ -8,6 +8,7 @@ interface User {
   wishlist?: string[];
   profilePicture?: string;
   role?: string;
+  _profilePicCacheBuster?: string;
 }
 
 interface AuthContextType {

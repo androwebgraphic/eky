@@ -102,10 +102,17 @@ const Header: React.FC = () => {
               {user && (
                 <div className="header-user-info-inner" onClick={e => { e.stopPropagation(); setIsExpanded(!isExpanded); }}>
                   <img
-                    src={user.profilePicture ? `${getApiUrl()}/u${user.profilePicture.replace('/uploads', '')}` : '../img/androcolored-80x80.jpg'}
+                    src={
+                      user.profilePicture 
+                        ? `${getApiUrl()}${user.profilePicture.startsWith('/') ? '' : '/'}${user.profilePicture.replace('/uploads', '/u')}${user._profilePicCacheBuster ? `?t=${user._profilePicCacheBuster}` : ''}`
+                        : '../img/androcolored-80x80.jpg'
+                    }
                     alt={t('userHeader.avatarAlt')}
                     className="header-avatar-inner"
-                    onError={e => { (e.target as HTMLImageElement).src = '../img/androcolored-80x80.jpg'; }}
+                    onError={e => { 
+                      console.error('Failed to load profile picture:', user.profilePicture);
+                      (e.target as HTMLImageElement).src = '../img/androcolored-80x80.jpg'; 
+                    }}
                   />
                   <span className="header-username-inner">{user.username}</span>
                   <span className="header-online-dot">●</span>

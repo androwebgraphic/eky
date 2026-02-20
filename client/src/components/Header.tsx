@@ -7,7 +7,7 @@ import UserProfileModal from './UserProfileModal';
 
 const Header: React.FC = () => {
   const { t } = useTranslation();
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, updateUser } = useAuth();
   const [apiOk, setApiOk] = useState<boolean | null>(null);
   const [uptime, setUptime] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -20,7 +20,10 @@ const Header: React.FC = () => {
   // Get API URL for profile pictures
   const getApiUrl = () => {
     if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-    return 'http://localhost:3001';
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return `http://${window.location.hostname}:3001`;
+    }
+    return 'http://172.20.10.2:3001';
   };
 
   const checkHealth = useCallback(async () => {
@@ -102,9 +105,18 @@ const Header: React.FC = () => {
               {user && (
                 <div className="header-user-info-inner" onClick={e => { e.stopPropagation(); setIsExpanded(!isExpanded); }}>
                   <img
+                    key={user._profilePicCacheBuster || 'default'}
                     src={
                       user.profilePicture 
-                        ? `${getApiUrl()}${user.profilePicture.startsWith('/') ? '' : '/'}${user.profilePicture.replace('/uploads', '/u')}${user._profilePicCacheBuster ? `?t=${user._profilePicCacheBuster}` : ''}`
+                        ? (() => {
+                          let url = user.profilePicture.startsWith('/') ? user.profilePicture : '/' + user.profilePicture;
+                          const fullUrl = `${getApiUrl()}${url}`;
+                          if (user._profilePicCacheBuster) {
+                            // Use cache buster only (no dynamic Date.now())
+                            return `${fullUrl}?v=${user._profilePicCacheBuster}`;
+                          }
+                          return fullUrl;
+                        })()
                         : '../img/androcolored-80x80.jpg'
                     }
                     alt={t('userHeader.avatarAlt')}
@@ -113,6 +125,16 @@ const Header: React.FC = () => {
                       console.error('Failed to load profile picture:', user.profilePicture);
                       (e.target as HTMLImageElement).src = '../img/androcolored-80x80.jpg'; 
                     }}
+                    onClick={() => {
+                      // Force reload on click
+                      const newCacheBuster = Date.now().toString() + '-' + Math.random().toString(36).substring(7);
+                      updateUser({
+                        ...user,
+                        _profilePicCacheBuster: newCacheBuster
+                      });
+                    }}
+                    style={{ cursor: 'pointer' }}
+                    title="Tap to refresh"
                   />
                   <span className="header-username-inner">{user.username}</span>
                   <span className="header-online-dot">●</span>

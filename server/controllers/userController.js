@@ -241,7 +241,9 @@ const updateProfile = async (req, res) => {
 		// Handle profile picture upload if provided
 		let profilePictureUrl = '';
 		if (req.file) {
-			const uploadDir = `uploads/users/${userId}`;
+			// Use absolute path to uploads directory at project root
+			const projectRoot = path.dirname(__dirname);
+			const uploadDir = path.join(projectRoot, 'uploads', 'users', userId);
 			
 			// Create directory if it doesn't exist
 			   if (!fs.existsSync(uploadDir)) {
@@ -288,8 +290,8 @@ const updateProfile = async (req, res) => {
 					return res.status(500).json({ message: 'Image file missing after save.' });
 				}
 				console.log('Image processing completed successfully');
-				// Set relative URL for database storage
-				profilePictureUrl = `/${uploadDir}/${filename}`;
+				// Set relative URL for database storage (use /u/ path to match server route)
+				profilePictureUrl = `/u/users/${userId}/${filename}`;
 				console.log('Profile picture URL:', profilePictureUrl);
 			} catch (imageError) {
 				console.log('Error processing profile picture:', imageError);

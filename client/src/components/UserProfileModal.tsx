@@ -43,18 +43,20 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>('');
   
-  // Helper to get full image URL (robust)
+  // Helper to get full image URL (robust with aggressive cache busting for Safari)
   const getProfileImageUrl = (profilePicture: string | undefined, cacheBuster?: string) => {
     if (!profilePicture) return "../img/androcolored-80x80.jpg";
+    
+    // Ensure path starts with /
     let url = profilePicture.startsWith('/') ? profilePicture : '/' + profilePicture;
-    // Replace /uploads with /u for API endpoint
-    url = url.replace('/uploads', '/u');
+    
     // Always use API base for /uploads/ and /u/ paths
     if (url.startsWith('/uploads/') || url.startsWith('/u/')) {
       const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
       const fullUrl = apiBase + url;
+      // Aggressive cache busting for mobile Safari: use cache buster only (no dynamic Date.now())
       if (cacheBuster) {
-        return fullUrl + `?t=${cacheBuster}`;
+        return `${fullUrl}?v=${cacheBuster}`;
       }
       return fullUrl;
     }
@@ -332,7 +334,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         console.log('[PROFILE UPDATE DEBUG] Full server response:', data);
         if (data && data.user) {
           console.log('[PROFILE UPDATE DEBUG] Returned user.profilePicture:', data.user.profilePicture);
-          alert('Backend response profilePicture: ' + data.user.profilePicture);
         }
       } catch (err) {
         console.error('[PROFILE UPDATE DEBUG] Error during fetch:', err);
@@ -344,20 +345,29 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         
         // Generate a unique cache buster timestamp to force browser to reload image
         const cacheBuster = Date.now().toString();
-        console.log('[PROFILE UPDATE DEBUG] Using cacheBuster:', cacheBuster);
-        console.log('[PROFILE UPDATE DEBUG] Full data.user object:', JSON.stringify(data.user));
-
-        // Merge server data with current user to preserve all fields
-        const updatedUser = {
-          ...user,
-          ...data.user,
-          _profilePicCacheBuster: cacheBuster
-        };
-        console.log('[PROFILE UPDATE DEBUG] Final updatedUser:', JSON.stringify(updatedUser));
+        const randomString = Math.random().toString(36).substring(7);
         
+        // Create new user object with server response + cache buster
+        // Important: server response is source of truth, only add cache buster
+        const updatedUser = {
+          ...data.user,
+          _profilePicCacheBuster: cacheBuster + '-' + randomString
+        };
+        
+        console.log('[PROFILE UPDATE DEBUG] Updated user object:', updatedUser);
+        console.log('[PROFILE UPDATE DEBUG] Cache buster:', cacheBuster + '-' + randomString);
+        console.log('[PROFILE UPDATE DEBUG] Profile picture path:', updatedUser.profilePicture);
+        
+        // Force complete re-render with new user object
         updateUser(updatedUser);
-        setProfilePicKey(prev => prev + 1); // Force re-render
-
+        
+        // Force component to remount by changing key (TWICE for more aggressive update)
+        setProfilePicKey(Date.now());
+        setTimeout(() => setProfilePicKey(Date.now() + 1), 50);
+        
+        // Force localStorage update
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
         // Reset profile picture state but keep the new image visible
         setProfilePicture(null);
         setProfilePicturePreview('');
@@ -373,7 +383,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         // Close editing mode after successful update
         setTimeout(() => {
           setIsEditing(false);
-        }, 100);
+          // Force hard reload of the page on mobile to ensure new image loads
+          if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            console.log('[MOBILE] Hard reload forced to update profile picture');
+            setTimeout(() => {
+              window.location.reload();
+            }, 300);
+          }
+        }, 1000);
       } else {
         console.error('Profile update failed:', data);
         setError(data.message || 'Failed to update profile');
@@ -492,12 +509,43 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   src={profilePicturePreview || getProfileImageUrl((user as any)?.profilePicture, (user as any)?._profilePicCacheBuster)}
                   alt={user && user.username ? `${user.username}'s profile` : 'User profile'} 
                   className="profile-avatar-small"
+                  onClick={() => {
+                    // Force reload by updating cache buster
+                    const newCacheBuster = Date.now().toString() + '-' + Math.random().toString(36).substring(7);
+                    const updatedUser = {
+                      ...user,
+                      _profilePicCacheBuster: newCacheBuster
+                    };
+                    updateUser(updatedUser);
+                    setProfilePicKey(Date.now());
+                  }}
+                  style={{ cursor: 'pointer' }}
+                  title="Tap to refresh profile picture"
                 />
                 <div className="profile-info-text">
                   <h3>{user ? user.username : ''}</h3>
                   {user && <span className="online-status">{t('userProfile.online')}</span>}
                 </div>
               </div>
+              <button
+                onClick={() => {
+                  // Force reload by updating cache buster
+                  console.log('[REFRESH] Current profilePicture:', (user as any)?.profilePicture);
+                  const newCacheBuster = Date.now().toString() + '-' + Math.random().toString(36).substring(7);
+                  console.log('[REFRESH] New cache buster:', newCacheBuster);
+                  const updatedUser = {
+                    ...user,
+                    _profilePicCacheBuster: newCacheBuster
+                  };
+                  console.log('[REFRESH] New image URL:', getProfileImageUrl((user as any)?.profilePicture, newCacheBuster));
+                  updateUser(updatedUser);
+                  setProfilePicKey(Date.now());
+                }}
+                className="modal-btn btn-secondary"
+                style={{ fontSize: '0.8em', padding: '5px 10px' }}
+              >
+                🔄 Refresh Image
+              </button>
             </div>
 
             {isEditing ? (

@@ -67,6 +67,10 @@ function setUploadsCORS(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  // Prevent caching of profile images
+  res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.header('Pragma', 'no-cache');
+  res.header('Expires', '0');
   next();
 }
 app.use('/uploads', setUploadsCORS, express.static(uploadsPath));

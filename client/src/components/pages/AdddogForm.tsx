@@ -18,8 +18,25 @@ interface AddDogFormData {
   neutered?: boolean;
 }
 
-// Use API URL from environment, fallback to localhost:3001
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+// Get API URL with proper fallbacks for mobile network access
+const getApiUrl = () => {
+  if (process.env.REACT_APP_API_URL !== undefined && process.env.REACT_APP_API_URL.trim() !== '') {
+    return process.env.REACT_APP_API_URL;
+  }
+  const hostname = window.location.hostname;
+  if (window.location.protocol === 'https:') {
+    return `https://${hostname}`;
+  }
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `http://${hostname}:3001`;
+  }
+  // For IP addresses (including mobile network access)
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+    return `http://${hostname}:3001`;
+  }
+  // Fallback - use current protocol and hostname
+  return `${window.location.protocol}//${hostname}:3001`;
+};
 
 // Media restriction constants
 const MAX_VIDEO_DURATION_SECONDS = 30;
@@ -447,7 +464,8 @@ const AdddogForm: React.FC = () => {
         }
       }
 
-      console.log('Submitting to:', `${API_URL}/api/dogs`);
+      const apiUrl = getApiUrl();
+      console.log('Submitting to:', `${apiUrl}/api/dogs`);
 
       abortControllerRef.current = new AbortController();
 
@@ -456,7 +474,7 @@ const AdddogForm: React.FC = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const resp = await fetch(`${API_URL}/api/dogs`, {
+      const resp = await fetch(`${apiUrl}/api/dogs`, {
         method: 'POST',
         body: formData,
         signal: abortControllerRef.current.signal,
@@ -467,10 +485,15 @@ const AdddogForm: React.FC = () => {
         let errMsg = `Upload failed with status ${resp.status} (${resp.statusText})`;
         try {
           const body = await resp.json();
-          errMsg = body.message || JSON.stringify(body);
+          // Prefer the 'error' field which contains the actual error message
+          errMsg = body.error || body.message || JSON.stringify(body);
+          console.error('[ADD DOG ERROR] Server response:', body);
         } catch (e) {
           const txt = await resp.text();
-          if (txt) errMsg = txt.substring(0, 200);
+          if (txt) {
+            console.error('[ADD DOG ERROR] Server text response:', txt);
+            errMsg = txt.substring(0, 200);
+          }
         }
         throw new Error(errMsg);
       }
@@ -505,7 +528,7 @@ const AdddogForm: React.FC = () => {
     <main>
       <h2>{t('adddog.title')}</h2>
       <div style={{ background: '#f0f0f0', padding: '8px', margin: '8px 0', fontSize: '11px', borderRadius: '4px' }}>
-        <strong>Debug:</strong> API_URL = {API_URL} | hostname = {window.location.hostname}
+        <strong>Debug:</strong> API_URL = {getApiUrl()} | hostname = {window.location.hostname}
       </div>
 
       <form id="adddog-form" onSubmit={handleSubmit(onSubmit)}>

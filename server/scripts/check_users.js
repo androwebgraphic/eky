@@ -7,12 +7,14 @@ const checkUsers = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connected to MongoDB\n');
 
-    const users = await User.find({}).select('username profilePicture');
+    const users = await User.find({}).select('username email role profilePicture');
     console.log(`Total users: ${users.length}\n`);
     
     users.forEach((user, index) => {
       console.log(`User ${index + 1}:`);
       console.log(`  Username: ${user.username}`);
+      console.log(`  Email: ${user.email}`);
+      console.log(`  Role: ${user.role || 'user'}`);
       console.log(`  Profile Picture: ${user.profilePicture}`);
       console.log('');
     });

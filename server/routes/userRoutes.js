@@ -5,6 +5,7 @@ console.log('[WISHLIST DEBUG] Registering GET /wishlist route');
 console.log('[ROUTES DEBUG] userRoutes.js loaded');
 const express = require('express');
 const multer = require('multer');
+const User = require('../models/userModel');
 const { signupUser, loginUser, updateProfile, deleteProfile, addToWishlist, removeFromWishlist, getWishlist, requestPasswordReset, searchUsers, getUserById, getAllUsers } = require('../controllers/userController.js');
 const auth = require('../middleware/auth.js');
 const { isAdmin, isSuperAdmin } = auth;
@@ -45,6 +46,20 @@ router.get('/search', auth, searchUsers);
 
 // Superadmin routes for managing all users
 router.get('/all', auth, isSuperAdmin, getAllUsers);
+
+// Get current user data
+router.get('/me', auth, async (req, res) => {
+  try {
+    console.log('[/ME ENDPOINT] Fetching user data for:', req.user._id);
+    const user = await User.findById(req.user._id).select('-password');
+    console.log('[/ME ENDPOINT] User found:', user ? 'YES' : 'NO');
+    console.log('[/ME ENDPOINT] User role:', user?.role);
+    res.json(user);
+  } catch (error) {
+    console.error('[/ME ENDPOINT] Error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
 
 // User's own profile routes
 router.put('/profile', auth, upload.single('profilePicture'), updateProfile);

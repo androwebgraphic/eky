@@ -86,7 +86,7 @@ const getAllUsers = async (req, res) => {
 	}
 };
 
-const
+const getUserById = async (req, res) => {
 	try {
 		const user = await User.findById(req.params.id);
 		if (!user) return res.status(404).json({ message: 'User not found' });
@@ -95,7 +95,7 @@ const
 		res.status(500).json({ message: err.message });
 	}
 };
- ++++++++ REPLACE
+
 const searchUsers = async (req, res) => {
 	try {
 		const query = req.query.query || '';
@@ -428,5 +428,6 @@ module.exports = {
 	getWishlist: async (req, res) => await getWishlist(req, res),
 	requestPasswordReset: async (req, res) => await requestPasswordReset(req, res),
 	getUserById: async (req, res) => await getUserById(req, res),
-	searchUsers: async (req, res) => await searchUsers(req, res)
+	searchUsers: async (req, res) => await searchUsers(req, res),
+	getAllUsers: async (req, res) => await getAllUsers(req, res)
 };

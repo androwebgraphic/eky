@@ -536,3 +536,239 @@
     height: 32px;
   }
 }
+
+/* Adoption notice section */
+.chat-adoption-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  flex-wrap: nowrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chat-adoption-notice span {
+  flex: 1;
+  color: #856404;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-adoption-notice-buttons {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.chat-adoption-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+  background: #28a745 !important;
+  color: white !important;
+}
+
+.chat-adoption-btn:hover {
+  background: #218838 !important;
+  color: white !important;
+}
+
+.chat-adoption-btn:active {
+  background: #1e7e34 !important;
+  color: white !important;
+}
+
+.chat-adoption-btn:disabled {
+  background: #90caf9 !important;
+  cursor: not-allowed;
+  color: white !important;
+}
+
+.chat-adoption-btn-cancel {
+  background: #dc3545 !important;
+  color: white !important;
+}
+
+.chat-adoption-btn-cancel:hover {
+  background: #c82333 !important;
+  color: white !important;
+}
+
+@media (max-width: 600px) {
+  .chat-adoption-btn {
+    background: #28a745 !important;
+    color: white !important;
+  }
+  
+  .chat-adoption-btn:hover {
+    background: #218838 !important;
+    color: white !important;
+  }
+  
+  .chat-adoption-btn:active {
+    background: #1e7e34 !important;
+    color: white !important;
+  }
+  
+  .chat-adoption-btn:disabled {
+    background: #90caf9 !important;
+    color: white !important;
+  }
+}
+
+.chat-waiting-message {
+  color: #856404;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Adoption action buttons in messages */
+.chat-adoption-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.chat-adoption-action-btn {
+  padding: 4px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.chat-adoption-action-btn.btn-confirm {
+  background: #28a745;
+  color: white;
+}
+
+.chat-adoption-action-btn.btn-deny {
+  background: #dc3545;
+  color: white;
+}
+
+.chat-adoption-action-btn:hover {
+  opacity: 0.9;
+}
+
+/* Message status buttons */
+.chat-message-status {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.chat-status-btn {
+  padding: 4px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.chat-status-btn.btn-confirm {
+  background: #28a745;
+  color: white;
+}
+
+.chat-status-btn.btn-cancel {
+  background: #dc3545;
+  color: white;
+}
+
+.chat-status-btn:hover {
+  opacity: 0.9;
+}
+
+/* Final message status */
+.chat-message-final {
+  display: inline-flex !important;
+  display: -webkit-inline-flex !important;
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
+  margin-top: 6px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  max-width: 100% !important;
+  min-height: auto !important;
+  max-height: none !important;
+  height: auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1.2 !important;
+  width: auto !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  transform-style: preserve-3d !important;
+}
+
+.chat-message-final.completed {
+  background: #d4edda !important;
+  color: #155724 !important;
+}
+
+/* Adoption request bubble */
+.chat-app-bubble.adoption-request {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+/* Connection alert */
+.chat-connection-alert {
+  display: block;
+  padding: 8px 10px;
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Users header */
+.chat-users-header {
+  padding: 6px 10px;
+  background: #f5f8fa;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #e3e3e3;
+}
+
+.chat-users-empty {
+  padding: 10px;
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.chat-app-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #888;
+  font-size: 13px;
+  font-style: italic;
+}

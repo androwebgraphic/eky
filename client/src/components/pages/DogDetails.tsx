@@ -643,19 +643,28 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                         setAdoptLoading(true);
                         setAdoptError(null);
                         try {
-                          const resp = await fetch(`${apiBase}/api/dogs/confirm-adoption`, {
+                          const resp = await fetch(`${apiBase}/api/dogs/${_id}/adopt-confirm`, {
                             method: 'POST',
                             headers: {
                               'Content-Type': 'application/json',
                               'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
-                            },
-                            body: JSON.stringify({ dogId: _id, isOwner: false })
+                            }
                           });
                           const data = await resp.json();
                           if (!resp.ok) throw new Error(data.message || 'Error');
-                          setAdoptionStatus(data.dog?.adoptionStatus || 'available');
-                          setAdoptionQueue(data.dog?.adoptionQueue);
-                          if (onDogUpdate && data.dog) onDogUpdate(data.dog);
+                          // If adoption is complete (dog deleted), close the modal
+                          if (data.adopted && data.removed) {
+                            setAdoptionStatus('adopted');
+                            setAdoptionQueue(null);
+                            if (onDogUpdate) onDogUpdate({ _id, adoptionStatus: 'adopted' });
+                            if (onDogChanged) onDogChanged();
+                            if (onClose) setTimeout(() => onClose(), 500);
+                          } else if (data.dog) {
+                            setAdoptionStatus(data.dog?.adoptionStatus || 'pending');
+                            setAdoptionQueue(data.dog?.adoptionQueue);
+                            if (onDogUpdate) onDogUpdate(data.dog);
+                            if (onDogChanged) onDogChanged();
+                          }
                         } catch (e: any) {
                           setAdoptError(e.message || 'Error');
                         } finally {
@@ -693,19 +702,28 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                       setAdoptLoading(true);
                       setAdoptError(null);
                       try {
-                        const resp = await fetch(`${apiBase}/api/dogs/confirm-adoption`, {
+                        const resp = await fetch(`${apiBase}/api/dogs/${_id}/adopt-confirm`, {
                           method: 'POST',
                           headers: {
                             'Content-Type': 'application/json',
                             'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
-                          },
-                          body: JSON.stringify({ dogId: _id, isOwner: true })
+                          }
                         });
                         const data = await resp.json();
                         if (!resp.ok) throw new Error(data.message || 'Error');
-                        setAdoptionStatus(data.dog?.adoptionStatus || 'available');
-                        setAdoptionQueue(data.dog?.adoptionQueue);
-                        if (onDogUpdate && data.dog) onDogUpdate(data.dog);
+                        // If adoption is complete (dog deleted), close the modal
+                        if (data.adopted && data.removed) {
+                          setAdoptionStatus('adopted');
+                          setAdoptionQueue(null);
+                          if (onDogUpdate) onDogUpdate({ _id, adoptionStatus: 'adopted' });
+                          if (onDogChanged) onDogChanged();
+                          if (onClose) setTimeout(() => onClose(), 500);
+                        } else if (data.dog) {
+                          setAdoptionStatus(data.dog?.adoptionStatus || 'pending');
+                          setAdoptionQueue(data.dog?.adoptionQueue);
+                          if (onDogUpdate) onDogUpdate(data.dog);
+                          if (onDogChanged) onDogChanged();
+                        }
                       } catch (e: any) {
                         setAdoptError(e.message || 'Error');
                       } finally {

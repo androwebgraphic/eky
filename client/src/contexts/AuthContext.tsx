@@ -19,6 +19,7 @@ interface AuthContextType {
   register: (userData: any) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateUser: (userData: User) => void;
+  refreshUser: () => Promise<void>;
   addToWishlist: (dogId: string) => Promise<{ success: boolean; error?: string }>;
   removeFromWishlist: (dogId: string) => Promise<{ success: boolean; error?: string }>;
   getWishlist: () => Promise<string[]>;
@@ -55,49 +56,68 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Check if user is logged in on app start
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (storedToken && storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setToken(storedToken);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error('AuthContext: Error parsing stored user:', error);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }
-    }
-    setLoading(false);
-  }, []);
-
   // Helper to always get latest token from localStorage
   const getLatestToken = () => localStorage.getItem('token') || token;
 
-  // Refresh auth state from localStorage on mount and window focus
-  useEffect(() => {
-    const refreshAuth = () => {
-      const storedToken = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
-      if (storedToken && storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          setToken(storedToken);
-          setUser(parsedUser);
-        } catch (error) {
-          console.error('AuthContext: Error parsing stored user:', error);
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-        }
+  const refreshUser = async () => {
+    try {
+      const latestToken = getLatestToken();
+      console.log('[REFRESH USER] Starting refresh, token exists:', !!latestToken);
+      if (!latestToken) {
+        return;
       }
+
+      const response = await fetch(`${getApiUrl()}/api/users/me`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${latestToken}`
+        },
+      });
+
+      console.log('[REFRESH USER] Response status:', response.status);
+      if (response.ok) {
+        const userData = await response.json();
+        console.log('[REFRESH USER] User data received:', userData.role, userData.email);
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+      } else {
+        console.error('Failed to refresh user data:', response.status);
+      }
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Check if user is logged in on app start
+    const storedToken = localStorage.getItem('token');
+    console.log('[INIT] Stored token exists:', !!storedToken);
+    
+    if (storedToken) {
+      // Set token first
+      setToken(storedToken);
+      // Then try to refresh user data from server
+      refreshUser().then(() => {
+        setLoading(false);
+      }).catch(() => {
+        setLoading(false);
+      });
+    } else {
       setLoading(false);
+    }
+  }, []);
+
+  // Refresh user data from server on window focus (not localStorage)
+  useEffect(() => {
+    const handleFocus = () => {
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
+        console.log('[FOCUS] Refreshing user data');
+        refreshUser();
+      }
     };
-    refreshAuth();
-    window.addEventListener('focus', refreshAuth);
-    return () => window.removeEventListener('focus', refreshAuth);
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -315,6 +335,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     updateUser,
+    refreshUser,
     addToWishlist,
     removeFromWishlist,
     getWishlist,

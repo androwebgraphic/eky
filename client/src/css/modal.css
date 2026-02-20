@@ -1,15 +1,12 @@
 /* Basic modal styles for DogDetails modal */
 .modal-overlay {
   position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  width: 85vw !important;
-  max-width: 550px !important;
-  height: auto !important;
-  max-height: 85vh !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
   background: rgba(0,0,0,0.5) !important;
-  border-radius: 12px !important;
+  border-radius: 0 !important;
   z-index: 2147483647 !important;
   display: flex !important;
   align-items: center !important;
@@ -30,7 +27,7 @@
   overflow-x: hidden !important;
   padding: 2rem !important;
   position: relative !important;
-  z-index: 9999999 !important;
+  z-index: 2147483648 !important;
   display: flex !important;
   flex-direction: column !important;
   margin: 0 !important;

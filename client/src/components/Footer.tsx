@@ -169,15 +169,36 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
           <div className="footer-search-content" onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
             <div className="search-modal-header">
-              <h2>{t('search.title') || 'Search Dogs'}</h2>
-              <button onClick={() => setShowSearchModal(false)} className="search-modal-close" title="Close">×</button>
+              <h2>{t('footer.search') || 'Search'}</h2>
+              <button 
+                onClick={() => setShowSearchModal(false)} 
+                className="search-modal-close" 
+                title="Close"
+                style={{
+                  background: '#e74c3c',
+                  color: '#f8f8f8',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0'
+                }}
+              >
+                ×
+              </button>
             </div>
 
             {/* Search Input */}
             <div className="search-modal-input-group">
               <input
                 type="search"
-                placeholder={t('search.placeholder') || 'Search for dogs...'}
+                placeholder={t('search.placeholder') || 'Search...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -213,25 +234,25 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
                 onClick={() => handleFilterClick('gender', 'male')}
                 className={`search-filter-btn ${selectedGender === 'male' ? 'active' : ''}`}
               >
-                {t('dog.male') || 'Male'}
+                {t('gender.male') || 'Male'}
               </button>
               <button
                 onClick={() => handleFilterClick('gender', 'female')}
                 className={`search-filter-btn ${selectedGender === 'female' ? 'active' : ''}`}
               >
-                {t('dog.female') || 'Female'}
+                {t('gender.female') || 'Female'}
               </button>
               <button
                 onClick={() => handleFilterClick('size', 'small')}
                 className={`search-filter-btn ${selectedSize === 'small' ? 'active' : ''}`}
               >
-                {t('dog.small') || 'Small'}
+                {t('size.small') || 'Small'}
               </button>
               <button
                 onClick={() => handleFilterClick('size', 'large')}
                 className={`search-filter-btn ${selectedSize === 'large' ? 'active' : ''}`}
               >
-                {t('dog.large') || 'Large'}
+                {t('size.large') || 'Large'}
               </button>
             </div>
 
@@ -251,7 +272,7 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
 
             {/* Search Button */}
             <button onClick={handleSearch} className="search-submit-btn">
-              {t('button.search') || 'Search'}
+              {t('footer.search') || 'Search'}
             </button>
           </div>
         </div>,

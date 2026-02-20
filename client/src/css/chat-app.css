@@ -164,29 +164,72 @@
     padding: 8px 2px 8px 2px;
   }
 }
-/* Chat close button always top right, above content */
-/* Chat close button smaller and more to the right */
-.chat-app-close-btn {
+/* Chat close button at top right corner - rounded like other modals */
+.chat-close-btn-top {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 18px;
-  height: 18px;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
   background: #e74c3c;
-  color: #fff;
   border: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(33,150,243,0.12);
-  cursor: pointer;
-  z-index: 1100;
   padding: 0;
-  font-size: 14px;
-  line-height: 1;
-  /* Ensure it overlays and does not take up layout space */
-  /* Remove any static/block display from parent */
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.1);
+  z-index: 10001;
+
+  span {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 900;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* Mobile-specific styles for close button */
+@media (max-width: 600px) {
+  .chat-close-btn-top {
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    z-index: 10002;
+
+    span {
+      font-size: 1.8rem;
+    }
+  }
+}
+
+/* Chat close button in header */
+.chat-close-btn {
+  width: 22px;
+  height: 22px;
+  background: #e74c3c;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.1);
+
+  span {
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1;
+  }
 }
   .chat-app-sidebar {
     width: 100%;
@@ -361,10 +404,115 @@
   margin-top: 2px;
 }
 
-.chat-app-notification {
-  color: #2196f3;
+.chat-users-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+}
+
+.chat-user-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+  margin-bottom: 4px;
+}
+
+.chat-user-item:hover {
+  background: #e8f4f8;
+}
+
+.chat-user-item.selected {
+  background: #2196f3;
+  color: white;
+}
+
+.chat-user-item.selected .chat-user-name {
+  color: white;
+}
+
+.chat-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+  background-color: #f0f0f0;
+  flex-shrink: 0;
+}
+
+.chat-user-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-user-status {
+  width: 8px;
+  height: 8px;
+  background: #4CAF50;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chat-app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #e3e3e3;
+  background: #fff;
+}
+
+.chat-header-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-header-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+  background-color: #f0f0f0;
+}
+
+.chat-header-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.chat-header-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
   font-weight: 600;
-  margin-top: 8px;
+  transition: background 0.2s;
+}
+
+.chat-header-btn.btn-block {
+  background: #666;
+  color: white;
+}
+
+.chat-header-btn.btn-block.blocked {
+  background: #28a745;
+}
+
+.chat-header-btn.btn-delete {
+  background: #dc3545;
+  color: white;
 }
 
 .chat-app-search {

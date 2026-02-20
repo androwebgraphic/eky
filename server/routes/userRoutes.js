@@ -5,9 +5,9 @@ console.log('[WISHLIST DEBUG] Registering GET /wishlist route');
 console.log('[ROUTES DEBUG] userRoutes.js loaded');
 const express = require('express');
 const multer = require('multer');
-const { signupUser, loginUser, updateProfile, deleteProfile, addToWishlist, removeFromWishlist, getWishlist, requestPasswordReset, searchUsers, getUserById } = require('../controllers/userController.js');
+const { signupUser, loginUser, updateProfile, deleteProfile, addToWishlist, removeFromWishlist, getWishlist, requestPasswordReset, searchUsers, getUserById, getAllUsers } = require('../controllers/userController.js');
 const auth = require('../middleware/auth.js');
-
+const { isAdmin, isSuperAdmin } = auth;
 
 const router = express.Router();
 
@@ -27,7 +27,6 @@ const upload = multer({
   }
 });
 
-
 // Public routes
 router.post('/registracija', signupUser);
 router.post('/logiranje', loginUser);
@@ -44,6 +43,9 @@ console.log('[WISHLIST DEBUG] After router.get(/wishlist)');
 // Other specific routes (must be above /:id)
 router.get('/search', auth, searchUsers);
 
+// Superadmin routes for managing all users
+router.get('/all', auth, isSuperAdmin, getAllUsers);
+
 // User's own profile routes
 router.put('/profile', auth, upload.single('profilePicture'), updateProfile);
 router.delete('/profile', auth, deleteProfile);
@@ -51,7 +53,6 @@ router.delete('/profile', auth, deleteProfile);
 // Superadmin routes for managing other users
 router.get('/:id', auth, getUserById);
 router.put('/:id/profile', auth, upload.single('profilePicture'), updateProfile);
-router.delete('/:id/profile', auth, deleteProfile);
-
+router.delete('/:id/profile', auth, isSuperAdmin, deleteProfile);
 
 module.exports = router;

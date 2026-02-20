@@ -77,7 +77,16 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const getUserById = async (req, res) => {
+const getAllUsers = async (req, res) => {
+	try {
+		const users = await User.find().select('-password');
+		res.json(users);
+	} catch (err) {
+		res.status(500).json({ message: err.message });
+	}
+};
+
+const
 	try {
 		const user = await User.findById(req.params.id);
 		if (!user) return res.status(404).json({ message: 'User not found' });
@@ -86,6 +95,7 @@ const getUserById = async (req, res) => {
 		res.status(500).json({ message: err.message });
 	}
 };
+ ++++++++ REPLACE
 const searchUsers = async (req, res) => {
 	try {
 		const query = req.query.query || '';
@@ -241,9 +251,11 @@ const updateProfile = async (req, res) => {
 		// Handle profile picture upload if provided
 		let profilePictureUrl = '';
 		if (req.file) {
-			// Use absolute path to uploads directory at project root
-			const projectRoot = path.dirname(__dirname);
-			const uploadDir = path.join(projectRoot, 'uploads', 'users', userId);
+			// Use uploads directory at project root (parent of server directory)
+			const projectRoot = path.join(__dirname, '..');
+			// Convert userId to string for path operations
+			const userIdStr = userId.toString();
+			const uploadDir = path.join(projectRoot, 'uploads', 'users', userIdStr);
 			
 			// Create directory if it doesn't exist
 			   if (!fs.existsSync(uploadDir)) {
@@ -291,7 +303,7 @@ const updateProfile = async (req, res) => {
 				}
 				console.log('Image processing completed successfully');
 				// Set relative URL for database storage (use /u/ path to match server route)
-				profilePictureUrl = `/u/users/${userId}/${filename}`;
+				profilePictureUrl = `/u/users/${userIdStr}/${filename}`;
 				console.log('Profile picture URL:', profilePictureUrl);
 			} catch (imageError) {
 				console.log('Error processing profile picture:', imageError);

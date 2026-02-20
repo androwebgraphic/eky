@@ -288,8 +288,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const updateUser = (userData: User) => {
+    console.log('[AUTH CONTEXT] updateUser called with:', {
+      ...userData,
+      profilePicture: userData.profilePicture,
+      _profilePicCacheBuster: userData._profilePicCacheBuster
+    });
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
+    console.log('[AUTH CONTEXT] User state updated and saved to localStorage');
   };
 
   const logout = () => {

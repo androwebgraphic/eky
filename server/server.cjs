@@ -58,6 +58,7 @@ app.use(passport.initialize());
 
 // 10. Use routes
 app.use('/api/chat', chatRoutes);
+// Use uploads directory at server directory to match where multer saves files
 const uploadsPath = path.join(__dirname, 'uploads');
 console.log('[STATIC DEBUG] uploadsPath resolved to:', uploadsPath);
 // Add CORS headers for all /uploads and /u responses (before static middleware)

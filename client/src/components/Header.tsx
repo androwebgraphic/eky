@@ -84,6 +84,17 @@ const Header: React.FC = () => {
 
   // Removed unused variable 'profileImageUrl'
   
+  // Debug: Log when user changes
+  useEffect(() => {
+    if (user) {
+      console.log('[HEADER DEBUG] User object changed:', {
+        username: user.username,
+        profilePicture: user.profilePicture,
+        _profilePicCacheBuster: user._profilePicCacheBuster
+      });
+    }
+  }, [user]);
+  
   // Calculate dropdown position based on header height
   const dropdownTop = headerRef.current ? `${headerRef.current.offsetHeight}px` : '60px';
   

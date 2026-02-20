@@ -5,6 +5,11 @@ import { useAuth } from '../contexts/AuthContext';
 import '../css/chat-app.css';
 import '../styles/chatAppNotification.css';
 
+// Dispatch chat close event to parent
+const dispatchCloseChat = () => {
+  window.dispatchEvent(new CustomEvent('closeChatModal'));
+};
+
 interface UserWithBlocks {
   _id: string;
   blockedUsers?: string[];
@@ -29,7 +34,7 @@ interface Conversation {
 }
 
 const getApiUrl = () => {
-  if (process.env.REACT_APP_API_URL !== undefined) {
+  if (process.env.REACT_APP_API_URL !== undefined && process.env.REACT_APP_API_URL.trim() !== '') {
     return process.env.REACT_APP_API_URL;
   }
   const hostname = window.location.hostname;
@@ -39,10 +44,21 @@ const getApiUrl = () => {
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return `http://${hostname}:3001`;
   }
+  // For IP addresses (including mobile network access)
   if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
     return `http://${hostname}:3001`;
   }
-  return `http://192.168.1.100:3001`;
+  // Fallback - use current protocol and hostname
+  return `${window.location.protocol}//${hostname}:3001`;
+};
+
+// Helper function to safely parse JSON responses
+const safeJsonParse = async (res: Response) => {
+  const contentType = res.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    return await res.json();
+  }
+  return null;
 };
 
 interface ChatAppProps {
@@ -65,7 +81,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
   const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
   const [userWithBlocks] = useState<UserWithBlocks | null>(null);
   const [confirmingAdoption, setConfirmingAdoption] = useState(false);
-  const [chatVisible, setChatVisible] = useState(true);
   const [adoptionRequests, setAdoptionRequests] = useState<any[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const socketRef = useRef<any>(null);
@@ -78,34 +93,45 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     const messagePayload: any = {
       conversationId: selectedConvo._id,
       sender: user._id,
+      recipient: recipient,
       message: input,
       messageType: 'text',
       dogId: adoptionDogId || undefined,
       isOwner: adoptionIsOwner
     };
     socketRef.current?.emit('sendMessage', messagePayload);
-    await fetch(`${getApiUrl()}/api/chat/message`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(messagePayload)
-    });
-    setMessages(prev => [
-      ...prev,
-      {
-        _id: Math.random().toString(36).substr(2, 9),
-        sender: user._id,
-        recipient,
-        message: input,
-        sentAt: new Date().toISOString(),
-        messageType: 'text',
-        dogId: adoptionDogId || undefined,
-        isOwner: adoptionIsOwner
+    try {
+      const res = await fetch(`${getApiUrl()}/api/chat/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(messagePayload)
+      });
+      if (!res.ok) {
+        console.error('[SEND MESSAGE] Failed to send message:', res.status, res.statusText);
+        const error = await res.text();
+        console.error('[SEND MESSAGE] Error response:', error);
+        return;
       }
-    ]);
-    setInput('');
+      setMessages(prev => [
+        ...prev,
+        {
+          _id: Math.random().toString(36).substr(2, 9),
+          sender: user._id,
+          recipient,
+          message: input,
+          sentAt: new Date().toISOString(),
+          messageType: 'text',
+          dogId: adoptionDogId || undefined,
+          isOwner: adoptionIsOwner
+        }
+      ]);
+      setInput('');
+    } catch (err) {
+      console.error('[SEND MESSAGE] Error sending message:', err);
+    }
   };
 
   const fetchAdoptionRequests = async () => {
@@ -113,32 +139,63 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       return;
     }
     setLoadingRequests(true);
+    const apiUrl = getApiUrl();
+    console.log('[FETCH DOGS] Requesting from URL:', `${apiUrl}/api/dogs`);
+    console.log('[FETCH DOGS] Current hostname:', window.location.hostname);
+    
     try {
-      const dogsRes = await fetch(`${getApiUrl()}/api/dogs`, {
+      const dogsRes = await fetch(`${apiUrl}/api/dogs`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      
+      // Log response details for debugging
+      console.log('[FETCH DOGS] Response status:', dogsRes.status, dogsRes.statusText);
+      console.log('[FETCH DOGS] Response content-type:', dogsRes.headers.get('content-type'));
+      
       if (dogsRes.ok) {
-        const allDogs = await dogsRes.json();
-        const dogsInAdoption = allDogs.filter((dog: any) => 
-          dog.adoptionStatus && 
-          dog.adoptionStatus === 'pending' &&
-          dog.adoptionQueue &&
-          dog.adoptionQueue.adopter &&
-          (String(dog.user._id || dog.user) === String(user._id) || 
-           String(dog.adoptionQueue.adopter) === String(user._id))
-        );
-        
-        const newReqs = dogsInAdoption.map((dog: any) => ({
-          _id: `dog-${dog._id}`,
-          dog: dog,
-          adopter: dog.adoptionQueue.adopter === String(user._id) ? user : dog.user,
-          status: dog.adoptionStatus,
-          isFromDog: true
-        }));
-        setAdoptionRequests(newReqs);
+        // Check if response is JSON before parsing
+        const contentType = dogsRes.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const allDogs = await dogsRes.json();
+          const dogsInAdoption = allDogs.filter((dog: any) => 
+            dog.adoptionStatus && 
+            dog.adoptionStatus === 'pending' &&
+            dog.adoptionQueue &&
+            dog.adoptionQueue.adopter &&
+            (String(dog.user._id || dog.user) === String(user._id) || 
+             String(dog.adoptionQueue.adopter) === String(user._id))
+          );
+          
+          const newReqs = dogsInAdoption.map((dog: any) => ({
+            _id: `dog-${dog._id}`,
+            dog: dog,
+            adopter: dog.adoptionQueue.adopter === String(user._id) ? user : dog.user,
+            status: dog.adoptionStatus,
+            isFromDog: true
+          }));
+          setAdoptionRequests(newReqs);
+        } else {
+          console.warn('[FETCH DOGS] Received non-JSON response from /api/dogs endpoint');
+          // Log a sample of the response to help debug
+          try {
+            const text = await dogsRes.text();
+            console.warn('[FETCH DOGS] Response text (first 200 chars):', text.substring(0, 200));
+          } catch (e) {
+            console.warn('[FETCH DOGS] Could not read response text:', e);
+          }
+        }
+      } else {
+        console.warn('[FETCH DOGS] Failed to fetch dogs:', dogsRes.status, dogsRes.statusText);
+        // Try to read error response
+        try {
+          const text = await dogsRes.text();
+          console.warn('[FETCH DOGS] Error response (first 200 chars):', text.substring(0, 200));
+        } catch (e) {
+          console.warn('[FETCH DOGS] Could not read error response:', e);
+        }
       }
     } catch (err) {
-      console.error('Failed to fetch adoption requests:', err);
+      console.error('[FETCH DOGS] Failed to fetch adoption requests:', err);
     } finally {
       setLoadingRequests(false);
     }
@@ -307,23 +364,37 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       socketRef.current.disconnect();
     }
     
-    socketRef.current = io(getApiUrl());
+    const apiUrl = getApiUrl();
+    console.log('[SOCKET] Attempting to connect to:', apiUrl);
+    
+    socketRef.current = io(apiUrl, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
     
     socketRef.current.on('connect', () => {
+      console.log('[SOCKET] Connected successfully, joining as user:', userId);
       socketRef.current?.emit('join', userId);
       socketRef.current?.emit('getOnlineUsers');
     });
     
-    socketRef.current.on('disconnect', () => {
-      console.log('[DEBUG] Socket disconnected');
+    socketRef.current.on('connect_error', (err) => {
+      console.error('[SOCKET] Connection error:', err.message, err);
+    });
+    
+    socketRef.current.on('disconnect', (reason) => {
+      console.log('[SOCKET] Disconnected:', reason);
     });
     
     socketRef.current.on('onlineUsers', (users) => {
-      if (users.length > 1) {
-        setOnlineUsers(users.filter((u: any) => u._id !== userId));
-      } else {
-        setOnlineUsers(users);
-      }
+      console.log('[SOCKET] Received online users:', users);
+      console.log('[SOCKET] Current userId:', userId);
+      // Always filter out current user from online users list
+      const filteredUsers = users.filter((u: any) => u._id !== userId);
+      console.log('[SOCKET] Filtered users:', filteredUsers);
+      setOnlineUsers(filteredUsers);
     });
     
     socketRef.current.on('adoptionUpdate', () => {
@@ -553,28 +624,48 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
         }
       });
   };
-  
-  if (!chatVisible) {
-    return null;
-  }
 
   const getProfilePic = (u: any) => {
-    const pic = u?.profilePicture;
+    // Check both profilePicture and profilePic fields (MongoDB has both)
+    const pic = u?.profilePicture || u?.profilePic;
+    const userId = u?._id;
+    const apiBase = getApiUrl();
+    console.log('[PROFILE PIC] User:', u);
+    console.log('[PROFILE PIC] profilePicture:', u?.profilePicture);
+    console.log('[PROFILE PIC] profilePic:', u?.profilePic);
+    console.log('[PROFILE PIC] Selected pic:', pic);
+    console.log('[PROFILE PIC] User ID:', userId);
+    console.log('[PROFILE PIC] API base:', apiBase);
+    
     if (pic && typeof pic === 'string' && pic.trim() !== '') {
-      const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      let url = '';
       if (/^(https?:\/\/|data:|blob:)/i.test(pic)) {
-        return pic + '?v=' + Date.now();
+        url = pic;
+      } else if (pic.startsWith('/uploads') || pic.startsWith('/u/')) {
+        url = apiBase + pic;
+      } else if (userId) {
+        // If just a filename, construct the full path assuming it's in user's uploads
+        url = `${apiBase}/u/users/${userId}/${pic}`;
+      } else {
+        url = apiBase + '/' + pic.replace(/^\//, '');
       }
-      if (pic.startsWith('/uploads') || pic.startsWith('/u/')) {
-        return apiBase + pic + '?v=' + Date.now();
-      }
-      return pic + '?v=' + Date.now();
+      console.log('[PROFILE PIC] Final URL:', url);
+      return url;
     }
+    console.log('[PROFILE PIC] Using fallback icon');
     return '/img/chat-icon.svg';
   };
 
   return (
     <div className="chat-app-container">
+      <button
+        onClick={dispatchCloseChat}
+        className="chat-close-btn-top"
+        title="Close chat"
+        aria-label="Close chat"
+      >
+        <span>×</span>
+      </button>
       <div className="chat-app-sidebar">
         <div className="chat-users-header">{t('onlineUsers') || 'Online Users'}</div>
         {onlineUsers.length === 0 ? (
@@ -590,8 +681,8 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                   alt={u.userName || 'User'}
                   className="chat-user-avatar"
                 />
-                <span className="chat-user-name">{u.userName || u._id}</span>
-                <span className="chat-user-status" title="Online"></span>
+                <span key={`name-${u._id}`} className="chat-user-name">{u.userName || u._id}</span>
+                <span key={`status-${u._id}`} className="chat-user-status" title="Online"></span>
               </li>
             ))}
           </ul>
@@ -620,14 +711,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                 );
               })()}
               <div className="chat-header-actions">
-                <button
-                  onClick={() => setChatVisible(false)}
-                  className="chat-close-btn"
-                  title="Close chat"
-                  aria-label="Close chat"
-                >
-                  <span>×</span>
-                </button>
                 <button className={`chat-header-btn btn-block ${isBlocked ? 'blocked' : ''}`} onClick={handleBlockUnblock}>
                   {isBlocked ? (t('unblock') || 'Unblock') : (t('block') || 'Block')}
                 </button>

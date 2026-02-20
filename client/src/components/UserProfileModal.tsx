@@ -368,8 +368,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         // Force localStorage update
         localStorage.setItem('user', JSON.stringify(updatedUser));
         
-        // Reset profile picture state but keep the new image visible
+        // Reset profile picture state
         setProfilePicture(null);
+        // Clear the preview so it will use the new server image URL from user object
         setProfilePicturePreview('');
         
         // Update form data to reflect changes
@@ -380,17 +381,13 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
           phone: data.user.phone || ''
         });
         
+        // Force update the profilePicKey to ensure the image component re-renders with new URL
+        setProfilePicKey(Date.now());
+        
         // Close editing mode after successful update
         setTimeout(() => {
           setIsEditing(false);
-          // Force hard reload of the page on mobile to ensure new image loads
-          if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-            console.log('[MOBILE] Hard reload forced to update profile picture');
-            setTimeout(() => {
-              window.location.reload();
-            }, 300);
-          }
-        }, 1000);
+        }, 500);
       } else {
         console.error('Profile update failed:', data);
         setError(data.message || 'Failed to update profile');
@@ -509,13 +506,29 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   src={profilePicturePreview || getProfileImageUrl((user as any)?.profilePicture, (user as any)?._profilePicCacheBuster)}
                   alt={user && user.username ? `${user.username}'s profile` : 'User profile'} 
                   className="profile-avatar-small"
+                  onError={(e) => {
+                    console.error('[IMAGE ERROR] Failed to load profile image:', {
+                      src: (e.target as HTMLImageElement).src,
+                      preview: !!profilePicturePreview,
+                      userPic: (user as any)?.profilePicture,
+                      cacheBuster: (user as any)?._profilePicCacheBuster
+                    });
+                    // Fallback to default image
+                    (e.target as HTMLImageElement).src = "/img/androcolored-80x80.jpg";
+                  }}
                   onClick={() => {
                     // Force reload by updating cache buster
+                    console.log('[REFRESH CLICK] Current state:', {
+                      profilePicturePreview: !!profilePicturePreview,
+                      userPic: (user as any)?.profilePicture,
+                      cacheBuster: (user as any)?._profilePicCacheBuster
+                    });
                     const newCacheBuster = Date.now().toString() + '-' + Math.random().toString(36).substring(7);
                     const updatedUser = {
                       ...user,
                       _profilePicCacheBuster: newCacheBuster
                     };
+                    console.log('[REFRESH CLICK] New cache buster:', newCacheBuster);
                     updateUser(updatedUser);
                     setProfilePicKey(Date.now());
                   }}

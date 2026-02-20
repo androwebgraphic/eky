@@ -9,7 +9,7 @@ import App from "./App";
 
 
 ReactDOM.render(
-  <Router>
+  <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
     <AuthProvider>
       <App />
     </AuthProvider>

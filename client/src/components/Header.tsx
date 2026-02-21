@@ -108,6 +108,7 @@ const Header: React.FC = () => {
             <nav className="header-nav-inner">
               <Link to="/" className="header-nav-link-inner">{t('nav.about')}</Link>
               <Link to="psi" className="header-nav-link-inner">{t('nav.dogs')}</Link>
+              <Link to="statistika" className="header-nav-link-inner">{t('nav.statistics') || 'Statistics'}</Link>
             </nav>
             <div className="header-flex-spacer" />
             {/* Right: Language Selector and User Info */}
@@ -165,7 +166,7 @@ const Header: React.FC = () => {
               <div className="user-dropdown-header-inner">
                 {user.username}
                 <span className="user-dropdown-online-text">
-                  ● Online
+                  ● {t('userProfile.online')}
                 </span>
               </div>
 
@@ -176,8 +177,8 @@ const Header: React.FC = () => {
                 {apiOk === null ? 'API' : apiOk ? 'API OK' : 'API Down'}{uptime ? ` • ${Math.floor(uptime)}s` : ''}
               </div>
 
-              <p className="user-dropdown-info-item">Name: {user.name}</p>
-              <p className="user-dropdown-info-item">Email: {user.email}</p>
+              <p className="user-dropdown-info-item">{t('fields.name')} {user.name}</p>
+              <p className="user-dropdown-info-item">{t('fields.email')} {user.email}</p>
               
               <div className="user-dropdown-buttons">
                 <button
@@ -189,7 +190,7 @@ const Header: React.FC = () => {
                   className="user-dropdown-btn profile"
                   title="User Menu"
                 >
-                  ⚙️ Profile
+                  ⚙️ {t('button.profile')}
                 </button>
 
                 <button 
@@ -237,8 +238,15 @@ const Header: React.FC = () => {
               <Link to="psi" className="header-nav-link-inner">{t('nav.dogs')}</Link>
               <Link to="logiranje" className="header-nav-link-inner">{t('nav.login')}</Link>
               <Link to="registracija" className="header-nav-link-inner">{t('nav.register')}</Link>
-              <LanguageSelector />
+              <Link to="statistika" className="header-nav-link-inner">{t('nav.statistics') || 'Statistics'}</Link>
             </nav>
+          )}
+
+          {/* Desktop language selector - separate from nav */}
+          {!isMobile && (
+            <div className="header-right-desktop">
+              <LanguageSelector />
+            </div>
           )}
 
           {/* Mobile language selector */}
@@ -279,6 +287,13 @@ const Header: React.FC = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               {t('nav.register')}
+            </Link>
+            <Link 
+              to="statistika" 
+              className="mobile-nav-link"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('nav.statistics') || 'Statistics'}
             </Link>
           </div>
         )}

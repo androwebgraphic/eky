@@ -606,6 +606,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                     onChange={handleInputChange}
                     required
                     autoComplete="name"
+                    autoFocus
                   />
                 </div>
 

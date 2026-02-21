@@ -311,6 +311,16 @@
   align-items: center;
   gap: 20px;
   flex-shrink: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.header-right-desktop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
 }
 
 .header-nav-link-inner {

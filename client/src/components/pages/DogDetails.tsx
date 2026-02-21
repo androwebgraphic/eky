@@ -70,23 +70,28 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         setLoadingCoords(true);
         setCoordsError(null);
         try {
-          let query = location.trim();
-          if (query.split(/\s+/).length < 2) {
-            query += ', Croatia';
-          }
-          const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&extratags=1`);
+          const query = location.trim();
+          console.log('[MAP] Geocoding location:', query);
+          const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&extratags=1`, {
+            headers: {
+              'User-Agent': 'EkyApp/1.0'
+            }
+          });
           const data = await resp.json();
+          console.log('[MAP] Geocoding response:', data);
           if (data && data.length > 0) {
             const result = data[0];
             setCoords({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
             setShowMap(true);
           } else {
+            console.log('[MAP] No coordinates found, will use search-based map');
             setShowMap(true);
-            setCoordsError('Location not found');
+            // Don't set error - use search-based map as fallback
           }
         } catch (e) {
+          console.error('[MAP] Geocoding error:', e);
           setShowMap(true);
-          setCoordsError('Location search failed');
+          // Don't set error - use search-based map as fallback
         } finally {
           setLoadingCoords(false);
         }
@@ -338,11 +343,8 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
     setLoadingCoords(true);
     setCoordsError(null);
     try {
-      // If location is short (1 word), append Croatia for better accuracy
-      let query = location.trim();
-      if (query.split(/\s+/).length < 2) {
-        query += ', Croatia';
-      }
+      // Use location as-is - don't append country to avoid breaking international cities
+      const query = location.trim();
       
       // Use OpenStreetMap Nominatim API for geocoding with higher precision
       const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&extratags=1`);
@@ -457,8 +459,8 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
           </p>
         )}
         {showMap && (coords || location) && ReactDOM.createPortal(
-          <div className="modal-map" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '85vw', maxWidth: '700px', height: 'auto', background: 'rgba(0,0,0,0.7)', borderRadius: 12, zIndex: 2147483647, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, pointerEvents: 'auto' }}>
-            <div style={{ background: '#fff', padding: 20, borderRadius: 12, maxWidth: 700, width: '95vw', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div className="modal-map" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '95vw', maxWidth: '900px', height: 'auto', background: 'rgba(0,0,0,0.7)', borderRadius: 12, zIndex: 2147483647, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, pointerEvents: 'auto' }}>
+            <div style={{ background: '#fff', padding: 20, borderRadius: 12, maxWidth: 900, width: '95vw', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <button
                 onClick={() => setShowMap(false)}
                 style={{
@@ -495,11 +497,11 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
               <iframe
                 title={t('dogDetails.mapPreview')}
                 width="100%"
-                height="450"
+                height="500"
                 frameBorder="0"
                 style={{ border: 'none', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
                 src={coords
-                  ? `https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng-0.005},${coords.lat-0.005},${coords.lng+0.005},${coords.lat+0.005}&layer=mapnik&marker=${coords.lat},${coords.lng}`
+                  ? `https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng-0.002},${coords.lat-0.002},${coords.lng+0.002},${coords.lat+0.002}&layer=mapnik&marker=${coords.lat},${coords.lng}`
                   : `https://www.openstreetmap.org/export/embed.html?search=${encodeURIComponent(location || '')}&layer=mapnik`}
                 allowFullScreen
               />

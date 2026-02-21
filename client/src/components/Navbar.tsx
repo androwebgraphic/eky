@@ -8,6 +8,7 @@ import AdddogForm from './pages/AdddogForm';
 import DogList from './pages/DogList';
 import AuthCallback from './pages/AuthCallback';
 import AdoptionRequests from './AdoptionRequests';
+import Statistics from './pages/Statistics';
 
 const Navbar: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const Navbar: React.FC = () => {
       <Route path="/dogs/*" element={<Navigate to="/psi" replace />} />
       <Route path="/dodajpsa" element={<AdddogForm />} />
       <Route path="/zahtjevi-za-posvajanjem" element={<AdoptionRequests />} />
+      <Route path="/statistika" element={<Statistics />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
     </Routes>
   );

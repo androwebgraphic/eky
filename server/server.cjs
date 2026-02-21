@@ -13,6 +13,7 @@ const passport = require('./config/passport.js');
 const userRoutes = require("./routes/userRoutes.js");
 const dogRoutes = require("./routes/dogRoutes.js");
 const authRoutes = require("./routes/authRoutes.js");
+const statsRoutes = require("./routes/statsRoutes.js");
 const auth = require('./middleware/auth.js');
 const cors = require('cors');
 const chatRoutes = require('./routes/chatRoutes.js'); // <-- Add this here
@@ -80,6 +81,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/dogs", dogRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/adoption", adoptionRoutes);
+app.use("/api/stats", statsRoutes);
 // If you want to use the auth middleware globally, use ONLY the function, not the module object:
 // const auth = require('./middleware/auth.js');
 // app.use(auth); // Uncomment if you want global auth protection

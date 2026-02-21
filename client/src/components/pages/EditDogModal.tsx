@@ -714,6 +714,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
               name="name"
               type="text" 
               autoComplete="name"
+              autoFocus
               {...register('name', { required: true })} 
               style={{
                 width: '100%',

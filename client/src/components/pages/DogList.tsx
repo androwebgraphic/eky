@@ -113,19 +113,25 @@ function DogList() {
 		setMapError(null);
 		setMapCoords(null);
 		try {
-			let query = location.trim();
-			if (query.split(/\s+/).length < 2) {
-				query += ', Croatia';
-			}
-			const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+			// Use location as-is - don't append country to avoid breaking international cities
+			const query = location.trim();
+			console.log('[MAP] Geocoding location:', query);
+			const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
+				headers: {
+					'User-Agent': 'EkyApp/1.0'
+				}
+			});
 			const data = await resp.json();
+			console.log('[MAP] Geocoding response:', data);
 			if (data && data.length > 0) {
 				setMapCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
 			} else {
-				setMapError(t('dogDetails.locationNotFound', 'Location not found'));
+				console.log('[MAP] No coordinates found, will use search-based map');
+				// Don't show error - just use search-based map as fallback
 			}
 		} catch (e) {
-			setMapError(t('dogDetails.locationSearchFailed', 'Location search failed'));
+			console.error('[MAP] Geocoding error:', e);
+			// Don't show error - just use search-based map as fallback
 		} finally {
 			setMapLoading(false);
 		}
@@ -547,8 +553,8 @@ function DogList() {
 						top: '50%',
 						left: '50%',
 						transform: 'translate(-50%, -50%)',
-						width: '85vw',
-						maxWidth: '600px',
+						width: '95vw',
+						maxWidth: '900px',
 						height: 'auto',
 						background: 'rgba(0,0,0,0.6)',
 						borderRadius: 12,
@@ -556,7 +562,7 @@ function DogList() {
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
-						padding: 16,
+						padding: 20,
 						pointerEvents: 'auto'
 					}}
 					onClick={(e) => { if (e.target === e.currentTarget) setMapDog(null); }}
@@ -565,9 +571,9 @@ function DogList() {
 						style={{
 							background: '#fff',
 							borderRadius: 16,
-							maxWidth: 600,
+							maxWidth: 900,
 							width: '95vw',
-							maxHeight: '80vh',
+							maxHeight: '85vh',
 							overflow: 'auto',
 							position: 'relative',
 							padding: 24,
@@ -614,17 +620,23 @@ function DogList() {
 							<iframe
 								title="Dog Location Map"
 								width="100%"
-								height="350"
+								height="500"
 								style={{ border: 0, borderRadius: 8 }}
 								loading="lazy"
 								allowFullScreen
-								src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCoords.lng - 0.02}%2C${mapCoords.lat - 0.02}%2C${mapCoords.lng + 0.02}%2C${mapCoords.lat + 0.02}&layer=mapnik&marker=${mapCoords.lat}%2C${mapCoords.lng}`}
+								src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCoords.lng - 0.005}%2C${mapCoords.lat - 0.005}%2C${mapCoords.lng + 0.005}%2C${mapCoords.lat + 0.005}&layer=mapnik&marker=${mapCoords.lat}%2C${mapCoords.lng}`}
 							/>
 						)}
-						{!mapCoords && !mapLoading && !mapError && (
-							<div style={{ textAlign: 'center', padding: 20, color: '#888' }}>
-								{t('dogDetails.noLocationData', 'No location data available')}
-							</div>
+						{!mapCoords && !mapLoading && mapDog && (
+							<iframe
+								title="Dog Location Map"
+								width="100%"
+								height="500"
+								style={{ border: 0, borderRadius: 8 }}
+								loading="lazy"
+								allowFullScreen
+								src={`https://www.openstreetmap.org/export/embed.html?search=${encodeURIComponent(mapDog.location)}&layer=mapnik`}
+							/>
 						)}
 					</div>
 				</div>,

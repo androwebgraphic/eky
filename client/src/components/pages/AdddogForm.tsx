@@ -527,13 +527,10 @@ const AdddogForm: React.FC = () => {
   return (
     <main>
       <h2>{t('adddog.title')}</h2>
-      <div style={{ background: '#f0f0f0', padding: '8px', margin: '8px 0', fontSize: '11px', borderRadius: '4px' }}>
-        <strong>Debug:</strong> API_URL = {getApiUrl()} | hostname = {window.location.hostname}
-      </div>
 
       <form id="adddog-form" onSubmit={handleSubmit(onSubmit)}>
         <label htmlFor="adddog-name">{t('adddog.name')}</label>
-        <input type="text" id="adddog-name" name="name" autoComplete="name" placeholder={t('adddog.name')} {...register('name', { required: true })} />
+        <input type="text" id="adddog-name" name="name" autoComplete="name" placeholder={t('adddog.name')} autoFocus {...register('name', { required: true })} />
         {errors.name && <div className="error" role="alert">{t('adddog.name')} is required</div>}
 
         <label htmlFor="adddog-breed">{t('adddog.breed')}</label>

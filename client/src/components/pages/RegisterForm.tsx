@@ -87,7 +87,7 @@ const RegisterForm: React.FC = () => {
         )}
         
         <label htmlFor="register-person">{t('register.person')}</label>
-        <select {...register('person')} name="person" id="register-person" autoComplete="off">
+        <select {...register('person')} name="person" id="register-person" autoComplete="off" autoFocus>
           <option value="private">{t('registerOptions.private')}</option>
           <option value="organization">{t('registerOptions.organization')}</option>
         </select>

@@ -1,0 +1,186 @@
+.statistics-page {
+  min-height: 100vh;
+  background-image: url("../../img/dog_paw.png");
+  background-color: rgba(253, 124, 43, 0.1843137255);
+  background-position: cover;
+  padding: 20px;
+  padding-top: 80px;
+  overflow-x: hidden;
+}
+
+.statistics-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.statistics-title {
+  color: #333;
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.statistics-grid {
+  display: grid;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.stats-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  color: #333;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Card specific styles */
+.total-card .stat-number {
+  color: #2196F3;
+}
+
+.available-card .stat-number {
+  color: #4CAF50;
+}
+
+.pending-card .stat-number {
+  color: #FF9800;
+}
+
+.adopted-card .stat-number {
+  color: #9C27B0;
+}
+
+.organization-card .stat-number {
+  color: #3F51B5;
+}
+
+.private-card .stat-number {
+  color: #009688;
+}
+
+.stats-footer {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.2rem;
+  padding: 12px 24px;
+  background: #75171a;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+
+.back-link:hover {
+  background: #5a1113;
+}
+
+.loading-spinner,
+.error-message {
+  text-align: center;
+  color: #666;
+  font-size: 1.5rem;
+  padding: 3rem;
+}
+
+.error-message {
+  color: #e74c3c;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .statistics-title {
+    font-size: 1.8rem;
+  }
+
+  .stats-cards {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .stat-icon {
+    font-size: 2.5rem;
+  }
+
+  .statistics-page {
+    padding-top: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-section {
+    padding: 1.5rem;
+  }
+
+  .stats-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .back-link {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .stats-footer {
+    margin-top: 1rem;
+    padding: 0 1rem;
+  }
+}

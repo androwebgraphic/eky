@@ -84,7 +84,7 @@ const LoginForm: React.FC = () => {
         )}
         
         <label htmlFor="login-email">{t('register.email')}</label>
-        <input type="email" id="login-email" name="email" autoComplete="email" placeholder={t('register.email')} {...register('email')} />
+        <input type="email" id="login-email" name="email" autoComplete="email" placeholder={t('register.email')} autoFocus {...register('email')} />
         <p className="error">{errors.email?.message as string}</p>
 
         <label htmlFor="login-password">{t('register.password')}</label>

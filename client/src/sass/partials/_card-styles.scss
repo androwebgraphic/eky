@@ -31,10 +31,6 @@
 
     .card-small-actions {
       width: 100%;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
       background: #fff;
       border-top: 1px solid #eee;
     }
@@ -119,7 +115,8 @@
     width: 100%;
 
     @media (min-width: 768px) {
-      padding-bottom: 80px;
+      padding-bottom: 8px;
+      text-align: left;
     }
 
     .adoption-status-badge {
@@ -144,6 +141,10 @@
       margin-bottom: 4px;
       color: #75171a;
       text-align: center;
+
+      @media (min-width: 768px) {
+        text-align: left;
+      }
     }
 
     .card-small-field {
@@ -169,6 +170,10 @@
         font-size: 13px;
         color: #888;
       }
+
+      @media (min-width: 768px) {
+        text-align: left;
+      }
     }
 
     .card-small-location {
@@ -183,6 +188,10 @@
         text-decoration: underline;
         margin-left: 4px;
       }
+
+      @media (min-width: 768px) {
+        text-align: left;
+      }
     }
 
     .card-small-health {
@@ -190,6 +199,10 @@
       font-size: 13px;
       margin-bottom: 4px;
       text-align: center;
+
+      @media (min-width: 768px) {
+        text-align: left;
+      }
     }
 
     .card-small-user {
@@ -205,6 +218,10 @@
       .user-name {
         font-weight: 600;
       }
+
+      @media (min-width: 768px) {
+        text-align: left;
+      }
     }
 
     .card-small-date {
@@ -212,6 +229,10 @@
       font-size: 11px;
       margin-bottom: 4px;
       text-align: center;
+
+      @media (min-width: 768px) {
+        text-align: left;
+      }
     }
   }
 

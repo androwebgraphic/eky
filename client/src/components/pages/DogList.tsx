@@ -228,13 +228,10 @@ function DogList() {
 					onAgeChange={setAgeFilter}
 				/>
 			</div>
+			<div style={{ maxWidth: '1600px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
 			<main
 				style={{
-					display: isDesktop ? 'flex' : 'block',
-					flexDirection: isDesktop ? 'row' : undefined,
-					alignItems: isDesktop ? 'flex-start' : undefined,
-					justifyContent: isDesktop ? 'center' : undefined,
-					gap: isDesktop ? 6 : undefined,
+					display: isDesktop ? 'block' : 'block',
 					marginTop: '10px',
 					position: 'relative',
 					overflowY: 'auto',
@@ -248,12 +245,14 @@ function DogList() {
 						style={{
 							display: 'flex',
 							flexDirection: 'row',
-							gap: 16,
+							gap: 12,
 							flexWrap: 'wrap',
 							alignItems: 'flex-start',
-							maxWidth: '1200px',
-							margin: '30px auto',
-							padding: '0 16px',
+							justifyContent: 'flex-start',
+							width: '100%',
+							maxWidth: '1600px',
+							margin: '30px 0',
+							padding: '0',
 						}}
 					>
 						{filteredDogs.map(dog => {
@@ -362,6 +361,7 @@ function DogList() {
 					</div>
 				)}
 			</main>
+			</div>
 			{editDog && (
 				<EditDogModal
 					key={editDog._id || Math.random()}

@@ -293,7 +293,10 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		<div
 			className="card card-small"
 			style={{
-				maxWidth: window.innerWidth > 768 ? 375 : 420,
+				maxWidth: window.innerWidth > 768 ? 340 : 420,
+				minHeight: window.innerWidth > 768 ? '600px' : 'fit-content',
+				display: 'flex',
+				flexDirection: 'column',
 			}}
 		>
 				<div className="card-small-image-wrapper">

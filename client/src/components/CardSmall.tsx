@@ -289,14 +289,15 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		setWishlistLoading(false);
 	};
 
-	return (
+		return (
 		<div
 			className="card card-small"
 			style={{
 				maxWidth: window.innerWidth > 768 ? 340 : 420,
-				minHeight: window.innerWidth > 768 ? '600px' : 'fit-content',
+				width: window.innerWidth > 768 ? 340 : 420,
 				display: 'flex',
 				flexDirection: 'column',
+				flex: window.innerWidth > 768 ? '0 0 auto' : undefined,
 			}}
 		>
 				<div className="card-small-image-wrapper">

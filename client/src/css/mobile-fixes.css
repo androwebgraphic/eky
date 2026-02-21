@@ -161,6 +161,11 @@ pre {
   margin-right: auto;
 }
 
+/* Fix: Don't center cards in grid */
+.card-small {
+  margin: 0 !important;
+}
+
 /* Mobile-specific grid fixes */
 .grid, .flex, .flexbox {
   max-width: 100%;

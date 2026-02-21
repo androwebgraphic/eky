@@ -1,7 +1,36 @@
+.dog-list-grid {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  gap: 12px;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  -ms-flex-line-pack: start;
+      align-content: flex-start;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  width: 100%;
+  max-width: 1600px;
+  margin: 30px 0;
+  padding: 0;
+}
+
 .card-small {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
   border: 1px solid #ddd;
   border-radius: 12px;
   overflow: hidden;
@@ -10,10 +39,38 @@
   transition: -webkit-box-shadow 0.2s;
   transition: box-shadow 0.2s;
   transition: box-shadow 0.2s, -webkit-box-shadow 0.2s;
+  position: relative;
 }
 .card-small:hover {
   -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+@media (min-width: 768px) {
+  .card-small {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+  }
+  .card-small .card-small-image-wrapper {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+    width: 50%;
+  }
+  .card-small .card-small-content {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
+    width: 50%;
+  }
+  .card-small .card-small-actions {
+    width: 100%;
+    background: #fff;
+    border-top: 1px solid #eee;
+  }
 }
 .card-small .card-small-image-wrapper {
   position: relative;
@@ -97,6 +154,12 @@
   padding: 16px;
   width: 100%;
 }
+@media (min-width: 768px) {
+  .card-small .card-small-content {
+    padding-bottom: 8px;
+    text-align: left;
+  }
+}
 .card-small .card-small-content .adoption-status-badge {
   background: #ff9800;
   color: #fff;
@@ -118,6 +181,11 @@
   color: #75171a;
   text-align: center;
 }
+@media (min-width: 768px) {
+  .card-small .card-small-content .card-small-name {
+    text-align: left;
+  }
+}
 .card-small .card-small-content .card-small-field {
   font-size: 15px;
   margin-bottom: 4px;
@@ -138,6 +206,11 @@
   font-size: 13px;
   color: #888;
 }
+@media (min-width: 768px) {
+  .card-small .card-small-content .card-small-field {
+    text-align: left;
+  }
+}
 .card-small .card-small-content .card-small-location {
   font-size: 14px;
   color: #888;
@@ -150,11 +223,21 @@
   text-decoration: underline;
   margin-left: 4px;
 }
+@media (min-width: 768px) {
+  .card-small .card-small-content .card-small-location {
+    text-align: left;
+  }
+}
 .card-small .card-small-content .card-small-health {
   color: #388e3c;
   font-size: 13px;
   margin-bottom: 4px;
   text-align: center;
+}
+@media (min-width: 768px) {
+  .card-small .card-small-content .card-small-health {
+    text-align: left;
+  }
 }
 .card-small .card-small-content .card-small-user {
   color: #666;
@@ -168,16 +251,30 @@
 .card-small .card-small-content .card-small-user .user-name {
   font-weight: 600;
 }
+@media (min-width: 768px) {
+  .card-small .card-small-content .card-small-user {
+    text-align: left;
+  }
+}
 .card-small .card-small-content .card-small-date {
   color: #999;
   font-size: 11px;
   margin-bottom: 4px;
   text-align: center;
 }
+@media (min-width: 768px) {
+  .card-small .card-small-content .card-small-date {
+    text-align: left;
+  }
+}
 .card-small .card-small-actions {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
   gap: 8px;
@@ -187,7 +284,7 @@
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  padding: 8px 8px 16px 8px;
+  padding: 8px;
   width: 100%;
 }
 .card-small .card-small-actions .card-small-btn {
@@ -237,7 +334,7 @@
   background: #a67c52;
 }
 .card-small .card-small-actions .card-small-btn.btn-edit {
-  background: #d77f6c;
+  background: #d7c96c;
   color: #72211f;
 }
 .card-small .card-small-actions .card-small-btn.btn-remove {

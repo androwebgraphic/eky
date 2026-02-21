@@ -241,20 +241,7 @@ function DogList() {
 				{filteredDogs.length === 0 ? (
 					<div>{t('doglist.empty') || 'No dogs found.'}</div>
 				) : isDesktop ? (
-					<div
-						style={{
-							display: 'flex',
-							flexDirection: 'row',
-							gap: 12,
-							flexWrap: 'wrap',
-							alignItems: 'flex-start',
-							justifyContent: 'flex-start',
-							width: '100%',
-							maxWidth: '1600px',
-							margin: '30px 0',
-							padding: '0',
-						}}
-					>
+					<div className="dog-list-grid">
 						{filteredDogs.map(dog => {
 							// Deduplicate images by base name before passing to CardSmall
 							const getImageBase = (url: string) => {

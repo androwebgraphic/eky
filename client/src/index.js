@@ -5,8 +5,8 @@ import "./sass/index.scss";
 import './i18n';
 import { AuthProvider } from './contexts/AuthContext';
 import App from "./App";
-
-
+import './css/modal.css';
+import './css/mobile-fixes.css';
 
 ReactDOM.render(
   <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchProps {
   searchTerm: string;
@@ -10,6 +11,8 @@ interface SearchProps {
   onSizeChange: (size: string) => void;
   ageFilter: string;
   onAgeChange: (age: string) => void;
+  searchInputRef?: React.RefObject<HTMLInputElement>;
+  searchActive?: boolean;
 }
 
 const Search: React.FC<SearchProps> = ({
@@ -21,9 +24,25 @@ const Search: React.FC<SearchProps> = ({
   onSizeChange,
   ageFilter,
   onAgeChange,
+  searchInputRef,
+  searchActive = false,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  // Check if any filter is active
+  const hasActiveFilters = searchTerm || genderFilter || sizeFilter || ageFilter;
+  
+  // Clear all filters and navigate to clean URL
+  const handleClear = () => {
+    onSearchChange('');
+    onGenderChange('');
+    onSizeChange('');
+    onAgeChange('');
+    // Navigate to clean URL without query parameters
+    navigate('/psi', { replace: true });
+  };
   
   return (
     <div className="search-container" style={{
@@ -43,6 +62,7 @@ const Search: React.FC<SearchProps> = ({
           <input 
             type="search" 
             id="Search" 
+            ref={searchInputRef}
             placeholder={t('search.placeholder') || 'Search by breed, size, or location...'}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
@@ -50,9 +70,11 @@ const Search: React.FC<SearchProps> = ({
               width: '100%',
               padding: '0.375rem',
               borderRadius: '7px',
-              border: '1px solid #ddd',
+              border: searchActive ? '2px solid #75171a' : '1px solid #ddd',
+              boxShadow: searchActive ? '0 0 0 3px rgba(117, 23, 26, 0.2)' : 'none',
               fontSize: '1.2rem',
-              lineHeight: '1.2'
+              lineHeight: '1.2',
+              transition: 'all 0.3s ease'
             }}
           />
         </div>
@@ -74,6 +96,26 @@ const Search: React.FC<SearchProps> = ({
         >
           {showAdvanced ? t('search.hideAdvanced') || 'Hide Advanced' : t('search.showAdvanced') || 'Advanced Search'}
         </button>
+        
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={handleClear}
+            style={{
+              padding: '0.375rem 0.75rem',
+              borderRadius: '3px',
+              border: '1px solid #e74c3c',
+              backgroundColor: '#e74c3c',
+              color: '#fff',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {t('search.clear') || 'Clear'}
+          </button>
+        )}
       </div>
       
       {/* Advanced filters - conditionally shown */}

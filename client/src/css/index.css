@@ -4047,7 +4047,7 @@ h1.extra-large {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  z-index: 9999;
+  z-index: 2147483648;
   padding: 20px;
   pointer-events: auto;
 }

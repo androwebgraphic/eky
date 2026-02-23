@@ -78,7 +78,8 @@ footer, #footer-nav {
   right: 0 !important;
   width: 100vw !important;
   height: 50px !important;
-  z-index: 1100 !important;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
 }
 
 #footer-nav ul {
@@ -161,9 +162,66 @@ pre {
   margin-right: auto;
 }
 
-/* Fix: Don't center cards in grid */
-.card-small {
-  margin: 0 !important;
+/* Fix cards alignment on mobile */
+@media (max-width: 768px) {
+  .card-small {
+    margin: 0 auto !important;
+    max-width: calc(100vw - 32px) !important;
+    width: 100% !important;
+  }
+}
+
+/* On desktop, align left */
+@media (min-width: 769px) {
+  .card-small {
+    margin: 0 !important;
+  }
+}
+
+/* Ensure footer search modal appears above everything */
+.footer-search-modal {
+  z-index: 2147483648 !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure all search modal content is clickable */
+.footer-search-content,
+.footer-search-content > *,
+.footer-search-content input,
+.footer-search-content button,
+.footer-search-content select {
+  pointer-events: auto !important;
+}
+
+/* Ensure footer search icon is clickable */
+#footer-nav li[title*="Search"], 
+#footer-nav li[title*="Pretraga"],
+#footer-nav .eky-search,
+#footer-nav a[href*="#search"],
+#footer-nav a[href*="#search"] li,
+#footer-nav a[href*="#search"] * {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Ensure all footer nav items are clickable */
+#footer-nav ul,
+#footer-nav ul li,
+#footer-nav ul a,
+#footer-nav ul a li,
+#footer-nav ul a li span,
+#footer-nav ul a * {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Ensure scrollable content doesn't block footer clicks */
+.scrollable-content {
+  pointer-events: none;
+}
+
+.scrollable-content > * {
+  pointer-events: auto;
 }
 
 /* Mobile-specific grid fixes */

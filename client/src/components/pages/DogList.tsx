@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import CardSmall from '../CardSmall';
 import EditDogModal from './EditDogModal';
 import RemoveDogModal from './RemoveDogModal';
@@ -46,6 +47,8 @@ function DogList() {
 
 	const { t } = useTranslation();
 	const { token, user } = useAuth();
+	const [searchParams] = useSearchParams();
+	const location = useLocation();
 	const [dogs, setDogs] = useState<DogDetailsProps[]>([]);
 	const [editDog, setEditDog] = useState<DogDetailsProps | null>(null);
 	const [removeDog, setRemoveDog] = useState<DogDetailsProps | null>(null);
@@ -62,6 +65,85 @@ function DogList() {
 	const [genderFilter, setGenderFilter] = useState('');
 	const [sizeFilter, setSizeFilter] = useState('');
 	const [ageFilter, setAgeFilter] = useState('');
+	const [searchActive, setSearchActive] = useState(false);
+
+	// Ref for search input to auto-focus when #search is in URL hash
+	const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+	// Debug logging on mount
+	React.useEffect(() => {
+		console.log('[DOG-LIST] ========== COMPONENT MOUNTED ==========');
+		console.log('[DOG-LIST] Current URL:', window.location.href);
+		console.log('[DOG-LIST] pathname:', window.location.pathname);
+		console.log('[DOG-LIST] location.hash:', location.hash);
+		console.log('[DOG-LIST] searchInputRef.current:', searchInputRef.current);
+	}, []);
+
+		// Auto-focus search input if #search is in URL hash
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	React.useEffect(() => {
+		console.log('[FOCUS] ========== FOCUS EFFECT RUNNING ==========');
+		console.log('[FOCUS] location.hash:', location.hash);
+		console.log('[FOCUS] location.pathname:', location.pathname);
+		console.log('[FOCUS] location.search:', location.search);
+		console.log('[FOCUS] window.location.hash:', window.location.hash);
+		console.log('[FOCUS] window.location.href:', window.location.href);
+		
+		if (location.hash === '#search') {
+			console.log('[FOCUS] ✅ #search detected in URL!');
+			// Highlight search
+			setSearchActive(true);
+			// Scroll to top first
+			window.scrollTo(0, 0);
+			console.log('[FOCUS] Scrolled to top');
+			// Wait for component to fully render, then focus
+			setTimeout(() => {
+				console.log('[FOCUS] First timeout - attempting to focus');
+				console.log('[FOCUS] searchInputRef.current:', searchInputRef.current);
+				if (searchInputRef.current) {
+					searchInputRef.current.focus();
+					// Also click to trigger mobile keyboard (iOS limitation: keyboard won't show programmatically)
+					searchInputRef.current.click();
+					console.log('[FOCUS] ✅ Search input focused and clicked!');
+					// Clear hash after focusing
+					window.history.replaceState(null, '', window.location.pathname);
+					console.log('[FOCUS] Hash cleared from URL');
+					// Remove highlight after 2 seconds
+					setTimeout(() => setSearchActive(false), 2000);
+				} else {
+					console.error('[FOCUS] ❌ Search input ref is null, trying again...');
+					// Try again with longer delay
+					setTimeout(() => {
+						console.log('[FOCUS] Second timeout - trying again');
+						console.log('[FOCUS] searchInputRef.current:', searchInputRef.current);
+						if (searchInputRef.current) {
+							searchInputRef.current.focus();
+							searchInputRef.current.click();
+							console.log('[FOCUS] ✅ Search input focused and clicked on second attempt!');
+							window.history.replaceState(null, '', window.location.pathname);
+							setTimeout(() => setSearchActive(false), 2000);
+						} else {
+							console.error('[FOCUS] ❌ Still unable to focus after two attempts');
+						}
+					}, 1000);
+				}
+			}, 600);
+		} else {
+			console.log('[FOCUS] ❌ #search not in URL hash');
+		}
+		console.log('[FOCUS] ========== FOCUS EFFECT END ==========');
+	}, [location.hash]);
+
+	// Read URL search parameters from footer search modal
+	useEffect(() => {
+		const search = searchParams.get('search');
+		const gender = searchParams.get('gender');
+		const size = searchParams.get('size');
+		
+		if (search) setSearchTerm(search);
+		if (gender) setGenderFilter(gender);
+		if (size) setSizeFilter(size);
+	}, [searchParams]);
 
 	// Filter dogs based on search/filters
 	const filteredDogs = useMemo(() => {
@@ -215,19 +297,21 @@ function DogList() {
 
 	return (
 		<>
-			{/* Search bar */}
-			<div style={{ padding: '0 16px', paddingTop: window.innerWidth > 768 ? '80px' : '80px', maxWidth: '1200px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
-				<Search
-					searchTerm={searchTerm}
-					onSearchChange={setSearchTerm}
-					genderFilter={genderFilter}
-					onGenderChange={setGenderFilter}
-					sizeFilter={sizeFilter}
-					onSizeChange={setSizeFilter}
-					ageFilter={ageFilter}
-					onAgeChange={setAgeFilter}
-				/>
-			</div>
+		{/* Search bar */}
+		<div style={{ padding: '0 16px', paddingTop: window.innerWidth > 768 ? '80px' : '80px', maxWidth: '1200px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+			<Search
+				searchTerm={searchTerm}
+				onSearchChange={setSearchTerm}
+				genderFilter={genderFilter}
+				onGenderChange={setGenderFilter}
+				sizeFilter={sizeFilter}
+				onSizeChange={setSizeFilter}
+				ageFilter={ageFilter}
+				onAgeChange={setAgeFilter}
+				searchInputRef={searchInputRef}
+				searchActive={searchActive}
+			/>
+		</div>
 			<div style={{ maxWidth: '1600px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
 			<main
 				style={{
@@ -449,36 +533,39 @@ function DogList() {
 					<div
 						style={{
 							position: 'fixed',
-							top: '10vh',
+							top: '50%',
 							left: '50%',
-							transform: 'translateX(-50%)',
-							width: '95vw',
-							maxWidth: '700px',
-							height: '85vh',
-							maxHeight: '85vh',
+							transform: 'translate(-50%, -50%)',
+							width: '90vw',
+							maxWidth: '600px',
+							height: '70vh',
+							maxHeight: '70vh',
 							background: 'rgba(0,0,0,0.5)',
 							borderRadius: 12,
 							zIndex: 2147483647,
 							display: 'flex',
 							alignItems: 'flex-start',
-							justifyContent: 'center',
-							padding: 8,
+							justifyContent: 'flex-start',
+							padding: 12,
 							pointerEvents: 'auto',
-							overflowY: 'auto'
+							overflowY: 'auto',
+							overflowX: 'hidden',
+							WebkitOverflowScrolling: 'touch'
 						}}
 					>
 						<div
 							style={{
 								background: '#fff',
 								borderRadius: 12,
-								maxWidth: 700,
-								width: '95vw',
-								height: '100%',
-								maxHeight: '100%',
+								maxWidth: 600,
+								width: '100%',
+								maxHeight: 'calc(70vh - 24px)',
+								height: 'auto',
 								overflow: 'auto',
 								overflowX: 'hidden',
 								position: 'relative',
-								padding: 16,
+								padding: 12,
+								paddingBottom: 80,
 								WebkitOverflowScrolling: 'touch'
 							}}
 						>

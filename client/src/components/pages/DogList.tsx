@@ -451,69 +451,16 @@ function DogList() {
 			{/* Details panel on desktop, modal on mobile */}
 			{detailsDog && ReactDOM.createPortal(
 				(isDesktop ? (
-					<div
-						style={{
-							position: 'fixed',
-							top: '50%',
-							left: '50%',
-							transform: 'translate(-50%, -50%)',
-							width: '85vw',
-							maxWidth: '700px',
-							height: 'auto',
-							background: 'rgba(0,0,0,0.5)',
-							borderRadius: 12,
-							zIndex: 2147483647,
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							padding: 16,
-							pointerEvents: 'auto'
-						}}
-					>
-						<div
-							style={{
-								background: '#fff',
-								borderRadius: 16,
-								maxWidth: 700,
-								width: '95vw',
-								maxHeight: '95vh',
-								overflow: 'auto',
-								position: 'relative',
-								padding: 24,
-							}}
-						>
-									<button
-										onClick={() => setDetailsDog(null)}
-										style={{
-											position: 'absolute',
-											top: 12,
-											right: 12,
-											width: 28,
-											height: 28,
-											background: '#e74c3c',
-											border: 'none',
-											borderRadius: '50%',
-											display: 'flex',
-											alignItems: 'center',
-											justifyContent: 'center',
-											padding: 0,
-											cursor: 'pointer',
-											zIndex: 2,
-											boxShadow: '0 2px 8px rgba(231,76,60,0.10)',
-										}}
-										aria-label="Close"
-										title="Close"
-									>
-										<span style={{
-											color: '#fff',
-											fontSize: '24px',
-											fontWeight: 900,
-											lineHeight: '28px',
-											display: 'block',
-											textAlign: 'center',
-											width: '100%',
-										}}>×</span>
-									</button>
+					<div className="doglist-details-modal desktop">
+						<div className="doglist-details-content">
+							<button
+								className="doglist-close-btn"
+								onClick={() => setDetailsDog(null)}
+								aria-label="Close"
+								title="Close"
+							>
+								<span>×</span>
+							</button>
 							<DogDetails
 								key={detailsDog._id}
 								{...detailsDog}
@@ -530,76 +477,15 @@ function DogList() {
 						</div>
 					</div>
 				) : (
-					<div
-						style={{
-							position: 'fixed',
-							top: '50%',
-							left: '50%',
-							transform: 'translate(-50%, -50%)',
-							width: '90vw',
-							maxWidth: '600px',
-							height: '70vh',
-							maxHeight: '70vh',
-							background: 'rgba(0,0,0,0.5)',
-							borderRadius: 12,
-							zIndex: 2147483647,
-							display: 'flex',
-							alignItems: 'flex-start',
-							justifyContent: 'flex-start',
-							padding: 12,
-							pointerEvents: 'auto',
-							overflowY: 'auto',
-							overflowX: 'hidden',
-							WebkitOverflowScrolling: 'touch'
-						}}
-					>
-						<div
-							style={{
-								background: '#fff',
-								borderRadius: 12,
-								maxWidth: 600,
-								width: '100%',
-								maxHeight: 'calc(70vh - 24px)',
-								height: 'auto',
-								overflow: 'auto',
-								overflowX: 'hidden',
-								position: 'relative',
-								padding: 12,
-								paddingBottom: 80,
-								WebkitOverflowScrolling: 'touch'
-							}}
-						>
+					<div className="doglist-details-modal mobile">
+						<div className="doglist-details-content">
 							<button
+								className="doglist-close-btn mobile"
 								onClick={() => setDetailsDog(null)}
-								style={{
-									position: 'absolute',
-									top: 8,
-									right: 8,
-									width: 28,
-									height: 28,
-									background: '#e74c3c',
-									border: 'none',
-									borderRadius: '50%',
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-									padding: 0,
-									cursor: 'pointer',
-									zIndex: 10000,
-									boxShadow: '0 2px 8px rgba(231,76,60,0.10)',
-								}}
 								aria-label="Close"
 								title="Close"
 							>
-								<span style={{
-									color: '#fff',
-									fontSize: '24px',
-									fontWeight: 900,
-									lineHeight: '28px',
-									display: 'block',
-									textAlign: 'center',
-									width: '100%',
-								}}>×</span>
+								<span>×</span>
 							</button>
 							<DogDetails
 								key={detailsDog._id}
@@ -621,81 +507,25 @@ function DogList() {
 			)}
 			{/* Map-only modal */}
 			{mapDog && ReactDOM.createPortal(
-				<div
-					style={{
-						position: 'fixed',
-						top: '50%',
-						left: '50%',
-						transform: 'translate(-50%, -50%)',
-						width: '95vw',
-						maxWidth: '900px',
-						height: 'auto',
-						background: 'rgba(0,0,0,0.6)',
-						borderRadius: 12,
-						zIndex: 2147483647,
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-						padding: 20,
-						pointerEvents: 'auto'
-					}}
-					onClick={(e) => { if (e.target === e.currentTarget) setMapDog(null); }}
-				>
-					<div
-						style={{
-							background: '#fff',
-							borderRadius: 16,
-							maxWidth: 900,
-							width: '95vw',
-							maxHeight: '85vh',
-							overflow: 'auto',
-							position: 'relative',
-							padding: 24,
-						}}
-					>
+				<div className="doglist-map-modal" onClick={(e) => { if (e.target === e.currentTarget) setMapDog(null); }}>
+					<div className="doglist-map-content">
 						<button
+							className="doglist-close-btn"
 							onClick={() => setMapDog(null)}
-							style={{
-								position: 'absolute',
-								top: 12,
-								right: 12,
-								width: 28,
-								height: 28,
-								background: '#e74c3c',
-								border: 'none',
-								borderRadius: '50%',
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-								padding: 0,
-								cursor: 'pointer',
-								zIndex: 2,
-								boxShadow: '0 2px 8px rgba(231,76,60,0.10)',
-							}}
 							aria-label="Close"
 							title="Close"
 						>
-							<span style={{
-								color: '#fff',
-								fontSize: '24px',
-								fontWeight: 900,
-								lineHeight: '28px',
-								display: 'block',
-								textAlign: 'center',
-								width: '100%',
-							}}>×</span>
+							<span>×</span>
 						</button>
-						<h3 style={{ marginTop: 0, marginBottom: 16 }}>
+						<h3 className="doglist-map-title">
 							📍 {mapDog.name} - {mapDog.location}
 						</h3>
 						{mapLoading && <div style={{ textAlign: 'center', padding: 20 }}>{t('dogDetails.loadingMap', 'Loading map...')}</div>}
 						{mapError && <div style={{ textAlign: 'center', padding: 20, color: '#e74c3c' }}>{mapError}</div>}
 						{mapCoords && !mapLoading && (
 							<iframe
+								className="doglist-map-iframe"
 								title="Dog Location Map"
-								width="100%"
-								height="500"
-								style={{ border: 0, borderRadius: 8 }}
 								loading="lazy"
 								allowFullScreen
 								src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapCoords.lng - 0.005}%2C${mapCoords.lat - 0.005}%2C${mapCoords.lng + 0.005}%2C${mapCoords.lat + 0.005}&layer=mapnik&marker=${mapCoords.lat}%2C${mapCoords.lng}`}
@@ -703,10 +533,8 @@ function DogList() {
 						)}
 						{!mapCoords && !mapLoading && mapDog && (
 							<iframe
+								className="doglist-map-iframe"
 								title="Dog Location Map"
-								width="100%"
-								height="500"
-								style={{ border: 0, borderRadius: 8 }}
 								loading="lazy"
 								allowFullScreen
 								src={`https://www.openstreetmap.org/export/embed.html?search=${encodeURIComponent(mapDog.location)}&layer=mapnik`}

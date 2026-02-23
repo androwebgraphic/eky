@@ -12,6 +12,7 @@
   border: none;
   box-shadow: none;
   opacity: 1;
+  z-index: 10;
 }
 
 .dog-image-slider .swiper-button-prev {
@@ -26,6 +27,7 @@
   border: none;
   box-shadow: none;
   opacity: 1;
+  z-index: 10;
 }
 
 .dog-image-slider .swiper-button-next:hover,
@@ -45,6 +47,7 @@
     background: none;
     border: none;
     box-shadow: none;
+    z-index: 10;
   }
   .dog-image-slider .swiper-button-prev {
     width: 44px;
@@ -55,6 +58,7 @@
     background: none;
     border: none;
     box-shadow: none;
+    z-index: 10;
   }
 }
 

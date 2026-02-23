@@ -459,51 +459,24 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
           </p>
         )}
         {showMap && (coords || location) && ReactDOM.createPortal(
-          <div className="modal-map" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '95vw', maxWidth: '900px', height: 'auto', background: 'rgba(0,0,0,0.7)', borderRadius: 12, zIndex: 2147483647, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, pointerEvents: 'auto' }}>
-            <div style={{ background: '#fff', padding: 20, borderRadius: 12, maxWidth: 900, width: '95vw', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div className="dogdetails-map-modal">
+            <div className="modal-map-content">
               <button
+                className="modal-map-close"
                 onClick={() => setShowMap(false)}
-                style={{
-                  position: 'absolute',
-                  top: 12,
-                  right: 12,
-                  width: 28,
-                  height: 28,
-                  background: '#e74c3c',
-                  border: 'none',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: 0,
-                  cursor: 'pointer',
-                  zIndex: 2147483647,
-                  boxShadow: '0 2px 8px rgba(231,76,60,0.10)',
-                }}
                 aria-label={t('common.close')}
                 title={t('common.close')}
               >
-                <span style={{
-                  color: '#fff',
-                  fontSize: '24px',
-                  fontWeight: 900,
-                  lineHeight: '28px',
-                  display: 'block',
-                  textAlign: 'center',
-                  width: '100%',
-                }}>×</span>
+                <span>×</span>
               </button>
-              <h3 style={{ marginBottom: 15, textAlign: 'center', color: '#333' }}>{place || location}</h3>
+              <h3 className="modal-map-title">{place || location}</h3>
               <iframe
+                className="map-iframe"
                 title={t('dogDetails.mapPreview')}
-                width="100%"
-                height="500"
-                frameBorder="0"
-                style={{ border: 'none', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
+                allowFullScreen
                 src={coords
                   ? `https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng-0.002},${coords.lat-0.002},${coords.lng+0.002},${coords.lat+0.002}&layer=mapnik&marker=${coords.lat},${coords.lng}`
                   : `https://www.openstreetmap.org/export/embed.html?search=${encodeURIComponent(location || '')}&layer=mapnik`}
-                allowFullScreen
               />
               <div style={{ marginTop: 15, display: 'flex', gap: 10 }}>
                 <button 

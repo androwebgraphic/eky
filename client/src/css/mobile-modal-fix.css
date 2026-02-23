@@ -33,11 +33,37 @@
   }
   
   /* Fix for close button - ensure it's on top of everything */
-  #doglist-details-root button[style*="position: absolute"] {
-    z-index: 99999 !important;
+  #doglist-details-root button[style*="position: absolute"],
+  #doglist-details-root button[aria-label="Close"],
+  #doglist-details-root .modal-close,
+  #doglist-details-root > div > div > button {
+    z-index: 2147483648 !important;
     position: fixed !important;
     top: 65px !important;
     right: 20px !important;
+  }
+  
+  /* Ensure all images, sliders, and containers are below the close button */
+  #doglist-details-root .dog-image-slider,
+  #doglist-details-root .swiper,
+  #doglist-details-root .swiper-slide,
+  #doglist-details-root .dog-image-slider img,
+  #doglist-details-root .card-details,
+  #doglist-details-root .img,
+  #doglist-details-root .description {
+    z-index: 1 !important;
+    position: relative !important;
+  }
+  
+  /* Ensure Swiper navigation buttons are below close button */
+  #doglist-details-root .swiper-button-next,
+  #doglist-details-root .swiper-button-prev {
+    z-index: 5 !important;
+  }
+  
+  /* Ensure no element creates a higher stacking context */
+  #doglist-details-root > div > div {
+    overflow: visible !important;
   }
   
   /* Fix for card-actions container to ensure buttons are visible */

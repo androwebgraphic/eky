@@ -392,13 +392,14 @@
 }
 
 // Map modal specific
-.modal-map {
+.modal-map,
+.dogdetails-map-modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 85vw;
-  max-width: 700px;
+  width: 95vw;
+  max-width: 900px;
   height: auto;
   background: rgba(0, 0, 0, 0.7);
   border-radius: 12px;
@@ -406,7 +407,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 20px;
   pointer-events: auto;
 }
 
@@ -575,6 +576,170 @@
   justify-content: center;
   z-index: 10000;
   padding: 20px;
+}
+
+// Dog Details Modal (from DogList)
+.doglist-details-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  pointer-events: auto;
+
+  &.desktop {
+    width: 85vw;
+    max-width: 700px;
+    height: auto;
+  }
+
+  &.mobile {
+    width: 90vw;
+    max-width: 600px;
+    height: 70vh;
+    max-height: 70vh;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 12px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .doglist-details-content {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 700px;
+    width: 95vw;
+    max-height: 95vh;
+    overflow: auto;
+    position: relative;
+    padding: 24px;
+
+    .doglist-details-mobile & {
+      max-width: 600;
+      width: 100%;
+      max-height: calc(70vh - 24px);
+      height: auto;
+      overflow: auto;
+      overflow-x: hidden;
+      position: relative;
+      padding: 12px;
+      padding-bottom: 80px;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}
+
+// Dog List Close Button (highest priority)
+.doglist-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  background: #e74c3c;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2147483648 !important;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.1);
+
+  &.mobile {
+    top: 8px;
+    right: 8px;
+  }
+
+  span {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 28px;
+    display: block;
+    text-align: center;
+    width: 100%;
+  }
+}
+
+// Map Modal (from DogList)
+.doglist-map-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 95vw;
+  max-width: 900px;
+  height: auto;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  pointer-events: auto;
+
+  .doglist-map-content {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 900px;
+    width: 95vw;
+    max-height: 85vh;
+    overflow: auto;
+    position: relative;
+    padding: 24px;
+  }
+
+  .doglist-map-title {
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+
+  .doglist-map-iframe {
+    width: 100%;
+    height: 500;
+    border: 0;
+    border-radius: 8;
+  }
+}
+
+// Ensure images and sliders are below close button
+.doglist-details-content {
+  .dog-image-slider,
+  .swiper,
+  .swiper-slide,
+  .dog-image-slider img,
+  .card-details,
+  .img,
+  .description {
+    z-index: 1 !important;
+    position: relative !important;
+  }
+
+  .swiper-button-next,
+  .swiper-button-prev {
+    z-index: 5 !important;
+  }
+}
+
+// Portal roots
+#doglist-details-root,
+#doglist-map-root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .edit-dog-modal-content {

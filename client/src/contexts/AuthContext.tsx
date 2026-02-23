@@ -9,6 +9,7 @@ interface User {
   profilePicture?: string;
   role?: string;
   _profilePicCacheBuster?: string;
+  lastVisit?: string | Date;
 }
 
 interface AuthContextType {

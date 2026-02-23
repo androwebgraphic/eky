@@ -1,0 +1,264 @@
+// Notification Bell Styles
+.notification-bell {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  .notification-bell-icon {
+    width: 24px;
+    height: 24px;
+    color: white;
+    transition: color 0.3s ease;
+  }
+
+  &.has-notifications {
+    .notification-bell-icon {
+      color: #22c55e;
+    }
+  }
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background-color: #22c55e;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 10px;
+  min-width: 16px;
+  text-align: center;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+// New Dogs Modal Overlay
+.new-dogs-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.new-dogs-modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.new-dogs-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: white;
+    font-weight: 600;
+  }
+}
+
+.new-dogs-close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.new-dogs-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 10px 0;
+}
+
+.new-dog-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:hover {
+    background: #f8f9fa;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.new-dog-image-wrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin-right: 15px;
+  background: #f0f0f0;
+}
+
+.new-dog-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.new-dog-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.new-dog-name {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.new-dog-breed {
+  margin: 0 0 5px 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.new-dog-details {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.new-dog-detail {
+  font-size: 0.85rem;
+  color: #888;
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.new-dog-time {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.new-dog-arrow {
+  margin-left: 15px;
+  font-size: 1.5rem;
+  color: #999;
+  transition: transform 0.2s ease;
+}
+
+.new-dog-item:hover .new-dog-arrow {
+  transform: translateX(5px);
+}
+
+.new-dogs-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+}
+
+.new-dogs-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.new-dogs-dismiss-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Mobile Responsive Styles
+@media (max-width: 768px) {
+  .new-dogs-modal-content {
+    max-width: 90%;
+    max-height: 70vh;
+  }
+
+  .new-dogs-modal-overlay {
+    padding: 10px;
+    align-items: center;
+  }
+
+  .new-dog-image-wrapper {
+    width: 50px;
+    height: 50px;
+  }
+
+  .new-dog-name {
+    font-size: 1rem;
+  }
+
+  .new-dog-breed {
+    font-size: 0.85rem;
+  }
+
+  .notification-bell {
+    padding: 6px;
+
+    .notification-bell-icon {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}

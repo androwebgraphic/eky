@@ -328,5 +328,19 @@
     "organizations": "Organisationen",
     "private": "Private Personen",
     "backHome": "Zurück zur Startseite"
+  },
+  "notification": {
+    "ariaLabel": "Benachrichtigungen anzeigen",
+    "tooltip": "Neue Hunde hinzugefügt seit Ihrem letzten Besuch"
+  },
+  "newDogs": {
+    "title": "Neue Hunde hinzugefügt",
+    "noNewDogs": "Keine neuen Hunde seit Ihrem letzten Besuch.",
+    "close": "Schließen",
+    "ageUnknown": "Unbekannt",
+    "years": "Jahre",
+    "minutesAgo": "Min. vor",
+    "hoursAgo": "Std. vor",
+    "daysAgo": "Tage vor"
   }
 }

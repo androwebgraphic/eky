@@ -349,5 +349,19 @@
     "organizations": "Organizations",
     "private": "Private Individuals",
     "backHome": "Back to Home"
+  },
+  "notification": {
+    "ariaLabel": "View notifications",
+    "tooltip": "New dogs added since your last visit"
+  },
+  "newDogs": {
+    "title": "New Dogs Added",
+    "noNewDogs": "No new dogs since your last visit.",
+    "close": "Close",
+    "ageUnknown": "Unknown",
+    "years": "years",
+    "minutesAgo": "min ago",
+    "hoursAgo": "hours ago",
+    "daysAgo": "days ago"
   }
 }

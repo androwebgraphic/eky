@@ -333,5 +333,19 @@
     "organizations": "Egyesületek",
     "private": "Magánszemélyek",
     "backHome": "Vissza a Főoldalra"
+  },
+  "notification": {
+    "ariaLabel": "Értesítések megtekintése",
+    "tooltip": "Új kutyák hozzáadva az utolsó látogatása óta"
+  },
+  "newDogs": {
+    "title": "Új kutyák hozzáadva",
+    "noNewDogs": "Nincsenek új kutyák az utolsó látogatása óta.",
+    "close": "Bezárás",
+    "ageUnknown": "Ismeretlen",
+    "years": "év",
+    "minutesAgo": "perce",
+    "hoursAgo": "órája",
+    "daysAgo": "napja"
   }
 }

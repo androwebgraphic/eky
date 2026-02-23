@@ -665,6 +665,35 @@ const listDogs = async (req, res) => {
   }
 };
 
+// GET /api/dogs/new-since/:lastVisit
+const getNewDogsSince = async (req, res) => {
+  try {
+    const { lastVisit } = req.params;
+    const lastVisitDate = new Date(lastVisit);
+    
+    if (isNaN(lastVisitDate.getTime())) {
+      return res.status(400).json({ message: 'Invalid date format' });
+    }
+
+    // Get dogs created after last visit (within last 24 hours)
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const dogs = await Dog.find({
+      createdAt: {
+        $gt: lastVisitDate,
+        $gte: oneDayAgo
+      }
+    })
+    .populate('user', 'name username email phone person')
+    .sort({ createdAt: -1 });
+    
+    console.log(`[NEW DOGS] Found ${dogs.length} dogs since ${lastVisitDate.toISOString()}`);
+    res.json(dogs);
+  } catch (err) {
+    console.error('[getNewDogsSince] Error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 
 // Cancel adoption for a dog
 const cancelAdoption = async (req, res) => {
@@ -814,6 +843,7 @@ module.exports = {
   getPendingAdoptions,
   confirmAdoption,
   listDogs,
+  getNewDogsSince,
   cancelAdoption,
   adoptRequest
 };

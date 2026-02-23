@@ -90,6 +90,12 @@ const userSchema = mongoose.Schema({
 		default: 'user'
 	},
 	
+	// Track last visit for new dogs notifications
+	lastVisit: {
+		type: Date,
+		default: Date.now
+	},
+	
 	// ...existing code...
 	
 	

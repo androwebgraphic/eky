@@ -6,7 +6,7 @@ console.log('[ROUTES DEBUG] userRoutes.js loaded');
 const express = require('express');
 const multer = require('multer');
 const User = require('../models/userModel');
-const { signupUser, loginUser, updateProfile, deleteProfile, addToWishlist, removeFromWishlist, getWishlist, requestPasswordReset, searchUsers, getUserById, getAllUsers } = require('../controllers/userController.js');
+const { signupUser, loginUser, updateProfile, deleteProfile, addToWishlist, removeFromWishlist, getWishlist, requestPasswordReset, searchUsers, getUserById, getAllUsers, updateLastVisit } = require('../controllers/userController.js');
 const auth = require('../middleware/auth.js');
 const { isAdmin, isSuperAdmin } = auth;
 
@@ -43,6 +43,7 @@ console.log('[WISHLIST DEBUG] After router.get(/wishlist)');
 
 // Other specific routes (must be above /:id)
 router.get('/search', auth, searchUsers);
+router.put('/last-visit', auth, updateLastVisit);
 
 // Superadmin routes for managing all users
 router.get('/all', auth, isSuperAdmin, getAllUsers);

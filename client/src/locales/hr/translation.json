@@ -337,5 +337,19 @@
     "organizations": "Organizacije",
     "private": "Privatne Osobe",
     "backHome": "Povratak na Početnu"
+  },
+  "notification": {
+    "ariaLabel": "Pregledaj obavijesti",
+    "tooltip": "Novi psi dodani od vaše posljednje posjete"
+  },
+  "newDogs": {
+    "title": "Novi Psi Dodani",
+    "noNewDogs": "Nema novih pasa od vaše posljednje posjete.",
+    "close": "Zatvori",
+    "ageUnknown": "Nepoznato",
+    "years": "god",
+    "minutesAgo": "min prije",
+    "hoursAgo": "sat(i) prije",
+    "daysAgo": "dan(a) prije"
   }
 }

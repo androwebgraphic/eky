@@ -193,6 +193,13 @@ const loginUser = async (req, res) => {
 			return res.status(400).json({ message: "Invalid email or password" });
 		}
 		
+		// Initialize lastVisit if not set
+		if (!user.lastVisit) {
+			user.lastVisit = new Date();
+			await user.save();
+			console.log('[LOGIN] Initialized lastVisit for user:', user.username);
+		}
+		
 		// Generate JWT token
 		const token = generateToken(user._id);
 		
@@ -204,6 +211,7 @@ const loginUser = async (req, res) => {
 			   role: user.role,
 			   wishlist: user.wishlist || [],
 			   profilePicture: user.profilePicture,
+			   lastVisit: user.lastVisit,
 			   token
 		});
 		
@@ -418,6 +426,33 @@ const addToWishlist = async (req, res) => {
 	}
 }
 
+// Update user's last visit timestamp
+const updateLastVisit = async (req, res) => {
+	try {
+		const userId = req.user._id;
+		console.log('[UPDATE LAST VISIT] Updating lastVisit for user:', userId);
+		
+		const updatedUser = await User.findByIdAndUpdate(
+			userId,
+			{ lastVisit: new Date() },
+			{ new: true, select: '-password' }
+		);
+		
+		if (!updatedUser) {
+			return res.status(404).json({ message: "User not found" });
+		}
+		
+		console.log('[UPDATE LAST VISIT] Updated lastVisit:', updatedUser.lastVisit);
+		res.status(200).json({ 
+			message: "Last visit updated", 
+			lastVisit: updatedUser.lastVisit 
+		});
+	} catch (error) {
+		console.error('[UPDATE LAST VISIT] Error:', error);
+		res.status(500).json({ message: error.message });
+	}
+};
+
 module.exports = {
 	signupUser: async (req, res) => await signupUser(req, res),
 	loginUser: async (req, res) => await loginUser(req, res),
@@ -429,5 +464,6 @@ module.exports = {
 	requestPasswordReset: async (req, res) => await requestPasswordReset(req, res),
 	getUserById: async (req, res) => await getUserById(req, res),
 	searchUsers: async (req, res) => await searchUsers(req, res),
-	getAllUsers: async (req, res) => await getAllUsers(req, res)
+	getAllUsers: async (req, res) => await getAllUsers(req, res),
+	updateLastVisit: async (req, res) => await updateLastVisit(req, res)
 };

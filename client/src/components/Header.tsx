@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LanguageSelector from './LanguageSelector';
 import UserProfileModal from './UserProfileModal';
+import NotificationBell from './NotificationBell';
+import NewDogsModal from './NewDogsModal';
 
 const Header: React.FC = () => {
   const { t } = useTranslation();
@@ -14,8 +16,12 @@ const Header: React.FC = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [newDogsCount, setNewDogsCount] = useState(0);
+  const [showNewDogsModal, setShowNewDogsModal] = useState(false);
+  const [newDogs, setNewDogs] = useState<any[]>([]);
   const timerRef = useRef<number | null>(null);
   const headerRef = useRef<HTMLElement | null>(null);
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get API URL for profile pictures
   const getApiUrl = () => {
@@ -24,6 +30,79 @@ const Header: React.FC = () => {
       return `http://${window.location.hostname}:3001`;
     }
     return 'http://172.20.10.2:3001';
+  };
+
+  // Fetch new dogs since last visit
+  const fetchNewDogs = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    const apiUrl = getApiUrl();
+    
+    // Get current user from localStorage to avoid dependency issues
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (!currentUser || !currentUser.lastVisit) {
+      console.log('[NOTIFICATION] No user or lastVisit found');
+      return;
+    }
+
+    try {
+      const lastVisit = new Date(currentUser.lastVisit).toISOString();
+      
+      const response = await fetch(`${apiUrl}/api/dogs/new-since/${lastVisit}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const dogs = await response.json();
+        setNewDogs(dogs);
+        setNewDogsCount(dogs.length);
+        console.log('[NOTIFICATION] New dogs count:', dogs.length);
+      }
+    } catch (error) {
+      console.error('[NOTIFICATION] Error fetching new dogs:', error);
+    }
+  }, [getApiUrl]);
+
+  // Update last visit timestamp
+  const updateLastVisit = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const apiUrl = getApiUrl();
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/users/last-visit`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[NOTIFICATION] Last visit updated:', data.lastVisit);
+        
+        // Update user in context
+        if (user) {
+          updateUser({
+            ...user,
+            lastVisit: data.lastVisit
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[NOTIFICATION] Error updating last visit:', error);
+    }
+  }, [user, getApiUrl, updateUser]);
+
+  // Handle notification bell click
+  const handleNotificationClick = () => {
+    setShowNewDogsModal(true);
+    // Update last visit when user opens notification
+    updateLastVisit();
   };
 
   const checkHealth = useCallback(async () => {
@@ -47,6 +126,28 @@ const Header: React.FC = () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
     };
   }, [checkHealth]);
+
+  // Start polling for new dogs
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log('[NOTIFICATION] Starting polling for new dogs');
+      // Initial fetch
+      fetchNewDogs();
+      
+      // Poll every 5 minutes
+      pollingRef.current = setInterval(() => {
+        console.log('[NOTIFICATION] Polling for new dogs...');
+        fetchNewDogs();
+      }, 5 * 60 * 1000);
+    }
+
+    return () => {
+      if (pollingRef.current) {
+        console.log('[NOTIFICATION] Cleaning up polling interval');
+        clearInterval(pollingRef.current);
+      }
+    };
+  }, [isAuthenticated, user?._id]); // Only re-run when auth state or user ID changes
 
   // Close expanded panel when clicking outside
   useEffect(() => {
@@ -114,6 +215,9 @@ const Header: React.FC = () => {
             {/* Right: Language Selector and User Info */}
             <div className="header-right-inner">
               <LanguageSelector />
+              <div className="notification-wrapper">
+                <NotificationBell count={newDogsCount} onClick={handleNotificationClick} />
+              </div>
               {user && (
                 <div className="header-user-info-inner" onClick={e => { e.stopPropagation(); setIsExpanded(!isExpanded); }}>
                   <img
@@ -307,6 +411,18 @@ const Header: React.FC = () => {
           onClose={() => {
             setShowProfileModal(false);
           }} 
+        />
+      )}
+
+      {/* New Dogs Notification Modal */}
+      {showNewDogsModal && (
+        <NewDogsModal
+          isOpen={showNewDogsModal}
+          onClose={() => {
+            setShowNewDogsModal(false);
+            setNewDogsCount(0);
+          }}
+          dogs={newDogs}
         />
       )}
     </>

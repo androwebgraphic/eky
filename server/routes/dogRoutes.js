@@ -3,8 +3,8 @@ const multer = require('multer');
 const auth = require('../middleware/auth.js');
 const authMiddleware = auth;
 const { isAdmin, isSuperAdmin } = auth;
-const { createDog, getDogById, updateDog, deleteDog, likeDog, unlikeDog, confirmAdoption, getPendingAdoptions, listDogs, cancelAdoption, adoptRequest } = require('../controllers/dogController.js');
-console.log('dogController:', { createDog, getDogById, updateDog, deleteDog, likeDog, unlikeDog, confirmAdoption, getPendingAdoptions, listDogs, cancelAdoption, adoptRequest });
+const { createDog, getDogById, updateDog, deleteDog, likeDog, unlikeDog, confirmAdoption, getPendingAdoptions, listDogs, cancelAdoption, adoptRequest, getNewDogsSince } = require('../controllers/dogController.js');
+console.log('dogController:', { createDog, getDogById, updateDog, deleteDog, likeDog, unlikeDog, confirmAdoption, getPendingAdoptions, listDogs, cancelAdoption, adoptRequest, getNewDogsSince });
 const router = express.Router();
 
 // Remove PATCH route without cpUpload (multer)
@@ -30,6 +30,7 @@ const cpUpload = upload.fields([
 
 // Specific routes first (must come before /:id routes)
 router.get('/', listDogs);
+router.get('/new-since/:lastVisit', authMiddleware, getNewDogsSince);
 router.post('/', authMiddleware, cpUpload, createDog);
 router.post('/confirm-adoption', authMiddleware, confirmAdoption);
 router.get('/pending-adoptions', authMiddleware, getPendingAdoptions);

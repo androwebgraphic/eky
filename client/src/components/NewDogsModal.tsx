@@ -60,13 +60,19 @@ const NewDogsModal: React.FC<NewDogsModalProps> = ({ dogs, isOpen, onClose }) =>
   // Dynamically set 'active' class to trigger CSS transition/opacity
   const overlayClass = `modal-overlay ${isVisible ? 'active' : ''}`;
 
-  return ReactDOM.createPortal(
+    return ReactDOM.createPortal(
     <div className={overlayClass} onClick={handleBackdropClick}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>New Dogs Found!</h2>
-          <button className="modal-close" onClick={onClose} aria-label="Close modal">
-            &#x27;
+          <button
+            onClick={onClose}
+            className="modal-close-btn"
+            aria-label="Close"
+            title="Close"
+            type="button"
+          >
+            <span>×</span>
           </button>
         </div>
         
@@ -96,18 +102,15 @@ const NewDogsModal: React.FC<NewDogsModalProps> = ({ dogs, isOpen, onClose }) =>
                   </div>
                 ))}
               </div>
+              
+              {dogs.length > 0 && (
+                <div className="modal-footer">
+                  <Link to="/dogs" className="btn btn-primary" onClick={onClose}>
+                    View All Dogs
+                  </Link>
+                </div>
+              )}
             </>
-          )}
-        </div>
-
-        <div className="modal-footer">
-          <button className="btn btn-secondary" onClick={onClose}>
-            Close
-          </button>
-          {dogs.length > 0 && (
-            <Link to="/dogs" className="btn btn-primary" onClick={onClose}>
-              View All Dogs
-            </Link>
           )}
         </div>
       </div>

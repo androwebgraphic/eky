@@ -16,6 +16,7 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
 
   const handleUserIconClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (isAuthenticated && user) {
       setShowUserModal(true);
     }
@@ -60,7 +61,6 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('[FOOTER] Search icon clicked');
                 // Always navigate to dog list page with search hash
                 window.location.href = '/psi#search';
               }}

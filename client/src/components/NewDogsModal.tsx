@@ -5,10 +5,11 @@ import '../sass/partials/_modal-styles.scss';
 
 interface NewDogsModalProps {
   dogs: any[];
+  isOpen: boolean;
   onClose: () => void;
 }
 
-const NewDogsModal: React.FC<NewDogsModalProps> = ({ dogs, onClose }) => {
+const NewDogsModal: React.FC<NewDogsModalProps> = ({ dogs, isOpen, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   // Close on Escape key press
@@ -49,7 +50,7 @@ const NewDogsModal: React.FC<NewDogsModalProps> = ({ dogs, onClose }) => {
     }
   };
 
-  if (dogs.length === 0) return null;
+  if (!isOpen || dogs.length === 0) return null;
 
   // Dynamically set 'active' class to trigger CSS transition/opacity
   const overlayClass = `modal-overlay ${isVisible ? 'active' : ''}`;
@@ -60,7 +61,6 @@ const NewDogsModal: React.FC<NewDogsModalProps> = ({ dogs, onClose }) => {
         <div className="modal-header">
           <h2>New Dogs Found!</h2>
           <button className="modal-close" onClick={onClose} aria-label="Close modal">
-            {/* FIX: Use HTML entity for X instead of SCSS syntax */}
             &#x27;
           </button>
         </div>
@@ -94,7 +94,8 @@ const NewDogsModal: React.FC<NewDogsModalProps> = ({ dogs, onClose }) => {
             View All Dogs
           </Link>
         </div>
-      </div>,
+      </div>
+    </div>,
     document.body
   );
 };

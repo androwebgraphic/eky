@@ -4,20 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import '../css/modal.css';
 
-// Portal container for modal
-const modalRoot = document.getElementById('modal-root') || (() => {
-  const root = document.createElement('div');
-  root.id = 'modal-root';
-  // Portal root should NOT block clicks - only modal overlay should
-  root.style.position = 'absolute';
-  root.style.top = '0';
-  root.style.left = '0';
-  root.style.zIndex = '0';
-  root.style.pointerEvents = 'none';
-  document.body.appendChild(root);
-  return root;
-})();
-
 interface User {
   id?: string;
   _id?: string;
@@ -43,28 +29,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>('');
   
-  // Helper to get full image URL (robust with aggressive cache busting for Safari)
-  const getProfileImageUrl = (profilePicture: string | undefined, cacheBuster?: string) => {
-    if (!profilePicture) return "../img/androcolored-80x80.jpg";
-    
-    // Ensure path starts with /
-    let url = profilePicture.startsWith('/') ? profilePicture : '/' + profilePicture;
-    
-    // Always use API base for /uploads/ and /u/ paths
-    if (url.startsWith('/uploads/') || url.startsWith('/u/')) {
-      const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-      const fullUrl = apiBase + url;
-      // Aggressive cache busting for mobile Safari: use cache buster only (no dynamic Date.now())
-      if (cacheBuster) {
-        return `${fullUrl}?v=${cacheBuster}`;
-      }
-      return fullUrl;
-    }
-    // If already absolute URL, return as is
-    if (/^https?:\/\//.test(url)) return url;
-    // Fallback to placeholder
-    return '../img/androcolored-80x80.jpg';
-  };
   const [formData, setFormData] = useState({
      name: typedUser?.name || '',
      email: typedUser?.email || '',
@@ -73,17 +37,23 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Used to force re-render after profile update
   const [profilePicKey, setProfilePicKey] = useState(0);
   const [success, setSuccess] = useState<string | null>(null);
 
-
-
-
-
-
-
+  const getProfileImageUrl = (profilePicture: string | undefined, cacheBuster?: string) => {
+    if (!profilePicture) return "../img/androcolored-80x80.jpg";
+    let url = profilePicture.startsWith('/') ? profilePicture : '/' + profilePicture;
+    if (url.startsWith('/uploads/') || url.startsWith('/u/')) {
+      const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const fullUrl = apiBase + url;
+      if (cacheBuster) {
+        return `${fullUrl}?v=${cacheBuster}`;
+      }
+      return fullUrl;
+    }
+    if (/^https?:\/\//.test(url)) return url;
+    return '../img/androcolored-80x80.jpg';
+  };
 
   const loadWishlist = React.useCallback(async () => {
     setLoadingWishlist(true);
@@ -92,12 +62,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     setLoadingWishlist(false);
   }, [getWishlist]);
 
-  // Load wishlist when modal opens and wishlist tab is active
   React.useEffect(() => {
     if (isOpen) {
       loadWishlist();
     }
-    // Reset form data when modal opens
     if (isOpen && user) {
       setFormData({
           name: typedUser.name || '',
@@ -116,7 +84,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       setError(null);
       setSuccess(null);
     }
-    // Listen for wishlist-updated events (from DogList add)
     const handler = (e: any) => {
       if (e.detail && Array.isArray(e.detail.wishlist)) {
         setWishlist(e.detail.wishlist);
@@ -124,8 +91,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     };
     window.addEventListener('wishlist-updated', handler);
     return () => window.removeEventListener('wishlist-updated', handler);
-    // Only re-run when modal opens/closes or user ID changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, typedUser?._id]);
 
   const handleModalClose = React.useCallback(() => {
@@ -136,7 +101,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     onClose();
   }, [onClose]);
 
-  // Handle escape key to close modal
   React.useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isOpen) {
@@ -144,7 +108,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         handleModalClose();
       }
     };
-
     if (isOpen) {
       document.addEventListener('keydown', handleEscapeKey);
       return () => {
@@ -153,7 +116,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     }
   }, [isOpen, handleModalClose]);
 
-  // Reset state when modal closes
   React.useEffect(() => {
     if (!isOpen) {
       setIsEditing(false);
@@ -164,39 +126,26 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     }
   }, [isOpen]);
 
-  // Prevent body scrolling when modal is open
   React.useEffect(() => {
     if (isOpen) {
-      // Prevent body scroll
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
       document.body.style.height = '100%';
-      
-      // Store scroll position
       const scrollY = window.scrollY;
       document.body.dataset.scrollY = scrollY.toString();
-      
-      // Prevent touch scrolling on mobile
       document.body.style.touchAction = 'none';
     } else {
-      // Restore body scroll
       const scrollY = document.body.dataset.scrollY || '0';
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
       document.body.style.height = '';
       document.body.style.touchAction = '';
-      
-      // Restore scroll position
       window.scrollTo(0, parseInt(scrollY, 10));
-      
-      // Clear stored scroll position
       delete document.body.dataset.scrollY;
     }
-    
     return () => {
-      // Cleanup when modal unmounts
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
@@ -206,11 +155,17 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     };
   }, [isOpen]);
 
-
-  // Don't render if modal is not open - MOVED AFTER ALL HOOKS
   if (!isOpen) {
     return null;
   }
+
+  const getApiUrl = () => {
+    if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return `http://${window.location.hostname}:3001`;
+    }
+    return `http://172.20.10.2:3001`;
+  };
 
   const handleAdopt = async (dogId: string) => {
     try {
@@ -244,7 +199,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
 
   const handlePasswordReset = async () => {
     if (!user?.email) return;
-    
     try {
       const API_URL = getApiUrl();
       const response = await fetch(`${API_URL}/api/users/password-reset`, {
@@ -254,9 +208,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         },
         body: JSON.stringify({ email: user.email }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         setSuccess('Password reset link sent to your email!');
         setError(null);
@@ -271,15 +223,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     }
   };
 
-  // Get API URL based on environment
-  const getApiUrl = () => {
-    if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return `http://${window.location.hostname}:3001`;
-    }
-    return `http://172.20.10.2:3001`;
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -288,108 +231,50 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
   };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
-    console.log('[PROFILE UPDATE DEBUG] handleUpdateProfile called');
-    if (profilePicture) {
-      console.log('[PROFILE UPDATE DEBUG] Uploading file:', profilePicture.name, 'type:', profilePicture.type);
-    }
     e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(null);
-
     try {
       const API_URL = getApiUrl();
-      
-      // Create FormData for file upload
       const uploadFormData = new FormData();
       uploadFormData.append('name', formData.name);
       uploadFormData.append('username', formData.username);
       uploadFormData.append('email', formData.email);
       uploadFormData.append('phone', formData.phone);
-      
-      // Add profile picture if selected
       if (profilePicture) {
         uploadFormData.append('profilePicture', profilePicture);
-        console.log('Profile picture selected:', profilePicture.name, profilePicture.size, profilePicture.type);
       }
-      
-      console.log('Updating profile with form data:', {
-        name: formData.name,
-        username: formData.username,
-        email: formData.email,
-        hasProfilePicture: !!profilePicture
+      const response = await fetch(`${API_URL}/api/users/profile`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: uploadFormData,
       });
-      
-      let response, data;
-      try {
-        response = await fetch(`${API_URL}/api/users/profile`, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          body: uploadFormData,
-        });
-        console.log('Response status:', response.status);
-        data = await response.json();
-        console.log('[PROFILE UPDATE DEBUG] Full server response:', data);
-        if (data && data.user) {
-          console.log('[PROFILE UPDATE DEBUG] Returned user.profilePicture:', data.user.profilePicture);
-        }
-      } catch (err) {
-        console.error('[PROFILE UPDATE DEBUG] Error during fetch:', err);
-        return;
-      }
-
+      const data = await response.json();
       if (response.ok) {
         setSuccess('Profile updated successfully!');
-        
-        // Generate a unique cache buster timestamp to force browser to reload image
         const cacheBuster = Date.now().toString();
-        const randomString = Math.random().toString(36).substring(7);
-        
-        // Create new user object with server response + cache buster
-        // Important: server response is source of truth, only add cache buster
         const updatedUser = {
           ...data.user,
-          _profilePicCacheBuster: cacheBuster + '-' + randomString
+          _profilePicCacheBuster: cacheBuster
         };
-        
-        console.log('[PROFILE UPDATE DEBUG] Updated user object:', updatedUser);
-        console.log('[PROFILE UPDATE DEBUG] Cache buster:', cacheBuster + '-' + randomString);
-        console.log('[PROFILE UPDATE DEBUG] Profile picture path:', updatedUser.profilePicture);
-        
-        // Force complete re-render with new user object
         updateUser(updatedUser);
-        
-        // Force component to remount by changing key (TWICE for more aggressive update)
         setProfilePicKey(Date.now());
-        setTimeout(() => setProfilePicKey(Date.now() + 1), 50);
-        
-        // Force localStorage update
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        
-        // Reset profile picture state
         setProfilePicture(null);
-        // Clear the preview so it will use the new server image URL from user object
         setProfilePicturePreview('');
-        
-        // Update form data to reflect changes
         setFormData({
           name: data.user.name,
           email: data.user.email,
           username: data.user.username,
           phone: data.user.phone || ''
         });
-        
-        // Force update the profilePicKey to ensure the image component re-renders with new URL
-        setProfilePicKey(Date.now());
-        
-        // Close editing mode after successful update
         setTimeout(() => {
           setIsEditing(false);
         }, 500);
       } else {
-        console.error('Profile update failed:', data);
         setError(data.message || 'Failed to update profile');
       }
     } catch (error) {
@@ -404,10 +289,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
       const API_URL = getApiUrl();
       const response = await fetch(`${API_URL}/api/users/profile`, {
@@ -416,7 +299,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
           'Authorization': `Bearer ${token}`
         },
       });
-
       if (response.ok) {
         logout();
         onClose();
@@ -432,12 +314,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     }
   };
 
-  // Render modal using portal to escape #Wrap container
   return ReactDOM.createPortal(
     <div 
       className="modal-overlay"
       onClick={(e) => {
-        // Close modal when clicking on backdrop
         if (e.target === e.currentTarget) {
           console.log('Backdrop clicked, closing modal');
           handleModalClose();
@@ -447,7 +327,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       <div 
         className="modal"
         onClick={(e) => {
-          // Prevent modal from closing when clicking inside the modal
           e.stopPropagation();
         }}
       >
@@ -468,7 +347,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
           </button>
         </div>
 
-        {/* Tab Navigation */}
         <div className="modal-tabs">
           <button
             onClick={() => setActiveTab('profile')}
@@ -490,7 +368,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
               {error}
             </div>
           )}
-
           {success && (
             <div className="modal-alert success">
               {success}
@@ -507,63 +384,18 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   alt={user && user.username ? `${user.username}'s profile` : 'User profile'} 
                   className="profile-avatar-small"
                   onError={(e) => {
-                    console.error('[IMAGE ERROR] Failed to load profile image:', {
-                      src: (e.target as HTMLImageElement).src,
-                      preview: !!profilePicturePreview,
-                      userPic: (user as any)?.profilePicture,
-                      cacheBuster: (user as any)?._profilePicCacheBuster
-                    });
-                    // Fallback to default image
                     (e.target as HTMLImageElement).src = "/img/androcolored-80x80.jpg";
                   }}
-                  onClick={() => {
-                    // Force reload by updating cache buster
-                    console.log('[REFRESH CLICK] Current state:', {
-                      profilePicturePreview: !!profilePicturePreview,
-                      userPic: (user as any)?.profilePicture,
-                      cacheBuster: (user as any)?._profilePicCacheBuster
-                    });
-                    const newCacheBuster = Date.now().toString() + '-' + Math.random().toString(36).substring(7);
-                    const updatedUser = {
-                      ...user,
-                      _profilePicCacheBuster: newCacheBuster
-                    };
-                    console.log('[REFRESH CLICK] New cache buster:', newCacheBuster);
-                    updateUser(updatedUser);
-                    setProfilePicKey(Date.now());
-                  }}
-                  style={{ cursor: 'pointer' }}
-                  title="Tap to refresh profile picture"
                 />
                 <div className="profile-info-text">
                   <h3>{user ? user.username : ''}</h3>
                   {user && <span className="online-status">{t('userProfile.online')}</span>}
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  // Force reload by updating cache buster
-                  console.log('[REFRESH] Current profilePicture:', (user as any)?.profilePicture);
-                  const newCacheBuster = Date.now().toString() + '-' + Math.random().toString(36).substring(7);
-                  console.log('[REFRESH] New cache buster:', newCacheBuster);
-                  const updatedUser = {
-                    ...user,
-                    _profilePicCacheBuster: newCacheBuster
-                  };
-                  console.log('[REFRESH] New image URL:', getProfileImageUrl((user as any)?.profilePicture, newCacheBuster));
-                  updateUser(updatedUser);
-                  setProfilePicKey(Date.now());
-                }}
-                className="modal-btn btn-secondary"
-                style={{ fontSize: '0.8em', padding: '5px 10px' }}
-              >
-                🔄 Refresh Image
-              </button>
             </div>
 
             {isEditing ? (
               <form onSubmit={handleUpdateProfile}>
-                {/* Profile Picture Section */}
                 <div className="profile-picture-section">
                   <div className="profile-picture-wrapper">
                     <img 
@@ -574,11 +406,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                     />
                   </div>
                   <div>
-                    <label
-                      htmlFor="profilePictureInput"
-                      className="profile-upload-label"
-                      tabIndex={0}
-                    >
+                    <label htmlFor="profilePictureInput" className="profile-upload-label" tabIndex={0}>
                       <input
                         type="file"
                         accept="image/*"
@@ -595,94 +423,38 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                 </div>
 
                 <div className="modal-form-group">
-                  <label>
-                    {t('userProfile.fullName')}
-                  </label>
-                  <input
-                    type="text"
-                    id="profileNameInput"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    autoComplete="name"
-                    autoFocus
-                  />
+                  <label>{t('userProfile.fullName')}</label>
+                  <input type="text" id="profileNameInput" name="name" value={formData.name} onChange={handleInputChange} required autoComplete="name" autoFocus />
                 </div>
 
                 <div className="modal-form-group">
-                  <label>
-                    {t('userProfile.phone')}
-                  </label>
-                  <input
-                    type="text"
-                    id="profilePhone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    autoComplete="tel"
-                  />
+                  <label>{t('userProfile.phone')}</label>
+                  <input type="text" id="profilePhone" name="phone" value={formData.phone} onChange={handleInputChange} autoComplete="tel" />
                 </div>
 
                 <div className="modal-form-group">
-                  <label>
-                    {t('userProfile.email')}
-                  </label>
-                  <input
-                    type="email"
-                    id="profileEmailInput"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    autoComplete="email"
-                  />
+                  <label>{t('userProfile.email')}</label>
+                  <input type="email" id="profileEmailInput" name="email" value={formData.email} onChange={handleInputChange} required autoComplete="email" />
                 </div>
 
                 <div className="modal-form-group">
-                  <label>
-                    {t('userProfile.username')}
-                  </label>
-                  <input
-                    type="text"
-                    id="profileUsernameInput"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    required
-                    autoComplete="username"
-                  />
+                  <label>{t('userProfile.username')}</label>
+                  <input type="text" id="profileUsernameInput" name="username" value={formData.username} onChange={handleInputChange} required autoComplete="username" />
                 </div>
 
-                {/* Password Change Section */}
                 <div className="password-section">
                   <h4>{t('userProfile.password')}</h4>
                   <p>{t('userProfile.passwordInfo')}</p>
-                  <button
-                    type="button"
-                    onClick={handlePasswordReset}
-                    className="modal-btn btn-info"
-                  >
+                  <button type="button" onClick={handlePasswordReset} className="modal-btn btn-info">
                     🔑 {t('userProfile.sendPasswordReset')}
                   </button>
                 </div>
 
                 <div className="modal-button-group">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="modal-btn btn-primary"
-                  >
+                  <button type="submit" disabled={loading} className="modal-btn btn-primary">
                     {loading ? t('userProfile.saving') : t('userProfile.saveChanges')}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      console.log('Cancel button clicked');
-                      setIsEditing(false);
-                    }}
-                    className="modal-btn btn-secondary"
-                  >
+                  <button type="button" onClick={() => setIsEditing(false)} className="modal-btn btn-secondary">
                     {t('userProfile.cancel')}
                   </button>
                 </div>
@@ -702,17 +474,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   <span className="field-label">{t('userProfile.phone')}:</span> {typedUser ? typedUser.phone : ''}
                 </div>
                 <div className="modal-button-group">
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="modal-btn btn-primary"
-                  >
+                  <button onClick={() => setIsEditing(true)} className="modal-btn btn-primary">
                     {t('userProfile.editProfile')}
                   </button>
-                  <button
-                    onClick={handleDeleteAccount}
-                    disabled={loading}
-                    className="modal-btn btn-danger"
-                  >
+                  <button onClick={handleDeleteAccount} disabled={loading} className="modal-btn btn-danger">
                     {loading ? t('userProfile.deleting') : t('userProfile.deleteAccount')}
                   </button>
                 </div>
@@ -721,11 +486,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
           </>
         )}
 
-        {/* Wishlist Tab Content */}
         {activeTab === 'wishlist' && (
           <div>
             <h3 className="wishlist-title">{t('userProfile.myWishlist')} ({wishlist.length})</h3>
-            
             {loadingWishlist ? (
               <div className="wishlist-loading">{t('userProfile.loadingWishlist')}</div>
             ) : wishlist.length === 0 ? (
@@ -753,70 +516,38 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                     />
                     <div className="wishlist-dog-info">
                       <h4>{dog.name}</h4>
-                      <p>
-                        {dog.breed} • {dog.age} years • {dog.size} • {dog.location || dog.place}
-                      </p>
-                      {dog.description && (
-                        <p className="dog-description">
-                          {dog.description.length > 100 ? dog.description.substring(0, 100) + '...' : dog.description}
-                        </p>
-                      )}
+                      <p>{dog.breed} • {dog.age} years • {dog.size} • {dog.location || dog.place}</p>
                     </div>
                     <div className="wishlist-dog-actions">
                       {(dog.adoptionStatus === 'pending' && dog.adoptionQueue && user && dog.adoptionQueue.adopter === user._id) ? (
-                        <button
-                          onClick={async () => {
-                            try {
-                              const API_URL = getApiUrl();
-                              const resp = await fetch(`${API_URL}/api/dogs/${dog._id}/adopt-cancel`, {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                  'Authorization': token ? `Bearer ${token}` : ''
-                                },
-                                body: JSON.stringify({ reason: '' })
-                              });
-                              const data = await resp.json();
-                              if (!resp.ok) throw new Error(data.message || 'Error');
-                              await loadWishlist();
-                            } catch (e) {
-                              alert(e.message || 'Error');
-                            }
-                          }}
-                          className="wishlist-action-btn btn-cancel"
-                        >
+                        <button onClick={async () => {
+                          try {
+                            const API_URL = getApiUrl();
+                            const resp = await fetch(`${API_URL}/api/dogs/${dog._id}/adopt-cancel`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' },
+                              body: JSON.stringify({ reason: '' })
+                            });
+                            const data = await resp.json();
+                            if (!resp.ok) throw new Error(data.message || 'Error');
+                            await loadWishlist();
+                          } catch (e) { alert(e.message || 'Error'); }
+                        }} className="wishlist-action-btn btn-cancel">
                           {t('button.cancelAdoption') || 'Odustani od posvajanja'}
                         </button>
                       ) : dog.adoptionStatus === 'pending' ? (
-                        <button
-                          disabled
-                          className="wishlist-action-btn btn-disabled"
-                        >
+                        <button disabled className="wishlist-action-btn btn-disabled">
                           {t('button.requested') || 'Zahtjev poslan'}
                         </button>
                       ) : (
-                        <button
-                          onClick={() => {
-                            handleAdopt(dog._id);
-                          }}
-                          className="wishlist-action-btn btn-adopt"
-                        >
+                        <button onClick={() => handleAdopt(dog._id)} className="wishlist-action-btn btn-adopt">
                           🏠 {t('button.adopt')}
                         </button>
                       )}
-                      <button
-                        onClick={async () => {
-                          setWishlist(prev => prev.filter((d: any) => d._id !== dog._id));
-                          await removeFromWishlist(dog._id);
-                          if (user) {
-                            updateUser({
-                              ...user,
-                              wishlist: (user.wishlist || []).filter(id => id !== dog._id)
-                            });
-                          }
-                        }}
-                        className="wishlist-action-btn btn-remove"
-                      >
+                      <button onClick={async () => {
+                        setWishlist(prev => prev.filter((d: any) => d._id !== dog._id));
+                        await removeFromWishlist(dog._id);
+                      }} className="wishlist-action-btn btn-remove">
                         <span className="heart-icon">💔</span> {t('button.removeFromList', 'Entfernen')}
                       </button>
                     </div>
@@ -829,7 +560,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
         </div>
       </div>
     </div>,
-    modalRoot
+    document.body
   );
 };
 

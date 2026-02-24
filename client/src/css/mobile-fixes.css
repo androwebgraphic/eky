@@ -215,14 +215,8 @@ pre {
   cursor: pointer !important;
 }
 
-/* Ensure scrollable content doesn't block footer clicks */
-.scrollable-content {
-  pointer-events: none;
-}
-
-.scrollable-content > * {
-  pointer-events: auto;
-}
+/* REMOVED: pointer-events: none on .scrollable-content was blocking all clicks */
+/* This was preventing users from clicking on buttons, inputs, and other elements */
 
 /* Mobile-specific grid fixes */
 .grid, .flex, .flexbox {

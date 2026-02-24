@@ -22,11 +22,11 @@ const getApiUrl = () => {
 const detailsModalRoot = document.getElementById('doglist-details-root') || (() => {
   const root = document.createElement('div');
   root.id = 'doglist-details-root';
-  root.style.position = 'absolute';
+  root.style.position = 'fixed';
   root.style.top = '0';
   root.style.left = '0';
-  root.style.zIndex = '0';
-  root.style.pointerEvents = 'none';
+  root.style.zIndex = '2147483647';
+  root.style.pointerEvents = 'auto';
   document.body.appendChild(root);
   return root;
 })();
@@ -34,11 +34,11 @@ const detailsModalRoot = document.getElementById('doglist-details-root') || (() 
 const mapModalRoot = document.getElementById('doglist-map-root') || (() => {
   const root = document.createElement('div');
   root.id = 'doglist-map-root';
-  root.style.position = 'absolute';
+  root.style.position = 'fixed';
   root.style.top = '0';
   root.style.left = '0';
-  root.style.zIndex = '0';
-  root.style.pointerEvents = 'none';
+  root.style.zIndex = '2147483647';
+  root.style.pointerEvents = 'auto';
   document.body.appendChild(root);
   return root;
 })();

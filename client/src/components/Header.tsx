@@ -219,7 +219,15 @@ const Header: React.FC = () => {
                 <NotificationBell count={newDogsCount} onClick={handleNotificationClick} />
               </div>
               {user && (
-                <div className="header-user-info-inner" onClick={e => { e.stopPropagation(); setIsExpanded(!isExpanded); }}>
+                <div 
+                  className="header-user-info-inner"
+                  style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+                  onClick={e => { 
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowProfileModal(true);
+                  }}
+                >
                   <img
                     key={user._profilePicCacheBuster || 'default'}
                     src={
@@ -238,19 +246,14 @@ const Header: React.FC = () => {
                     alt={t('userHeader.avatarAlt')}
                     className="header-avatar-inner"
                     onError={e => { 
-                      console.error('Failed to load profile picture:', user.profilePicture);
                       (e.target as HTMLImageElement).src = '../img/androcolored-80x80.jpg'; 
                     }}
-                    onClick={() => {
-                      // Force reload on click
-                      const newCacheBuster = Date.now().toString() + '-' + Math.random().toString(36).substring(7);
-                      updateUser({
-                        ...user,
-                        _profilePicCacheBuster: newCacheBuster
-                      });
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Open modal on image click
+                      setShowProfileModal(true);
                     }}
-                    style={{ cursor: 'pointer' }}
-                    title="Tap to refresh"
+                    style={{ pointerEvents: 'none' }}
                   />
                   <span className="header-username-inner">{user.username}</span>
                   <span className="header-online-dot">●</span>

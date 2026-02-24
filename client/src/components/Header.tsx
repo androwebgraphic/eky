@@ -19,6 +19,7 @@ const Header: React.FC = () => {
   const [newDogsCount, setNewDogsCount] = useState(0);
   const [showNewDogsModal, setShowNewDogsModal] = useState(false);
   const [newDogs, setNewDogs] = useState<any[]>([]);
+  const [newDogsForModal, setNewDogsForModal] = useState<any[]>([]);
   const timerRef = useRef<number | null>(null);
   const headerRef = useRef<HTMLElement | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -100,9 +101,10 @@ const Header: React.FC = () => {
 
   // Handle notification bell click
   const handleNotificationClick = () => {
+    // Store the current new dogs in a separate state for the modal
+    setNewDogsForModal([...newDogs]);
     setShowNewDogsModal(true);
-    // Update last visit when user opens notification
-    updateLastVisit();
+    // Don't update lastVisit here - update it when modal closes
   };
 
   const checkHealth = useCallback(async () => {
@@ -225,7 +227,7 @@ const Header: React.FC = () => {
                   onClick={e => { 
                     e.preventDefault();
                     e.stopPropagation();
-                    setShowProfileModal(true);
+                    setIsExpanded(!isExpanded);
                   }}
                 >
                   <img
@@ -248,12 +250,6 @@ const Header: React.FC = () => {
                     onError={e => { 
                       (e.target as HTMLImageElement).src = '../img/androcolored-80x80.jpg'; 
                     }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Open modal on image click
-                      setShowProfileModal(true);
-                    }}
-                    style={{ pointerEvents: 'none' }}
                   />
                   <span className="header-username-inner">{user.username}</span>
                   <span className="header-online-dot">●</span>
@@ -424,8 +420,11 @@ const Header: React.FC = () => {
           onClose={() => {
             setShowNewDogsModal(false);
             setNewDogsCount(0);
+            setNewDogsForModal([]);
+            // Update lastVisit after user has viewed and closed the modal
+            updateLastVisit();
           }}
-          dogs={newDogs}
+          dogs={newDogsForModal}
         />
       )}
     </>

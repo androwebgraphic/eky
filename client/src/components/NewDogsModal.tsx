@@ -25,12 +25,17 @@ const NewDogsModal: React.FC<NewDogsModalProps> = ({ dogs, isOpen, onClose }) =>
 
   // Handle visibility for transition/active class
   useEffect(() => {
-    setIsVisible(true);
-    return () => setIsVisible(false);
-  }, []);
+    if (isOpen) {
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
+  }, [isOpen]);
 
   // Handle Body Scroll Lock with safety check
   useEffect(() => {
+    if (!isOpen) return;
+    
     const isCurrentlyHidden = document.body.style.overflow === 'hidden';
     
     if (!isCurrentlyHidden) {
@@ -42,7 +47,7 @@ const NewDogsModal: React.FC<NewDogsModalProps> = ({ dogs, isOpen, onClose }) =>
         document.body.style.overflow = 'unset';
       }
     };
-  }, []);
+  }, [isOpen]);
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -50,7 +55,7 @@ const NewDogsModal: React.FC<NewDogsModalProps> = ({ dogs, isOpen, onClose }) =>
     }
   };
 
-  if (!isOpen || dogs.length === 0) return null;
+  if (!isOpen) return null;
 
   // Dynamically set 'active' class to trigger CSS transition/opacity
   const overlayClass = `modal-overlay ${isVisible ? 'active' : ''}`;
@@ -66,33 +71,44 @@ const NewDogsModal: React.FC<NewDogsModalProps> = ({ dogs, isOpen, onClose }) =>
         </div>
         
         <div className="modal-body">
-          <p>You have {dogs.length} new dog{dogs.length !== 1 ? 's' : ''} waiting for you:</p>
-          
-          <div className="dogs-grid">
-            {dogs.map(dog => (
-              <div key={dog._id} className="dog-card-mini">
-                <img 
-                  src={dog.thumbnail ? `http://localhost:3001${dog.thumbnail.url}` : '/placeholder-dog.jpg'} 
-                  alt={dog.name} 
-                  className="dog-thumbnail"
-                />
-                <div className="dog-info-mini">
-                  <h3>{dog.name}</h3>
-                  <p>{dog.breed}</p>
-                  <p>{dog.location}</p>
-                </div>
+          {dogs.length === 0 ? (
+            <p>No new dogs since your last visit.</p>
+          ) : (
+            <>
+              <p>You have {dogs.length} new dog{dogs.length !== 1 ? 's' : ''} waiting for you:</p>
+              
+              <div className="dogs-grid">
+                {dogs.map(dog => (
+                  <div key={dog._id} className="dog-card-mini">
+                    <img 
+                      src={dog.thumbnail ? `http://localhost:3001${dog.thumbnail.url}` : '/placeholder-dog.jpg'} 
+                      alt={dog.name} 
+                      className="dog-thumbnail"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/placeholder-dog.jpg';
+                      }}
+                    />
+                    <div className="dog-info-mini">
+                      <h3>{dog.name}</h3>
+                      <p>{dog.breed}</p>
+                      <p>{dog.location || dog.place}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </div>
 
         <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onClose}>
             Close
           </button>
-          <Link to="/dogs" className="btn btn-primary" onClick={onClose}>
-            View All Dogs
-          </Link>
+          {dogs.length > 0 && (
+            <Link to="/dogs" className="btn btn-primary" onClick={onClose}>
+              View All Dogs
+            </Link>
+          )}
         </div>
       </div>
     </div>,

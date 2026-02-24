@@ -47,7 +47,7 @@ const Search: React.FC<SearchProps> = ({
   return (
     <div className="search-container">
       {/* Basic search row */}
-      <div className="search-row">
+      <div className="search-row" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
         <div style={{ flex: '1', minWidth: '150px' }}>
           <input 
             type="search" 
@@ -67,7 +67,11 @@ const Search: React.FC<SearchProps> = ({
           style={{
             border: '1px solid #75171a',
             backgroundColor: '#f5f5f0',
-            color: '#75171a'
+            color: '#75171a',
+            padding: '6px 12px',
+            fontSize: '13px',
+            height: '38px',
+            minHeight: '38px'
           }}
         >
           {showAdvanced ? t('search.hideAdvanced') || 'Hide Advanced' : t('search.showAdvanced') || 'Advanced Search'}
@@ -81,7 +85,11 @@ const Search: React.FC<SearchProps> = ({
             style={{
               border: '1px solid #e74c3c',
               backgroundColor: '#e74c3c',
-              color: '#fff'
+              color: '#fff',
+              padding: '6px 12px',
+              fontSize: '13px',
+              height: '38px',
+              minHeight: '38px'
             }}
           >
             {t('search.clear') || 'Clear'}

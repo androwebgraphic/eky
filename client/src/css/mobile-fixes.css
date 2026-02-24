@@ -406,6 +406,42 @@ select {
   main {
     margin-bottom: 100px !important;
   }
+
+  /* Make advanced search buttons smaller on mobile */
+  .search-btn {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Display filter options next to each other on mobile */
+  .search-row.advanced {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    align-items: flex-start !important;
+    overflow-x: auto !important;
+  }
+
+  .search-filter-group {
+    flex: 1 !important;
+    min-width: 100px !important;
+    max-width: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .search-filter-label {
+    display: block !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    margin-bottom: 4px !important;
+    color: #75171a !important;
+    white-space: nowrap !important;
+  }
 }
 
 /* Hide footer labels on mobile screens (<769px) */

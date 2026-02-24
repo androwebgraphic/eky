@@ -24,7 +24,7 @@ const adoptionRoutes = require('./routes/adoptionRoutes.js'); // <-- Add adoptio
 const app = express();
 
 // 3. Set up CORS middleware FIRST
-const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://172.20.10.2:3000', 'http://172.20.10.2:3000', 'http://192.168.1.100:3000', 'http://192.168.1.100:3000', 'http://192.168.1.100:3001'];
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://172.20.10.2:3000', 'http://172.20.10.2:3001', 'http://192.168.1.100:3000', 'http://192.168.1.100:3001'];
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);

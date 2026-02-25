@@ -88,13 +88,16 @@
 
 // Specific styles for New Dogs Modal Grid
 .dogs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
 
-  // Adjust grid for mobile
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr; // Single column on small screens
+  // Mobile: 3 cards per row, only image
+  @media (max-width: 768px) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 0 -4px;
   }
 }
 
@@ -106,10 +109,32 @@
   border-radius: 8px;
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  color: inherit;
+  padding: 12px;
 
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  &:visited {
+    color: inherit;
+  }
+
+  // Mobile: Only image, 3 per row
+  @media (max-width: 768px) {
+    max-width: calc(33.333% - 6px);
+    flex: 0 0 calc(33.333% - 6px);
+    padding: 4px;
+    border: none;
+    border-radius: 0;
+    margin: 0;
+
+    .dog-info-mini,
+    .dog-actions-mini {
+      display: none;
+    }
   }
 }
 
@@ -117,6 +142,20 @@
   width: 100%;
   height: 150px;
   object-fit: cover;
+
+  // Mobile: Clickable with animation
+  @media (max-width: 768px) {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    object-fit: cover;
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
 }
 
 .dog-info-mini {
@@ -132,6 +171,15 @@
     margin: 0 0 5px;
     font-size: 0.9rem;
     color: #666;
+  }
+}
+
+// Action buttons for desktop
+.dog-actions-mini {
+  margin-top: 8px;
+
+  @media (max-width: 768px) {
+    display: none;
   }
 }
 

@@ -293,11 +293,11 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		<div
 			className="card card-small"
 			style={{
-				maxWidth: window.innerWidth > 768 ? 340 : 420,
-				width: window.innerWidth > 768 ? 340 : 420,
+				maxWidth: window.innerWidth > 900 ? 'none' : 'calc(25% - 6px)',
+				width: window.innerWidth > 900 ? 'auto' : 'calc(25% - 6px)',
 				display: 'flex',
 				flexDirection: 'column',
-				flex: window.innerWidth > 768 ? '0 0 auto' : undefined,
+				flex: window.innerWidth > 900 ? '0 0 auto' : '0 0 calc(25% - 6px)',
 			}}
 		>
 				<div className="card-small-image-wrapper">

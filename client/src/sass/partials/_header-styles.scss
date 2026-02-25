@@ -297,18 +297,22 @@
 .header-content-inner {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
+  height: 60px;
 }
 
 .header-nav-inner {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 15px;
 }
 
 .header-nav-desktop {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 20px;
   flex-shrink: 0;
   position: absolute;
@@ -319,6 +323,7 @@
 .header-right-desktop {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   margin-left: auto;
 }
@@ -341,6 +346,7 @@
 .header-right-inner {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
 }
 
@@ -353,6 +359,7 @@
 .header-user-info-inner {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   cursor: pointer;
   pointer-events: auto !important;
@@ -557,5 +564,200 @@
 
   &:last-child {
     border-bottom: none;
+  }
+}
+
+// Mobile-specific fixes for authenticated header
+@media (max-width: 768px) {
+  .UserHeader {
+    padding: 0 12px !important;
+    min-height: 50px !important;
+    height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-direction: row !important;
+    gap: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .header-content-inner {
+    justify-content: space-between !important;
+    align-items: center !important;
+    height: 50px !important;
+    flex-direction: row !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  // Hide desktop navigation on mobile
+  .header-nav-inner {
+    display: none !important;
+  }
+
+  .header-flex-spacer {
+    flex: 0;
+  }
+
+  .header-right-inner {
+    gap: 8px !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+  }
+
+  // Adjust user info for mobile
+  .header-user-info-inner {
+    gap: 6px;
+    align-items: center !important;
+  }
+
+  .header-avatar-inner {
+    width: 28px;
+    height: 28px;
+  }
+
+  .header-username-inner {
+    font-size: 13px;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 28px;
+    vertical-align: middle;
+  }
+
+  .header-online-dot {
+    font-size: 10px;
+    line-height: 28px;
+    vertical-align: middle;
+  }
+
+  // Mobile hamburger button for authenticated users
+  .authenticated-hamburger-btn {
+    display: flex !important;
+    background: none;
+    border: none;
+    color: #f8f8f8;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    width: 35px;
+    height: 50px;
+    align-items: center !important;
+    justify-content: center;
+    line-height: 1;
+    align-self: center;
+  }
+
+  // Ensure all elements have no vertical margins
+  .header-right-inner > * {
+    margin: 0 !important;
+    vertical-align: middle !important;
+  }
+
+  // Language selector specific fixes
+  .header-right-inner > div:first-child {
+    display: inline-flex !important;
+    align-items: center !important;
+    vertical-align: middle !important;
+    padding: 0 8px;
+    height: 50px !important;
+  }
+
+  // Notification bell wrapper
+  .notification-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center;
+    height: 50px;
+    padding: 0 4px;
+    align-self: center !important;
+  }
+
+  // User info wrapper
+  .header-user-info-inner {
+    gap: 6px;
+    align-items: center !important;
+    height: 50px;
+    padding: 0 8px;
+    margin: 0;
+    align-self: center !important;
+  }
+
+  .header-avatar-inner {
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .header-username-inner {
+    font-size: 13px;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+  }
+
+  .header-online-dot {
+    font-size: 10px;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+  }
+
+  // Mobile menu dropdown for authenticated users
+  .authenticated-mobile-menu {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    right: 0;
+    background-color: #75171a;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    border-bottom: 2px solid #8a2419;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 998;
+  }
+
+  .authenticated-mobile-link {
+    color: #f5f5f5;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 12px;
+    border-bottom: 1px solid #8a2419;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #8a2419;
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  // Adjust dropdown panel for mobile
+  .user-dropdown-panel {
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+  }
+}
+
+// Hide hamburger on desktop
+@media (min-width: 769px) {
+  .authenticated-hamburger-btn {
+    display: none !important;
+  }
+
+  .authenticated-mobile-menu {
+    display: none !important;
   }
 }

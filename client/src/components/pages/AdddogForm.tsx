@@ -533,23 +533,22 @@ const AdddogForm: React.FC = () => {
         <input type="text" id="adddog-name" name="name" autoComplete="name" placeholder={t('adddog.name')} autoFocus {...register('name', { required: true })} />
         {errors.name && <div className="error" role="alert">{t('adddog.name')} is required</div>}
 
-        <label htmlFor="adddog-breed">{t('adddog.breed')}</label>
-        <input 
-          type="text" 
-          id="adddog-breed" 
+        <label htmlFor="breed">{t('fields.breed')}</label>
+        <select 
+          id="breed" 
           name="breed" 
           autoComplete="off" 
-          placeholder={t('adddog.breed')} 
-          list="dog-breeds"
+          className="breed-select"
+          style={{ maxWidth: '150px', width: 'auto', position: 'relative', zIndex: 9999 }}
           {...register('breed')} 
-        />
-        <datalist id="dog-breeds">
+        >
+          <option value="">{t('fields.breed')}</option>
           {DOG_BREEDS.map((breed) => (
             <option key={breed} value={breed}>
               {breed}
             </option>
           ))}
-        </datalist>
+        </select>
 
         <label htmlFor="adddog-color">{t('adddog.color')}</label>
         <input type="text" id="adddog-color" name="color" autoComplete="off" placeholder={t('adddog.color')} {...register('color')} />
@@ -558,7 +557,7 @@ const AdddogForm: React.FC = () => {
         <input type="text" id="adddog-location" name="location" autoComplete="address-level2" placeholder={t('adddog.location')} {...register('location', { required: true })} />
 
         <label htmlFor="adddog-age-category">{t('adddogExtra.ageCategory')}</label>
-        <select {...register('ageCategory')} id="adddog-age-category" name="ageCategory" autoComplete="off" style={{ marginBottom: '8px' }}>
+        <select {...register('ageCategory')} id="adddog-age-category" name="ageCategory" autoComplete="off" style={{ marginBottom: '8px', maxWidth: '150px', width: 'auto', position: 'relative', zIndex: 9999 }}>
           <option value="">{t('adddogExtra.selectAgeCategory')}</option>
           <option value="0.5">{t('adddogExtra.ageCategory.puppy')}</option>
           <option value="2">{t('adddogExtra.ageCategory.youngAdult')}</option>
@@ -572,7 +571,7 @@ const AdddogForm: React.FC = () => {
         <textarea id="adddog-description" name="description" rows={3} cols={30} autoComplete="off" placeholder={t('adddog.description')} {...register('description')} />
 
         <label htmlFor="adddog-size">{t('adddog.size')}</label>
-        <select {...register('size')} id="adddog-size" name="size" autoComplete="off">
+        <select {...register('size')} id="adddog-size" name="size" autoComplete="off" style={{ maxWidth: '150px', width: 'auto', position: 'relative', zIndex: 9999 }}>
           <option value="small">{t('size.small')}</option>
           <option value="medium">{t('size.medium')}</option>
           <option value="large">{t('size.large')}</option>

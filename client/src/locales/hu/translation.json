@@ -339,13 +339,16 @@
     "tooltip": "Új kutyák hozzáadva az utolsó látogatása óta"
   },
   "newDogs": {
-    "title": "Új kutyák hozzáadva",
+    "title": "Új kutyák találtak!",
     "noNewDogs": "Nincsenek új kutyák az utolsó látogatása óta.",
     "close": "Bezárás",
     "ageUnknown": "Ismeretlen",
     "years": "év",
     "minutesAgo": "perce",
     "hoursAgo": "órája",
-    "daysAgo": "napja"
+    "daysAgo": "napja",
+    "waitingForYou_one": "{{count}} új kutya vár rád:",
+    "waitingForYou_other": "{{count}} új kutya vár rád:",
+    "viewAllDogs": "Minden kutya megtekintése"
   }
 }

@@ -132,9 +132,7 @@
     "ageCategory.senior": "Senior (7-10 Jahre)",
     "ageCategory.seniorPlus": "Senior+ (10+ Jahre)"
   },
-  "social": {
-    
-  },
+  "social": {},
   "share": {
     "title": "Mit anderen teilen"
   },
@@ -334,13 +332,16 @@
     "tooltip": "Neue Hunde hinzugefügt seit Ihrem letzten Besuch"
   },
   "newDogs": {
-    "title": "Neue Hunde hinzugefügt",
+    "title": "Neue Hunde gefunden!",
     "noNewDogs": "Keine neuen Hunde seit Ihrem letzten Besuch.",
     "close": "Schließen",
     "ageUnknown": "Unbekannt",
     "years": "Jahre",
     "minutesAgo": "Min. vor",
     "hoursAgo": "Std. vor",
-    "daysAgo": "Tage vor"
+    "daysAgo": "Tage vor",
+    "waitingForYou_one": "Sie haben {{count}} neuen Hund auf Sie:",
+    "waitingForYou_other": "Sie haben {{count}} neue Hunde auf Sie:",
+    "viewAllDogs": "Alle Hunde anzeigen"
   }
 }

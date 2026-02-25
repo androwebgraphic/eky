@@ -142,7 +142,9 @@
     "ageCategory.senior": "Senior (7-10 years)",
     "ageCategory.seniorPlus": "Senior+ (10+ years)"
   },
-  "social": {},
+  "social": {
+    
+  },
   "share": {
     "title": "Share with others"
   },
@@ -353,16 +355,13 @@
     "tooltip": "New dogs added since your last visit"
   },
   "newDogs": {
-    "title": "New Dogs Found!",
+    "title": "New Dogs Added",
     "noNewDogs": "No new dogs since your last visit.",
     "close": "Close",
     "ageUnknown": "Unknown",
     "years": "years",
     "minutesAgo": "min ago",
     "hoursAgo": "hours ago",
-    "daysAgo": "days ago",
-    "waitingForYou_one": "You have {{count}} new dog waiting for you:",
-    "waitingForYou_other": "You have {{count}} new dogs waiting for you:",
-    "viewAllDogs": "View All Dogs"
+    "daysAgo": "days ago"
   }
 }

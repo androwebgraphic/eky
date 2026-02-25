@@ -10,8 +10,8 @@
   pointer-events: auto !important;
 }
 
-/* Mobile Modal Fix */
-@media (max-width: 767px) {
+  /* Mobile Modal Fix */
+@media (max-width: 899px) {
   /* Modal overlay - full screen backdrop */
   .doglist-details-modal.mobile {
     position: fixed !important;
@@ -24,9 +24,9 @@
     background: rgba(0, 0, 0, 0.5) !important;
     z-index: 2147483647 !important;
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     justify-content: center !important;
-    padding: 20px !important;
+    padding: 80px 16px 80px 16px !important;
     overflow: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
@@ -37,13 +37,25 @@
     border-radius: 12px !important;
     width: 100% !important;
     max-width: 600px !important;
-    max-height: 90vh !important;
+    max-height: calc(100vh - 160px) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     position: relative !important;
     padding: 16px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
-    margin: auto !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure action buttons are visible on mobile */
+  .doglist-details-content .card-actions.call-to-action.dog-details-mobile-actions,
+  .doglist-details-content .card-actions,
+  .doglist-details-content .btn-adopt,
+  .doglist-details-content .btn-wishlist,
+  .doglist-details-content .btn-details,
+  .doglist-details-content button {
+    display: inline-block !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
   }
 
   /* Card details - ensure white background */
@@ -75,7 +87,7 @@
 }
 
 /* Desktop Modal Fix */
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   /* Modal overlay - full screen backdrop */
   .doglist-details-modal.desktop {
     position: fixed !important;

@@ -343,13 +343,17 @@
     "tooltip": "Novi psi dodani od vaše posljednje posjete"
   },
   "newDogs": {
-    "title": "Novi Psi Dodani",
+    "title": "Novi Psi Pronađeni!",
     "noNewDogs": "Nema novih pasa od vaše posljednje posjete.",
     "close": "Zatvori",
     "ageUnknown": "Nepoznato",
     "years": "god",
     "minutesAgo": "min prije",
     "hoursAgo": "sat(i) prije",
-    "daysAgo": "dan(a) prije"
+    "daysAgo": "dan(a) prije",
+    "waitingForYou_one": "Imate {{count}} novog psa koji čeka na vas:",
+    "waitingForYou_few": "Imate {{count}} nova psa koji čekaju na vas:",
+    "waitingForYou_other": "Imate {{count}} novih pasa koji čekaju na vas:",
+    "viewAllDogs": "Pregledaj Sve Pse"
   }
 }

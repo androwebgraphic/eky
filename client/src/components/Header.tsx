@@ -207,7 +207,17 @@ const Header: React.FC = () => {
         <>
         <header className="UserHeader">
           <div className="header-content-inner">
-            {/* Left: Navigation Links */}
+            {/* Mobile hamburger menu - only shows on mobile */}
+            {isMobile && (
+              <button 
+                onClick={toggleMobileMenu}
+                className="authenticated-hamburger-btn"
+              >
+                ☰
+              </button>
+            )}
+            
+            {/* Left: Navigation Links - hidden on mobile */}
             <nav className="header-nav-inner">
               <Link to="/" className="header-nav-link-inner">{t('nav.about')}</Link>
               <Link to="psi" className="header-nav-link-inner">{t('nav.dogs')}</Link>
@@ -258,6 +268,33 @@ const Header: React.FC = () => {
             </div>
           </div>
         </header>
+
+        {/* Mobile menu dropdown for authenticated users */}
+        {mobileMenuOpen && isMobile && (
+          <div className="authenticated-mobile-menu">
+            <Link 
+              to="/" 
+              className="authenticated-mobile-link"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('nav.about')}
+            </Link>
+            <Link 
+              to="psi" 
+              className="authenticated-mobile-link"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('nav.dogs')}
+            </Link>
+            <Link 
+              to="statistika" 
+              className="authenticated-mobile-link"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t('nav.statistics') || 'Statistics'}
+            </Link>
+          </div>
+        )}
         
         {/* Expanded dropdown panel - outside header */}
         {isExpanded && user && (

@@ -244,7 +244,10 @@ function DogList() {
 	}, [token]);
 
 	const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 900;
-	const handleEdit = (dog: DogDetailsProps) => setEditDog(dog);
+	const handleEdit = (dog: DogDetailsProps) => {
+		setDetailsDog(null);
+		setEditDog(dog);
+	};
 	const handleRemove = (dog: DogDetailsProps) => setRemoveDog(dog);
 	const handleDetails = (dog: DogDetailsProps) => setDetailsDog(dog);
 	const handleEditSave = async (updatedDog: any) => {
@@ -461,19 +464,20 @@ function DogList() {
 							>
 								<span>×</span>
 							</button>
-							<DogDetails
-								key={detailsDog._id}
-								{...detailsDog}
-								gender={
-									detailsDog.gender === 'male' || detailsDog.gender === 'female'
-										? detailsDog.gender
-										: undefined
-								}
-								user={detailsDog.user || null}
-								place={detailsDog.place}
-								location={detailsDog.location || detailsDog.place}
-								onClose={() => setDetailsDog(null)}
-							/>
+                          <DogDetails
+                                key={detailsDog._id}
+                                {...detailsDog}
+                                gender={
+                                  detailsDog.gender === 'male' || detailsDog.gender === 'female'
+                                    ? detailsDog.gender
+                                    : undefined
+                                }
+                                user={detailsDog.user || null}
+                                place={detailsDog.place}
+                                location={detailsDog.location || detailsDog.place}
+                                onClose={() => setDetailsDog(null)}
+                                onEdit={handleEdit}
+                          />
 						</div>
 					</div>
 				) : (
@@ -499,6 +503,7 @@ function DogList() {
 								place={detailsDog.place}
 								location={detailsDog.location || detailsDog.place}
 								onClose={() => setDetailsDog(null)}
+								onEdit={handleEdit}
 							/>
 						</div>
 					</div>

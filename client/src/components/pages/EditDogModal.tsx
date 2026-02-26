@@ -235,6 +235,7 @@ const getApiUrl = () => {
     const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
     
     let base = filename;
+    const originalBase = base; // Keep for logging
     
     // Remove file extension
     base = base.replace(/\.(jpg|jpeg|png|webp)$/i, '');
@@ -249,6 +250,14 @@ const getApiUrl = () => {
       const uploadedMatch = base.match(/^(.+?)-\d{10,13}-[a-z0-9]{6}-\d{3,4}$/);
       if (uploadedMatch) {
         base = uploadedMatch[1];
+      } else {
+        // Fallback: if pattern doesn't match, try taking first part before first hyphen
+        // This handles cases where the naming convention is different
+        const fallbackMatch = base.match(/^(.+?)-/);
+        if (fallbackMatch) {
+          console.log('[getImageBase] Using fallback for:', originalBase, '->', fallbackMatch[1]);
+          base = fallbackMatch[1];
+        }
       }
     } else if (base.startsWith('pexels-')) {
       // Handle Pexels images: pexels-name-ID-TIMESTAMP-HASH-SIZE -> name-ID
@@ -258,10 +267,61 @@ const getApiUrl = () => {
       const pexelsMatch = base.match(/^pexels-(.+?)-\d+(-\d{10,13}-[a-z0-9]{6}-\d{3,4})?$/);
       if (pexelsMatch) {
         base = pexelsMatch[1];
+      } else {
+        // Fallback for pexels if pattern doesn't match
+        const pexelsFallbackMatch = base.match(/^pexels-(.+?)-\d+/);
+        if (pexelsFallbackMatch) {
+          console.log('[getImageBase] Using pexels fallback for:', originalBase, '->', pexelsFallbackMatch[1]);
+          base = pexelsFallbackMatch[1];
+        }
       }
     }
     
+    console.log('[getImageBase] URL:', cleanUrl, 'Original:', originalBase, 'Base:', base);
     return base;
+  };
+
+  // Check if two images are likely duplicates based on similarity
+  const areLikelyDuplicates = (url1: string, url2: string) => {
+    const base1 = getImageBase(url1);
+    const base2 = getImageBase(url2);
+    
+    // Direct match
+    if (base1 === base2) {
+      console.log('[areLikelyDuplicates] Direct match:', base1);
+      return true;
+    }
+    
+    // Check if one is a substring of other (for edge cases)
+    if (base1.includes(base2) || base2.includes(base1)) {
+      const longer = base1.length > base2.length ? base1 : base2;
+      const shorter = base1.length > base2.length ? base2 : base1;
+      // Only consider it a match if the shorter is a significant portion of the longer
+      if (longer.startsWith(shorter) || longer.endsWith(shorter)) {
+        console.log('[areLikelyDuplicates] Substring match:', shorter, 'in', longer);
+        return true;
+      }
+    }
+    
+    // Fallback: check if URLs are very similar (same directory, similar filename)
+    const cleanUrl1 = url1.split('?')[0];
+    const cleanUrl2 = url2.split('?')[0];
+    const path1 = cleanUrl1.substring(0, cleanUrl1.lastIndexOf('/'));
+    const path2 = cleanUrl2.substring(0, cleanUrl2.lastIndexOf('/'));
+    
+    if (path1 === path2) {
+      // Same directory - check if filenames are similar
+      const filename1 = cleanUrl1.substring(cleanUrl1.lastIndexOf('/') + 1).replace(/\.(jpg|jpeg|png|webp)$/i, '');
+      const filename2 = cleanUrl2.substring(cleanUrl2.lastIndexOf('/') + 1).replace(/\.(jpg|jpeg|png|webp)$/i, '');
+      
+      // Check if one filename starts with the other
+      if (filename1.startsWith(filename2) || filename2.startsWith(filename1)) {
+        console.log('[areLikelyDuplicates] Filename similarity match:', filename1, filename2);
+        return true;
+      }
+    }
+    
+    return false;
   };
 
 function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
@@ -281,37 +341,76 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
       console.log('[EDITDOG] First few images:', dog.images.slice(0, 3).map(img => ({ url: img.url, width: img.width })));
       const baseToImage = new Map();
       const allBases: string[] = [];
-      dog.images.forEach((img: any) => {
+      
+      dog.images.forEach((img: any, imgIndex: number) => {
         if (!img.url) {
-          console.log('[EDITDOG] Skipping image with no url');
+          console.log('[EDITDOG] Skipping image with no url at index', imgIndex);
           return;
         }
         const url = getImageUrl(img.url);
         const base = getImageBase(img.url);
         allBases.push(base);
-        console.log('[EDITDOG] Processing image:', { url, base, width: img.width });
+        console.log('[EDITDOG] Processing image', imgIndex, ':', { url, base, width: img.width });
         
         if (!baseToImage.has(base)) {
           baseToImage.set(base, img);
-          console.log('[EDITDOG]   -> First occurrence, adding to Map');
+          console.log('[EDITDOG]   -> First occurrence, adding to Map (total:', baseToImage.size, ')');
         } else {
           // Keep one with larger width
           const existing = baseToImage.get(base);
-          if ((img.width || 0) > (existing.width || 0)) {
+          const imgWidth = img.width || 0;
+          const existingWidth = existing.width || 0;
+          console.log('[EDITDOG]   -> Duplicate base found. Current width:', imgWidth, 'Existing width:', existingWidth);
+          
+          if (imgWidth > existingWidth) {
             baseToImage.set(base, img);
-            console.log('[EDITDOG]   -> Replacing with larger width');
+            console.log('[EDITDOG]   -> Replacing with larger width:', imgWidth, '>', existingWidth);
           } else {
-            console.log('[EDITDOG]   -> Skipping, smaller width');
+            console.log('[EDITDOG]   -> Skipping, same or smaller width:', imgWidth, '<=', existingWidth);
           }
         }
       });
-      const unique = Array.from(baseToImage.values());
-      console.log('[EDITDOG] Total images:', dog.images.length, 'Unique images:', unique.length);
-      console.log('[EDITDOG] All bases:', allBases);
-      unique.forEach((img, idx) => {
-        console.log('[EDITDOG] Unique image', idx, 'url:', getImageUrl(img.url), 'base:', getImageBase(img.url));
+      
+      // Second pass: check for duplicates using similarity matching
+      const uniqueList = Array.from(baseToImage.values());
+      const finalUnique: any[] = [];
+      const usedBases = new Set<string>();
+      
+      uniqueList.forEach((img, idx) => {
+        const currentBase = getImageBase(img.url);
+        console.log('[EDITDOG] Second pass - checking image', idx, 'with base:', currentBase);
+        
+        // Check if this base or any similar base has been used
+        let isDuplicate = false;
+        let matchingBase = '';
+        
+        Array.from(usedBases).forEach(usedBase => {
+          if (areLikelyDuplicates(currentBase, usedBase)) {
+            isDuplicate = true;
+            matchingBase = usedBase;
+            console.log('[EDITDOG]   -> Duplicate found via similarity! Current:', currentBase, 'matches existing:', usedBase);
+          }
+        });
+        
+        if (!isDuplicate) {
+          usedBases.add(currentBase);
+          finalUnique.push(img);
+          console.log('[EDITDOG]   -> Adding unique image (total:', finalUnique.length, ')');
+        } else {
+          console.log('[EDITDOG]   -> Skipping duplicate (similar to base:', matchingBase, ')');
+        }
       });
-      setUniqueImages(unique);
+      
+      console.log('[EDITDOG] === DEDUPLICATION SUMMARY ===');
+      console.log('[EDITDOG] Total images:', dog.images.length);
+      console.log('[EDITDOG] Unique images:', finalUnique.length);
+      console.log('[EDITDOG] All bases:', allBases);
+      console.log('[EDITDOG] Unique bases:', finalUnique.map(img => getImageBase(img.url)));
+      finalUnique.forEach((img, idx) => {
+        console.log('[EDITDOG] Unique image', idx, 'url:', getImageUrl(img.url), 'base:', getImageBase(img.url), 'width:', img.width);
+      });
+      
+      setUniqueImages(finalUnique);
       // Set existingImages for API calls (keep all variants for server to delete properly)
       setExistingImages(dog.images ? [...dog.images] : []);
     } else {
@@ -462,11 +561,11 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
           top: window.innerWidth > 768 ? '0' : '70px',
           left: '0',
           right: '0',
-          bottom: window.innerWidth > 768 ? '0' : '170px',
+          bottom: window.innerWidth > 768 ? '0' : '70px',
           width: '100vw',
-          height: window.innerWidth > 768 ? '100vh' : 'calc(100vh - 240px)',
+          height: window.innerWidth > 768 ? '100vh' : 'calc(100vh - 140px)',
           backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          zIndex: 2147483647,
+          zIndex: 9999999999999999,
           display: 'flex',
           alignItems: window.innerWidth > 768 ? 'center' : 'flex-start',
           justifyContent: 'center',
@@ -486,13 +585,13 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
         style={{
           backgroundColor: 'white',
           borderRadius: window.innerWidth > 768 ? '12px' : '12px',
-          padding: window.innerWidth > 768 ? '1.5rem' : '0.5rem',
+          padding: window.innerWidth > 768 ? '1.5rem' : '1rem',
           paddingTop: window.innerWidth > 768 ? '1.5rem' : '3rem',
-          paddingBottom: window.innerWidth > 768 ? '1.5rem' : '0.5rem',
-          width: window.innerWidth > 768 ? '85vw' : 'calc(90vw - 1rem)',
-          maxWidth: window.innerWidth > 768 ? '550px' : 'calc(90vw - 1rem)',
-          height: window.innerWidth > 768 ? 'auto' : 'calc(100vh - 260px)',
-          maxHeight: window.innerWidth > 768 ? '90vh' : 'calc(100vh - 260px)',
+          paddingBottom: window.innerWidth > 768 ? '1.5rem' : '1.5rem',
+          width: window.innerWidth > 768 ? '85vw' : 'calc(90vw - 2rem)',
+          maxWidth: window.innerWidth > 768 ? '550px' : 'calc(90vw - 2rem)',
+          height: 'auto',
+          maxHeight: window.innerWidth > 768 ? '90vh' : 'calc(100vh - 120px)',
           overflowY: 'auto',
           overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch',
@@ -714,7 +813,6 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
               name="name"
               type="text" 
               autoComplete="name"
-              autoFocus
               {...register('name', { required: true })} 
               style={{
                 width: '100%',

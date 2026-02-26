@@ -37,12 +37,13 @@ export interface DogDetailsProps {
   adoptionQueue?: any;
   onDogUpdate?: (update: any) => void;
   onDogChanged?: () => void;
+  onEdit?: (dog: DogDetailsProps) => void;
   createdAt?: string;
 }
 
 const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   _id, name, breed, age, images, video, thumbnail, color, place, location, description, size, gender, vaccinated, neutered, onClose, user: owner,
-  adoptionStatus, adoptionQueue, onDogUpdate, onDogChanged, createdAt, _showMap
+  adoptionStatus, adoptionQueue, onDogUpdate, onDogChanged, onEdit, createdAt, _showMap
 }) => {
   const [coords, setCoords] = useState<{lat: number, lng: number} | null>(null);
   const [loadingCoords, setLoadingCoords] = useState(false);
@@ -483,7 +484,29 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                   className="details"
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.dispatchEvent(new CustomEvent('edit-dog', { detail: { dogId: _id } }));
+                    if (onEdit) {
+                      onEdit({
+                        _id,
+                        name,
+                        breed,
+                        age,
+                        images,
+                        video,
+                        thumbnail,
+                        color,
+                        place,
+                        location,
+                        description,
+                        size,
+                        gender,
+                        vaccinated,
+                        neutered,
+                        user: owner,
+                        adoptionStatus,
+                        adoptionQueue,
+                        createdAt
+                      });
+                    }
                   }}
                   style={{
                     backgroundColor: '#ff9800',

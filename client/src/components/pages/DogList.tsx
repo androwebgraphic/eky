@@ -377,7 +377,7 @@ function DogList() {
 						})}
 					</div>
 				) : (
-					<div style={{ padding: '0 16px' }}>
+					<div style={{ padding: '0 16px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
 						{filteredDogs.map((dog, index) => {
 						// Deduplicate images by base name before passing to CardSmall
 						const getImageBase = (url: string) => {
@@ -405,7 +405,7 @@ function DogList() {
 						const canEdit = isOwner || isSuperAdmin;
 
 							return (
-								<div key={dog._id} style={{ marginBottom: index < filteredDogs.length - 1 ? '20px' : '0' }}>
+								<div key={dog._id} style={{ width: 'calc(25% - 6px)', flex: '0 0 calc(25% - 6px)', padding: '4px', display: 'flex' }}>
 									<CardSmall
 										{...dog}
 										images={dedupedImages}

@@ -23,11 +23,8 @@
     height: 100vh !important;
     background: rgba(0, 0, 0, 0.5) !important;
     z-index: 2147483647 !important;
-    display: flex !important;
-    align-items: flex-start !important;
-    justify-content: center !important;
-    padding: 80px 16px 80px 16px !important;
-    overflow: auto !important;
+    display: block !important;
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
 
@@ -35,15 +32,54 @@
   .doglist-details-content {
     background: #ffffff !important;
     border-radius: 12px !important;
-    width: 100% !important;
+    width: calc(100% - 32px) !important;
     max-width: 600px !important;
-    max-height: calc(100vh - 160px) !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
     position: relative !important;
     padding: 16px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
-    margin: 0 !important;
+    margin: 16px auto !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  /* Override ALL inline styles */
+  .doglist-details-content > div {
+    overflow: visible !important;
+  }
+
+  .doglist-details-content > div > div {
+    overflow: visible !important;
+  }
+
+  /* Ensure buttons are visible */
+  .doglist-details-content button,
+  .doglist-details-content button[aria-label="Close"],
+  .doglist-details-content .card-actions button,
+  .doglist-details-content .dog-details-buttons-container button {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Card actions - ensure not hidden */
+  .doglist-details-content .card-actions,
+  .doglist-details-content .card-actions.call-to-action,
+  .doglist-details-content .card-actions.call-to-action.dog-details-mobile-actions {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    position: relative !important;
+    background: #ffffff !important;
+  }
+
+  /* Button containers */
+  .doglist-details-content .dog-details-buttons-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    overflow: visible !important;
   }
 
   /* Ensure action buttons are visible on mobile */

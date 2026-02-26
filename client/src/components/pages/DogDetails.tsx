@@ -1,24 +1,10 @@
 
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
 import DogImageSlider from '../DogImageSlider';
 import { useTranslation } from 'react-i18next';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '../../contexts/AuthContext';
-
-// Portal container for map modal
-const mapModalRoot = document.getElementById('map-modal-root') || (() => {
-  const root = document.createElement('div');
-  root.id = 'map-modal-root';
-  // Portal root should NOT block clicks - only modal overlay should
-  root.style.position = 'absolute';
-  root.style.top = '0';
-  root.style.left = '0';
-  root.style.zIndex = '0';
-  root.style.pointerEvents = 'none';
-  document.body.appendChild(root);
-  return root;
-})();
+import { useMapModal } from '../../contexts/MapModalContext';
 
 
 interface MediaVariant { url: string; width?: number; size?: string }
@@ -58,48 +44,12 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   _id, name, breed, age, images, video, thumbnail, color, place, location, description, size, gender, vaccinated, neutered, onClose, user: owner,
   adoptionStatus, adoptionQueue, onDogUpdate, onDogChanged, createdAt, _showMap
 }) => {
-  const [showMap, setShowMap] = useState(!!_showMap);
   const [coords, setCoords] = useState<{lat: number, lng: number} | null>(null);
   const [loadingCoords, setLoadingCoords] = useState(false);
   const [coordsError, setCoordsError] = useState<string | null>(null);
-
-  // If _showMap is true and location exists, trigger geocoding on mount
-  React.useEffect(() => {
-      if (_showMap && location) {
-      (async () => {
-        setLoadingCoords(true);
-        setCoordsError(null);
-        try {
-          const query = location.trim();
-          console.log('[MAP] Geocoding location:', query);
-          const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&extratags=1`, {
-            headers: {
-              'User-Agent': 'EkyApp/1.0'
-            }
-          });
-          const data = await resp.json();
-          console.log('[MAP] Geocoding response:', data);
-          if (data && data.length > 0) {
-            const result = data[0];
-            setCoords({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
-            setShowMap(true);
-          } else {
-            console.log('[MAP] No coordinates found, will use search-based map');
-            setShowMap(true);
-            // Don't set error - use search-based map as fallback
-          }
-        } catch (e) {
-          console.error('[MAP] Geocoding error:', e);
-          setShowMap(true);
-          // Don't set error - use search-based map as fallback
-        } finally {
-          setLoadingCoords(false);
-        }
-      })();
-    }
-  }, [_showMap, location]);
   const { t } = useTranslation();
   const { user: currentUser, isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist } = useAuth();
+  const { showMap: showMapModal, hideMap: hideMapModal } = useMapModal();
   
   // Safely check if current user is the owner
   // If owner data is missing or incomplete, assume NOT owner to allow buttons to show
@@ -333,13 +283,8 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
 
   // Geocode location if needed
   const handleShowMap = async () => {
-    if (coords || !location) {
-      setShowMap(true);
-      return;
-    }
-
-    // Debug log for sliderImages
-    console.log('DogDetails sliderImages:', sliderImages);
+    if (!location) return;
+    
     setLoadingCoords(true);
     setCoordsError(null);
     try {
@@ -351,22 +296,22 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
       const data = await resp.json();
       
       console.log('Geocoding response for', query, data);
-      setCoordsError(null);
       if (data && data.length > 0) {
         const result = data[0];
-        setCoords({ 
+        const mapCoords = { 
           lat: parseFloat(result.lat), 
           lng: parseFloat(result.lon)
-        });
-        setShowMap(true);
+        };
+        setCoords(mapCoords);
+        showMapModal(location, place, mapCoords);
       } else {
-        // Fallback: show map with search query even if geocoding fails
-        setShowMap(true);
+        // Show map with search query if geocoding fails
+        showMapModal(location, place, undefined);
         setCoordsError(t('dogDetails.approximateLocation'));
       }
     } catch (e) {
       // Show map anyway with search fallback
-      setShowMap(true);
+      showMapModal(location, place, undefined);
       setCoordsError(t('dogDetails.searchBasedLocation'));
     } finally {
       setLoadingCoords(false);
@@ -417,7 +362,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         }
       `}</style>
       <div className="card-details">
-      <div className="img" style={{ width: '100%', maxWidth: 240, margin: '0 auto', aspectRatio: '1/1', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f8f8', minHeight: 0, maxHeight: 240, boxSizing: 'border-box', marginTop: 12, marginBottom: 12, borderRadius: 12 }}>
+      <div className="img">
         {sliderImages.length > 0 && (
           <DogImageSlider images={sliderImages} alt={name} />
         )}
@@ -457,48 +402,6 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
             {loadingCoords && <span style={{ marginLeft: 8 }}>{t('dogDetails.loadingMap')}</span>}
             {coordsError && <span style={{ color: 'red', marginLeft: 8 }}>{coordsError}</span>}
           </p>
-        )}
-        {showMap && (coords || location) && ReactDOM.createPortal(
-          <div className="dogdetails-map-modal">
-            <div className="modal-map-content">
-              <button
-                className="modal-map-close"
-                onClick={() => setShowMap(false)}
-                aria-label={t('common.close')}
-                title={t('common.close')}
-              >
-                <span>×</span>
-              </button>
-              <h3 className="modal-map-title">{place || location}</h3>
-              <iframe
-                className="map-iframe"
-                title={t('dogDetails.mapPreview')}
-                allowFullScreen
-                src={coords
-                  ? `https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng-0.002},${coords.lat-0.002},${coords.lng+0.002},${coords.lat+0.002}&layer=mapnik&marker=${coords.lat},${coords.lng}`
-                  : `https://www.openstreetmap.org/export/embed.html?search=${encodeURIComponent(location || '')}&layer=mapnik`}
-              />
-              <div style={{ marginTop: 15, display: 'flex', gap: 10 }}>
-                <button 
-                  onClick={() => setShowMap(false)} 
-                  style={{ fontSize: 16, padding: '10px 20px', borderRadius: 6, border: '1px solid #ddd', background: '#f8f9fa', cursor: 'pointer', color: '#666' }}
-                >
-                  {t('common.close')}
-                </button>
-                {coords && (
-                  <a 
-                    href={`https://www.openstreetmap.org/?mlat=${coords.lat}&mlon=${coords.lng}#map=16/${coords.lat}/${coords.lng}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ fontSize: 16, padding: '10px 20px', borderRadius: 6, border: 'none', background: '#007bff', color: 'white', textDecoration: 'none', cursor: 'pointer', display: 'inline-block' }}
-                  >
-                    {t('dogDetails.viewFullMap')}
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>,
-          mapModalRoot
         )}
         {color && (
           <p className="meta">
@@ -573,6 +476,70 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         {/* Show buttons for authenticated users - show all buttons and handle owner check inside each button */}
         {isAuthenticated && _id && (
           <>
+            {/* Edit/Delete buttons for owner */}
+            {isOwner && (
+              <div className="dog-details-buttons-container" style={{ marginBottom: '12px' }}>
+                <button 
+                  className="details"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.dispatchEvent(new CustomEvent('edit-dog', { detail: { dogId: _id } }));
+                  }}
+                  style={{
+                    backgroundColor: '#ff9800',
+                    color: 'white',
+                    border: 'none',
+                    fontWeight: 600,
+                    padding: '12px 16px',
+                    borderRadius: 6,
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    minHeight: '50px'
+                  }}
+                >
+                  {t('button.edit', t('edit'))}
+                </button>
+                <button 
+                  className="details"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (window.confirm(t('button.confirmDelete') || 'Are you sure you want to delete this dog?')) {
+                      try {
+                        const resp = await fetch(`${apiBase}/api/dogs/${_id}`, {
+                          method: 'DELETE',
+                          headers: {
+                            'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
+                          }
+                        });
+                        if (resp.ok) {
+                          alert(t('alerts.dogDeleted') || 'Dog deleted successfully');
+                          if (onDogChanged) onDogChanged();
+                          if (onClose) onClose();
+                        } else {
+                          const data = await resp.json();
+                          alert(data.message || t('alerts.deleteFailed') || 'Failed to delete dog');
+                        }
+                      } catch (err) {
+                        alert(t('alerts.deleteError') || 'Error deleting dog');
+                      }
+                    }
+                  }}
+                  style={{
+                    backgroundColor: '#e74c3c',
+                    color: 'white',
+                    border: 'none',
+                    fontWeight: 600,
+                    padding: '12px 16px',
+                    borderRadius: 6,
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    minHeight: '50px'
+                  }}
+                >
+                  {t('button.remove', t('delete'))}
+                </button>
+              </div>
+            )}
             <div className="dog-details-buttons-container">
               <button 
                 id="add-to-list" 

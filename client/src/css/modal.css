@@ -123,11 +123,10 @@ body {
   .modal {
     width: 90vw !important;
     max-width: 90vw !important;
-    max-height: calc(100vh - 150px) !important;
+    max-height: none !important;
     min-height: auto !important;
     padding: 0 !important;
     overflow: visible !important;
-    overflow-x: hidden !important;
     display: flex !important;
     flex-direction: column !important;
     margin: 0 !important;
@@ -140,9 +139,42 @@ body {
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
-    max-height: calc(100vh - 150px) !important;
-    padding: 1rem !important;
+    max-height: calc(100vh - 350px) !important;
+    padding: 0 !important;
+    padding-bottom: 1rem !important;
     box-sizing: border-box !important;
+  }
+  
+  /* Fix image container - override inline styles */
+  .modal > .card-details > .img {
+    width: 100% !important;
+    max-width: 280px !important;
+    margin: 8px auto !important;
+    aspect-ratio: auto !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #f8f8f8 !important;
+    max-height: 150px !important;
+    box-sizing: border-box !important;
+    borderRadius: 12px !important;
+  }
+  
+  /* Ensure card-actions is always visible at bottom */
+  .modal > .card-actions,
+  .modal > .card-actions.call-to-action,
+  .modal > .card-actions.call-to-action.dog-details-mobile-actions {
+    flex-shrink: 0 !important;
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 100 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 16px 0 !important;
+    margin-top: 0 !important;
+    background: #ffffff !important;
   }
   
   .modal-close {
@@ -168,6 +200,120 @@ body {
 @media (max-width: 767px) {
   .map-iframe {
     height: 300px !important;
+  }
+}
+
+/* Map Modal Styles - Desktop & Mobile */
+.dogdetails-map-modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  z-index: 9999999999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: auto !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.modal-map-content {
+  position: relative !important;
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  max-width: 90vw !important;
+  width: 600px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+  pointer-events: auto !important;
+}
+
+.modal-map-title {
+  margin: 0 0 15px 0 !important;
+  color: #333 !important;
+  font-size: 20px !important;
+  font-weight: bold !important;
+  text-align: center !important;
+}
+
+.modal-map-close {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  width: 36px !important;
+  height: 36px !important;
+  background: #e74c3c !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+  border-radius: 50% !important;
+  font-size: 24px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4) !important;
+  transition: all 0.2s !important;
+}
+
+.modal-map-close:hover {
+  background: #c0392b !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 16px rgba(231, 76, 60, 0.5) !important;
+}
+
+.modal-map-close:active {
+  transform: scale(0.95) !important;
+  background: #b0261c !important;
+}
+
+.modal-map-close span {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Mobile map modal adjustments */
+@media (max-width: 767px) {
+  .dogdetails-map-modal {
+    padding: 10px !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding-top: 60px !important;
+  }
+  
+  .modal-map-content {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    padding: 16px !important;
+    max-height: calc(100vh - 100px) !important;
+  }
+  
+  .modal-map-title {
+    font-size: 18px !important;
+    margin-bottom: 12px !important;
+    padding-right: 30px !important;
+  }
+  
+  .modal-map-close {
+    top: 8px !important;
+    right: 8px !important;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 20px !important;
   }
 }
 
@@ -629,4 +775,48 @@ body {
   .wishlist-action-btn {
     flex: 1 !important;
   }
+}
+
+/* HIGHEST PRIORITY MAP MODAL - Must appear above everything including dog details modal */
+#map-modal-root .dogdetails-map-modal {
+  z-index: 214748364999 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: auto !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* Also target directly without parent selector for maximum specificity */
+.dogdetails-map-modal {
+  z-index: 214748364999 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: auto !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#map-modal-root .modal-map-content {
+  z-index: 214748364999 !important;
+  position: relative !important;
+}
+
+.modal-map-content {
+  z-index: 214748364999 !important;
+  position: relative !important;
 }

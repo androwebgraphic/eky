@@ -4,6 +4,7 @@ import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import ErrorBoundary from './components/ErrorBoundary';
 import ChatApp from './components/ChatApp';
+import { MapModalProvider } from './contexts/MapModalContext';
 import "./css/mobile-fixes.css"; // Mobile viewport fixes
 
 const App = () => {
@@ -98,7 +99,7 @@ const App = () => {
   }, []);
 
   return (
-    <>
+    <MapModalProvider>
       <ErrorBoundary>
         <div id="Wrap">
           <Header />
@@ -120,7 +121,7 @@ const App = () => {
           </div>
         )}
       </ErrorBoundary>
-    </>
+    </MapModalProvider>
   );
 };
 

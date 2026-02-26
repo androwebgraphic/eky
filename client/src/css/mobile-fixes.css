@@ -99,65 +99,6 @@ footer, #footer-nav {
   box-sizing: border-box;
 }
 
-/* CRITICAL: Card wrappers need specific width for 4-per-row layout */
-/* This MUST apply to override inline styles and component defaults */
-@media screen and (max-width: 899px) {
-  /* Parent container - flex with 4 per row */
-  .dog-list-grid,
-  main > div[style*="padding: 0 16px"],
-  main > div[style*="padding: '0 16px'"] {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 4px !important;
-    margin: 0 -4px !important;
-    padding: 0 !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    width: 100% !important;
-    max-width: 100vw !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Card wrappers - 25% width for 4 per row */
-  main > div[style*="padding: 0 16px"] > div,
-  main > div[style*="padding: '0 16px'"] > div,
-  main > div[style*="padding: 0 16px"] > div[style*="marginBottom"],
-  main > div[style*="padding: '0 16px'"] > div[style*="marginBottom"] {
-    width: calc(25% - 6px) !important;
-    max-width: calc(25% - 6px) !important;
-    flex: 0 0 calc(25% - 6px) !important;
-    margin: 0 !important;
-    margin-bottom: 0 !important;
-    padding: 4px !important;
-    display: flex !important;
-    flex-shrink: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  /* CardSmall component itself */
-  main > div[style*="padding: 0 16px"] .card.card-small {
-    width: calc(25% - 6px) !important;
-    max-width: calc(25% - 6px) !important;
-    flex: 0 0 calc(25% - 6px) !important;
-    padding: 4px !important;
-    margin: 0 !important;
-    flex-direction: column !important;
-    display: flex !important;
-    flex-shrink: 0 !important;
-    flex-grow: 0 !important;
-  }
-
-  /* Override ANY inline maxWidth/width styles on CardSmall */
-  main > div[style*="padding: 0 16px"] .card.card-small[style],
-  main > div[style*="padding: 0 16px"] .card.card-small[style*="maxWidth"],
-  main > div[style*="padding: 0 16px"] .card.card-small[style*="width"],
-  main > div[style*="padding: 0 16px"] > div > .card.card-small {
-    width: calc(25% - 6px) !important;
-    max-width: calc(25% - 6px) !important;
-    flex: 0 0 calc(25% - 6px) !important;
-  }
-}
-
 /* Responsive media */
 img, video, iframe, embed, object, canvas {
   max-width: 100%;
@@ -552,6 +493,8 @@ select {
     line-height: 0 !important;
   }
 
+  /* === MOBILE CARD LAYOUT: 4 CARDS PER ROW === */
+
   /* New Dogs Modal - Mobile: Only image, 4 per row */
   .dogs-grid .dog-card-mini {
     max-width: calc(25% - 6px) !important;
@@ -592,7 +535,7 @@ select {
     grid-template-rows: none !important;
   }
 
-  /* Dog List Cards - Mobile: Only image, 4 per row */
+  /* Dog List - Parent container: flex with 4 per row */
   .dog-list-grid,
   main > div[style*="padding: 0 16px"],
   main > div[style*="padding: '0 16px'"] {
@@ -608,33 +551,14 @@ select {
     box-sizing: border-box !important;
   }
 
-  /* CRITICAL: Card wrappers must have specific width - HIGHEST PRIORITY */
+  /* Card wrappers: 25% width for 4 per row */
   main > div[style*="padding: 0 16px"] > div,
-  main > div[style*="padding: '0 16px'"] > div {
-    width: calc(25% - 6px) !important;
-    max-width: calc(25% - 6px) !important;
-  }
-
+  main > div[style*="padding: '0 16px'"] > div,
   main > div[style*="padding: 0 16px"] > div[style*="marginBottom"],
   main > div[style*="padding: '0 16px'"] > div[style*="marginBottom"] {
     width: calc(25% - 6px) !important;
     max-width: calc(25% - 6px) !important;
-  }
-
-  /* Also target the specific div that wraps cards on mobile */
-  main > div[style*="padding: 0 16px"] > div,
-  main > div[style*="padding: '0 16px'"] > div {
-    display: flex !important;
-  }
-
-  /* Override inline marginBottom style from DogList component - CRITICAL */
-  main > div[style*="padding: 0 16px"] > div[style*="marginBottom"],
-  main > div[style*="padding: '0 16px'"] > div[style*="marginBottom"],
-  main > div[style*="padding: 0 16px"] > div,
-  main > div[style*="padding: '0 16px'"] > div {
-    max-width: calc(25% - 6px) !important;
     flex: 0 0 calc(25% - 6px) !important;
-    width: calc(25% - 6px) !important;
     margin: 0 !important;
     margin-bottom: 0 !important;
     padding: 4px !important;
@@ -643,10 +567,11 @@ select {
     box-sizing: border-box !important;
   }
 
-  /* Override CardSmall inline styles on mobile - HIGHEST PRIORITY */
-  main > div[style*="padding: 0 16px"] .card.card-small {
-    max-width: calc(25% - 6px) !important;
+  /* CardSmall component: 25% width */
+  main > div[style*="padding: 0 16px"] .card.card-small,
+  main > div[style*="padding: '0 16px'"] .card.card-small {
     width: calc(25% - 6px) !important;
+    max-width: calc(25% - 6px) !important;
     flex: 0 0 calc(25% - 6px) !important;
     padding: 4px !important;
     margin: 0 !important;
@@ -656,14 +581,41 @@ select {
     flex-grow: 0 !important;
   }
 
-  /* Force override of ANY inline maxWidth/width styles on CardSmall */
+  /* Override ANY inline maxWidth/width styles on CardSmall */
   main > div[style*="padding: 0 16px"] .card.card-small[style],
   main > div[style*="padding: 0 16px"] .card.card-small[style*="maxWidth"],
   main > div[style*="padding: 0 16px"] .card.card-small[style*="width"],
-  main > div[style*="padding: 0 16px"] > div > .card.card-small {
-    max-width: calc(25% - 6px) !important;
+  main > div[style*="padding: '0 16px'"] > div > .card.card-small,
+  main > div[style*="padding: 0 16px"] .card.card-small div[style],
+  main > div[style*="padding: 0 16px"] .card.card-small div[style*="maxWidth"],
+  main > div[style*="padding: 0 16px"] .card.card-small div[style*="width"] {
     width: calc(25% - 6px) !important;
+    max-width: calc(25% - 6px) !important;
     flex: 0 0 calc(25% - 6px) !important;
+  }
+
+  /* CardSmall image container override */
+  main > div[style*="padding: 0 16px"] .card.card-small .card-small-image-wrapper,
+  main > div[style*="padding: 0 16px"] .card.card-small .card-small-image-wrapper[style] {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* CardSmall image override */
+  main > div[style*="padding: 0 16px"] .card.card-small .card-small-image,
+  main > div[style*="padding: 0 16px"] .card.card-small .card-small-image[style],
+  main > div[style*="padding: 0 16px"] .card.card-small .card-small-video,
+  main > div[style*="padding: 0 16px"] .card.card-small .card-small-video[style] {
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    display: block !important;
+    object-fit: contain !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: transform 0.2s !important;
+    background-color: #f0f0f0 !important;
   }
 
   /* Hide content and actions on mobile */
@@ -680,11 +632,14 @@ select {
 
   .card-small-image,
   .card-small-video {
-    width: 100% !important;
+    max-width: 100% !important;
+    width: auto !important;
     height: auto !important;
+    display: block !important;
     border-radius: 8px !important;
     cursor: pointer !important;
     transition: transform 0.2s !important;
+    background-color: #f0f0f0 !important;
   }
 
   .card-small-image:active,

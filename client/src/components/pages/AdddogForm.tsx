@@ -619,7 +619,7 @@ const AdddogForm: React.FC = () => {
                 </div>
               ) : (
                 <div className="preview-wrap">
-                  <img src={smallPreview || mediaPreview} alt="preview" />
+                  <img src={smallPreview || mediaPreview} alt="preview" style={{ maxWidth: '150px', maxHeight: '150px', objectFit: 'contain' }} />
                   <button type="button" className="view-full" onClick={() => window.open(mediaPreview, '_blank')}>View full</button>
                 </div>
               )}

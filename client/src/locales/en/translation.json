@@ -274,12 +274,18 @@
     "adoptionPending": "Adoption pending for this dog.",
     "confirmAdoption": "Confirm Adoption",
     "confirming": "Confirming...",
-    "waitingForOtherParty": "Waiting for the other party to confirm...",
+    "waitingForOtherParty": "Waiting for other party to confirm...",
     "cancelAdoption": "Cancel Adoption",
     "adoptionConfirmed": "Adoption confirmed!",
     "adoptionConfirmError": "Failed to confirm adoption",
-    "adoptionCanceled": "Adoption canceled",
-    "adoptionCancelError": "Failed to cancel adoption"
+    "adoptionCanceled": "Adoption cancelled",
+    "adoptionCancelError": "Failed to cancel adoption",
+    "adoptionNotFound": "This adoption request has been cancelled or is no longer available.",
+    "actionFailed": "Action failed",
+    "years": "years",
+    "noMessagesYet": "No messages yet.",
+    "socketNotConnected": "Socket not connected. Check backend/server.",
+    "searching": "Searching..."
   },
   "adoptionRequests": {
     "failedToFetch": "Failed to fetch adoption requests",

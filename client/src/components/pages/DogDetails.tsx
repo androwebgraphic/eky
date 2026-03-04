@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import DogImageSlider from '../DogImageSlider';
 import { useTranslation } from 'react-i18next';
 import 'leaflet/dist/leaflet.css';
+import '../../css/modal.css';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMapModal } from '../../contexts/MapModalContext';
 
@@ -51,6 +51,16 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   const { t } = useTranslation();
   const { user: currentUser, isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist } = useAuth();
   const { showMap: showMapModal, hideMap: hideMapModal } = useMapModal();
+  
+  // Helper function to get API base URL - define before use in event listeners
+  const getApiBase = () => {
+    if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return `http://${window.location.hostname}:3001`;
+    }
+    return `http://${window.location.hostname}:3001`;
+  };
+  const apiBase = getApiBase();
   
   // Safely check if current user is the owner
   // If owner data is missing or incomplete, assume NOT owner to allow buttons to show
@@ -105,62 +115,120 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [cancelSuccess, setCancelSuccess] = useState(false);
+  const [isPerformingAction, setIsPerformingAction] = useState(false); // Flag to prevent state overwrite during actions
 
-  // Reset state when dog changes
+  // Reset state when dog changes (only when _id changes, not when adoptionStatus/adoptionQueue change from props)
   React.useEffect(() => {
-    setAdoptionStatus(adoptionStatus);
-    setAdoptionQueue(adoptionQueue);
-    setAdoptLoading(false);
-    setAdoptError(null);
-    setCancelReason('');
-    setCancelLoading(false);
-    setCancelError(null);
-    setCancelSuccess(false);
-    console.log('[DogDetails] Reset state for dog:', _id);
-  }, [_id]);
-    // Odustani handler
-    const handleCancelAdoption = async () => {
-      if (!_id) return;
-      setCancelLoading(true);
+    // Don't reset state if we're in the middle of performing an action
+    if (!isPerformingAction) {
+      setAdoptionStatus(adoptionStatus);
+      setAdoptionQueue(adoptionQueue);
+      setAdoptLoading(false);
+      setAdoptError(null);
+      setCancelReason('');
+      setCancelLoading(false);
       setCancelError(null);
       setCancelSuccess(false);
-      try {
-        const resp = await fetch(`${apiBase}/api/dogs/${_id}/adopt-cancel`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
-          },
-          body: JSON.stringify({ reason: cancelReason })
-        });
-        const data = await resp.json();
-        if (!resp.ok) {
-          setCancelError(data.message || 'Error');
-          throw new Error(data.message || 'Error');
+      console.log('[DogDetails] Reset state for dog:', _id);
+    }
+  }, [_id, isPerformingAction]);
+
+  // Listen for dog updates from Socket.IO (via ChatApp window events)
+  React.useEffect(() => {
+    const handleDogUpdated = (event: Event) => {
+      console.log('[DogDetails] dogUpdated event received');
+      console.log('[DogDetails] Current dog ID:', _id);
+      // Refetch dog data to get latest status
+      if (_id) {
+        const headers: Record<string, string> = {};
+        const token = localStorage.getItem('token');
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
         }
-        setCancelSuccess(true);
-        setAdoptionStatus(data.dog?.adoptionStatus || 'available');
-        setAdoptionQueue(data.dog?.adoptionQueue);
-        setCancelReason('');
-        if (onDogUpdate && data.dog) onDogUpdate(data.dog);
-        if (onDogChanged) onDogChanged();
-        // Force state refresh after cancel - wait a bit for the update to propagate
-        setTimeout(() => {
-          setAdoptionStatus(data.dog?.adoptionStatus || 'available');
-          setAdoptionQueue(data.dog?.adoptionQueue);
-          setCancelSuccess(false);
-        }, 100);
-      } catch (e: any) {
-        setCancelError(e.message || 'Error');
-      } finally {
-        setCancelLoading(false);
+        fetch(`${apiBase}/api/dogs/${_id}`, { headers })
+          .then(res => {
+            if (res.status === 404) {
+              // Dog was deleted (adopted)
+              console.log('[DogDetails] Dog deleted (adopted)');
+              setAdoptionStatus('adopted');
+              setAdoptionQueue(null);
+              if (onDogUpdate) onDogUpdate({ _id, adoptionStatus: 'adopted' });
+              if (onDogChanged) onDogChanged();
+              if (onClose) setTimeout(() => onClose(), 500);
+              return null;
+            }
+            return res.json();
+          })
+          .then(data => {
+            if (data) {
+              console.log('[DogDetails] Updated dog data:', data);
+              setAdoptionStatus(data.adoptionStatus);
+              setAdoptionQueue(data.adoptionQueue);
+              if (onDogUpdate) onDogUpdate(data);
+              if (onDogChanged) onDogChanged();
+            }
+          })
+          .catch(err => {
+            console.error('[DogDetails] Failed to fetch updated dog:', err);
+          });
       }
     };
+
+    // Listen for custom dogUpdated event
+    window.addEventListener('dogUpdated', handleDogUpdated);
+
+    return () => {
+      window.removeEventListener('dogUpdated', handleDogUpdated);
+    };
+  }, [_id, apiBase, onDogUpdate, onDogChanged, onClose]);
+
+  // Odustani handler
+  const handleCancelAdoption = async () => {
+    if (!_id) return;
+    setCancelLoading(true);
+    setCancelError(null);
+    setCancelSuccess(false);
+    try {
+      const resp = await fetch(`${apiBase}/api/dogs/${_id}/adopt-cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': localStorage.getItem('token') ? `Bearer ${localStorage.getItem('token')}` : ''
+        },
+        body: JSON.stringify({ reason: cancelReason })
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        setCancelError(data.message || 'Error');
+        throw new Error(data.message || 'Error');
+      }
+      setCancelSuccess(true);
+      setAdoptionStatus(data.dog?.adoptionStatus || 'available');
+      setAdoptionQueue(data.dog?.adoptionQueue);
+      setCancelReason('');
+      if (onDogUpdate && data.dog) onDogUpdate(data.dog);
+      if (onDogChanged) onDogChanged();
+      // Force state refresh after cancel - wait a bit for the update to propagate
+      setTimeout(() => {
+        setAdoptionStatus(data.dog?.adoptionStatus || 'available');
+        setAdoptionQueue(data.dog?.adoptionQueue);
+        setCancelSuccess(false);
+      }, 100);
+    } catch (e: any) {
+      setCancelError(e.message || 'Error');
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
   // Optionally: fetch status from props if available
 
   const handleAdopt = async () => {
     if (!_id) return;
-    // Notify ChatApp to set adoptionDogId
+    // Open chat with the dog owner and notify ChatApp to set adoptionDogId
+    if (owner && owner._id) {
+      window.dispatchEvent(new CustomEvent('openChatModal', { detail: { userId: owner._id } }));
+    }
     window.dispatchEvent(new CustomEvent('dog-adopt-initiate', { detail: { dogId: _id } }));
     setAdoptLoading(true);
     setAdoptError(null);
@@ -184,21 +252,13 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
       // Force state refresh after adoption
       setAdoptionStatus(data.dog?.adoptionStatus);
       setAdoptionQueue(data.dog?.adoptionQueue);
-    } catch (e: any) {
-      setAdoptError(e.message || 'Error');
-    } finally {
-      setAdoptLoading(false);
-    }
+                        } catch (e: any) {
+                          setAdoptError(e.message || 'Error');
+                        } finally {
+                          setAdoptLoading(false);
+                          setIsPerformingAction(false);
+                        }
   };
-  const getApiBase = () => {
-    if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return `http://${window.location.hostname}:3001`;
-    }
-    return `http://${window.location.hostname}:3001`;
-  };
-  const apiBase = getApiBase();
-
 
   // Prepare images for DogImageSlider (always use largest available, prefer 1024px, always pass full Cloudinary URL)
   // Deduplicate images by base name (ignore size/hash/extension variants)
@@ -321,47 +381,6 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
 
   return (
     <>
-      <style>{`
-        @media (max-width: 600px) {
-          .dog-details-mobile-actions button:not(#add-to-list) {
-            width: 100% !important;
-            margin-bottom: 12px !important;
-            box-sizing: border-box !important;
-            display: block !important;
-            min-height: 50px !important;
-            font-size: 16px !important;
-            font-weight: bold !important;
-            padding: 12px 16px !important;
-            text-align: center !important;
-          }
-          .dog-details-mobile-actions button#add-to-list {
-            margin-bottom: 16px !important;
-            width: auto !important;
-            height: 32px !important;
-            font-size: 11px !important;
-            padding: 0 8px !important;
-            font-weight: 600 !important;
-            color: #75171a !important;
-          }
-          .dog-details-buttons-container {
-            flex-direction: column !important;
-          }
-        }
-        @media (min-width: 601px) {
-          .dog-details-buttons-container {
-            display: flex;
-            gap: 12px;
-            flex-direction: row;
-          }
-          .dog-details-buttons-container button {
-            flex: 1;
-            margin-left: 0 !important;
-          }
-          .dog-details-buttons-container button#add-to-list {
-            flex: 0 0 auto !important;
-          }
-        }
-      `}</style>
       <div className="card-details">
       <div className="img">
         {sliderImages.length > 0 && (
@@ -459,29 +478,15 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
             </div>
           )}
       </div>
-      <div 
-        className="card-actions call-to-action dog-details-mobile-actions"
-        style={{
-          background: 'white',
-          padding: '16px',
-          width: '100%',
-          boxSizing: 'border-box',
-          marginTop: '20px',
-          paddingBottom: '20px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-          alignItems: 'stretch'
-        }}
-      >
+      <div className="card-actions call-to-action dog-details-mobile-actions">
         {/* Show buttons for authenticated users - show all buttons and handle owner check inside each button */}
         {isAuthenticated && _id && (
           <>
             {/* Edit/Delete buttons for owner */}
             {isOwner && (
-              <div className="dog-details-buttons-container" style={{ marginBottom: '12px' }}>
+              <div className="dog-details-buttons-container">
                 <button 
-                  className="details"
+                  className="details edit-dog-btn"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (onEdit) {
@@ -508,22 +513,11 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                       });
                     }
                   }}
-                  style={{
-                    backgroundColor: '#ff9800',
-                    color: 'white',
-                    border: 'none',
-                    fontWeight: 600,
-                    padding: '12px 16px',
-                    borderRadius: 6,
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    minHeight: '50px'
-                  }}
                 >
                   {t('button.edit', t('edit'))}
                 </button>
                 <button 
-                  className="details"
+                  className="details delete-dog-btn"
                   onClick={async (e) => {
                     e.stopPropagation();
                     if (window.confirm(t('button.confirmDelete') || 'Are you sure you want to delete this dog?')) {
@@ -547,17 +541,6 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                       }
                     }
                   }}
-                  style={{
-                    backgroundColor: '#e74c3c',
-                    color: 'white',
-                    border: 'none',
-                    fontWeight: 600,
-                    padding: '12px 16px',
-                    borderRadius: 6,
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    minHeight: '50px'
-                  }}
                 >
                   {t('button.remove', t('delete'))}
                 </button>
@@ -569,25 +552,6 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 className="details"
                 onClick={() => {
                   handleWishlistToggle();
-                }}
-                style={{
-                  backgroundColor: '#dbb69d',
-                  color: 'white',
-                  border: 'none',
-                  fontWeight: 600,
-                  height: 32,
-                  fontSize: 11,
-                  padding: '0 8px',
-                  borderRadius: 6,
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: isInWishlist(_id) ? '0 0 0 2px #dbb69d' : '0 0 0 2px #dbb69d',
-                  transition: 'background 0.2s, box-shadow 0.2s',
-                  whiteSpace: 'nowrap',
-                  flex: '0 0 auto'
                 }}
               >
                 {isInWishlist(_id)
@@ -602,9 +566,9 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 {adoptionQueueState.adopter === currentUser._id && !adoptionQueueState.adopterConfirmed && (
                   <div>
                     <button
-                      className="details"
-                      style={{ backgroundColor: '#28a745', color: 'white', marginRight: 8 }}
+                      className="details adopt-confirm-btn"
                       onClick={async () => {
+                        setIsPerformingAction(true);
                         setAdoptLoading(true);
                         setAdoptError(null);
                         try {
@@ -634,6 +598,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                           setAdoptError(e.message || 'Error');
                         } finally {
                           setAdoptLoading(false);
+                          setIsPerformingAction(false);
                         }
                       }}
                       disabled={adoptLoading}
@@ -649,8 +614,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                       disabled={cancelLoading}
                     />
                     <button
-                      className="details"
-                      style={{ backgroundColor: '#e74c3c', color: 'white', marginLeft: 0 }}
+                      className="details adopt-cancel-btn"
                       onClick={handleCancelAdoption}
                       disabled={cancelLoading}
                     >
@@ -661,9 +625,9 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 {/* Owner: can confirm if not yet confirmed */}
                 {owner && owner._id === currentUser._id && !adoptionQueueState.ownerConfirmed && (
                   <button
-                    className="details"
-                    style={{ backgroundColor: '#28a745', color: 'white', marginRight: 8 }}
+                    className="details adopt-confirm-btn"
                     onClick={async () => {
+                      setIsPerformingAction(true);
                       setAdoptLoading(true);
                       setAdoptError(null);
                       try {
@@ -689,11 +653,12 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                           if (onDogUpdate) onDogUpdate(data.dog);
                           if (onDogChanged) onDogChanged();
                         }
-                      } catch (e: any) {
-                        setAdoptError(e.message || 'Error');
-                      } finally {
-                        setAdoptLoading(false);
-                      }
+                        } catch (e: any) {
+                          setAdoptError(e.message || 'Error');
+                        } finally {
+                          setAdoptLoading(false);
+                          setIsPerformingAction(false);
+                        }
                     }}
                     disabled={adoptLoading}
                   >
@@ -719,9 +684,8 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
               <div>
                 <button
                   id="adopt"
-                  className="details"
+                  className="details adopt-requested-btn"
                   disabled
-                  style={{ marginLeft: 12, backgroundColor: '#aaa', color: 'white' }}
                 >
                   {t('button.requested') || 'Zahtjev poslan'}
                 </button>
@@ -735,10 +699,9 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
               <div>
                 <button
                   id="adopt"
-                  className="details"
+                  className="details adopt-btn"
                   onClick={handleAdopt}
                   disabled={adoptLoading || adoptionStatusState === 'adopted'}
-                  style={{ marginLeft: 12, backgroundColor: '#4CAF50', color: '#f8f8f8', padding: '16px 24px', fontSize: '18px', fontWeight: 'bold', minHeight: '56px' }}
                 >
                   {adoptLoading
                     ? t('button.sending') || 'Slanje...'

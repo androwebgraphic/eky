@@ -53,7 +53,22 @@ router.post('/superadmin/adopt-cancel/:id', authMiddleware, async (req, res) => 
 
 // Parameterized routes
 router.post('/:id/adopt-confirm', authMiddleware, confirmAdoption);
-router.post('/:id/adopt-cancel', authMiddleware, cancelAdoption);
+router.post('/:id/adopt-cancel', authMiddleware, async (req, res) => {
+  console.log('[ROUTE DEBUG] /:id/adopt-cancel route matched for dogId:', req.params.id);
+  console.log('[ROUTE DEBUG] req.user:', req.user);
+  console.log('[ROUTE DEBUG] req.user._id:', req.user._id);
+  console.log('[ROUTE DEBUG] req.user.role:', req.user.role);
+  console.log('[ROUTE DEBUG] About to call cancelAdoption...');
+  
+  try {
+    return await cancelAdoption(req, res);
+  } catch (error) {
+    console.error('[ROUTE DEBUG] Error in route handler:', error);
+    if (!res.headersSent) {
+      return res.status(500).json({ message: 'Server error in route handler', error: error.message });
+    }
+  }
+});
 router.post('/:id/adopt-request', authMiddleware, adoptRequest);
 router.get('/:id', getDogById);
 router.patch('/:id', authMiddleware, cpUpload, updateDog);

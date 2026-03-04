@@ -241,6 +241,32 @@ function DogList() {
 		};
 
 		fetchDogs();
+
+		// Listen for dog updates from Socket.IO (via ChatApp window events)
+		const handleDogUpdated = async (event: Event) => {
+			console.log('[DOG-LIST] dogUpdated event received');
+			// Refetch dogs to get latest data
+			const headers: Record<string, string> = {};
+			const authToken = token || localStorage.getItem('token');
+			if (authToken) {
+				headers['Authorization'] = `Bearer ${authToken}`;
+			}
+			fetch(`${getApiUrl()}/api/dogs`, { headers })
+				.then(res => res.json())
+				.then(data => {
+					setDogs(Array.isArray(data) ? data : []);
+				})
+				.catch(err => {
+					console.error('[DOG-LIST] Failed to refresh dogs after update:', err);
+				});
+		};
+
+		// Listen for custom dogUpdated event
+		window.addEventListener('dogUpdated', handleDogUpdated);
+
+		return () => {
+			window.removeEventListener('dogUpdated', handleDogUpdated);
+		};
 	}, [token]);
 
 	const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 900;

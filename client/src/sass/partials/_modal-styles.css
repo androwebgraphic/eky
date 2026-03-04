@@ -267,3 +267,237 @@
     opacity: 1;
   }
 }
+/* DogDetails Mobile Modal - Height & Button Layout */
+@media (max-width: 767px) {
+  /* Modal fits EXACTLY between header and footer */
+  .modal-overlay,
+  .ReactModal__Overlay {
+    padding: 0 !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    height: calc(100vh - 120px) !important;
+    top: 60px !important;
+  }
+  .modal,
+  .ReactModal__Content {
+    max-height: 100% !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    padding: 16px !important;
+    margin: 0 !important;
+    position: relative !important;
+    inset: 0 !important;
+  }
+  /* Parent container */
+  .card-actions.dog-details-mobile-actions {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-box-direction: normal !important;
+        -ms-flex-direction: column !important;
+            flex-direction: column !important;
+    width: 100% !important;
+  }
+  /* Main button container - use flex for layout */
+  .dog-details-buttons-container {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -webkit-box-orient: horizontal !important;
+    -webkit-box-direction: normal !important;
+        -ms-flex-direction: row !important;
+            flex-direction: row !important;
+    -ms-flex-wrap: wrap !important;
+        flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 10px !important;
+    margin-bottom: 10px !important;
+    -webkit-box-align: stretch !important;
+        -ms-flex-align: stretch !important;
+            align-items: stretch !important;
+  }
+  /* Direct children buttons - force flex basis */
+  .dog-details-buttons-container > button,
+  .dog-details-buttons-container > .details {
+    -webkit-box-flex: 0 !important;
+        -ms-flex: 0 0 calc(50% - 5px) !important;
+            flex: 0 0 calc(50% - 5px) !important;
+    width: calc(50% - 5px) !important;
+    -webkit-box-sizing: border-box !important;
+            box-sizing: border-box !important;
+    min-height: 50px !important;
+    display: -webkit-inline-box !important;
+    display: -ms-inline-flexbox !important;
+    display: inline-flex !important;
+    -webkit-box-align: center !important;
+        -ms-flex-align: center !important;
+            align-items: center !important;
+    -webkit-box-pack: center !important;
+        -ms-flex-pack: center !important;
+            justify-content: center !important;
+    text-align: center !important;
+  }
+  /* Nested wrapper divs (for adoption confirm/cancel) - override inline styles */
+  .dog-details-buttons-container > div {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -webkit-box-orient: horizontal !important;
+    -webkit-box-direction: normal !important;
+        -ms-flex-direction: row !important;
+            flex-direction: row !important;
+    -ms-flex-wrap: wrap !important;
+        flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 10px !important;
+    margin-top: 0 !important;
+    margin-bottom: 10px !important;
+  }
+  /* All buttons within nested divs */
+  .dog-details-buttons-container > div > button,
+  .dog-details-buttons-container > div > .details {
+    width: calc(50% - 5px) !important;
+    -webkit-box-sizing: border-box !important;
+            box-sizing: border-box !important;
+    min-height: 50px !important;
+    -webkit-box-flex: 0 !important;
+        -ms-flex: 0 0 calc(50% - 5px) !important;
+            flex: 0 0 calc(50% - 5px) !important;
+    display: -webkit-inline-box !important;
+    display: -ms-inline-flexbox !important;
+    display: inline-flex !important;
+    -webkit-box-align: center !important;
+        -ms-flex-align: center !important;
+            align-items: center !important;
+    -webkit-box-pack: center !important;
+        -ms-flex-pack: center !important;
+            justify-content: center !important;
+    text-align: center !important;
+  }
+  /* Textarea should be full width and come before buttons in the flex order */
+  .dog-details-buttons-container textarea {
+    width: 100% !important;
+    margin: 10px 0 !important;
+    -webkit-box-ordinal-group: 0 !important;
+        -ms-flex-order: -1 !important;
+            order: -1 !important;
+  }
+  /* Textarea should be full width */
+  .dog-details-buttons-container textarea {
+    width: 100% !important;
+    margin: 10px 0 !important;
+    -webkit-box-flex: 1 !important;
+        -ms-flex: 1 1 100% !important;
+            flex: 1 1 100% !important;
+  }
+  /* Force box-sizing on all elements */
+  .dog-details-buttons-container * {
+    -webkit-box-sizing: border-box !important;
+            box-sizing: border-box !important;
+  }
+  /* UNIVERSAL: ALL buttons in button container are 50% width */
+  .dog-details-buttons-container button,
+  .dog-details-buttons-container .details {
+    width: calc(50% - 5px) !important;
+    -webkit-box-sizing: border-box !important;
+            box-sizing: border-box !important;
+    min-height: 50px !important;
+    -webkit-box-flex: 0 !important;
+        -ms-flex: 0 0 calc(50% - 5px) !important;
+            flex: 0 0 calc(50% - 5px) !important;
+    display: -webkit-inline-box !important;
+    display: -ms-inline-flexbox !important;
+    display: inline-flex !important;
+    -webkit-box-align: center !important;
+        -ms-flex-align: center !important;
+            align-items: center !important;
+    -webkit-box-pack: center !important;
+        -ms-flex-pack: center !important;
+            justify-content: center !important;
+    text-align: center !important;
+  }
+  /* Edit button - orange */
+  .dog-details-buttons-container .edit-dog-btn {
+    background-color: #ff9800 !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+  }
+  /* Delete button - red */
+  .dog-details-buttons-container .delete-dog-btn {
+    background-color: #e74c3c !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+  }
+  /* Wishlist button */
+  .dog-details-buttons-container button#add-to-list {
+    background-color: #dbb69d !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+  }
+  /* Adopt button - green */
+  .dog-details-buttons-container button#adopt {
+    background-color: #4CAF50 !important;
+    color: #f8f8f8 !important;
+    border: none !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+  }
+  /* Adopt Confirm button */
+  .adopt-confirm-btn {
+    background-color: #28a745 !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+  }
+  /* Adopt Cancel button */
+  .adopt-cancel-btn {
+    background-color: #e74c3c !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+  }
+  /* Adopt Requested button */
+  .adopt-requested-btn {
+    background-color: #aaa !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    cursor: not-allowed !important;
+  }
+  /* Adopt button (normal) */
+  .adopt-btn {
+    background-color: #4CAF50 !important;
+    color: #f8f8f8 !important;
+    font-weight: bold !important;
+    border: none !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+  }
+}

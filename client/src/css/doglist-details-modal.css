@@ -12,34 +12,38 @@
 
   /* Mobile Modal Fix */
 @media (max-width: 899px) {
-  /* Modal overlay - full screen backdrop */
+  /* Modal overlay - fits between header and footer */
   .doglist-details-modal.mobile {
     position: fixed !important;
-    top: 0 !important;
+    top: 60px !important;
     left: 0 !important;
     right: 0 !important;
-    bottom: 0 !important;
+    bottom: 60px !important;
     width: 100vw !important;
-    height: 100vh !important;
+    height: calc(100vh - 120px) !important;
     background: rgba(0, 0, 0, 0.5) !important;
     z-index: 2147483647 !important;
     display: block !important;
-    overflow-y: auto !important;
+    overflow-y: hidden !important;
     -webkit-overflow-scrolling: touch !important;
   }
 
-  /* Modal content container - white background card */
+  /* Modal content container - white background card, 100% height with scroll */
   .doglist-details-content {
     background: #ffffff !important;
     border-radius: 12px !important;
-    width: calc(100% - 32px) !important;
-    max-width: 600px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
     position: relative !important;
     padding: 16px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
-    margin: 16px auto !important;
-    display: block !important;
-    overflow: visible !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    box-sizing: border-box !important;
   }
 
   /* Override ALL inline styles */
@@ -62,11 +66,15 @@
     pointer-events: auto !important;
   }
 
-  /* Card actions - ensure not hidden */
+  /* Card actions - flex row to combine all button containers */
   .doglist-details-content .card-actions,
   .doglist-details-content .card-actions.call-to-action,
   .doglist-details-content .card-actions.call-to-action.dog-details-mobile-actions {
-    display: block !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 10px !important;
     visibility: visible !important;
     opacity: 1 !important;
     overflow: visible !important;
@@ -74,12 +82,106 @@
     background: #ffffff !important;
   }
 
-  /* Button containers */
+  /* Button containers - flex row for 2 buttons per row */
   .doglist-details-content .dog-details-buttons-container {
     display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 10px !important;
+    margin: 0 !important;
     overflow: visible !important;
+  }
+
+  /* ALL buttons - 50% width */
+  .doglist-details-content .dog-details-buttons-container button,
+  .doglist-details-content .dog-details-buttons-container .details {
+    width: calc(50% - 5px) !important;
+    flex: 0 0 calc(50% - 5px) !important;
+    box-sizing: border-box !important;
+    min-height: 50px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    border: none !important;
+    margin: 0 !important;
+  }
+
+  /* Nested wrapper divs */
+  .doglist-details-content .dog-details-buttons-container > div {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 10px !important;
+    margin-top: 0 !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Buttons in nested divs */
+  .doglist-details-content .dog-details-buttons-container > div > button,
+  .doglist-details-content .dog-details-buttons-container > div > .details {
+    width: calc(50% - 5px) !important;
+    flex: 0 0 calc(50% - 5px) !important;
+  }
+
+  /* Textarea - full width */
+  .doglist-details-content .dog-details-buttons-container textarea {
+    width: 100% !important;
+    margin: 10px 0 !important;
+    order: -1 !important;
+    flex: 1 1 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Button colors */
+  .doglist-details-content .dog-details-buttons-container .edit-dog-btn {
+    background-color: #ff9800 !important;
+    color: white !important;
+  }
+
+  .doglist-details-content .dog-details-buttons-container .delete-dog-btn {
+    background-color: #e74c3c !important;
+    color: white !important;
+  }
+
+  .doglist-details-content .dog-details-buttons-container button#add-to-list {
+    background-color: #dbb69d !important;
+    color: white !important;
+  }
+
+  .doglist-details-content .dog-details-buttons-container button#adopt {
+    background-color: #4CAF50 !important;
+    color: #f8f8f8 !important;
+    font-weight: bold !important;
+  }
+
+  .doglist-details-content .adopt-confirm-btn {
+    background-color: #28a745 !important;
+    color: white !important;
+  }
+
+  .doglist-details-content .adopt-cancel-btn {
+    background-color: #e74c3c !important;
+    color: white !important;
+  }
+
+  .doglist-details-content .adopt-requested-btn {
+    background-color: #aaa !important;
+    color: white !important;
+    cursor: not-allowed !important;
+  }
+
+  .doglist-details-content .adopt-btn {
+    background-color: #4CAF50 !important;
+    color: #f8f8f8 !important;
+    font-weight: bold !important;
   }
 
   /* Ensure action buttons are visible on mobile */

@@ -474,10 +474,10 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                   <span className="field-label">{t('userProfile.phone')}:</span> {typedUser ? typedUser.phone : ''}
                 </div>
                 <div className="modal-button-group">
-                  <button onClick={() => setIsEditing(true)} className="modal-btn btn-primary">
+                  <button onClick={() => setIsEditing(true)} className="btn-primary">
                     {t('userProfile.editProfile')}
                   </button>
-                  <button onClick={handleDeleteAccount} disabled={loading} className="modal-btn btn-danger">
+                  <button onClick={handleDeleteAccount} disabled={loading} className="btn-danger">
                     {loading ? t('userProfile.deleting') : t('userProfile.deleteAccount')}
                   </button>
                 </div>

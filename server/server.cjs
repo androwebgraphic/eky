@@ -24,7 +24,7 @@ const adoptionRoutes = require('./routes/adoptionRoutes.js'); // <-- Add adoptio
 const app = express();
 
 // 3. Set up CORS middleware FIRST
-const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://172.20.10.2:3000', 'http://172.20.10.2:3001', 'http://192.168.1.100:3000', 'http://192.168.1.100:3001'];
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://172.20.10.4:3000', 'http://172.20.10.4:3001', 'http://192.168.1.100:3000', 'http://192.168.1.100:3001'];
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);
@@ -53,6 +53,16 @@ app.get('/health', (req, res) => {
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(cookieParser());
+
+// Log all POST requests to /api/dogs for debugging
+app.use('/api/dogs', (req, res, next) => {
+  if (req.method === 'POST') {
+    console.log('[ROUTE INTERCEPT] POST to /api/dogs detected');
+    console.log('[ROUTE INTERCEPT] Full path:', req.originalUrl);
+    console.log('[ROUTE INTERCEPT] params:', req.params);
+  }
+  next();
+});
 
 // 9. Initialize Passport
 app.use(passport.initialize());
@@ -98,7 +108,7 @@ const httpServer = http.createServer({ maxHeaderSize: 1024 * 1024 }, app);
 httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`Server started at:`);
   console.log(`  Local:   http://localhost:${PORT}`);
-  console.log(`  Network: http://172.20.10.2:${PORT}`);
+  console.log(`  Network: http://172.20.10.4:${PORT}`);
 });
 
 const { Server: SocketIOServer } = require('socket.io');

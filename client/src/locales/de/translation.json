@@ -281,16 +281,19 @@
     "send": "Senden",
     "block": "Blockieren",
     "unblock": "Entblockieren",
-    "deleteConversation": "Gespräch löschen",
+    "deleteConversation": "Unterhaltung löschen",
     "adoptionPending": "Adoption ausstehend für diesen Hund.",
     "confirmAdoption": "Adoption bestätigen",
-    "confirming": "Bestätigung...",
-    "waitingForOtherParty": "Warten auf Bestätigung der anderen Partei...",
+    "confirming": "Bestätige...",
+    "waitingForOtherParty": "Warte auf Bestätigung der anderen Partei...",
     "cancelAdoption": "Adoption abbrechen",
     "adoptionConfirmed": "Adoption bestätigt!",
     "adoptionConfirmError": "Bestätigung der Adoption fehlgeschlagen",
     "adoptionCanceled": "Adoption abgebrochen",
-    "adoptionCancelError": "Abbrechen der Adoption fehlgeschlagen"
+    "adoptionCancelError": "Abbrechen der Adoption fehlgeschlagen",
+    "adoptionNotFound": "Diese Adoptionsanfrage wurde storniert oder ist nicht mehr verfügbar.",
+    "actionFailed": "Aktion fehlgeschlagen",
+    "years": "Jahre"
   },
   "alerts": {
     "pleaseLoginToAdopt": "Bitte melden Sie sich an, um einen Hund zu adoptieren.",

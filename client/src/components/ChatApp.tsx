@@ -48,6 +48,17 @@ interface Message {
   isOwner?: boolean;
   requiresAction?: boolean;
   actionTakenBy?: string;
+  dogData?: {
+    _id: string;
+    name: string;
+    breed?: string;
+    age?: number;
+    size?: string;
+    gender?: string;
+    location?: string;
+    thumbnail?: { url: string };
+    images?: Array<{ url: string }>;
+  };
 }
 
 interface Conversation {
@@ -86,6 +97,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
   
   const [dogStatusMap, setDogStatusMap] = useState<Record<string, string>>({});
   const [dogOwnerMap, setDogOwnerMap] = useState<Record<string, string>>({});
+  const [dogDataMap, setDogDataMap] = useState<Record<string, any>>({});
   const [adoptionDogId, setAdoptionDogId] = useState('');
   const [adoptionIsOwner, setAdoptionIsOwner] = useState(false);
   const [selectedConvo, setSelectedConvo] = useState<Conversation | null>(null);
@@ -334,12 +346,19 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
         body: JSON.stringify({ reason: '' })
       });
       if (res.ok) {
-        setNotification(t('adoptionCanceled'));
+        setNotification(t('adoptionCanceled') || 'Adoption cancelled');
         setAdoptionDogId('');
         setAdoptionIsOwner(false);
+        // Update dog status map to reflect cancellation
+        setDogStatusMap(prev => ({ ...prev, [dogId]: 'available' }));
+      } else {
+        const errorData = await res.json().catch(() => ({ message: 'Unknown error' }));
+        console.error('[CANCEL ADOPTION] Error response:', errorData);
+        setNotification(errorData.message || t('adoptionCancelError') || 'Failed to cancel adoption');
       }
     } catch (err) {
-      setNotification(t('adoptionCancelError'));
+      console.error('[CANCEL ADOPTION] Exception:', err);
+      setNotification(t('adoptionCancelError') || 'Failed to cancel adoption');
     }
   };
 
@@ -371,11 +390,16 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
         }
       } else {
         const error = await res.json();
-        setNotification(error.error || 'Action failed');
+        // Better error message for cancelled/adoption requests
+        if (res.status === 404) {
+          setNotification(t('adoptionNotFound') || 'This adoption request has been cancelled or is no longer available.');
+        } else {
+          setNotification(error.error || t('actionFailed') || 'Action failed');
+        }
       }
     } catch (err) {
       console.error('Error handling adoption action:', err);
-      setNotification('Failed to handle adoption action');
+      setNotification(t('actionFailed') || 'Failed to handle adoption action');
     }
   };
 
@@ -619,6 +643,25 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       return;
     }
     
+    // Fetch dog data immediately
+    fetch(`${getApiUrl()}/api/dogs/${adoptionDogId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        }
+        return null;
+      })
+      .then(dog => {
+        if (dog) {
+          setDogDataMap(prev => ({ ...prev, [adoptionDogId]: dog }));
+          setDogStatusMap(prev => ({ ...prev, [adoptionDogId]: dog.adoptionStatus }));
+          setDogOwnerMap(prev => ({ ...prev, [adoptionDogId]: dog.owner }));
+        }
+      })
+      .catch(err => console.error('Error fetching dog data:', err));
+    
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`${getApiUrl()}/api/dogs/${adoptionDogId}`, {
@@ -626,6 +669,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
         });
         if (res.ok) {
           const dog = await res.json();
+          setDogDataMap(prev => ({ ...prev, [adoptionDogId]: dog }));
           setDogStatusMap(prev => ({ ...prev, [adoptionDogId]: dog.adoptionStatus }));
           setDogOwnerMap(prev => ({ ...prev, [adoptionDogId]: dog.owner }));
           // Clear adoption notice if status is no longer pending
@@ -806,6 +850,28 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     return '/img/chat-icon.svg';
   };
 
+  const getDogImageUrl = (dog: any) => {
+    if (!dog) return '/img/placeholder-dog.jpg';
+    
+    // Check for thumbnail first
+    if (dog.thumbnail?.url) {
+      const url = dog.thumbnail.url;
+      if (/^https?:\/\//.test(url)) return url;
+      if (url.startsWith('/u/dogs/') || url.startsWith('/uploads/')) return getApiUrl() + url;
+      return getApiUrl() + '/' + url.replace(/^\/+/, '');
+    }
+    
+    // Check for images array
+    if (dog.images && dog.images.length > 0 && dog.images[0].url) {
+      const url = dog.images[0].url;
+      if (/^https?:\/\//.test(url)) return url;
+      if (url.startsWith('/u/dogs/') || url.startsWith('/uploads/')) return getApiUrl() + url;
+      return getApiUrl() + '/' + url.replace(/^\/+/, '');
+    }
+    
+    return '/img/placeholder-dog.jpg';
+  };
+
   return (
     <>
       {notification && ReactDOM.createPortal(
@@ -870,7 +936,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
           )}
         </div>
         {isSearching && (
-          <div className="chat-users-empty">Searching...</div>
+          <div className="chat-users-empty">{t('chat.searching') || 'Searching...'}</div>
         )}
         {searchResults.length > 0 && userSearchQuery && (
           <ul className="chat-users-list">
@@ -916,7 +982,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       <div className="chat-app-main">
         {(!socketRef.current || !socketRef.current.connected) && (
           <div className="chat-connection-alert">
-            Socket not connected. Check backend/server.
+            {t('chat.socketNotConnected') || 'Socket not connected. Check backend/server.'}
           </div>
         )}
         {selectedConvo ? (
@@ -944,34 +1010,52 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                 </button>
               </div>
             </div>
-            {adoptionDogId && (
+            {adoptionDogId && dogDataMap[adoptionDogId] && (
               <div className="chat-adoption-notice">
-                <span>{t('adoptionPending') || 'Adoption pending for this dog.'}</span>
-                <div className="chat-adoption-notice-buttons">
+                <div className="chat-adoption-notice-content">
                   {(() => {
-                    const status = dogStatusMap[adoptionDogId];
-                    if (status === 'pending') {
-                      return (
-                        <button
-                          className="chat-adoption-btn"
-                          onClick={() => handleConfirmAdoption(adoptionDogId, adoptionIsOwner)}
-                          disabled={confirmingAdoption}
-                        >
-                          {confirmingAdoption ? (t('confirming') || 'Confirming...') : (t('confirmAdoption') || 'Confirm Adoption')}
-                        </button>
-                      );
-                    }
-                    return null;
+                    const dog = dogDataMap[adoptionDogId];
+                    return (
+                      <div className="chat-adoption-dog-info">
+                        <img
+                          src={getDogImageUrl(dog)}
+                          alt={dog.name}
+                          className="chat-dog-image"
+                        />
+                        <div className="chat-adoption-dog-details">
+                          <h4>{dog.name}</h4>
+                          <p>{dog.breed} • {dog.age} {t('chat.years')} • {dog.size} • {dog.location}</p>
+                          <p>{t('adoptionPending') || 'Adoption pending for this dog.'}</p>
+                        </div>
+                      </div>
+                    );
                   })()}
-                  {adoptionDogId && !adoptionIsOwner && (
-                    <button className="chat-adoption-btn chat-adoption-btn-cancel" onClick={() => handleCancelAdoption(adoptionDogId)}>{t('cancelAdoption') || 'Cancel Adoption'}</button>
-                  )}
+                  <div className="chat-adoption-notice-buttons">
+                    {(() => {
+                      const status = dogStatusMap[adoptionDogId];
+                      if (status === 'pending') {
+                        return (
+                          <button
+                            className="chat-adoption-btn"
+                            onClick={() => handleConfirmAdoption(adoptionDogId, adoptionIsOwner)}
+                            disabled={confirmingAdoption}
+                          >
+                            {confirmingAdoption ? (t('confirming') || 'Confirming...') : (t('confirmAdoption') || 'Confirm Adoption')}
+                          </button>
+                        );
+                      }
+                      return null;
+                    })()}
+                    {adoptionDogId && !adoptionIsOwner && (
+                      <button className="chat-adoption-btn chat-adoption-btn-cancel" onClick={() => handleCancelAdoption(adoptionDogId)}>{t('cancelAdoption') || 'Cancel Adoption'}</button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
             <div className="chat-app-messages">
               {messages.length === 0 ? (
-                <div className="chat-app-empty">No messages yet.</div>
+                <div className="chat-app-empty">{t('noMessagesYet') || 'No messages yet.'}</div>
               ) : (
                 messages.map(msg => {
                   const isAdoptionRequest = msg.messageType === 'adoption_request' && msg.requiresAction && !msg.actionTakenBy;
@@ -983,6 +1067,21 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                       <span className={bubbleClass}>
                         {msg.message}
                       </span>
+                      
+                      {/* Display dog information for adoption requests */}
+                      {msg.dogData && msg.messageType === 'adoption_request' && (
+                        <div className="chat-dog-info">
+                          <img
+                            src={getDogImageUrl(msg.dogData)}
+                            alt={msg.dogData.name}
+                            className="chat-dog-image"
+                          />
+                          <div className="chat-dog-details">
+                            <h4>{msg.dogData.name}</h4>
+                            <p>{msg.dogData.breed} • {msg.dogData.age} {t('chat.years')} • {msg.dogData.size} • {msg.dogData.location}</p>
+                          </div>
+                        </div>
+                      )}
                       
                       {isAdoptionRequest && isOwnerMessage && (
                         <div className="chat-adoption-actions">

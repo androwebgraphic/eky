@@ -539,27 +539,61 @@
 
 /* Adoption notice section */
 .chat-adoption-notice {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
   padding: 8px 10px;
   background: #fff3cd;
   border: 1px solid #ffc107;
   border-radius: 8px;
   margin-bottom: 8px;
   font-size: 13px;
-  flex-wrap: nowrap;
   width: 100%;
   box-sizing: border-box;
 }
 
-.chat-adoption-notice span {
+.chat-adoption-notice-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-adoption-dog-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-dog-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+  flex-shrink: 0;
+  background-color: #f0f0f0;
+}
+
+.chat-adoption-dog-details {
   flex: 1;
+  min-width: 0;
+}
+
+.chat-adoption-dog-details h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.3;
+}
+
+.chat-adoption-dog-details p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.chat-adoption-dog-details p:last-child {
   color: #856404;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-style: italic;
 }
 
 .chat-adoption-notice-buttons {
@@ -577,18 +611,19 @@
   cursor: pointer;
   font-weight: 600;
   transition: background 0.2s;
+  color: white !important;
+}
+
+.chat-adoption-btn:not(.chat-adoption-btn-cancel) {
   background: #28a745 !important;
-  color: white !important;
 }
 
-.chat-adoption-btn:hover {
+.chat-adoption-btn:not(.chat-adoption-btn-cancel):hover {
   background: #218838 !important;
-  color: white !important;
 }
 
-.chat-adoption-btn:active {
+.chat-adoption-btn:not(.chat-adoption-btn-cancel):active {
   background: #1e7e34 !important;
-  color: white !important;
 }
 
 .chat-adoption-btn:disabled {
@@ -608,17 +643,17 @@
 }
 
 @media (max-width: 600px) {
-  .chat-adoption-btn {
+  .chat-adoption-btn:not(.chat-adoption-btn-cancel) {
     background: #28a745 !important;
     color: white !important;
   }
   
-  .chat-adoption-btn:hover {
+  .chat-adoption-btn:not(.chat-adoption-btn-cancel):hover {
     background: #218838 !important;
     color: white !important;
   }
   
-  .chat-adoption-btn:active {
+  .chat-adoption-btn:not(.chat-adoption-btn-cancel):active {
     background: #1e7e34 !important;
     color: white !important;
   }
@@ -771,4 +806,72 @@
   color: #888;
   font-size: 13px;
   font-style: italic;
+}
+
+/* Dog information in adoption request messages - similar to wishlist styling */
+.chat-dog-info {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chat-dog-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+  flex-shrink: 0;
+  background-color: #f0f0f0;
+}
+
+.chat-dog-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-dog-details h4 {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.3;
+}
+
+.chat-dog-details p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Mobile styles for chat dog info */
+@media (max-width: 600px) {
+  .chat-dog-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 10px;
+    gap: 8px;
+  }
+  
+  .chat-dog-image {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .chat-dog-details h4 {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  
+  .chat-dog-details p {
+    font-size: 12px;
+  }
 }

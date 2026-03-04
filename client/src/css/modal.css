@@ -13,7 +13,7 @@
   justify-content: center !important;
   box-sizing: border-box !important;
   padding: 16px !important;
-  pointer-events: auto !important; /* Enable clicks on modal overlay */
+  pointer-events: auto !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
@@ -34,9 +34,7 @@
   flex-direction: column !important;
   margin: 0 !important;
   transform: none !important;
-  /* Ensure modal content is always visible */
   min-height: auto !important;
-  /* Make sure the modal itself doesn't scroll with the page */
   will-change: transform !important;
 }
 
@@ -66,22 +64,6 @@
   outline: none !important;
 }
 
-/* Ensure modal breaks out of any stacking context */
-.modal-overlay {
-  isolation: isolate !important;
-  will-change: contents !important;
-}
-
-/* Override any parent container stacking issues */
-body {
-  position: relative !important;
-}
-
-/* Force modal above everything */
-.modal-overlay {
-  contain: layout style !important;
-}
-
 /* Desktop-specific modal adjustments */
 @media (min-width: 768px) {
   .modal-overlay {
@@ -92,6 +74,56 @@ body {
     width: 70vw !important;
     max-width: 500px !important;
     max-height: 70vh !important;
+  }
+
+  /* Fix image container on desktop */
+  .modal > .card-details > .img {
+    width: 100% !important;
+    max-width: 280px !important;
+    margin: 0 auto 1.5rem auto !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #f8f8f8 !important;
+    max-height: 280px !important;
+    box-sizing: border-box !important;
+    border-radius: 12px !important;
+  }
+
+  /* Constrain slider inside */
+  .modal > .card-details > .img .dog-image-slider {
+    max-height: 280px !important;
+  }
+
+  /* Fix images in NewDogsModal (dogs-grid) - for modal class */
+  .modal .dogs-grid .dog-thumbnail {
+    width: 200px !important;
+    max-width: 200px !important;
+    height: 150px !important;
+  }
+
+  /* Fix images in NewDogsModal (dogs-grid) - for modal-content class */
+  .modal-content .dogs-grid .dog-thumbnail {
+    width: 200px !important;
+    max-width: 200px !important;
+    height: 150px !important;
+  }
+
+  /* Fix dog cards in NewDogsModal - for modal class */
+  .modal .dogs-grid .dog-card-mini {
+    max-width: 200px !important;
+  }
+
+  /* Fix dog cards in NewDogsModal - for modal-content class */
+  .modal-content .dogs-grid .dog-card-mini {
+    max-width: 200px !important;
+  }
+
+  /* Fix images in NewDogsModal (new-dog-image) */
+  .new-dog-image {
+    width: 60px !important;
+    height: 60px !important;
   }
 }
 
@@ -110,28 +142,31 @@ body {
 /* Mobile-specific modal adjustments */
 @media (max-width: 767px) {
   .modal-overlay {
-    padding: 10px !important;
+    padding: 0 !important;
     align-items: flex-start !important;
     justify-content: flex-start !important;
-    overflow-y: auto !important;
+    overflow-y: hidden !important;
     -webkit-overflow-scrolling: touch !important;
-    height: 100vh !important;
-    padding-top: 60px !important;
-    padding-bottom: 80px !important;
+    height: calc(100vh - 120px) !important;
+    top: 60px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
   }
   
   .modal {
     width: 90vw !important;
     max-width: 90vw !important;
-    max-height: none !important;
-    min-height: auto !important;
-    padding: 0 !important;
-    overflow: visible !important;
+    max-height: 100% !important;
+    height: 100% !important;
+    padding: 16px !important;
+    overflow-y: auto !important;
     display: flex !important;
     flex-direction: column !important;
     margin: 0 !important;
     -webkit-overflow-scrolling: touch !important;
     box-sizing: border-box !important;
+    position: relative !important;
+    inset: 0 !important;
   }
   
   /* Make card-details scrollable */
@@ -145,7 +180,7 @@ body {
     box-sizing: border-box !important;
   }
   
-  /* Fix image container - override inline styles */
+  /* Fix image container */
   .modal > .card-details > .img {
     width: 100% !important;
     max-width: 280px !important;
@@ -161,22 +196,6 @@ body {
     borderRadius: 12px !important;
   }
   
-  /* Ensure card-actions is always visible at bottom */
-  .modal > .card-actions,
-  .modal > .card-actions.call-to-action,
-  .modal > .card-actions.call-to-action.dog-details-mobile-actions {
-    flex-shrink: 0 !important;
-    overflow: visible !important;
-    position: relative !important;
-    z-index: 100 !important;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    padding: 16px 0 !important;
-    margin-top: 0 !important;
-    background: #ffffff !important;
-  }
-  
   .modal-close {
     z-index: 99999999 !important;
     top: 0.5rem !important;
@@ -185,6 +204,115 @@ body {
     height: 2rem !important;
     font-size: 1.2rem !important;
     line-height: 2rem !important;
+  }
+
+  /* Parent container for buttons */
+  .card-actions.dog-details-mobile-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  /* Button container - flex row with wrap */
+  .dog-details-buttons-container {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 10px !important;
+    margin-bottom: 10px !important;
+    align-items: stretch !important;
+  }
+
+  /* ALL buttons - 50% width */
+  .dog-details-buttons-container button,
+  .dog-details-buttons-container .details {
+    width: calc(50% - 5px) !important;
+    flex: 0 0 calc(50% - 5px) !important;
+    box-sizing: border-box !important;
+    min-height: 50px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    border: none !important;
+    margin: 0 !important;
+  }
+
+  /* Nested wrapper divs */
+  .dog-details-buttons-container > div {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 10px !important;
+    margin-top: 0 !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Buttons in nested divs */
+  .dog-details-buttons-container > div > button,
+  .dog-details-buttons-container > div > .details {
+    width: calc(50% - 5px) !important;
+    flex: 0 0 calc(50% - 5px) !important;
+  }
+
+  /* Textarea - full width */
+  .dog-details-buttons-container textarea {
+    width: 100% !important;
+    margin: 10px 0 !important;
+    order: -1 !important;
+    flex: 1 1 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Button colors */
+  .dog-details-buttons-container .edit-dog-btn {
+    background-color: #ff9800 !important;
+    color: white !important;
+  }
+
+  .dog-details-buttons-container .delete-dog-btn {
+    background-color: #e74c3c !important;
+    color: white !important;
+  }
+
+  .dog-details-buttons-container button#add-to-list {
+    background-color: #dbb69d !important;
+    color: white !important;
+  }
+
+  .dog-details-buttons-container button#adopt {
+    background-color: #4CAF50 !important;
+    color: #f8f8f8 !important;
+    font-weight: bold !important;
+  }
+
+  .adopt-confirm-btn {
+    background-color: #28a745 !important;
+    color: white !important;
+  }
+
+  .adopt-cancel-btn {
+    background-color: #e74c3c !important;
+    color: white !important;
+  }
+
+  .adopt-requested-btn {
+    background-color: #aaa !important;
+    color: white !important;
+    cursor: not-allowed !important;
+  }
+
+  .adopt-btn {
+    background-color: #4CAF50 !important;
+    color: #f8f8f8 !important;
+    font-weight: bold !important;
   }
 }
 
@@ -211,7 +339,7 @@ body {
   width: 100vw !important;
   height: 100vh !important;
   background: rgba(0, 0, 0, 0.7) !important;
-  z-index: 9999999999 !important;
+  z-index: 214748364999 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -286,6 +414,469 @@ body {
   height: 100% !important;
 }
 
+/* UserProfileModal Styles */
+.modal-close-btn {
+  position: absolute !important;
+  top: 1.2rem !important;
+  right: 1.2rem !important;
+  width: 3rem !important;
+  height: 3rem !important;
+  background: #e74c3c !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 50% !important;
+  font-size: 2rem !important;
+  font-weight: bold !important;
+  line-height: 3rem !important;
+  text-align: center !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+  cursor: pointer !important;
+  z-index: 99999999 !important;
+  transition: background 0.2s, color 0.2s, transform 0.1s !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.modal-close-btn:hover, .modal-close-btn:focus {
+  background: #c0392b !important;
+  color: #fff !important;
+  transform: scale(1.1) !important;
+  outline: none !important;
+}
+
+.modal-close-btn span {
+  display: block !important;
+  line-height: 1 !important;
+}
+
+/* Modal tabs - side by side */
+.modal-tabs {
+  display: flex !important;
+  gap: 10px !important;
+  margin-bottom: 1.5rem !important;
+  border-bottom: 2px solid #eee !important;
+  padding-bottom: 10px !important;
+}
+
+.modal-tab-btn {
+  flex: 1 !important;
+  padding: 10px 15px !important;
+  background: #f8f8f8 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  color: #666 !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  font-size: 14px !important;
+}
+
+.modal-tab-btn.active {
+  background: #4CAF50 !important;
+  color: #fff !important;
+}
+
+.modal-tab-btn:hover:not(.active) {
+  background: #e0e0e0 !important;
+}
+
+/* Modal button group - side by side with gap */
+.modal-button-group {
+  display: flex !important;
+  gap: 10px !important;
+  margin-top: 1.5rem !important;
+  flex-wrap: wrap !important;
+}
+
+.modal-button-group button {
+  flex: 1 !important;
+  min-width: calc(50% - 5px) !important;
+  padding: 12px 16px !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+
+/* Edit Profile button - Orange */
+.modal-button-group .btn-primary {
+  background-color: #ff9800 !important;
+  color: #fff !important;
+}
+
+.modal-button-group .btn-primary:hover {
+  background-color: #f57c00 !important;
+}
+
+/* Delete Account button - Red */
+.modal-button-group .btn-danger {
+  background-color: #e74c3c !important;
+  color: #fff !important;
+}
+
+.modal-button-group .btn-danger:hover {
+  background-color: #c0392b !important;
+}
+
+/* Cancel/Secondary button */
+.modal-button-group .btn-secondary {
+  background-color: #6c757d !important;
+  color: #fff !important;
+}
+
+.modal-button-group .btn-secondary:hover {
+  background-color: #5a6268 !important;
+}
+
+/* Wishlist buttons - side by side */
+.wishlist-dog-actions {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: 10px !important;
+}
+
+.wishlist-action-btn {
+  flex: 1 !important;
+  padding: 8px 12px !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  text-align: center !important;
+}
+
+/* Adopt button - Green */
+.wishlist-action-btn.btn-adopt {
+  background-color: #4CAF50 !important;
+  color: #fff !important;
+}
+
+.wishlist-action-btn.btn-adopt:hover {
+  background-color: #45a049 !important;
+}
+
+/* Remove from list button - Red */
+.wishlist-action-btn.btn-remove {
+  background-color: #e74c3c !important;
+  color: #fff !important;
+}
+
+.wishlist-action-btn.btn-remove:hover {
+  background-color: #c0392b !important;
+}
+
+/* Cancel adoption button */
+.wishlist-action-btn.btn-cancel {
+  background-color: #ff9800 !important;
+  color: #fff !important;
+}
+
+.wishlist-action-btn.btn-cancel:hover {
+  background-color: #f57c00 !important;
+}
+
+/* Disabled button */
+.wishlist-action-btn.btn-disabled {
+  background-color: #ccc !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+}
+
+.heart-icon {
+  display: inline !important;
+}
+
+/* Wishlist dog items - add gap between items */
+.wishlist-dog-item {
+  margin-bottom: 16px !important;
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid #eee !important;
+}
+
+.wishlist-dog-item:last-child {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Profile form labels and inputs - improve visibility and consistency */
+.modal-form-group label {
+  display: block !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+  margin-bottom: 8px !important;
+  line-height: 1.4 !important;
+}
+
+.modal-form-group input {
+  width: 100% !important;
+  padding: 12px 16px !important;
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+  color: #333 !important;
+  background-color: #fff !important;
+  border: 2px solid #ddd !important;
+  border-radius: 8px !important;
+  box-sizing: border-box !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+  font-family: inherit !important;
+}
+
+.modal-form-group input:focus {
+  outline: none !important;
+  border-color: #4CAF50 !important;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1) !important;
+}
+
+.modal-form-group input::placeholder {
+  color: #999 !important;
+  font-size: 14px !important;
+}
+
+/* Password section styling */
+.password-section {
+  background: #f8f8f8 !important;
+  padding: 16px !important;
+  border-radius: 8px !important;
+  margin-top: 16px !important;
+}
+
+.password-section h4 {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+  margin: 0 0 8px 0 !important;
+}
+
+.password-section p {
+  font-size: 14px !important;
+  color: #666 !important;
+  margin: 0 0 12px 0 !important;
+  line-height: 1.4 !important;
+}
+
+.password-section .btn-info {
+  background-color: #4CAF50 !important;
+  color: #fff !important;
+  font-size: 14px !important;
+}
+
+/* Profile display fields */
+.profile-field {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 12px 0 !important;
+  border-bottom: 1px solid #eee !important;
+  margin-bottom: 8px !important;
+}
+
+.profile-field:last-child {
+  border-bottom: none !important;
+}
+
+.field-label {
+  font-weight: 600 !important;
+  color: #555 !important;
+  font-size: 14px !important;
+}
+
+/* Profile avatar - smaller on desktop in view mode */
+.profile-avatar-small {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}
+
+/* Profile picture - smaller on desktop in edit mode */
+.profile-picture {
+  width: 100px !important;
+  height: 100px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  margin: 0 auto 16px auto !important;
+  display: block !important;
+  border: 3px solid #4CAF50 !important;
+}
+
+.profile-picture-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-bottom: 16px !important;
+}
+
+/* Mobile adjustments for UserProfileModal */
+@media (max-width: 767px) {
+  .modal-close-btn {
+    top: 0.5rem !important;
+    right: 0.5rem !important;
+    width: 2.2rem !important;
+    height: 2.2rem !important;
+    font-size: 1.5rem !important;
+  }
+  
+  .modal-tabs {
+    gap: 8px !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .modal-tab-btn {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+  
+  .modal-button-group {
+    gap: 8px !important;
+    margin-top: 1rem !important;
+  }
+  
+  .modal-button-group button {
+    min-width: calc(50% - 4px) !important;
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .wishlist-dog-actions {
+    display: flex !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+  }
+
+  .wishlist-action-btn {
+    flex: 1 !important;
+    padding: 8px 12px !important;
+    border: none !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    text-align: center !important;
+  }
+
+  /* Adopt button - Green */
+  .wishlist-action-btn.btn-adopt {
+    background-color: #4CAF50 !important;
+    color: #fff !important;
+  }
+
+  .wishlist-action-btn.btn-adopt:hover {
+    background-color: #45a049 !important;
+  }
+
+  /* Remove from list button - Red */
+  .wishlist-action-btn.btn-remove {
+    background-color: #e74c3c !important;
+    color: #fff !important;
+  }
+
+  .wishlist-action-btn.btn-remove:hover {
+    background-color: #c0392b !important;
+  }
+
+  /* Cancel adoption button */
+  .wishlist-action-btn.btn-cancel {
+    background-color: #ff9800 !important;
+    color: #fff !important;
+  }
+
+  .wishlist-action-btn.btn-cancel:hover {
+    background-color: #f57c00 !important;
+  }
+
+  /* Disabled button */
+  .wishlist-action-btn.btn-disabled {
+    background-color: #ccc !important;
+    color: #666 !important;
+    cursor: not-allowed !important;
+  }
+
+  .heart-icon {
+    display: inline !important;
+  }
+
+  /* Mobile-specific form label and input adjustments */
+  .modal-form-group label {
+    font-size: 15px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .modal-form-group input {
+    padding: 10px 12px !important;
+    font-size: 16px !important;
+    border-radius: 8px !important;
+  }
+
+  .password-section {
+    padding: 14px !important;
+    margin-top: 14px !important;
+  }
+
+  .password-section h4 {
+    font-size: 15px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .password-section p {
+    font-size: 13px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .profile-field {
+    padding: 14px 0 !important;
+  }
+
+  .field-label {
+    font-size: 15px !important;
+  }
+
+  /* Profile image - smaller on mobile in view mode */
+  .profile-avatar-small {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+  }
+
+  /* Profile info text - larger on mobile */
+  .profile-info-text {
+    margin-left: 12px !important;
+  }
+
+  .profile-info-text h3 {
+    font-size: 18px !important;
+    margin: 0 0 4px 0 !important;
+    font-weight: 700 !important;
+    color: #333 !important;
+  }
+
+  .profile-info-text .online-status {
+    font-size: 14px !important;
+    color: #4CAF50 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Profile display fields - larger text on mobile */
+  .profile-field {
+    font-size: 15px !important;
+  }
+
+  /* Profile picture - smaller on mobile in edit mode */
+  .profile-picture {
+    width: 70px !important;
+    height: 70px !important;
+  }
+}
+
 /* Mobile map modal adjustments */
 @media (max-width: 767px) {
   .dogdetails-map-modal {
@@ -315,508 +906,4 @@ body {
     height: 32px !important;
     font-size: 20px !important;
   }
-}
-
-/* UserProfileModal specific styles */
-.modal-header {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  margin-bottom: 1.5rem !important;
-  border-bottom: 1px solid #eee !important;
-  padding-bottom: 1rem !important;
-}
-
-.modal-header h2 {
-  margin: 0 !important;
-  font-size: 1.5rem !important;
-  color: #333 !important;
-}
-
-.modal-close-btn {
-  background: #e74c3c !important;
-  border: none !important;
-  border-radius: 50% !important;
-  cursor: pointer !important;
-  font-size: 24px !important;
-  color: #f8f8f8 !important;
-  padding: 0 !important;
-  width: 32px !important;
-  height: 32px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-weight: bold !important;
-  position: relative !important;
-  z-index: 10 !important;
-  transition: background 0.2s !important;
-}
-
-.modal-close-btn:hover {
-  background: #c0392b !important;
-}
-
-.modal-close-btn:active {
-  transform: scale(0.95) !important;
-}
-
-.modal-close-btn span {
-  line-height: 1 !important;
-}
-
-/* Modal tabs */
-.modal-tabs {
-  display: flex !important;
-  gap: 0.5rem !important;
-  margin-bottom: 1rem !important;
-  border-bottom: 1px solid #eee !important;
-}
-
-.modal-tab-btn {
-  flex: 1 !important;
-  padding: 0.75rem 1rem !important;
-  background: transparent !important;
-  border: none !important;
-  border-bottom: 2px solid transparent !important;
-  cursor: pointer !important;
-  font-size: 14px !important;
-  color: #666 !important;
-  transition: all 0.2s !important;
-  font-weight: 500 !important;
-}
-
-.modal-tab-btn:hover {
-  color: #333 !important;
-  background: #f5f5f5 !important;
-}
-
-.modal-tab-btn.active {
-  color: #72211f !important;
-  border-bottom-color: #72211f !important;
-  background: #fff !important;
-}
-
-/* Modal content */
-.modal-content {
-  overflow-y: auto !important;
-  max-height: 70vh !important;
-  padding-right: 5px !important;
-}
-
-/* Profile header */
-.profile-header {
-  margin-bottom: 1.5rem !important;
-  padding-bottom: 1rem !important;
-  border-bottom: 1px solid #eee !important;
-}
-
-.profile-info {
-  display: flex !important;
-  align-items: center !important;
-  gap: 1rem !important;
-}
-
-.profile-avatar-small {
-  width: 60px !important;
-  height: 60px !important;
-  border-radius: 50% !important;
-  object-fit: cover !important;
-}
-
-.profile-info-text h3 {
-  margin: 0 0 0.25rem 0 !important;
-  font-size: 1.25rem !important;
-  color: #333 !important;
-}
-
-.online-status {
-  font-size: 0.875rem !important;
-  color: #27ae60 !important;
-}
-
-/* Profile picture section */
-.profile-picture-section {
-  display: flex !important;
-  align-items: center !important;
-  gap: 1.5rem !important;
-  margin-bottom: 1.5rem !important;
-}
-
-.profile-picture-wrapper {
-  flex-shrink: 0 !important;
-}
-
-.profile-picture {
-  width: 100px !important;
-  height: 100px !important;
-  border-radius: 50% !important;
-  object-fit: cover !important;
-  border: 3px solid #fff !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
-}
-
-.profile-upload-label {
-  cursor: pointer !important;
-  display: inline-block !important;
-}
-
-.profile-upload-label input[type="file"] {
-  display: none !important;
-}
-
-.upload-icon {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 0.5rem !important;
-  color: #72211f !important;
-  font-weight: 500 !important;
-}
-
-/* Form groups */
-.modal-form-group {
-  margin-bottom: 1rem !important;
-}
-
-.modal-form-group label {
-  display: block !important;
-  margin-bottom: 0.5rem !important;
-  font-weight: 500 !important;
-  color: #333 !important;
-  font-size: 0.875rem !important;
-}
-
-.modal-form-group input {
-  width: 100% !important;
-  padding: 0.75rem !important;
-  border: 1px solid #ddd !important;
-  border-radius: 6px !important;
-  font-size: 14px !important;
-  box-sizing: border-box !important;
-}
-
-.modal-form-group input:focus {
-  outline: none !important;
-  border-color: #72211f !important;
-}
-
-/* Password section */
-.password-section {
-  margin: 1.5rem 0 !important;
-  padding: 1rem !important;
-  background: #f5f5f5 !important;
-  border-radius: 8px !important;
-}
-
-.password-section h4 {
-  margin: 0 0 0.5rem 0 !important;
-  font-size: 1rem !important;
-  color: #333 !important;
-}
-
-.password-section p {
-  margin: 0 0 1rem 0 !important;
-  font-size: 0.875rem !important;
-  color: #666 !important;
-}
-
-/* Profile display */
-.profile-display {
-  padding: 1rem 0 !important;
-}
-
-.profile-field {
-  display: flex !important;
-  margin-bottom: 0.75rem !important;
-  padding-bottom: 0.75rem !important;
-  border-bottom: 1px solid #f0f0f0 !important;
-}
-
-.profile-field:last-child {
-  border-bottom: none !important;
-}
-
-.field-label {
-  font-weight: 500 !important;
-  color: #666 !important;
-  margin-right: 0.5rem !important;
-}
-
-/* Modal buttons */
-.modal-button-group {
-  display: flex !important;
-  gap: 1rem !important;
-  margin-top: 1.5rem !important;
-  flex-wrap: wrap !important;
-}
-
-.modal-btn {
-  flex: 1 !important;
-  min-width: 120px !important;
-  padding: 0.75rem 1.5rem !important;
-  border: none !important;
-  border-radius: 6px !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  cursor: pointer !important;
-  transition: all 0.2s !important;
-  text-align: center !important;
-}
-
-.modal-btn:disabled {
-  opacity: 0.6 !important;
-  cursor: not-allowed !important;
-}
-
-.btn-primary {
-  background: #72211f !important;
-  color: #fff !important;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #5a1a19 !important;
-}
-
-.btn-secondary {
-  background: #6c757d !important;
-  color: #fff !important;
-}
-
-.btn-secondary:hover {
-  background: #5a6268 !important;
-}
-
-.btn-info {
-  background: #17a2b8 !important;
-  color: #fff !important;
-}
-
-.btn-info:hover {
-  background: #138496 !important;
-}
-
-.btn-danger {
-  background: #dc3545 !important;
-  color: #fff !important;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: #c82333 !important;
-}
-
-/* Modal alerts */
-.modal-alert {
-  padding: 0.75rem 1rem !important;
-  border-radius: 6px !important;
-  margin-bottom: 1rem !important;
-  font-size: 0.875rem !important;
-}
-
-.modal-alert.error {
-  background: #f8d7da !important;
-  color: #721c24 !important;
-  border: 1px solid #f5c6cb !important;
-}
-
-.modal-alert.success {
-  background: #d4edda !important;
-  color: #155724 !important;
-  border: 1px solid #c3e6cb !important;
-}
-
-/* Wishlist styles */
-.wishlist-title {
-  margin: 0 0 1rem 0 !important;
-  font-size: 1.25rem !important;
-  color: #333 !important;
-}
-
-.wishlist-loading {
-  text-align: center !important;
-  padding: 2rem !important;
-  color: #666 !important;
-}
-
-.wishlist-empty-state {
-  text-align: center !important;
-  padding: 3rem 1rem !important;
-  color: #666 !important;
-}
-
-.wishlist-empty-state p {
-  margin: 0.5rem 0 !important;
-}
-
-.wishlist-scroll-container {
-  max-height: 400px !important;
-  overflow-y: auto !important;
-  padding-right: 5px !important;
-}
-
-.wishlist-dog-item {
-  display: flex !important;
-  align-items: center !important;
-  gap: 1rem !important;
-  padding: 0.75rem !important;
-  border-bottom: 1px solid #f0f0f0 !important;
-  transition: background 0.2s !important;
-}
-
-.wishlist-dog-item:hover {
-  background: #f5f5f5 !important;
-}
-
-.wishlist-dog-image {
-  width: 60px !important;
-  height: 60px !important;
-  border-radius: 8px !important;
-  object-fit: cover !important;
-  flex-shrink: 0 !important;
-}
-
-.wishlist-dog-info {
-  flex: 1 !important;
-  min-width: 0 !important;
-}
-
-.wishlist-dog-info h4 {
-  margin: 0 0 0.25rem 0 !important;
-  font-size: 1rem !important;
-  color: #333 !important;
-}
-
-.wishlist-dog-info p {
-  margin: 0 !important;
-  font-size: 0.875rem !important;
-  color: #666 !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.wishlist-dog-actions {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 0.5rem !important;
-}
-
-.wishlist-action-btn {
-  padding: 0.5rem 1rem !important;
-  border: none !important;
-  border-radius: 4px !important;
-  font-size: 0.875rem !important;
-  font-weight: 500 !important;
-  cursor: pointer !important;
-  transition: all 0.2s !important;
-}
-
-.wishlist-action-btn:disabled {
-  opacity: 0.6 !important;
-  cursor: not-allowed !important;
-}
-
-.heart-icon {
-  font-size: 0.875rem !important;
-}
-
-.btn-adopt {
-  background: #27ae60 !important;
-  color: #fff !important;
-}
-
-.btn-adopt:hover:not(:disabled) {
-  background: #229954 !important;
-}
-
-.btn-remove {
-  background: #e74c3c !important;
-  color: #fff !important;
-}
-
-.btn-remove:hover {
-  background: #c0392b !important;
-}
-
-.btn-cancel {
-  background: #f39c12 !important;
-  color: #fff !important;
-}
-
-.btn-cancel:hover {
-  background: #e67e22 !important;
-}
-
-.btn-disabled {
-  background: #95a5a6 !important;
-  color: #fff !important;
-}
-
-/* Mobile adjustments for UserProfileModal */
-@media (max-width: 767px) {
-  .profile-picture-section {
-    flex-direction: column !important;
-    text-align: center !important;
-  }
-
-  .profile-dog-item {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-  }
-
-  .wishlist-dog-image {
-    width: 80px !important;
-    height: 80px !important;
-  }
-
-  .wishlist-dog-actions {
-    flex-direction: row !important;
-    width: 100% !important;
-  }
-
-  .wishlist-action-btn {
-    flex: 1 !important;
-  }
-}
-
-/* HIGHEST PRIORITY MAP MODAL - Must appear above everything including dog details modal */
-#map-modal-root .dogdetails-map-modal {
-  z-index: 214748364999 !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  background: rgba(0, 0, 0, 0.7) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  pointer-events: auto !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-/* Also target directly without parent selector for maximum specificity */
-.dogdetails-map-modal {
-  z-index: 214748364999 !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  background: rgba(0, 0, 0, 0.7) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  pointer-events: auto !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-#map-modal-root .modal-map-content {
-  z-index: 214748364999 !important;
-  position: relative !important;
-}
-
-.modal-map-content {
-  z-index: 214748364999 !important;
-  position: relative !important;
 }

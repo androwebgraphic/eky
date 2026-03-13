@@ -79,6 +79,89 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
       }
     }
   }, []);
+
+  // Handle scroll indicator visibility
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const isMobile = window.innerWidth < 900;
+    if (!isMobile) return;
+    
+    let isSetup = false;
+    
+    const setupScrollIndicator = () => {
+      // Find the modal content element
+      const modalContent = document.querySelector('.doglist-details-content') as HTMLElement;
+      if (!modalContent) return;
+      
+      // Prevent duplicate setup
+      if (isSetup) return;
+      isSetup = true;
+      
+      const updateScrollIndicator = () => {
+        const scrollTop = modalContent.scrollTop;
+        const clientHeight = modalContent.clientHeight;
+        const scrollHeight = modalContent.scrollHeight;
+        
+        // Simple logic: hide only when user has actually scrolled near the bottom
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50;
+        const hasScrolledDown = scrollTop > 50; // User has scrolled down
+        
+        // Hide indicator only if user has scrolled down and is now at bottom
+        const shouldHide = hasScrolledDown && isAtBottom;
+        
+        // Toggle class on modal content
+        if (shouldHide) {
+          modalContent.classList.add('scrolled-to-bottom');
+        } else {
+          modalContent.classList.remove('scrolled-to-bottom');
+        }
+      };
+      
+      // Initial check with small delay to ensure layout is complete
+      setTimeout(updateScrollIndicator, 50);
+      
+      // Handle scroll events
+      modalContent.addEventListener('scroll', updateScrollIndicator);
+      
+      // Also check on resize in case modal content size changes
+      const resizeObserver = new ResizeObserver(() => {
+        updateScrollIndicator();
+      });
+      resizeObserver.observe(modalContent);
+      
+      // Return cleanup function
+      return () => {
+        modalContent.removeEventListener('scroll', updateScrollIndicator);
+        resizeObserver.disconnect();
+      };
+    };
+    
+    // Watch for modal content to appear using MutationObserver
+    const observer = new MutationObserver(() => {
+      if (!isSetup) {
+        setupScrollIndicator();
+      }
+    });
+    
+    // Observe the body for modal content appearing
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+    
+    // Try immediate setup in case modal is already rendered
+    setupScrollIndicator();
+    
+    // Also try with increasing delays as fallbacks
+    setTimeout(setupScrollIndicator, 100);
+    setTimeout(setupScrollIndicator, 300);
+    setTimeout(setupScrollIndicator, 500);
+    
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
   
   // Helper function to get API base URL - define before use in event listeners
   const getApiBase = () => {

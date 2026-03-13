@@ -108,7 +108,7 @@
     max-width: 100% !important;
     height: 100% !important;
     position: relative !important;
-    padding: 16px !important;
+    padding: 16px 16px 32px 16px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
     margin: 0 !important;
     display: flex !important;
@@ -116,6 +116,48 @@
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
     box-sizing: border-box !important;
+  }
+  
+  /* Scroll indicator arrow for mobile */
+  .doglist-details-content::after {
+    content: '↓';
+    position: fixed !important;
+    bottom: 80px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 40px !important;
+    height: 40px !important;
+    background: rgba(117, 23, 26, 0.8) !important;
+    color: #ffffff !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+    z-index: 2147483646 !important;
+    animation: bounce 2s infinite !important;
+    pointer-events: none !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
+    opacity: 1 !important;
+    transition: opacity 0.3s ease !important;
+  }
+  
+  /* Hide indicator when scrolled to bottom */
+  .doglist-details-content.scrolled-to-bottom::after {
+    opacity: 0 !important;
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateX(-50%) translateY(0) !important;
+    }
+    40% {
+      transform: translateX(-50%) translateY(-10px) !important;
+    }
+    60% {
+      transform: translateX(-50%) translateY(-5px) !important;
+    }
   }
 
   /* Override ALL inline styles */

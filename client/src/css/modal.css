@@ -139,182 +139,276 @@
   }
 }
 
-/* Mobile-specific modal adjustments */
-@media (max-width: 767px) {
-  .modal-overlay {
-    padding: 0 !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    overflow-y: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    height: calc(100vh - 120px) !important;
-    top: 60px !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+  /* Desktop-specific button styles for dog details */
+  @media (min-width: 768px) {
+    /* Parent container for buttons */
+    .card-actions.dog-details-mobile-actions {
+      display: flex !important;
+      flex-direction: row !important;
+      width: 100% !important;
+      gap: 12px !important;
+      margin-bottom: 12px !important;
+    }
+
+    /* Button container - flex row without wrap for single row */
+    .dog-details-buttons-container {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      width: 100% !important;
+      gap: 12px !important;
+      align-items: stretch !important;
+    }
+
+    /* ALL buttons - auto width for single row */
+    .dog-details-buttons-container button,
+    .dog-details-buttons-container .details,
+    .card-actions.dog-details-mobile-actions > button {
+      width: auto !important;
+      flex: 1 1 auto !important;
+      box-sizing: border-box !important;
+      min-height: 56px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      padding: 16px 24px !important;
+      border-radius: 6px !important;
+      font-weight: bold !important;
+      font-size: 18px !important;
+      cursor: pointer !important;
+      border: none !important;
+    }
+
+    /* Nested wrapper divs */
+    .dog-details-buttons-container > div {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      width: auto !important;
+      gap: 12px !important;
+      margin: 0 !important;
+    }
+
+    /* Buttons in nested divs */
+    .dog-details-buttons-container > div > button,
+    .dog-details-buttons-container > div > .details {
+      width: auto !important;
+      flex: 1 1 auto !important;
+    }
+
+    /* Textarea - full width, appears before buttons */
+    .dog-details-buttons-container textarea,
+    .card-actions.dog-details-mobile-actions textarea {
+      width: 100% !important;
+      max-width: 320px !important;
+      margin: 0 0 12px 0 !important;
+      padding: 8px 12px !important;
+      border: 1px solid #ddd !important;
+      border-radius: 4px !important;
+      box-sizing: border-box !important;
+    }
+
+    /* Desktop button colors */
+    .card-actions.dog-details-mobile-actions .edit-dog-btn,
+    .dog-details-buttons-container .edit-dog-btn {
+      background-color: #ff9800 !important;
+      color: #fff !important;
+    }
+
+    .card-actions.dog-details-mobile-actions .delete-dog-btn,
+    .dog-details-buttons-container .delete-dog-btn {
+      background-color: #e74c3c !important;
+      color: #fff !important;
+    }
+
+    .card-actions.dog-details-mobile-actions button#add-to-list,
+    .dog-details-buttons-container button#add-to-list {
+      background-color: #dbb69d !important;
+      color: #fff !important;
+    }
+
+    .card-actions.dog-details-mobile-actions button#adopt,
+    .dog-details-buttons-container button#adopt,
+    .card-actions.dog-details-mobile-actions .adopt-btn,
+    .dog-details-buttons-container .adopt-btn {
+      background-color: #4CAF50 !important;
+      color: #fff !important;
+    }
+
+    .card-actions.dog-details-mobile-actions .adopt-confirm-btn,
+    .dog-details-buttons-container .adopt-confirm-btn {
+      background-color: #28a745 !important;
+      color: #fff !important;
+    }
+
+    .card-actions.dog-details-mobile-actions .adopt-cancel-btn,
+    .dog-details-buttons-container .adopt-cancel-btn {
+      background-color: #e74c3c !important;
+      color: #fff !important;
+    }
+
+    .card-actions.dog-details-mobile-actions .adopt-requested-btn,
+    .dog-details-buttons-container .adopt-requested-btn {
+      background-color: #aaa !important;
+      color: #fff !important;
+      cursor: not-allowed !important;
+    }
   }
+
+  /* Mobile-specific modal adjustments */
+  @media (max-width: 767px) {
+    .modal-overlay {
+      padding: 0 !important;
+      align-items: flex-start !important;
+      justify-content: flex-start !important;
+      overflow-y: hidden !important;
+      -webkit-overflow-scrolling: touch !important;
+      height: calc(100vh - 120px) !important;
+      top: 60px !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
   
-  .modal {
-    width: 90vw !important;
-    max-width: 90vw !important;
-    max-height: 100% !important;
-    height: 100% !important;
-    padding: 16px !important;
-    overflow-y: auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-    margin: 0 !important;
-    -webkit-overflow-scrolling: touch !important;
-    box-sizing: border-box !important;
-    position: relative !important;
-    inset: 0 !important;
-  }
+    .modal {
+      width: 90vw !important;
+      max-width: 90vw !important;
+      max-height: 100% !important;
+      height: 100% !important;
+      padding: 16px !important;
+      overflow-y: auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+      margin: 0 !important;
+      -webkit-overflow-scrolling: touch !important;
+      box-sizing: border-box !important;
+      position: relative !important;
+      inset: 0 !important;
+    }
   
-  /* Make card-details scrollable */
-  .modal > .card-details {
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    max-height: calc(100vh - 350px) !important;
-    padding: 0 !important;
-    padding-bottom: 1rem !important;
-    box-sizing: border-box !important;
-  }
+    /* Make card-details scrollable */
+    .modal > .card-details {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      -webkit-overflow-scrolling: touch !important;
+      max-height: calc(100vh - 350px) !important;
+      padding: 0 !important;
+      padding-bottom: 1rem !important;
+      box-sizing: border-box !important;
+    }
   
-  /* Fix image container */
-  .modal > .card-details > .img {
-    width: 100% !important;
-    max-width: 280px !important;
-    margin: 8px auto !important;
-    aspect-ratio: auto !important;
-    overflow: hidden !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: #f8f8f8 !important;
-    max-height: 150px !important;
-    box-sizing: border-box !important;
-    borderRadius: 12px !important;
-  }
+    /* Fix image container */
+    .modal > .card-details > .img {
+      width: 100% !important;
+      max-width: 280px !important;
+      margin: 8px auto !important;
+      aspect-ratio: auto !important;
+      overflow: hidden !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: #f8f8f8 !important;
+      max-height: 150px !important;
+      box-sizing: border-box !important;
+      borderRadius: 12px !important;
+    }
   
-  .modal-close {
-    z-index: 99999999 !important;
-    top: 0.5rem !important;
-    right: 0.5rem !important;
-    width: 2rem !important;
-    height: 2rem !important;
-    font-size: 1.2rem !important;
-    line-height: 2rem !important;
-  }
+    .modal-close {
+      z-index: 99999999 !important;
+      top: 0.5rem !important;
+      right: 0.5rem !important;
+      width: 2rem !important;
+      height: 2rem !important;
+      font-size: 1.2rem !important;
+      line-height: 2rem !important;
+    }
 
-  /* Parent container for buttons */
-  .card-actions.dog-details-mobile-actions {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 100% !important;
-  }
+    /* Parent container for buttons - CSS Grid for reliable 2x2 layout */
+    .card-actions.dog-details-mobile-actions {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 12px !important;
+      width: 100% !important;
+      margin-bottom: 16px !important;
+    }
 
-  /* Button container - flex row with wrap */
-  .dog-details-buttons-container {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    width: 100% !important;
-    gap: 10px !important;
-    margin-bottom: 10px !important;
-    align-items: stretch !important;
-  }
+    /* Status message divs - span both columns */
+    .card-actions.dog-details-mobile-actions > div[style*="color"] {
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+      margin: 0 !important;
+    }
 
-  /* ALL buttons - 50% width */
-  .dog-details-buttons-container button,
-  .dog-details-buttons-container .details {
-    width: calc(50% - 5px) !important;
-    flex: 0 0 calc(50% - 5px) !important;
-    box-sizing: border-box !important;
-    min-height: 50px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    text-align: center !important;
-    padding: 12px 16px !important;
-    border-radius: 6px !important;
-    font-weight: 600 !important;
-    font-size: 16px !important;
-    cursor: pointer !important;
-    border: none !important;
-    margin: 0 !important;
-  }
+    /* Textarea - span both columns */
+    .card-actions.dog-details-mobile-actions textarea {
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+    }
 
-  /* Nested wrapper divs */
-  .dog-details-buttons-container > div {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    width: 100% !important;
-    gap: 10px !important;
-    margin-top: 0 !important;
-    margin-bottom: 10px !important;
-  }
+    /* ALL buttons - fill parent */
+    .card-actions.dog-details-mobile-actions button {
+      width: 100% !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      min-height: 52px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      padding: 14px 18px !important;
+      border-radius: 8px !important;
+      font-weight: 600 !important;
+      font-size: 16px !important;
+      cursor: pointer !important;
+      border: none !important;
+      background-color: #4CAF50 !important;
+      color: #fff !important;
+    }
 
-  /* Buttons in nested divs */
-  .dog-details-buttons-container > div > button,
-  .dog-details-buttons-container > div > .details {
-    width: calc(50% - 5px) !important;
-    flex: 0 0 calc(50% - 5px) !important;
-  }
+    /* Specific button colors */
+    .card-actions.dog-details-mobile-actions .edit-dog-btn {
+      background-color: #ff9800 !important;
+      color: #fff !important;
+    }
 
-  /* Textarea - full width */
-  .dog-details-buttons-container textarea {
-    width: 100% !important;
-    margin: 10px 0 !important;
-    order: -1 !important;
-    flex: 1 1 100% !important;
-    box-sizing: border-box !important;
-  }
+    .card-actions.dog-details-mobile-actions .delete-dog-btn {
+      background-color: #e74c3c !important;
+      color: #fff !important;
+    }
 
-  /* Button colors */
-  .dog-details-buttons-container .edit-dog-btn {
-    background-color: #ff9800 !important;
-    color: white !important;
-  }
+    .card-actions.dog-details-mobile-actions button#add-to-list {
+      background-color: #dbb69d !important;
+      color: #fff !important;
+    }
 
-  .dog-details-buttons-container .delete-dog-btn {
-    background-color: #e74c3c !important;
-    color: white !important;
-  }
+    .card-actions.dog-details-mobile-actions button#adopt {
+      background-color: #4CAF50 !important;
+      color: #fff !important;
+    }
 
-  .dog-details-buttons-container button#add-to-list {
-    background-color: #dbb69d !important;
-    color: white !important;
-  }
+    .card-actions.dog-details-mobile-actions .adopt-confirm-btn {
+      background-color: #28a745 !important;
+      color: #fff !important;
+    }
 
-  .dog-details-buttons-container button#adopt {
-    background-color: #4CAF50 !important;
-    color: #f8f8f8 !important;
-    font-weight: bold !important;
-  }
+    .card-actions.dog-details-mobile-actions .adopt-cancel-btn {
+      background-color: #e74c3c !important;
+      color: #fff !important;
+    }
 
-  .adopt-confirm-btn {
-    background-color: #28a745 !important;
-    color: white !important;
-  }
+    .card-actions.dog-details-mobile-actions .adopt-requested-btn {
+      background-color: #aaa !important;
+      color: #fff !important;
+      cursor: not-allowed !important;
+    }
 
-  .adopt-cancel-btn {
-    background-color: #e74c3c !important;
-    color: white !important;
+    .card-actions.dog-details-mobile-actions .adopt-btn {
+      background-color: #4CAF50 !important;
+      color: #fff !important;
+    }
   }
-
-  .adopt-requested-btn {
-    background-color: #aaa !important;
-    color: white !important;
-    cursor: not-allowed !important;
-  }
-
-  .adopt-btn {
-    background-color: #4CAF50 !important;
-    color: #f8f8f8 !important;
-    font-weight: bold !important;
-  }
-}
 
 /* Map iframe styling */
 .map-iframe {

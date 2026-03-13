@@ -246,7 +246,25 @@
     "email": "E-mail:",
     "userType": "Vrsta korisnika:",
     "postedBy": "Objavio:",
+    "postedOn": "Objavljeno dana",
     "contactOwner": "Kontaktiraj vlasnika"
+  },
+  "color": {
+    "white": "Bijela",
+    "black": "Crna",
+    "brown": "Smeđa",
+    "golden": "Zlatna",
+    "grey": "Siva",
+    "gray": "Siva",
+    "tan": "Plaštenasta",
+    "spotted": "Mrljasta",
+    "tricolor": "Trobojna",
+    "brindle": "Tigrasta",
+    "merle": "Merle",
+    "beige": "Bež",
+    "cream": "Krem",
+    "sable": "Čagalj",
+    "other": "Ostalo"
   },
   "language": {
     "selectAria": "Odaberite jezik"

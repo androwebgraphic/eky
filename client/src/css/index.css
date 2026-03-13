@@ -348,14 +348,16 @@ a {
   }
   /* Parent container */
   .card-actions.dog-details-mobile-actions {
-    display: -webkit-box !important;
-    display: -ms-flexbox !important;
-    display: flex !important;
-    -webkit-box-orient: vertical !important;
-    -webkit-box-direction: normal !important;
-        -ms-flex-direction: column !important;
-            flex-direction: column !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
     width: 100% !important;
+  }
+  /* Ensure buttons don't stretch in grid - keep their flex display for internal centering */
+  .card-actions.dog-details-mobile-actions > button,
+  .card-actions.dog-details-mobile-actions > .details {
+    width: auto !important;
+    height: auto !important;
   }
   /* Main button container - use flex for layout */
   .dog-details-buttons-container {
@@ -882,9 +884,6 @@ a {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  -webkit-box-flex: 1;
-      -ms-flex: 1 1 0px;
-          flex: 1 1 0;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
   margin: 0 2px;
@@ -952,9 +951,6 @@ a {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  -webkit-box-flex: 1;
-      -ms-flex: 1 1 0px;
-          flex: 1 1 0;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
   margin: 0 2px;
@@ -1077,16 +1073,22 @@ img.welcome {
 }
 
 #Wrap > *:nth-child(1) {
+  grid-row: 1;
+  grid-column: 1;
   -ms-grid-row: 1;
   -ms-grid-column: 1;
 }
 
 #Wrap > *:nth-child(2) {
+  grid-row: 2;
+  grid-column: 1;
   -ms-grid-row: 2;
   -ms-grid-column: 1;
 }
 
 #Wrap > *:nth-child(3) {
+  grid-row: 3;
+  grid-column: 1;
   -ms-grid-row: 3;
   -ms-grid-column: 1;
 }
@@ -1140,18 +1142,44 @@ img {
   }
 }
 @media (max-width: 480px) {
-  .UserHeader, header {
-    padding: 0.75rem 0.5rem;
-    gap: 0.5rem;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-            flex-direction: column;
+  .card-actions button.details,
+  .card-actions button.wishlist,
+  .card-actions button.edit,
+  .card-actions button.remove,
+  .card-actions button {
+    font-size: 0.8em;
+    padding: 0.04rem 0.09rem;
+    min-width: 44px;
+    height: 16px;
+    border-radius: 5px;
   }
-  .UserHeader img, header img {
-    width: 2.5rem;
-    height: 2.5rem;
+}
+
+/* Force 2x2 grid for mobile dog details buttons - MUST come after all other rules */
+@media (max-width: 767px) {
+  .card-actions.dog-details-mobile-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 12px !important;
+    width: 100% !important;
+    flex-wrap: unset !important;
+    flex-direction: unset !important;
+    justify-content: unset !important;
+    align-items: unset !important;
   }
+  
+  .card-actions.dog-details-mobile-actions > button,
+  .card-actions.dog-details-mobile-actions > .details {
+    display: flex !important;
+    width: 100% !important;
+    height: auto !important;
+    min-width: unset !important;
+    flex: unset !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+}
 }
 
 nav#top ul {
@@ -1282,6 +1310,7 @@ h1 {
   background: #42210B;
   background: -webkit-gradient(linear, left bottom, left top, from(#42210B), to(#B16C2E));
   background: linear-gradient(to top, #42210B 0%, #B16C2E 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -2137,6 +2166,7 @@ h2 {
   background: #42210b;
   background: -webkit-gradient(linear, left bottom, left top, from(#42210b), to(#b16c2e));
   background: linear-gradient(to top, #42210b 0%, #b16c2e 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -2158,6 +2188,7 @@ h1.extra-large {
   background: #42210b;
   background: -webkit-gradient(linear, left bottom, left top, from(#42210b), to(#b16c2e));
   background: linear-gradient(to top, #42210b 0%, #b16c2e 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -2169,6 +2200,18 @@ h1.extra-large {
 .meta {
   font-size: 1.8rem;
   color: #666;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1.6;
+}
+
+.meta strong {
+  white-space: nowrap;
+}
+
+.meta span.eky-icon {
+  flex-shrink: 0;
 }
 
 #footer-nav ul .eky-icon {
@@ -2186,9 +2229,25 @@ h1.extra-large {
 .edit {
   border-radius: 15px !important;
   padding: 0.2em 0.7em !important;
-  background: rgb(215.1275862069, 110.9448275862, 108.3724137931) !important;
-  color: #72211f !important;
+  background: #ff9800 !important;
+  color: #fff !important;
   border: none !important;
+}
+
+.edit-dog-btn {
+  background: #ff9800 !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 12px 16px !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  cursor: pointer !important;
+  -webkit-transition: background 0.2s;
+  transition: background 0.2s;
+}
+.edit-dog-btn:hover {
+  background: #e68900 !important;
 }
 
 .remove {
@@ -3029,13 +3088,56 @@ h1.extra-large {
 .card-small .card-small-actions .card-small-btn.btn-wishlist.in-wishlist {
   background: #a67c52;
 }
+/* ULTIMATE: Edit button orange override with MAXIMUM specificity */
 .card-small .card-small-actions .card-small-btn.btn-edit {
-  background: #d7c96c;
-  color: #72211f;
+  background: #ff9800 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+.card-small .card-small-actions .card-small-btn.btn-edit:hover {
+  background: #e68900 !important;
+  color: #ffffff !important;
+}
+/* Universal override */
+.card-small-btn.btn-edit,
+button.btn-edit,
+button.btn-edit[type="button"] {
+  background-color: #ff9800 !important;
+  background: #ff9800 !important;
+  color: #ffffff !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+/* Override any specificity with !important */
+button.card-small-btn.btn-edit,
+button.btn-edit[class*="edit"] {
+  background: #ff9800 !important;
+  color: #ffffff !important;
+  border: none !important;
 }
 .card-small .card-small-actions .card-small-btn.btn-remove {
   background: #e74c3c;
   color: #fff;
+}
+
+/* ULTIMATE: Edit button orange override with MAXIMUM specificity */
+.card-small .card-small-actions .card-small-btn.btn-edit {
+  background: #ff9800 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+.card-small .card-small-actions .card-small-btn.btn-edit:hover {
+  background: #e68900 !important;
+  color: #ffffff !important;
+}
+/* Universal override */
+.card-small-btn.btn-edit,
+button.btn-edit,
+button.btn-edit[type="button"] {
+  background-color: #ff9800 !important;
+  background: #ff9800 !important;
+  color: #ffffff !important;
+  border: none !important;
 }
 .card-small .card-small-actions .card-small-btn:hover:not(:disabled) {
   opacity: 0.9;
@@ -3141,14 +3243,19 @@ h1.extra-large {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
   gap: 12px;
   padding: 12px;
   margin-bottom: 16px;
+  width: 100%;
 }
 @media (max-width: 768px) {
   .dog-details .dog-details-actions {
@@ -3156,6 +3263,8 @@ h1.extra-large {
     -webkit-box-direction: normal;
         -ms-flex-direction: column;
             flex-direction: column;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
     -webkit-box-align: stretch;
         -ms-flex-align: stretch;
             align-items: stretch;
@@ -3181,21 +3290,25 @@ h1.extra-large {
   background: #72211f;
   color: #fff;
   margin-right: 8px;
+  border: 2px solid #1f4b72;
 }
 .dog-details .dog-details-actions .details-action-btn.btn-confirm {
   background: #28a745;
-  color: white;
+  color: #fff;
   margin-right: 8px;
+  border: 2px solid #1e7e34;
 }
 .dog-details .dog-details-actions .details-action-btn.btn-cancel {
   background: #e74c3c;
-  color: white;
+  color: #fff;
   margin-left: 0;
+  border: 2px solid #c0392b;
 }
 .dog-details .dog-details-actions .details-action-btn.btn-adopt {
   background: #4CAF50;
-  color: #f8f8f8;
+  color: #fff;
   margin-left: 12px;
+  border: 2px solid #388E3C;
 }
 .dog-details .dog-details-actions .details-action-btn.btn-adopt:disabled {
   background: #aaa;
@@ -4541,5 +4654,31 @@ h1.extra-large {
 @media (min-width: 769px) {
   .footer-chat-btn .chat-label {
     display: inline-block;
+  }
+}
+
+/* Force 2x2 grid for mobile dog details buttons - MUST come at the END */
+@media (max-width: 767px) {
+  .card-actions.dog-details-mobile-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 12px !important;
+    width: 100% !important;
+    flex-wrap: unset !important;
+    flex-direction: unset !important;
+    justify-content: unset !important;
+    align-items: unset !important;
+  }
+  
+  .card-actions.dog-details-mobile-actions > button,
+  .card-actions.dog-details-mobile-actions > .details {
+    display: flex !important;
+    width: 100% !important;
+    height: auto !important;
+    min-width: unset !important;
+    flex: unset !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
 }

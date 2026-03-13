@@ -51,6 +51,34 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   const { t } = useTranslation();
   const { user: currentUser, isAuthenticated, isInWishlist, addToWishlist, removeFromWishlist } = useAuth();
   const { showMap: showMapModal, hideMap: hideMapModal } = useMapModal();
+  const buttonsContainerRef = React.useRef<HTMLDivElement>(null);
+
+  // Force grid layout on mobile using DOM manipulation
+  React.useEffect(() => {
+    if (buttonsContainerRef.current && typeof window !== 'undefined') {
+      const container = buttonsContainerRef.current;
+      const isMobile = window.innerWidth < 900;
+      
+      if (isMobile) {
+        // Directly set styles on the DOM element
+        container.style.setProperty('display', 'grid', 'important');
+        container.style.setProperty('grid-template-columns', '1fr 1fr', 'important');
+        container.style.setProperty('gap', '12px', 'important');
+        container.style.setProperty('width', '100%', 'important');
+        container.style.setProperty('flex-direction', 'unset', 'important');
+        container.style.setProperty('flex-wrap', 'unset', 'important');
+        container.style.setProperty('justify-content', 'unset', 'important');
+      } else {
+        // Reset to allow CSS to handle desktop
+        container.style.removeProperty('display');
+        container.style.removeProperty('grid-template-columns');
+        container.style.removeProperty('gap');
+        container.style.removeProperty('flex-direction');
+        container.style.removeProperty('flex-wrap');
+        container.style.removeProperty('justify-content');
+      }
+    }
+  }, []);
   
   // Helper function to get API base URL - define before use in event listeners
   const getApiBase = () => {
@@ -393,25 +421,21 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         </h3>
         {breed && (
           <p className="meta">
-            <span className="eky-icon eky-tag"></span>
             <strong>{t('fields.breed')}</strong> {breed}
           </p>
         )}
         {gender && (
           <p className="meta">
-            <span className="eky-icon eky-user"></span>
             <strong>{t('fields.gender')}</strong> {t(`gender.${gender}`) || gender}
           </p>
         )}
         {age && (
           <p className="meta">
-            <span className="eky-icon eky-clock"></span>
             <strong>{t('fields.age')}</strong> {age} {t('dogDetails.ageSuffix')}
           </p>
         )}
         {(place || location) && (
           <p className="meta">
-            <span className="eky-icon eky-map"></span>
             <strong>{t('fields.location')}</strong>
             <span
               style={{ cursor: location ? 'pointer' : 'default', textDecoration: location ? 'underline' : 'none' }}
@@ -425,19 +449,16 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         )}
         {color && (
           <p className="meta">
-            <span className="eky-icon eky-palette"></span>
-            <strong>{t('fields.color')}</strong> {color}
+            <strong>{t('fields.color')}</strong> {t(`color.${color.toLowerCase()}`) || color}
           </p>
         )}
         {size && (
           <p className="meta">
-            <span className="eky-icon eky-ruler"></span>
-            <strong>{t('fields.size')}</strong> {size}
+            <strong>{t('fields.size')}</strong> {t(`size.${size.toLowerCase()}`) || size}
           </p>
         )}
         {(vaccinated !== undefined || neutered !== undefined) && (
           <p className="meta">
-            <span className="eky-icon eky-shield"></span>
             <strong>{t('fields.vaccination')}</strong>
             {vaccinated === true && t('dogDetails.vaccinated')}
             {vaccinated === false && t('dogDetails.notVaccinated')}
@@ -448,7 +469,6 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         )}
         {description && (
           <p className="meta description-text">
-            <span className="eky-icon eky-note"></span>
             <strong>{t('fields.description')}</strong> {description}
           </p>
         )}
@@ -461,7 +481,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
               </p>
               {typeof createdAt !== 'undefined' && (
                 <p className="meta" style={{ marginBottom: '0.75rem' }}>
-                  <strong>{t('postedOn') || 'Posted on'}</strong> {new Date(createdAt as string).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                  <strong>{t('fields.postedOn')}</strong> {new Date(createdAt as string).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                 </p>
               )}
               {owner.username && owner.username !== owner.name && (
@@ -478,13 +498,16 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
             </div>
           )}
       </div>
-      <div className="card-actions call-to-action dog-details-mobile-actions">
+      <div 
+        className="card-actions call-to-action dog-details-mobile-actions"
+        ref={buttonsContainerRef}
+      >
         {/* Show buttons for authenticated users - show all buttons and handle owner check inside each button */}
         {isAuthenticated && _id && (
           <>
             {/* Edit/Delete buttons for owner */}
             {isOwner && (
-              <div className="dog-details-buttons-container">
+              <>
                 <button 
                   className="details edit-dog-btn"
                   onClick={(e) => {
@@ -544,27 +567,26 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 >
                   {t('button.remove', t('delete'))}
                 </button>
-              </div>
+              </>
             )}
-            <div className="dog-details-buttons-container">
-              <button 
-                id="add-to-list" 
-                className="details"
-                onClick={() => {
-                  handleWishlistToggle();
-                }}
-              >
-                {isInWishlist(_id)
-                  ? <><div style={{position:'relative',fontSize:18,marginRight:4,display:'inline-block'}}>❤️<span style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',color:'#4CAF50',fontSize:12,fontWeight:'bold'}}>✓</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4}}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></>
-                  : <><span style={{fontSize:18,marginRight:4}}>❤️</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4}}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></>}
-              </button>
-              {/* ADOPT/CONFIRM/CANCEL LOGIC (improved for both adopter and owner) */}
-              {/* Adoption UI logic fallback: if state is ambiguous, show info */}
-              {adoptionStatusState === 'pending' && adoptionQueueState && currentUser ? (
-              <div style={{ marginTop: 16 }}>
+            <button 
+              id="add-to-list" 
+              className="details"
+              onClick={() => {
+                handleWishlistToggle();
+              }}
+            >
+              {isInWishlist(_id)
+                ? <><div style={{position:'relative',fontSize:18,marginRight:4,display:'inline-block'}}>❤️<span style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',color:'#4CAF50',fontSize:12,fontWeight:'bold'}}>✓</span></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4}}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></>
+                : <><span style={{fontSize:18,marginRight:4}}>❤️</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4}}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></>}
+            </button>
+            {/* ADOPT/CONFIRM/CANCEL LOGIC (improved for both adopter and owner) */}
+            {/* Adoption UI logic fallback: if state is ambiguous, show info */}
+            {adoptionStatusState === 'pending' && adoptionQueueState && currentUser ? (
+              <>
                 {/* Adopter: can confirm or cancel if not yet confirmed */}
                 {adoptionQueueState.adopter === currentUser._id && !adoptionQueueState.adopterConfirmed && (
-                  <div>
+                  <>
                     <button
                       className="details adopt-confirm-btn"
                       onClick={async () => {
@@ -610,8 +632,11 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                       value={cancelReason}
                       onChange={e => setCancelReason(e.target.value)}
                       rows={2}
-                      style={{ width: '100%', maxWidth: 320, marginBottom: 8 }}
                       disabled={cancelLoading}
+                      style={{
+                        width: '100%',
+                        boxSizing: 'border-box'
+                      }}
                     />
                     <button
                       className="details adopt-cancel-btn"
@@ -620,7 +645,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                     >
                       {cancelLoading ? (t('button.cancelling') || 'Odustajanje...') : (t('button.cancelAdoption') || 'Odustani od posvajanja')}
                     </button>
-                  </div>
+                  </>
                 )}
                 {/* Owner: can confirm if not yet confirmed */}
                 {owner && owner._id === currentUser._id && !adoptionQueueState.ownerConfirmed && (
@@ -653,12 +678,12 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                           if (onDogUpdate) onDogUpdate(data.dog);
                           if (onDogChanged) onDogChanged();
                         }
-                        } catch (e: any) {
-                          setAdoptError(e.message || 'Error');
-                        } finally {
-                          setAdoptLoading(false);
-                          setIsPerformingAction(false);
-                        }
+                      } catch (e: any) {
+                        setAdoptError(e.message || 'Error');
+                      } finally {
+                        setAdoptLoading(false);
+                        setIsPerformingAction(false);
+                      }
                     }}
                     disabled={adoptLoading}
                   >
@@ -666,22 +691,22 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                   </button>
                 )}
                 {/* Status messages */}
-                {adoptError && <div style={{ color: 'red', marginTop: 8 }}>{adoptError}</div>}
-                {cancelError && <div style={{ color: 'red', marginTop: 8 }}>{cancelError}</div>}
-                {cancelSuccess && <div style={{ color: 'green', marginTop: 8 }}>{t('dogDetails.cancelSuccess') || 'Posvajanje je otkazano.'}</div>}
+                {adoptError && <div style={{ color: 'red', marginTop: 8, width: '100%' }}>{adoptError}</div>}
+                {cancelError && <div style={{ color: 'red', marginTop: 8, width: '100%' }}>{cancelError}</div>}
+                {cancelSuccess && <div style={{ color: 'green', marginTop: 8, width: '100%' }}>{t('dogDetails.cancelSuccess') || 'Posvajanje je otkazano.'}</div>}
                 {/* Waiting for confirmation message */}
                 {adoptionQueueState.adopterConfirmed && !adoptionQueueState.ownerConfirmed && owner && owner._id === currentUser._id && (
-                  <div style={{ marginTop: 8, color: '#555' }}>{t('dogDetails.waitingForOwner') || 'Čeka potvrdu vlasnika.'}</div>
+                  <div style={{ marginTop: 8, color: '#555', width: '100%' }}>{t('dogDetails.waitingForOwner') || 'Čeka potvrdu vlasnika.'}</div>
                 )}
                 {adoptionQueueState.ownerConfirmed && !adoptionQueueState.adopterConfirmed && adoptionQueueState.adopter === currentUser._id && (
-                  <div style={{ marginTop: 8, color: '#555' }}>{t('dogDetails.waitingForAdopter') || 'Čeka potvrdu posvojitelja.'}</div>
+                  <div style={{ marginTop: 8, color: '#555', width: '100%' }}>{t('dogDetails.waitingForAdopter') || 'Čeka potvrdu posvojitelja.'}</div>
                 )}
                 {adoptionQueueState.ownerConfirmed && adoptionQueueState.adopterConfirmed && (
-                  <div style={{ marginTop: 8, color: 'green' }}>{t('dogDetails.adoptionComplete') || 'Posvajanje završeno!'}</div>
+                  <div style={{ marginTop: 8, color: 'green', width: '100%' }}>{t('dogDetails.adoptionComplete') || 'Posvajanje završeno!'}</div>
                 )}
-              </div>
+              </>
             ) : adoptionStatusState === 'pending' ? (
-              <div>
+              <>
                 <button
                   id="adopt"
                   className="details adopt-requested-btn"
@@ -689,14 +714,14 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 >
                   {t('button.requested') || 'Zahtjev poslan'}
                 </button>
-                <div style={{ marginTop: 8, color: '#555' }}>{t('dogDetails.waitingForConfirmation') || 'Čeka potvrdu vlasnika.'}</div>
-              </div>
+                <div style={{ marginTop: 8, color: '#555', width: '100%' }}>{t('dogDetails.waitingForConfirmation') || 'Čeka potvrdu vlasnika.'}</div>
+              </>
             ) : adoptionStatusState === 'pending' && !adoptionQueueState ? (
-              <div style={{ color: 'orange', marginTop: 12 }}>
+              <div style={{ color: 'orange', marginTop: 12, width: '100%' }}>
                 {t('dogDetails.ambiguousAdoptionState') || 'Adoption is pending, but details are unavailable. Please refresh or contact support.'}
               </div>
-              ) : (
-              <div>
+            ) : (
+              <>
                 <button
                   id="adopt"
                   className="details adopt-btn"
@@ -709,13 +734,12 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 </button>
                 {/* Fallback: if adoption state is not available, show info */}
                 {adoptionStatusState === undefined && (
-                  <div style={{ color: 'orange', marginTop: 12 }}>
+                  <div style={{ color: 'orange', marginTop: 12, width: '100%' }}>
                     {t('dogDetails.noAdoptionInfo') || 'No adoption information available for this dog.'}
                   </div>
                 )}
-              </div>
+              </>
             )}
-            </div>
           </>
         )}
       </div>

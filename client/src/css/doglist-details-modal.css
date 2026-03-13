@@ -12,6 +12,78 @@
 
   /* Mobile Modal Fix */
 @media (max-width: 899px) {
+  /* HIGHEST SPECIFICITY: Force grid on elements with data-force-grid attribute */
+  [data-force-grid="true"].card-actions.dog-details-mobile-actions,
+  [data-force-grid="true"].card-actions.call-to-action.dog-details-mobile-actions,
+  .card-actions.dog-details-mobile-actions[data-force-grid="true"],
+  .card-actions.call-to-action.dog-details-mobile-actions[data-force-grid="true"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 12px !important;
+    width: 100% !important;
+    flex-wrap: unset !important;
+    flex-direction: unset !important;
+    justify-content: unset !important;
+    align-items: unset !important;
+    flex-grow: unset !important;
+    flex-shrink: unset !important;
+    background: #ffffff !important;
+  }
+  
+  /* HIGHEST SPECIFICITY: Buttons fill their grid cells */
+  [data-force-grid="true"].card-actions.dog-details-mobile-actions > button,
+  [data-force-grid="true"].card-actions.dog-details-mobile-actions > .details,
+  [data-force-grid="true"].card-actions.call-to-action.dog-details-mobile-actions > button,
+  [data-force-grid="true"].card-actions.call-to-action.dog-details-mobile-actions > .details,
+  .card-actions.dog-details-mobile-actions[data-force-grid="true"] > button,
+  .card-actions.dog-details-mobile-actions[data-force-grid="true"] > .details,
+  .card-actions.call-to-action.dog-details-mobile-actions[data-force-grid="true"] > button,
+  .card-actions.call-to-action.dog-details-mobile-actions[data-force-grid="true"] > .details {
+    width: 100% !important;
+    min-width: unset !important;
+    flex: unset !important;
+    -webkit-box-flex: unset !important;
+    -ms-flex: unset !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 !important;
+  }
+  
+  /* DIRECT: Force 2x2 grid on card-actions without parent wrapper */
+  .card-actions.dog-details-mobile-actions,
+  .card-actions.call-to-action.dog-details-mobile-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 12px !important;
+    width: 100% !important;
+    flex-wrap: unset !important;
+    flex-direction: unset !important;
+    justify-content: unset !important;
+    align-items: unset !important;
+    flex-grow: unset !important;
+    flex-shrink: unset !important;
+    background: #ffffff !important;
+  }
+  
+  /* DIRECT: Buttons fill their grid cells */
+  .card-actions.dog-details-mobile-actions > button,
+  .card-actions.dog-details-mobile-actions > .details,
+  .card-actions.call-to-action.dog-details-mobile-actions > button,
+  .card-actions.call-to-action.dog-details-mobile-actions > .details {
+    width: 100% !important;
+    min-width: unset !important;
+    flex: unset !important;
+    -webkit-box-flex: unset !important;
+    -ms-flex: unset !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 !important;
+  }
+  
   /* Modal overlay - fits between header and footer */
   .doglist-details-modal.mobile {
     position: fixed !important;
@@ -66,15 +138,14 @@
     pointer-events: auto !important;
   }
 
-  /* Card actions - flex row to combine all button containers */
+  /* Card actions - CSS Grid for 2x2 layout */
   .doglist-details-content .card-actions,
   .doglist-details-content .card-actions.call-to-action,
   .doglist-details-content .card-actions.call-to-action.dog-details-mobile-actions {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
     width: 100% !important;
-    gap: 10px !important;
     visibility: visible !important;
     opacity: 1 !important;
     overflow: visible !important;
@@ -82,25 +153,38 @@
     background: #ffffff !important;
   }
 
-  /* Button containers - flex row for 2 buttons per row */
+  /* Button containers - CSS Grid for reliable 2x2 layout */
   .doglist-details-content .dog-details-buttons-container {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
     width: 100% !important;
-    gap: 10px !important;
     margin: 0 !important;
     overflow: visible !important;
   }
 
-  /* ALL buttons - 50% width */
+  /* Status message divs - span both columns */
+  .doglist-details-content .dog-details-buttons-container > div[style*="color"] {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* Textarea - span both columns */
+  .doglist-details-content .dog-details-buttons-container textarea {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* ALL buttons - fill parent */
   .doglist-details-content .dog-details-buttons-container button,
   .doglist-details-content .dog-details-buttons-container .details {
-    width: calc(50% - 5px) !important;
-    flex: 0 0 calc(50% - 5px) !important;
+    width: 100% !important;
     box-sizing: border-box !important;
     min-height: 50px !important;
-    display: inline-flex !important;
+    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     text-align: center !important;
@@ -111,33 +195,31 @@
     cursor: pointer !important;
     border: none !important;
     margin: 0 !important;
+    flex: none !important;
+    -webkit-box-flex: none !important;
+    -ms-flex: none !important;
   }
 
-  /* Nested wrapper divs */
-  .doglist-details-content .dog-details-buttons-container > div {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
+  /* Also override direct button children of card-actions */
+  .doglist-details-content .card-actions.call-to-action.dog-details-mobile-actions button,
+  .doglist-details-content .card-actions.call-to-action.dog-details-mobile-actions .details {
     width: 100% !important;
-    gap: 10px !important;
-    margin-top: 0 !important;
-    margin-bottom: 10px !important;
-  }
-
-  /* Buttons in nested divs */
-  .doglist-details-content .dog-details-buttons-container > div > button,
-  .doglist-details-content .dog-details-buttons-container > div > .details {
-    width: calc(50% - 5px) !important;
-    flex: 0 0 calc(50% - 5px) !important;
-  }
-
-  /* Textarea - full width */
-  .doglist-details-content .dog-details-buttons-container textarea {
-    width: 100% !important;
-    margin: 10px 0 !important;
-    order: -1 !important;
-    flex: 1 1 100% !important;
     box-sizing: border-box !important;
+    min-height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    border: none !important;
+    margin: 0 !important;
+    flex: none !important;
+    -webkit-box-flex: none !important;
+    -ms-flex: none !important;
   }
 
   /* Button colors */

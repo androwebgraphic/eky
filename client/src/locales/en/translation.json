@@ -209,6 +209,20 @@
     "success": "Success",
     "refresh": "Refresh"
   },
+  "dogDetails": {
+    "imageAlt": "dog image",
+    "ageSuffix": "years",
+    "mixed": "mixed breed",
+    "vaccinated": "Vaccinated",
+    "notVaccinated": "Not vaccinated",
+    "neutered": "Neutered",
+    "notNeutered": "Not neutered",
+    "loadingMap": "Loading map...",
+    "approximateLocation": "Showing approximate location",
+    "searchBasedLocation": "Using location search",
+    "viewFullMap": "View full map",
+    "mapPreview": "Map preview"
+  },
   "fields": {
     "name": "Name:",
     "breed": "Breed:",
@@ -224,7 +238,22 @@
     "email": "Email:",
     "userType": "User Type:",
     "postedBy": "Posted by:",
+    "postedOn": "Posted on",
     "contactOwner": "Contact Owner"
+  },
+  "color": {
+    "white": "White",
+    "black": "Black",
+    "brown": "Brown",
+    "golden": "Golden",
+    "grey": "Grey",
+    "gray": "Gray",
+    "tan": "Tan",
+    "spotted": "Spotted",
+    "tricolor": "Tricolor",
+    "brindle": "Brindle",
+    "merle": "Merle",
+    "other": "Other"
   },
   "language": {
     "selectAria": "Select language"

@@ -120,12 +120,5 @@
     padding-bottom: 50px !important;
   }
   
-  /* Ensure all buttons in mobile modal are visible */
-  .dog-details-mobile-actions button {
-    margin-bottom: 12px !important;
-  }
-  
-  .dog-details-mobile-actions button:last-child {
-    margin-bottom: 30px !important;
-  }
+  /* Remove these margin rules to allow proper 2x2 grid layout in modal.css */
 }

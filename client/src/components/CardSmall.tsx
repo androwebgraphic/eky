@@ -175,7 +175,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 			background: '#dbb69d', color: '#fff', border: 'none', fontWeight: 600
 		},
 		edit: {
-			background: 'orange', color: '#fff', border: 'none', fontWeight: 600
+			background: '#ff9800', color: '#fff', border: 'none', fontWeight: 600
 		},
 		remove: {
 			background: '#d32f2f', color: '#fff', border: 'none', fontWeight: 600

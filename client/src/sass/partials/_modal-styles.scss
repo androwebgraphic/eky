@@ -346,13 +346,20 @@
     /* Edit button - orange */
     .dog-details-buttons-container .edit-dog-btn {
       background-color: #ff9800 !important;
-      color: white !important;
+      color: #fff !important;
       border: none !important;
       padding: 12px 16px !important;
       border-radius: 6px !important;
       font-weight: 600 !important;
       font-size: 16px !important;
       cursor: pointer !important;
+    }
+    
+    /* Card Edit button - orange */
+    .card-small .card-small-actions .card-small-btn.btn-edit {
+      background-color: #ff9800 !important;
+      color: #fff !important;
+      border: none !important;
     }
 
     /* Delete button - red */

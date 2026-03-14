@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import io from 'socket.io-client';
 import { useAuth } from '../contexts/AuthContext';
+import { sanitizeChatMessage } from '../utils/sanitize';
 import '../css/chat-app.css';
 import '../styles/chatAppNotification.css';
 
@@ -140,12 +141,18 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     if (!selectedConvo || !token || !input.trim()) {
       return;
     }
+    // Sanitize message content to prevent XSS attacks
+    const sanitizedMessage = sanitizeChatMessage(input);
+    if (!sanitizedMessage.trim()) {
+      return;
+    }
+    
     const recipient = selectedConvo.participants.find(id => id !== user._id);
     const messagePayload: any = {
       conversationId: selectedConvo._id,
       sender: user._id,
       recipient: recipient,
-      message: input,
+      message: sanitizedMessage,
       messageType: 'text',
       dogId: adoptionDogId || undefined,
       isOwner: adoptionIsOwner
@@ -1023,8 +1030,9 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                           className="chat-dog-image"
                         />
                         <div className="chat-adoption-dog-details">
-                          <h4>{dog.name}</h4>
-                          <p>{dog.breed} • {dog.age} {t('chat.years')} • {dog.size} • {dog.location}</p>
+                          {/* Sanitize dog data to prevent XSS */}
+                          <h4>{sanitizeChatMessage(dog.name)}</h4>
+                          <p>{sanitizeChatMessage(dog.breed)} • {dog.age} {t('chat.years')} • {dog.size} • {sanitizeChatMessage(dog.location)}</p>
                           <p>{t('adoptionPending') || 'Adoption pending for this dog.'}</p>
                         </div>
                       </div>
@@ -1065,7 +1073,8 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                   return (
                     <div key={msg._id} className={`chat-app-message${msg.sender === user._id ? ' self' : ''}`}>
                       <span className={bubbleClass}>
-                        {msg.message}
+                        {/* Sanitize displayed message to prevent XSS */}
+                        {sanitizeChatMessage(msg.message)}
                       </span>
                       
                       {/* Display dog information for adoption requests */}
@@ -1077,8 +1086,9 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                             className="chat-dog-image"
                           />
                           <div className="chat-dog-details">
-                            <h4>{msg.dogData.name}</h4>
-                            <p>{msg.dogData.breed} • {msg.dogData.age} {t('chat.years')} • {msg.dogData.size} • {msg.dogData.location}</p>
+                            {/* Sanitize dog data to prevent XSS */}
+                            <h4>{sanitizeChatMessage(msg.dogData.name)}</h4>
+                            <p>{sanitizeChatMessage(msg.dogData.breed)} • {msg.dogData.age} {t('chat.years')} • {msg.dogData.size} • {sanitizeChatMessage(msg.dogData.location)}</p>
                           </div>
                         </div>
                       )}

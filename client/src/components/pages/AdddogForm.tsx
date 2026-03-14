@@ -3,6 +3,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { sanitizeFormData, sanitizeWithMaxLength } from '../../utils/sanitize';
 
 interface AddDogFormData {
   name: string;
@@ -426,12 +427,15 @@ const AdddogForm: React.FC = () => {
   const onSubmit: SubmitHandler<AddDogFormData> = async (fields) => {
     console.log('Form submit triggered with fields:', fields);
 
+    // Sanitize all form data before submission
+    const sanitizedFields = sanitizeFormData(fields, ['description']);
+
     // Basic validation
-    if (!fields.name?.trim()) {
+    if (!sanitizedFields.name?.trim()) {
       setSubmitError(t('adddog.nameRequired'));
       return;
     }
-    if (!fields.location?.trim()) {
+    if (!sanitizedFields.location?.trim()) {
       setSubmitError(t('adddog.locationRequired'));
       return;
     }
@@ -445,13 +449,15 @@ const AdddogForm: React.FC = () => {
       setSubmitError(null);
 
       const formData = new FormData();
-      formData.append('name', fields.name);
-      if (fields.breed) formData.append('breed', fields.breed);
-      if (fields.color) formData.append('color', fields.color);
-      if (fields.age !== undefined) formData.append('age', String(fields.age));
-      if (fields.description) formData.append('description', fields.description);
-      if (fields.size) formData.append('size', fields.size);
-      if (fields.location) formData.append('location', fields.location);
+      
+      // Use sanitized values
+      formData.append('name', sanitizeWithMaxLength(sanitizedFields.name, 100));
+      if (sanitizedFields.breed) formData.append('breed', sanitizeWithMaxLength(sanitizedFields.breed, 100));
+      if (sanitizedFields.color) formData.append('color', sanitizeWithMaxLength(sanitizedFields.color, 50));
+      if (sanitizedFields.age !== undefined) formData.append('age', String(sanitizedFields.age));
+      if (sanitizedFields.description) formData.append('description', sanitizeWithMaxLength(sanitizedFields.description, 2000));
+      if (sanitizedFields.size) formData.append('size', sanitizedFields.size);
+      if (sanitizedFields.location) formData.append('location', sanitizeWithMaxLength(sanitizedFields.location, 200));
 
       formData.append('vaccinated', fields.vaccinated ? 'true' : 'false');
       formData.append('neutered', fields.neutered ? 'true' : 'false');

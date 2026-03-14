@@ -364,13 +364,6 @@ const Header: React.FC = () => {
             </div>
           )}
 
-          {/* Message - centered */}
-          <div className={`header-message-wrapper ${isMobile ? 'mobile' : 'desktop'}`}>
-            <p className="header-message-text">
-              {t('nav.mustBeLoggedIn')}
-            </p>
-          </div>
-
           {/* Desktop navigation */}
           {!isMobile && (
             <nav className="header-nav-desktop">
@@ -396,6 +389,39 @@ const Header: React.FC = () => {
             </div>
           )}
         </header>
+
+        {/* Message - show for all non-authenticated users */}
+        {!isAuthenticated && (
+          <div 
+            className="header-message-wrapper"
+            style={{
+              position: 'fixed',
+              top: '62px',
+              left: 0,
+              right: 0,
+              padding: '12px 20px',
+              background: 'rgba(0, 0, 0, 0.9)',
+              zIndex: 10001,
+              textAlign: 'center',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <p 
+              className="header-message-text"
+              style={{
+                margin: 0,
+                color: '#ff9800',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                textAlign: 'center'
+              }}
+            >
+              {t('nav.mustBeLoggedIn')}
+            </p>
+          </div>
+        )}
 
         {/* Mobile menu dropdown */}
         {mobileMenuOpen && isMobile && (

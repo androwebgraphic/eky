@@ -383,16 +383,33 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
       // Remove file extension FIRST
       base = base.replace(/\.(jpg|jpeg|png|webp)$/i, '');
       
-      // Handle uploaded files: name-TIMESTAMP-HASH-SIZE -> name
-      // Examples: doggy-1770420370994-1liy0v-320 -> doggy
+      // Handle uploaded files: name-TIMESTAMP-HASH-SIZE -> name or name-INDEX-SIZE -> name
+      // Examples from updateDog: doggy-1770420370994-1liy0v-320 -> doggy
+      // Examples from createDog: img-0-320 -> img, img-0-orig -> img
       // Also handle: doggy-orig -> doggy
       if (base.includes('-') && !base.startsWith('pexels-')) {
-        // Remove -orig suffix if present
-        base = base.replace(/-orig$/, '');
-        // Remove -TIMESTAMP-HASH-SIZE suffix (10-13 digit timestamp + 6 char hash + 3-4 digit size)
-        const uploadedMatch = base.match(/^(.+?)-\d{10,13}-[a-z0-9]{6}-\d{3,4}$/);
-        if (uploadedMatch) {
-          base = uploadedMatch[1];
+        // Handle createDog format: img-INDEX-SIZE (e.g., img-0-320) or img-INDEX-orig (e.g., img-0-orig)
+        // Test for -orig FIRST (before testing general pattern)
+        if (base.endsWith('-orig')) {
+          base = base.replace(/-orig$/, '');
+          // Now remove trailing -INDEX (e.g., "img-0-orig" -> "img-0" -> "img")
+          base = base.replace(/-\d+$/, '');
+        } else {
+          // Test for img-INDEX-SIZE pattern (e.g., "img-0-320")
+          const createDogMatch = base.match(/^(.+?)-\d+-\d{3,4}$/);
+          if (createDogMatch) {
+            const baseWithoutIndex = createDogMatch[1];
+            base = baseWithoutIndex;
+          } else {
+            // Handle updateDog format: name-TIMESTAMP-HASH-SIZE or name-TIMESTAMP-HASH-orig
+            // First remove -orig suffix if present
+            base = base.replace(/-orig$/, '');
+            // Then remove -TIMESTAMP-HASH-SIZE suffix (10-13 digit timestamp + 6 char hash + 3-4 digit size)
+            const uploadedMatch = base.match(/^(.+?)-\d{10,13}-[a-z0-9]{6}-\d{3,4}$/);
+            if (uploadedMatch) {
+              base = uploadedMatch[1];
+            }
+          }
         }
       } else if (base.startsWith('pexels-')) {
         // Handle Pexels images: pexels-name-ID-TIMESTAMP-HASH-SIZE -> name-ID
@@ -414,19 +431,26 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
       const baseToImage = new Map();
       validImages.forEach(img => {
         const base = getImageBase(img.url);
+        console.log(`[DOG DETAILS] Processing image: url="${img.url}", width=${img.width}, extractedBase="${base}"`);
         if (!baseToImage.has(base)) {
           baseToImage.set(base, img);
+          console.log(`[DOG DETAILS] Added to map with base="${base}"`);
         } else {
           // Keep the one with larger width
           const existing = baseToImage.get(base);
+          console.log(`[DOG DETAILS] Duplicate base="${base}", current width=${img.width}, existing width=${existing.width}`);
           if ((img.width || 0) > (existing.width || 0)) {
             baseToImage.set(base, img);
+            console.log(`[DOG DETAILS] Replaced with higher resolution image`);
           }
         }
       });
       
       const uniqueImages = Array.from(baseToImage.values());
       console.log('[DOG DETAILS] Total images:', validImages.length, 'Unique images:', uniqueImages.length);
+      uniqueImages.forEach((img, idx) => {
+        console.log(`[DOG DETAILS] Unique image ${idx}: url="${img.url}", base="${getImageBase(img.url)}", width=${img.width}`);
+      });
       
       // NOW convert to absolute URLs
       const toAbs = (u?: string) => {
@@ -439,7 +463,20 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
       
       // Sort by width descending and convert to absolute URLs
       const sorted = [...uniqueImages].sort((a, b) => (b.width || 0) - (a.width || 0));
-      return sorted.map(img => ({ url: toAbs(img.url), width: img.width }));
+      
+      // Final deduplication by URL (in case cache-busting creates duplicates)
+      const seenUrls = new Set();
+      const finalImages = [];
+      for (const img of sorted) {
+        const urlWithoutCache = img.url.split('?')[0];
+        if (!seenUrls.has(urlWithoutCache)) {
+          seenUrls.add(urlWithoutCache);
+          finalImages.push({ url: toAbs(img.url), width: img.width });
+        }
+      }
+      
+      console.log('[DOG DETAILS] Final slider images count:', finalImages.length);
+      return finalImages;
     } else if (thumbnail && thumbnail.url) {
       const toAbs = (u?: string) => {
         if (!u) return u;

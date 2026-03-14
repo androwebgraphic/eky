@@ -5,6 +5,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
+import { sanitizeFormData, sanitizeEmail, sanitizePhone, sanitizeUsername } from '../../utils/sanitize';
 // import { useAuth } from '../../contexts/AuthContext';
 
 interface RegisterFormData {
@@ -53,8 +54,20 @@ const RegisterForm: React.FC = () => {
     setIsSubmitting(true);
     setSubmitError('');
     try {
+      // Sanitize form data before sending to server
+      const sanitizedData = {
+        person: data.person,
+        name: sanitizeFormData({ name: data.name }).name,
+        username: sanitizeUsername(data.username),
+        email: sanitizeEmail(data.email),
+        phone: sanitizePhone(data.phone),
+        password: data.password, // Don't sanitize password
+        passwordAgain: data.passwordAgain, // Don't sanitize password
+        remember: data.remember
+      };
+
       // Remove passwordAgain from data before sending to server
-      const { passwordAgain, remember, ...registrationData } = data;
+      const { passwordAgain, remember, ...registrationData } = sanitizedData;
       const response = await fetch('http://localhost:3001/api/users/registracija', {
         method: 'POST',
         headers: {

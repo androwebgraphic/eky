@@ -12,9 +12,27 @@ interface DogImageSliderProps {
 }
 
 const DogImageSlider: React.FC<DogImageSliderProps> = ({ images, alt }) => {
+  console.log('[DogImageSlider] Received images:', images.length);
+  console.log('[DogImageSlider] Image URLs:', images.map((img, i) => `${i}: ${img.url}`));
+  
   if (!images || images.length === 0) return null;
 
   // Note: Deduplication is done in DogDetails component before passing images here
+  // Additional deduplication here as a safety net
+  const uniqueImages: { url: string; width?: number }[] = [];
+  const seenUrls = new Set<string>();
+  
+  for (const img of images) {
+    const urlWithoutCache = img.url.split('?')[0];
+    if (!seenUrls.has(urlWithoutCache)) {
+      seenUrls.add(urlWithoutCache);
+      uniqueImages.push(img);
+    } else {
+      console.log('[DogImageSlider] Skipping duplicate image:', img.url);
+    }
+  }
+  
+  console.log('[DogImageSlider] After deduplication:', uniqueImages.length, 'images');
 
   // Responsive maxHeight: 240px on desktop, 150px on mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
@@ -26,12 +44,12 @@ const DogImageSlider: React.FC<DogImageSliderProps> = ({ images, alt }) => {
         modules={[Navigation, Pagination]}
         spaceBetween={10}
         slidesPerView={1}
-        loop={images.length > 1}
-        pagination={{ clickable: true }}
-        navigation={true}
+        loop={uniqueImages.length > 1}
+        pagination={uniqueImages.length > 1 ? { clickable: true } : false}
+        navigation={uniqueImages.length > 1}
         style={{ borderRadius: '1rem', maxHeight }}
       >
-        {images.map((img, idx) => (
+        {uniqueImages.map((img, idx) => (
           <SwiperSlide key={img.url}>
             <img
               src={img.url}

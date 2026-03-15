@@ -1093,7 +1093,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                         </div>
                       )}
                       
-                      {isAdoptionRequest && isOwnerMessage && (
+                      {isAdoptionRequest && isOwnerMessage && msg.dogId && dogStatusMap[msg.dogId] !== 'adopted' && dogStatusMap[msg.dogId] !== 'completed' && dogStatusMap[msg.dogId] !== 'cancelled' && dogStatusMap[msg.dogId] !== 'closed' && (
                         <div className="chat-adoption-actions">
                           <button
                             onClick={() => handleAdoptionAction(msg._id, 'owner_confirm')}
@@ -1110,7 +1110,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                         </div>
                       )}
                       
-                      {msg.messageType === 'adoption_confirmed' && msg.requiresAction && !msg.actionTakenBy && msg.recipient === user._id && (
+                      {msg.messageType === 'adoption_confirmed' && msg.requiresAction && !msg.actionTakenBy && msg.recipient === user._id && msg.dogId && dogStatusMap[msg.dogId] !== 'adopted' && dogStatusMap[msg.dogId] !== 'completed' && dogStatusMap[msg.dogId] !== 'cancelled' && dogStatusMap[msg.dogId] !== 'closed' && (
                         <div className="chat-message-status">
                           <button
                             onClick={() => handleAdoptionAction(msg._id, 'adopter_confirm')}

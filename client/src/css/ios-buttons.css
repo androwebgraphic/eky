@@ -1,0 +1,308 @@
+/* iOS-style Button Styles */
+
+/* Base iOS button styles */
+.ios-button {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  outline: none;
+}
+
+/* Primary button - iOS Blue */
+.ios-button-primary {
+  background-color: #007AFF;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 122, 255, 0.3);
+}
+
+.ios-button-primary:hover {
+  background-color: #0051D5;
+  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.4);
+}
+
+.ios-button-primary:active {
+  background-color: #0041BB;
+  transform: scale(0.98);
+  box-shadow: 0 1px 2px rgba(0, 122, 255, 0.2);
+}
+
+/* Secondary button - iOS Gray */
+.ios-button-secondary {
+  background-color: #F2F2F7;
+  color: #007AFF;
+}
+
+.ios-button-secondary:hover {
+  background-color: #E5E5EA;
+}
+
+.ios-button-secondary:active {
+  background-color: #D1D1D6;
+  transform: scale(0.98);
+}
+
+/* Success button - iOS Green */
+.ios-button-success {
+  background-color: #34C759;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(52, 199, 89, 0.3);
+}
+
+.ios-button-success:hover {
+  background-color: #2DB84D;
+  box-shadow: 0 2px 6px rgba(52, 199, 89, 0.4);
+}
+
+.ios-button-success:active {
+  background-color: #26A642;
+  transform: scale(0.98);
+}
+
+/* Danger button - iOS Red */
+.ios-button-danger {
+  background-color: #FF3B30;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(255, 59, 48, 0.3);
+}
+
+.ios-button-danger:hover {
+  background-color: #D6332A;
+  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.4);
+}
+
+.ios-button-danger:active {
+  background-color: #C42B21;
+  transform: scale(0.98);
+}
+
+/* Warning button - iOS Orange */
+.ios-button-warning {
+  background-color: #FF9500;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(255, 149, 0, 0.3);
+}
+
+.ios-button-warning:hover {
+  background-color: #E68300;
+  box-shadow: 0 2px 6px rgba(255, 149, 0, 0.4);
+}
+
+.ios-button-warning:active {
+  background-color: #CC7700;
+  transform: scale(0.98);
+}
+
+/* Disabled state */
+.ios-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Small button variant */
+.ios-button-small {
+  font-size: 15px;
+  padding: 8px 16px;
+  min-height: 36px;
+}
+
+/* Large button variant */
+.ios-button-large {
+  font-size: 19px;
+  padding: 16px 24px;
+  min-height: 52px;
+}
+
+/* Outline button variant */
+.ios-button-outline {
+  background-color: transparent;
+  border: 2px solid #007AFF;
+  color: #007AFF;
+  box-shadow: none;
+}
+
+.ios-button-outline:hover {
+  background-color: rgba(0, 122, 255, 0.1);
+}
+
+.ios-button-outline:active {
+  background-color: rgba(0, 122, 255, 0.2);
+  transform: scale(0.98);
+}
+
+/* Apply iOS styles to existing button classes */
+#start_btn,
+.card-actions button,
+.card-actions .details,
+.card-actions .like,
+.card-actions .wishlist,
+.card-actions .edit,
+.card-actions .remove,
+.edit-dog-btn,
+.delete-dog-btn,
+.view-details-btn,
+.adopt-btn,
+.cancel-adopt-btn,
+.adopt-confirm-btn,
+.adopt-cancel-btn,
+.card-small-btn,
+.modal-footer .btn,
+.chat-header-btn,
+.chat-adoption-btn,
+.chat-send-btn,
+.notification-close,
+.editdog-close-btn,
+.editdog-submit-btn,
+.editdog-reset-photos-btn,
+.editdog-delete-img-btn,
+.doglist-close-btn,
+.new-dogs-dismiss-btn,
+.dropdown-btn,
+.modal-btn,
+.wishlist-action-btn,
+.btn-refresh,
+.btn-chat,
+.btn-confirm,
+.btn-deny,
+.btn-finalize,
+.btn-cancel,
+.btn-block,
+.btn-delete {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.015em !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+}
+
+#start_btn:hover,
+.card-actions button:hover,
+.card-actions .details:hover,
+.card-actions .like:hover,
+.card-actions .wishlist:hover,
+.card-actions .edit:hover,
+.card-actions .remove:hover,
+.edit-dog-btn:hover,
+.delete-dog-btn:hover,
+.view-details-btn:hover,
+.adopt-btn:hover,
+.cancel-adopt-btn:hover,
+.adopt-confirm-btn:hover,
+.adopt-cancel-btn:hover,
+.card-small-btn:hover,
+.modal-footer .btn:hover,
+.chat-header-btn:hover,
+.chat-adoption-btn:hover,
+.chat-send-btn:hover:not(:disabled),
+.notification-close:hover,
+.editdog-close-btn:hover,
+.editdog-submit-btn:hover:not(:disabled),
+.editdog-reset-photos-btn:hover,
+.editdog-delete-img-btn:hover,
+.doglist-close-btn:hover,
+.new-dogs-dismiss-btn:hover,
+.dropdown-btn:hover,
+.modal-btn:hover,
+.wishlist-action-btn:hover:not(:disabled),
+.btn-refresh:hover,
+.btn-chat:hover,
+.btn-confirm:hover,
+.btn-deny:hover,
+.btn-finalize:hover,
+.btn-cancel:hover,
+.btn-block:hover,
+.btn-delete:hover {
+  transform: scale(0.98);
+}
+
+/* Specific button color overrides with iOS colors */
+.ios-blue-bg {
+  background-color: #007AFF !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 122, 255, 0.3) !important;
+}
+
+.ios-green-bg {
+  background-color: #34C759 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(52, 199, 89, 0.3) !important;
+}
+
+.ios-red-bg {
+  background-color: #FF3B30 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(255, 59, 48, 0.3) !important;
+}
+
+.ios-orange-bg {
+  background-color: #FF9500 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(255, 149, 0, 0.3) !important;
+}
+
+.ios-gray-bg {
+  background-color: #F2F2F7 !important;
+  color: #007AFF !important;
+}
+
+/* Form buttons */
+#login, #register, button[type="submit"] {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.015em !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  box-shadow: 0 1px 3px rgba(0, 122, 255, 0.3) !important;
+}
+
+#login:hover, #register:hover, button[type="submit"]:hover {
+  transform: scale(0.98);
+}
+
+/* Search and filter buttons */
+.quick-filter-btn {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.015em !important;
+  border-radius: 20px !important;
+  transition: all 0.2s ease !important;
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+}
+
+.quick-filter-btn:hover {
+  transform: scale(0.98);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .ios-button {
+    font-size: 16px;
+    padding: 12px 16px;
+    min-height: 44px;
+  }
+  
+  .ios-button-small {
+    font-size: 14px;
+    padding: 8px 12px;
+    min-height: 36px;
+  }
+}

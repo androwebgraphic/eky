@@ -701,7 +701,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 : <><span style={{fontSize:18,marginRight:4}}>❤️</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4}}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></>}
             </button>
             {/* ADOPT/CONFIRM/CANCEL LOGIC (improved for both adopter and owner) */}
-            {/* Adoption UI logic fallback: if state is ambiguous, show info */}
+            {/* Adoption UI logic: handle different states correctly */}
             {adoptionStatusState === 'pending' && adoptionQueueState && currentUser ? (
               <>
                 {/* Adopter: can confirm or cancel if not yet confirmed */}
@@ -825,7 +825,11 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                   <div style={{ marginTop: 8, color: 'green', width: '100%' }}>{t('dogDetails.adoptionComplete') || 'Posvajanje završeno!'}</div>
                 )}
               </>
-            ) : adoptionStatusState === 'pending' ? (
+            ) : adoptionStatusState === 'pending' && !adoptionQueueState ? (
+              <div style={{ color: 'orange', marginTop: 12, width: '100%' }}>
+                {t('dogDetails.ambiguousAdoptionState') || 'Adoption is pending, but details are unavailable. Please refresh or contact support.'}
+              </div>
+            ) : adoptionStatusState === 'pending' && adoptionQueueState ? (
               <>
                 <button
                   id="adopt"
@@ -836,10 +840,6 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
                 </button>
                 <div style={{ marginTop: 8, color: '#555', width: '100%' }}>{t('dogDetails.waitingForConfirmation') || 'Čeka potvrdu vlasnika.'}</div>
               </>
-            ) : adoptionStatusState === 'pending' && !adoptionQueueState ? (
-              <div style={{ color: 'orange', marginTop: 12, width: '100%' }}>
-                {t('dogDetails.ambiguousAdoptionState') || 'Adoption is pending, but details are unavailable. Please refresh or contact support.'}
-              </div>
             ) : (
               <>
                 <button

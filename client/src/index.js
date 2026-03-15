@@ -8,6 +8,7 @@ import App from "./App";
 import './css/modal.css';
 import './css/mobile-fixes.css';
 import './css/doglist-details-modal.css';
+import './css/ios-buttons.css';
 
 ReactDOM.render(
   <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>

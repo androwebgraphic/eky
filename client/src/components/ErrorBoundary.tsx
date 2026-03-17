@@ -16,7 +16,21 @@ class ErrorBoundary extends React.Component<{ children?: React.ReactNode }, Erro
   }
 
   componentDidCatch(error: any, errorInfo: any) {
-    // You can log errorInfo here if needed
+    console.error('ErrorBoundary caught an error:', error);
+    console.error('Error Info:', errorInfo);
+    
+    // Log to localStorage for debugging
+    try {
+      const errorLog = {
+        timestamp: new Date().toISOString(),
+        error: error?.toString(),
+        errorStack: error?.stack,
+        componentStack: errorInfo?.componentStack
+      };
+      localStorage.setItem('lastError', JSON.stringify(errorLog));
+    } catch (e) {
+      // Ignore localStorage errors
+    }
   }
 
   render() {

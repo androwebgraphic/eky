@@ -184,42 +184,20 @@ pre {
   }
 }
 
-/* Ensure footer search modal appears above everything */
-.footer-search-modal {
-  z-index: 2147483648 !important;
-  pointer-events: auto !important;
-}
+  /* Ensure footer search modal appears above everything */
+  .footer-search-modal {
+    z-index: 2147483648 !important;
+  }
 
-/* Ensure all search modal content is clickable */
-.footer-search-content,
-.footer-search-content > *,
-.footer-search-content input,
-.footer-search-content button,
-.footer-search-content select {
-  pointer-events: auto !important;
-}
-
-/* Ensure footer search icon is clickable */
-#footer-nav li[title*="Search"], 
-#footer-nav li[title*="Pretraga"],
-#footer-nav .eky-search,
-#footer-nav a[href*="#search"],
-#footer-nav a[href*="#search"] li,
-#footer-nav a[href*="#search"] * {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-}
-
-/* Ensure all footer nav items are clickable */
-#footer-nav ul,
-#footer-nav ul li,
-#footer-nav ul a,
-#footer-nav ul a li,
-#footer-nav ul a li span,
-#footer-nav ul a * {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-}
+  /* Ensure footer search icon is clickable */
+  #footer-nav li[title*="Search"], 
+  #footer-nav li[title*="Pretraga"],
+  #footer-nav .eky-search,
+  #footer-nav a[href*="#search"],
+  #footer-nav a[href*="#search"] li,
+  #footer-nav a[href*="#search"] * {
+    cursor: pointer !important;
+  }
 
 /* REMOVED: pointer-events: none on .scrollable-content was blocking all clicks */
 /* This was preventing users from clicking on buttons, inputs, and other elements */
@@ -376,6 +354,312 @@ button, a, .clickable {
   min-width: 44px;
 }
 
+  /* === IPHONE SE AND VERY SMALL SCREENS OPTIMIZATION === */
+@media screen and (max-width: 375px) {
+  /* FULLSCREEN MODAL APPROACH - Bypass Safari tab bar by overlaying everything */
+  .modal-overlay,
+  .ReactModal__Overlay {
+    padding: 0 !important;
+    overflow: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: 100dvh !important; /* Dynamic viewport height for mobile browsers */
+    top: 0 !important; /* Fullscreen - cover everything */
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    position: fixed !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    z-index: 9999999 !important; /* Above header and footer */
+  }
+  
+  .modal,
+  .ReactModal__Content {
+    max-height: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: relative !important;
+    inset: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: white !important;
+    border-radius: 0 !important;
+  }
+  
+  .modal,
+  .ReactModal__Content {
+    max-height: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: relative !important;
+    inset: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Dog details modal wrapper - compact layout */
+  .dog-details {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  
+  /* Scrollable content area - more compact */
+  .dog-details .modal-body,
+  .dog-details > div:not(.dog-details-actions) {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex: 1 1 auto !important;
+    padding: 6px !important;
+    padding-bottom: 80px !important; /* Reduced for button space */
+  }
+  
+  /* Compact modal content for Safari tab bar */
+  .dog-details .dog-details-image {
+    max-height: 150px !important; /* Reduced from 200px */
+    margin: 4px auto !important;
+  }
+  
+  .dog-details .dog-details-name {
+    font-size: 18px !important; /* Reduced from 20px */
+    margin: 4px 0 !important;
+  }
+  
+  .dog-details .dog-details-location,
+  .dog-details .dog-details-breed,
+  .dog-details .dog-details-field,
+  .dog-details .dog-details-owner {
+    font-size: 12px !important; /* Reduced from 14px */
+    margin: 2px 0 !important;
+    padding: 2px 0 !important;
+  }
+  
+  /* Ultra-compact buttons at bottom */
+  .dog-details .dog-details-actions,
+  .dog-details-mobile-actions {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: white !important;
+    padding: 4px !important; /* Reduced from 8px */
+    margin: 0 !important;
+    z-index: 1000 !important;
+    border-top: 2px solid #eee !important;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.15) !important;
+    flex: 0 0 auto !important;
+    min-height: 70px !important; /* Reduced from 90px */
+  }
+  
+  .dog-details-buttons-container {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 3px !important; /* Reduced from 4px */
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+  
+  /* Ultra-compact buttons - use stack layout if needed */
+  .dog-details-buttons-container button,
+  .dog-details-buttons-container .details,
+  .dog-details .dog-details-actions button,
+  .dog-details .dog-details-actions .details-action-btn,
+  .dog-details .dog-details-actions .btn-adopt,
+  .dog-details .dog-details-actions .btn-wishlist {
+    flex: 1 1 calc(50% - 1.5px) !important;
+    min-width: calc(50% - 1.5px) !important;
+    max-width: calc(50% - 1.5px) !important;
+    height: 32px !important; /* Reduced from 40px */
+    min-height: 32px !important;
+    padding: 4px 6px !important; /* Reduced from 8px 10px */
+    font-size: 12px !important; /* Reduced from 14px */
+    font-weight: 600 !important;
+    margin: 0 !important;
+    border-radius: 6px !important;
+    line-height: 1.1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Stack buttons vertically if there are many */
+  .dog-details-buttons-container button:nth-child(n+3) {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+  }
+  
+  /* Ultra-compact textarea */
+  .dog-details-buttons-container textarea {
+    width: 100% !important;
+    min-height: 35px !important; /* Reduced from 45px */
+    padding: 6px !important;
+    font-size: 12px !important;
+    margin: 0 0 3px 0 !important; /* Reduced from 0 0 4px */
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+  }
+  
+  /* Remove extra margins from modal content */
+  .dog-details > div {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  
+  /* Even more compact for iPhone SE (375px width) */
+  
+  /* Even more compact for iPhone SE (375px width) */
+  
+  /* Reduce padding and margins */
+  main {
+    padding: 0.25rem !important;
+    margin-top: 5.5rem !important;
+    margin-bottom: 4rem !important;
+  }
+  
+  /* Reduce header height */
+  header,
+  .UserHeader {
+    min-height: 45px !important;
+    height: 45px !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+  
+  /* Reduce footer height */
+  #footer-nav {
+    height: 45px !important;
+  }
+  
+  #footer-nav ul {
+    height: 45px !important;
+    min-height: 45px !important;
+  }
+  
+  #footer-nav ul li {
+    height: 45px !important;
+  }
+  
+  /* Smaller footer icons */
+  #footer-nav .sharedog-icon,
+  nav#top .sharedog-icon,
+  header .sharedog-icon {
+    font-size: 2rem !important;
+    width: 28px !important;
+    height: 28px !important;
+  }
+  
+  #footer-nav img {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    max-width: 24px !important;
+    min-height: 24px !important;
+    max-height: 24px !important;
+  }
+  
+  /* Reduce card padding */
+  .dog-card-mini {
+    padding: 2px !important;
+  }
+  
+  .dogs-grid {
+    gap: 2px !important;
+    margin: 0 -2px !important;
+  }
+  
+  /* Reduce grid gap */
+  .dog-list-grid,
+  main > div[style*="padding: 0 16px"],
+  main > div[style*="padding: '0 16px'"] {
+    gap: 2px !important;
+    margin: 0 -2px !important;
+  }
+  
+  /* Smaller card wrappers */
+  main > div[style*="padding: 0 16px"] > div,
+  main > div[style*="padding: '0 16px'"] > div,
+  main > div[style*="padding: 0 16px"] .card.card-small,
+  main > div[style*="padding: '0 16px'"] .card.card-small {
+    padding: 2px !important;
+  }
+  
+  /* Reduce text sizes */
+  h1, h2 {
+    font-size: 1.4rem !important;
+  }
+  
+  p {
+    font-size: 1.4rem !important;
+  }
+  
+  /* Smaller search input */
+  .search-input {
+    font-size: 1.2rem !important;
+    padding: 0.5rem !important;
+    margin: 0.5rem 0 !important;
+  }
+  
+  /* Smaller buttons */
+  .search-btn {
+    padding: 3px 6px !important;
+    font-size: 10px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+  }
+  
+  /* Reduce modal padding */
+  .modal-overlay,
+  .ReactModal__Overlay {
+    padding: 5px !important;
+  }
+  
+  .modal-content,
+  .ReactModal__Content {
+    padding: 10px !important;
+  }
+  
+  /* Optimize header for very small screens */
+  .header-mobile-container {
+    min-height: 45px !important;
+    height: 45px !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+  
+  .mobile-nav-simple {
+    min-height: 45px !important;
+    height: 45px !important;
+  }
+  
+  .mobile-nav-icon-link {
+    min-width: 40px !important;
+    min-height: 40px !important;
+  }
+  
+  /* Smaller unauthenticated nav icons */
+  .mobile-nav-simple .sharedog-icon,
+  .mobile-nav-icon-link .sharedog-icon {
+    font-size: 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+  }
+  
+  .mobile-nav-simple svg,
+  .mobile-nav-icon-link svg {
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+
 /* === CRITICAL INPUT FIX === */
 /* Override any user-select: none that might block input */
 input,
@@ -454,31 +738,33 @@ select {
     padding: 0 0.5rem !important;
   }
 
-  /* Icon sizing for mobile - INCREASED SIZES */
+  /* Icon sizing for mobile - SMALLER AND LIGHTER */
   #footer-nav .sharedog-icon {
-    font-size: 2.5rem !important;
+    font-size: 2rem !important; /* Reduced from 2.5rem */
+    font-weight: 500 !important; /* Reduced from default bold */
     padding: 0 !important;
     margin: 0 !important;
     line-height: 1 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 32px !important;
-    height: 32px !important;
+    width: 28px !important; /* Reduced from 32px */
+    height: 28px !important;
   }
 
-  /* Header nav icons on mobile - INCREASED SIZES */
+  /* Header nav icons on mobile - SMALLER AND LIGHTER */
   nav#top .sharedog-icon,
   header .sharedog-icon {
-    font-size: 2.5rem !important;
+    font-size: 1.8rem !important; /* Reduced from 2.5rem */
+    font-weight: 400 !important; /* Lighter, not bold */
     padding: 0 !important;
     margin: 0 !important;
     line-height: 1 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 32px !important;
-    height: 32px !important;
+    width: 26px !important; /* Reduced from 32px */
+    height: 26px !important;
   }
 
   #footer-nav img {
@@ -521,12 +807,12 @@ select {
     line-height: 0 !important;
   }
 
-  /* === MOBILE CARD LAYOUT: 4 CARDS PER ROW === */
+    /* === MOBILE CARD LAYOUT: 3 CARDS PER ROW (better for iPhone SE) === */
 
-  /* New Dogs Modal - Mobile: Only image, 4 per row */
+  /* New Dogs Modal - Mobile: Only image, 3 per row for small screens */
   .dogs-grid .dog-card-mini {
-    max-width: calc(25% - 6px) !important;
-    flex: 0 0 calc(25% - 6px) !important;
+    max-width: calc(33.333% - 6px) !important;
+    flex: 0 0 calc(33.333% - 6px) !important;
     margin: 0 !important;
     padding: 4px !important;
     display: flex !important;
@@ -563,7 +849,7 @@ select {
     grid-template-rows: none !important;
   }
 
-  /* Dog List - Parent container: flex with 4 per row */
+  /* Dog List - Parent container: flex with 3 per row */
   .dog-list-grid,
   main > div[style*="padding: 0 16px"],
   main > div[style*="padding: '0 16px'"] {
@@ -579,14 +865,14 @@ select {
     box-sizing: border-box !important;
   }
 
-  /* Card wrappers: 25% width for 4 per row */
+  /* Card wrappers: 33.333% width for 3 per row */
   main > div[style*="padding: 0 16px"] > div,
   main > div[style*="padding: '0 16px'"] > div,
   main > div[style*="padding: 0 16px"] > div[style*="marginBottom"],
   main > div[style*="padding: '0 16px'"] > div[style*="marginBottom"] {
-    width: calc(25% - 6px) !important;
-    max-width: calc(25% - 6px) !important;
-    flex: 0 0 calc(25% - 6px) !important;
+    width: calc(33.333% - 6px) !important;
+    max-width: calc(33.333% - 6px) !important;
+    flex: 0 0 calc(33.333% - 6px) !important;
     margin: 0 !important;
     margin-bottom: 0 !important;
     padding: 4px !important;
@@ -595,12 +881,12 @@ select {
     box-sizing: border-box !important;
   }
 
-  /* CardSmall component: 25% width */
+  /* CardSmall component: 33.333% width */
   main > div[style*="padding: 0 16px"] .card.card-small,
   main > div[style*="padding: '0 16px'"] .card.card-small {
-    width: calc(25% - 6px) !important;
-    max-width: calc(25% - 6px) !important;
-    flex: 0 0 calc(25% - 6px) !important;
+    width: calc(33.333% - 6px) !important;
+    max-width: calc(33.333% - 6px) !important;
+    flex: 0 0 calc(33.333% - 6px) !important;
     padding: 4px !important;
     margin: 0 !important;
     flex-direction: column !important;
@@ -617,9 +903,9 @@ select {
   main > div[style*="padding: 0 16px"] .card.card-small div[style],
   main > div[style*="padding: 0 16px"] .card.card-small div[style*="maxWidth"],
   main > div[style*="padding: 0 16px"] .card.card-small div[style*="width"] {
-    width: calc(25% - 6px) !important;
-    max-width: calc(25% - 6px) !important;
-    flex: 0 0 calc(25% - 6px) !important;
+    width: calc(33.333% - 6px) !important;
+    max-width: calc(33.333% - 6px) !important;
+    flex: 0 0 calc(33.333% - 6px) !important;
   }
 
   /* CardSmall image container override */
@@ -969,7 +1255,7 @@ select {
 
 }
 
-/* === LARGER ICONS FOR UNAUTHENTICATED MOBILE NAV - OUTSIDE MEDIA QUERY === */
+/* === ICONS FOR UNAUTHENTICATED MOBILE NAV - SMALLER AND LIGHTER === */
 
 /* CRITICAL: Ensure mobile-nav-simple is always a row layout */
 .mobile-nav-simple {
@@ -985,67 +1271,67 @@ select {
   visibility: visible !important;
   opacity: 1 !important;
   overflow: visible !important;
-  min-height: 70px !important;
-  height: 70px !important;
+  min-height: 50px !important;
+  height: 50px !important;
   box-sizing: border-box !important;
   flex-wrap: nowrap !important;
 }
 
-/* Icon styling */
+/* Icon styling - smaller and lighter */
 .mobile-nav-simple .sharedog-icon {
-  font-size: 48px !important;
-  width: 48px !important;
-  height: 48px !important;
+  font-size: 36px !important; /* Reduced from 48px */
+  width: 36px !important; /* Reduced from 48px */
+  height: 36px !important; /* Reduced from 48px */
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  line-height: 48px !important;
-  font-weight: 900 !important;
+  line-height: 36px !important;
+  font-weight: 400 !important; /* Lighter, not bold */
   color: #f8f8f8 !important;
 }
 
 .mobile-nav-simple svg {
-  width: 48px !important;
-  height: 48px !important;
+  width: 36px !important; /* Reduced from 48px */
+  height: 36px !important; /* Reduced from 48px */
   display: block !important;
   flex-shrink: 0;
 }
 
-/* More specific selector to override index.css */
+/* More specific selector to override index.css - smaller and lighter */
 .mobile-nav-icon-link .sharedog-icon {
-  font-size: 48px !important;
-  width: 48px !important;
-  height: 48px !important;
+  font-size: 36px !important; /* Reduced from 48px */
+  width: 36px !important; /* Reduced from 48px */
+  height: 36px !important; /* Reduced from 48px */
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  line-height: 48px !important;
-  font-weight: 900 !important;
+  line-height: 36px !important;
+  font-weight: 400 !important; /* Lighter, not bold */
   color: #f8f8f8 !important;
   padding: 0 !important;
 }
 
-/* SVG icon styling in mobile nav */
+/* SVG icon styling in mobile nav - smaller */
 .mobile-nav-icon-link svg {
-  width: 48px !important;
-  height: 48px !important;
+  width: 36px !important; /* Reduced from 48px */
+  height: 36px !important; /* Reduced from 48px */
   display: block !important;
   flex-shrink: 0 !important;
 }
 
-/* Icon links - ensure they stay in row */
+/* Icon links - ensure they stay in row, smaller */
 .mobile-nav-icon-link {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  min-width: 60px !important;
-  min-height: 60px !important;
+  min-width: 50px !important; /* Reduced from 60px */
+  min-height: 50px !important; /* Reduced from 60px */
   padding: 0 !important;
   margin: 0 !important;
   flex-shrink: 0 !important;
 }
 
-/* Ensure header container doesn't interfere */
+/* Ensure header container doesn't interfere - smaller */
 .header-mobile-container.mobile-nav-only {
   display: flex !important;
   flex-direction: row !important;
@@ -1054,32 +1340,32 @@ select {
   width: 100vw !important;
   max-width: 100vw !important;
   padding: 0 !important;
-  min-height: 70px !important;
-  height: 70px !important;
+  min-height: 50px !important; /* Reduced from 70px */
+  height: 50px !important; /* Reduced from 70px */
   overflow: visible !important;
 }
 
-/* Language indicator - ensure it stays in row */
+/* Language indicator - ensure it stays in row, smaller */
 .mobile-language-indicator {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 60px !important;
-  min-height: 60px !important;
+  width: 50px !important; /* Reduced from 60px */
+  min-height: 50px !important; /* Reduced from 60px */
   padding: 0 !important;
   margin: 0 !important;
   flex-shrink: 0 !important;
 }
 
-/* ULTRA SPECIFIC - Target all icons in mobile nav */
+/* ULTRA SPECIFIC - Target all icons in mobile nav - smaller and lighter */
 .mobile-nav-simple > .mobile-nav-icon-link > .sharedog-icon,
 .mobile-nav-simple > .mobile-nav-icon-link > span.sharedog-icon,
 .mobile-nav-simple > .mobile-nav-icon-link > svg {
-  font-size: 48px !important;
-  width: 48px !important;
-  height: 48px !important;
-  line-height: 48px !important;
-  font-weight: 900 !important;
+  font-size: 36px !important; /* Reduced from 48px */
+  width: 36px !important; /* Reduced from 48px */
+  height: 36px !important; /* Reduced from 48px */
+  line-height: 36px !important;
+  font-weight: 400 !important; /* Lighter, not bold */
 }
 
 .mobile-nav-simple > .mobile-nav-icon-link > svg {

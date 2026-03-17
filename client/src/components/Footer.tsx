@@ -29,29 +29,29 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
           <ul>
             <Link to="/psi">
               <li title={t('nav.dogs')}>
-                <span className="eky-icon eky-eky"></span>
+                <span className="sharedog-icon sharedog-Paw" style={{fontSize: '36px'}}></span>
                 <span className="desktop-label">{t('footer.dogs')}</span>
               </li>
             </Link>
             <li title={t('button.chat') || 'Chat'} onClick={typeof onChatClick === 'function' ? onChatClick : undefined}>
-              <img src="/img/paper-airplane.svg" alt="Chat" className="footer-icon" />
+              <span className="sharedog-icon sharedog-Message" style={{fontSize: '36px'}}></span>
               <span className="desktop-label">{t('footer.chat')}</span>
             </li>
             <Link to="/dodajpsa">
               <li title={t('adddog.title')}>
-                <span className="eky-icon eky-add-dog">+</span>
+                <span className="sharedog-icon sharedog-Add-dog" style={{fontSize: '36px'}}>+</span>
                 <span className="desktop-label">{t('footer.addDog')}</span>
               </li>
             </Link>
             {isAuthenticated && user ? (
               <li title={`${user.username} - ${t('userProfile.welcome') || 'User Profile'}`} onClick={handleUserIconClick}>
-                <span className="eky-icon eky-user"></span>
+                <span className="sharedog-icon sharedog-User" style={{fontSize: '36px'}}></span>
                 <span className="desktop-label">{t('footer.profile')}</span>
               </li>
             ) : (
               <Link to="/logiranje">
                 <li title={t('nav.login')}>
-                  <span className="eky-icon eky-user"></span>
+                  <span className="sharedog-icon sharedog-User" style={{fontSize: '36px'}}></span>
                   <span className="desktop-label">{t('footer.login')}</span>
                 </li>
               </Link>
@@ -66,7 +66,7 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
               }}
               style={{ cursor: 'pointer' } as any}
             >
-              <span className="eky-icon eky-search"></span>
+              <span className="sharedog-icon sharedog-Search" style={{fontSize: '36px'}}></span>
               <span className="desktop-label">{t('footer.search')}</span>
             </li>
           </ul>

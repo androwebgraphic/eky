@@ -16,7 +16,7 @@ const About: React.FC = () => {
       <p>{t('about.p2')}</p>
       <p>
         {t('about.p3')}{' '}
-        <span className="eky-icon eky-heart"></span>
+        <span className="sharedog-icon sharedog-Heart"></span>
       </p>
       <Welcome />
       <Button text={t('button.findFriend')} />

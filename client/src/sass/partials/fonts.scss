@@ -1,9 +1,20 @@
 @use "variables";
+@font-face {
+  font-family: 'sharedog-icon';
+  src:  url('~./../../public/fonts/sharedog-icon.eot');
+  src:  url('~./../../public/fonts/sharedog-icon.eot#iefix') format('embedded-opentype'),
+    url('~./../../public/fonts/sharedog-icon.woff') format('woff'),
+    url('~./../../public/fonts/sharedog-icon.ttf') format('truetype'),
+    url('~./../../public/fonts/sharedog-icon.svg#sharedog-icon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
 
-.eky-icon {
+.sharedog-icon {
   /* use !important to prevent issues with browser extensions that change fonts */
-  font-family: "eky" !important;
-  // speak: never;
+  font-family: 'sharedog-icon' !important;
+  speak: never;
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
@@ -15,86 +26,64 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.eky-add-dog:before {
+.sharedog-Add-dog:before {
   content: "\e900";
 }
-.eky-comment .path1:before {
+.sharedog-Bin:before {
   content: "\e901";
-  color: rgb(0, 0, 0);
 }
-.eky-comment .path2:before {
+.sharedog-Camera:before {
   content: "\e902";
-  margin-left: -0.93359375em;
-  color: rgb(255, 255, 255);
 }
-.eky-comment .path3:before {
+.sharedog-Close:before {
   content: "\e903";
-  margin-left: -0.93359375em;
-  color: rgb(255, 255, 255);
 }
-.eky-comment .path4:before {
+.sharedog-Gear:before {
   content: "\e904";
-  margin-left: -0.93359375em;
-  color: rgb(255, 255, 255);
 }
-.eky-eky:before {
+.sharedog-Hamby:before {
   content: "\e905";
 }
-.eky-envelope:before {
+.sharedog-Heart:before {
   content: "\e906";
 }
-.eky-female:before {
+.sharedog-Home:before {
+  content: "\e907";
+}
+.sharedog-Left-arrow:before {
   content: "\e908";
 }
-.eky-hamby:before {
+.sharedog-Location:before {
+  content: "\e909";
+}
+.sharedog-Login:before {
   content: "\e90a";
 }
-.eky-heart:before {
+.sharedog-Logout:before {
   content: "\e90b";
-  color: red;
 }
-.eky-left-arrow:before {
+.sharedog-Message:before {
   content: "\e90c";
 }
-.eky-logout:before {
+.sharedog-Paw:before {
   content: "\e90d";
 }
-.eky-male:before {
+.sharedog-Reply:before {
   content: "\e90e";
 }
-.eky-map:before {
+.sharedog-Right-arrow:before {
   content: "\e90f";
 }
-.eky-message:before {
+.sharedog-Search:before {
   content: "\e910";
 }
-.eky-paw:before {
+.sharedog-Share:before {
   content: "\e911";
 }
-.eky-phone:before {
+.sharedog-User:before {
   content: "\e912";
 }
-.eky-reply:before {
-  content: "\e913";
-}
-.eky-search:before {
-  content: "\e914";
-}
-.eky-share:before {
-  content: "\e915";
-}
-.eky-Symbols:before {
-  content: "\e916";
-}
-.eky-trash:before {
-  content: "\e917";
-}
-.eky-twitter:before {
-  content: "\e918";
-}
-.eky-user:before {
-  content: "\e919";
-}
+
 h1,
 h2,
 h3,
@@ -148,7 +137,7 @@ h1.extra-large {
   -webkit-text-fill-color: transparent;
 }
 
-.eky-icon {
+.sharedog-icon {
   padding: 0.5rem;
   // font-size: 3rem;
 }
@@ -157,6 +146,6 @@ h1.extra-large {
   color: #666;
 }
 
-#footer-nav ul .eky-icon{
+#footer-nav ul .sharedog-icon{
   font-size: 2.5rem;
 }

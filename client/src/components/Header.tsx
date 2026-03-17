@@ -7,8 +7,41 @@ import UserProfileModal from './UserProfileModal';
 import NotificationBell from './NotificationBell';
 import NewDogsModal from './NewDogsModal';
 
+// Custom Statistics Icon - bar chart matching sharedog-icon style
+const StatisticsIcon: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
+  <svg 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    style={style}
+  >
+    <rect x="3" y="13" width="4" height="8" rx="0.5" fill="currentColor"/>
+    <rect x="10" y="8" width="4" height="13" rx="0.5" fill="currentColor"/>
+    <rect x="17" y="3" width="4" height="18" rx="0.5" fill="currentColor"/>
+  </svg>
+);
+
+// Custom Register Icon - person with plus sign matching sharedog-icon style
+const RegisterIcon: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
+  <svg 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    style={style}
+  >
+    <circle cx="12" cy="8" r="4" fill="currentColor"/>
+    <path d="M12 14C8.68629 14 6 16.6863 6 20V21H18V20C18 16.6863 15.3137 14 12 14Z" fill="currentColor"/>
+    <circle cx="19" cy="5" r="4" fill="currentColor"/>
+    <path d="M19 11C15.6863 11 13 13.6863 13 17V18H25V17C25 13.6863 22.3137 11 19 11Z" fill="currentColor"/>
+  </svg>
+);
+
 const Header: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, logout, isAuthenticated, updateUser } = useAuth();
   const [apiOk, setApiOk] = useState<boolean | null>(null);
   const [uptime, setUptime] = useState<number | null>(null);
@@ -168,6 +201,34 @@ const Header: React.FC = () => {
     };
   }, [isExpanded]);
 
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const mobileMenu = document.querySelector('.authenticated-mobile-menu');
+      const hamburgerBtn = document.querySelector('.authenticated-hamburger-btn');
+      
+      // Close if clicking outside both the menu and hamburger button
+      if (mobileMenuOpen && 
+          mobileMenu && 
+          hamburgerBtn && 
+          !mobileMenu.contains(target) && 
+          !hamburgerBtn.contains(target)) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    if (mobileMenuOpen) {
+      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [mobileMenuOpen]);
+
   // Detect mobile screen size
   useEffect(() => {
     const checkMobile = () => {
@@ -207,24 +268,29 @@ const Header: React.FC = () => {
         <>
         <header className="UserHeader">
           <div className="header-content-inner">
-            {/* Mobile hamburger menu - only shows on mobile */}
+            {/* Mobile hamburger menu button */}
             {isMobile && (
               <button 
-                onClick={toggleMobileMenu}
                 className="authenticated-hamburger-btn"
+                onClick={toggleMobileMenu}
+                aria-label="Toggle menu"
+                style={{fontSize: '32px'}}
               >
-                ☰
+                <span className="sharedog-icon sharedog-Hamby" style={{fontSize: '32px'}}></span>
               </button>
             )}
             
-            {/* Left: Navigation Links - hidden on mobile */}
-            <nav className="header-nav-inner">
-              <Link to="/" className="header-nav-link-inner">{t('nav.about')}</Link>
-              <Link to="psi" className="header-nav-link-inner">{t('nav.dogs')}</Link>
-              <Link to="statistika" className="header-nav-link-inner">{t('nav.statistics') || 'Statistics'}</Link>
-            </nav>
+            {/* Desktop navigation */}
+            {!isMobile && (
+              <nav className="header-nav-inner">
+                <Link to="/" className="header-nav-link-inner">{t('nav.about')}</Link>
+                <Link to="psi" className="header-nav-link-inner">{t('nav.dogs')}</Link>
+                <Link to="statistika" className="header-nav-link-inner">{t('nav.statistics') || 'Statistics'}</Link>
+              </nav>
+            )}
+            
             <div className="header-flex-spacer" />
-            {/* Right: Language Selector and User Info */}
+            {/* Right: Language Selector, Notifications, and User Info */}
             <div className="header-right-inner">
               <LanguageSelector />
               <div className="notification-wrapper">
@@ -269,33 +335,49 @@ const Header: React.FC = () => {
           </div>
         </header>
 
-        {/* Mobile menu dropdown for authenticated users */}
+        {/* Authenticated mobile menu dropdown */}
         {mobileMenuOpen && isMobile && (
-          <div className="authenticated-mobile-menu">
-            <Link 
-              to="/" 
-              className="authenticated-mobile-link"
-              onClick={() => setMobileMenuOpen(false)}
-            >
+          <nav className="authenticated-mobile-menu">
+            <Link to="/" className="authenticated-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+              <span className="sharedog-icon sharedog-Home" style={{marginRight: '10px', fontSize: '24px'}}></span>
               {t('nav.about')}
             </Link>
-            <Link 
-              to="psi" 
-              className="authenticated-mobile-link"
-              onClick={() => setMobileMenuOpen(false)}
-            >
+            <Link to="psi" className="authenticated-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+              <span className="sharedog-icon sharedog-Paw" style={{marginRight: '10px', fontSize: '24px'}}></span>
               {t('nav.dogs')}
             </Link>
-            <Link 
-              to="statistika" 
-              className="authenticated-mobile-link"
-              onClick={() => setMobileMenuOpen(false)}
-            >
+            <Link to="statistika" className="authenticated-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+              <StatisticsIcon style={{marginRight: '10px', color: '#f5f5f5', width: '24px', height: '24px'}} />
               {t('nav.statistics') || 'Statistics'}
             </Link>
-          </div>
+            <div 
+              className="authenticated-mobile-link"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowProfileModal(true);
+                setMobileMenuOpen(false);
+                setIsExpanded(false);
+              }}
+              style={{cursor: 'pointer'}}
+            >
+              <span className="sharedog-icon sharedog-Gear" style={{marginRight: '10px', fontSize: '24px'}}></span>
+              {t('button.profile') || 'Profile'}
+            </div>
+            <div 
+              className="authenticated-mobile-link"
+              onClick={(e) => {
+                e.stopPropagation();
+                logout();
+                setMobileMenuOpen(false);
+              }}
+              style={{cursor: 'pointer', color: '#ff6b6b'}}
+            >
+              <span className="sharedog-icon sharedog-Logout" style={{marginRight: '10px', fontSize: '24px'}}></span>
+              {t('button.logout') || 'Logout'}
+            </div>
+          </nav>
         )}
-        
+
         {/* Expanded dropdown panel - outside header */}
         {isExpanded && user && (
             <div 
@@ -353,15 +435,35 @@ const Header: React.FC = () => {
         </>
       ) : (
          <>
-         <header className="header-mobile-container">
-          {/* Mobile hamburger menu */}
+         <header className="header-mobile-container mobile-nav-only">
+          {/* Mobile navigation - simple icon bar for unauthenticated users */}
           {isMobile && (
-            <div 
-              onClick={toggleMobileMenu}
-              className="hamburger-menu-btn"
-            >
-              ☰
-            </div>
+            <nav className="mobile-nav-simple">
+              <Link 
+                to="/" 
+                className="mobile-nav-icon-link" 
+                title={t('nav.about')}
+              >
+                <span className="sharedog-icon sharedog-Home"></span>
+              </Link>
+              <Link 
+                to="logiranje" 
+                className="mobile-nav-icon-link" 
+                title={t('nav.login')}
+              >
+                <span className="sharedog-icon sharedog-Login"></span>
+              </Link>
+              <Link 
+                to="registracija" 
+                className="mobile-nav-icon-link" 
+                title={t('nav.register')}
+              >
+                <RegisterIcon />
+              </Link>
+              <div className="mobile-language-indicator">
+                <LanguageSelector />
+              </div>
+            </nav>
           )}
 
           {/* Desktop navigation */}
@@ -381,13 +483,6 @@ const Header: React.FC = () => {
               <LanguageSelector />
             </div>
           )}
-
-          {/* Mobile language selector */}
-          {isMobile && (
-            <div>
-              <LanguageSelector />
-            </div>
-          )}
         </header>
 
         {/* Message - show for all non-authenticated users */}
@@ -401,7 +496,7 @@ const Header: React.FC = () => {
               right: 0,
               padding: '12px 20px',
               background: 'rgba(0, 0, 0, 0.9)',
-              zIndex: 10001,
+              zIndex: 998,
               textAlign: 'center',
               display: 'flex',
               justifyContent: 'center',
@@ -420,47 +515,6 @@ const Header: React.FC = () => {
             >
               {t('nav.mustBeLoggedIn')}
             </p>
-          </div>
-        )}
-
-        {/* Mobile menu dropdown */}
-        {mobileMenuOpen && isMobile && (
-          <div className="mobile-menu-dropdown">
-            <Link 
-              to="/" 
-              className="mobile-nav-link"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t('nav.about')}
-            </Link>
-            <Link 
-              to="psi" 
-              className="mobile-nav-link"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t('nav.dogs')}
-            </Link>
-            <Link 
-              to="logiranje" 
-              className="mobile-nav-link"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t('nav.login')}
-            </Link>
-            <Link 
-              to="registracija" 
-              className="mobile-nav-link"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t('nav.register')}
-            </Link>
-            <Link 
-              to="statistika" 
-              className="mobile-nav-link"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t('nav.statistics') || 'Statistics'}
-            </Link>
           </div>
         )}
         </>

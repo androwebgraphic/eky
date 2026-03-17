@@ -6,7 +6,7 @@ const UserProfile: React.FC = () => {
   const { t } = useTranslation();
   return (
     <>
-      <h1>{t('userProfile.welcome')} <span className="eky-icon eky-user"></span></h1>
+      <h1>{t('userProfile.welcome')} <span className="sharedog-icon sharedog-User"></span></h1>
       <Users />
     </>
   );

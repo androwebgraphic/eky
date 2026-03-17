@@ -452,7 +452,7 @@ button {
   box-sizing: border-box;
 }
 
-.eky-icon {
+.sharedog-icon {
   cursor: pointer;
 }
 
@@ -464,7 +464,7 @@ button {
   font-style: normal;
   font-display: block;
 }
-.eky-icon {
+.sharedog-icon {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'eky' !important;
   speak: never;
@@ -633,7 +633,7 @@ h1.extra-large {
   -webkit-text-fill-color: transparent;
 }
 
-.eky-icon {
+.sharedog-icon {
   padding: .5rem;
 }
 

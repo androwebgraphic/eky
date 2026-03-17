@@ -79,7 +79,44 @@ function DogList() {
 		console.log('[DOG-LIST] searchInputRef.current:', searchInputRef.current);
 	}, []);
 
-		// Auto-focus search input if #search is in URL hash
+	// Custom event handler for search focus
+	React.useEffect(() => {
+		const handleSearchFocus = () => {
+			console.log('[FOCUS] ========== CUSTOM SEARCH FOCUS EVENT ==========');
+			console.log('[FOCUS] searchInputRef.current:', searchInputRef.current);
+			
+			// Highlight search
+			setSearchActive(true);
+			// Scroll to top first
+			window.scrollTo(0, 0);
+			console.log('[FOCUS] Scrolled to top');
+			
+			// Wait for component to fully render, then focus
+			setTimeout(() => {
+				console.log('[FOCUS] Timeout - attempting to focus');
+				console.log('[FOCUS] searchInputRef.current:', searchInputRef.current);
+				if (searchInputRef.current) {
+					searchInputRef.current.focus();
+					// Also click to trigger mobile keyboard (iOS limitation: keyboard won't show programmatically)
+					searchInputRef.current.click();
+					console.log('[FOCUS] ✅ Search input focused and clicked!');
+					// Remove highlight after 2 seconds
+					setTimeout(() => setSearchActive(false), 2000);
+				} else {
+					console.error('[FOCUS] ❌ Search input ref is null');
+				}
+			}, 100);
+		};
+
+		// Listen for custom search focus event
+		window.addEventListener('focus-search', handleSearchFocus);
+		
+		return () => {
+			window.removeEventListener('focus-search', handleSearchFocus);
+		};
+	}, []);
+
+		// Auto-focus search input if #search is in URL hash (for initial page load)
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	React.useEffect(() => {
 		console.log('[FOCUS] ========== FOCUS EFFECT RUNNING ==========');
@@ -91,48 +128,16 @@ function DogList() {
 		
 		if (location.hash === '#search') {
 			console.log('[FOCUS] ✅ #search detected in URL!');
-			// Highlight search
-			setSearchActive(true);
-			// Scroll to top first
-			window.scrollTo(0, 0);
-			console.log('[FOCUS] Scrolled to top');
-			// Wait for component to fully render, then focus
-			setTimeout(() => {
-				console.log('[FOCUS] First timeout - attempting to focus');
-				console.log('[FOCUS] searchInputRef.current:', searchInputRef.current);
-				if (searchInputRef.current) {
-					searchInputRef.current.focus();
-					// Also click to trigger mobile keyboard (iOS limitation: keyboard won't show programmatically)
-					searchInputRef.current.click();
-					console.log('[FOCUS] ✅ Search input focused and clicked!');
-					// Clear hash after focusing
-					window.history.replaceState(null, '', window.location.pathname);
-					console.log('[FOCUS] Hash cleared from URL');
-					// Remove highlight after 2 seconds
-					setTimeout(() => setSearchActive(false), 2000);
-				} else {
-					console.error('[FOCUS] ❌ Search input ref is null, trying again...');
-					// Try again with longer delay
-					setTimeout(() => {
-						console.log('[FOCUS] Second timeout - trying again');
-						console.log('[FOCUS] searchInputRef.current:', searchInputRef.current);
-						if (searchInputRef.current) {
-							searchInputRef.current.focus();
-							searchInputRef.current.click();
-							console.log('[FOCUS] ✅ Search input focused and clicked on second attempt!');
-							window.history.replaceState(null, '', window.location.pathname);
-							setTimeout(() => setSearchActive(false), 2000);
-						} else {
-							console.error('[FOCUS] ❌ Still unable to focus after two attempts');
-						}
-					}, 1000);
-				}
-			}, 600);
+			// Clear hash to prevent re-triggering
+			window.history.replaceState(null, '', window.location.pathname);
+			console.log('[FOCUS] Hash cleared from URL');
+			// Dispatch custom event to trigger focus
+			window.dispatchEvent(new CustomEvent('focus-search'));
 		} else {
 			console.log('[FOCUS] ❌ #search not in URL hash');
 		}
 		console.log('[FOCUS] ========== FOCUS EFFECT END ==========');
-	}, [location.hash]);
+	}, []);
 
 	// Read URL search parameters from footer search modal
 	useEffect(() => {

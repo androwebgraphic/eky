@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import UserProfileModal from './UserProfileModal';
 // import ChatApp from './ChatApp';
@@ -13,6 +13,8 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
   const { t } = useTranslation();
   const { isAuthenticated, user } = useAuth();
   const [showUserModal, setShowUserModal] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleUserIconClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -61,8 +63,15 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                // Always navigate to dog list page with search hash
-                window.location.href = '/psi#search';
+                // If already on /psi page, dispatch custom event to focus search
+                if (location.pathname === '/psi') {
+                  console.log('[FOOTER SEARCH] Already on /psi page, dispatching focus-search event');
+                  window.dispatchEvent(new CustomEvent('focus-search'));
+                } else {
+                  // Navigate to /psi page with search hash
+                  console.log('[FOOTER SEARCH] Navigating to /psi#search');
+                  navigate('/psi#search', { replace: false });
+                }
               }}
               style={{ cursor: 'pointer' } as any}
             >

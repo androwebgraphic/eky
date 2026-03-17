@@ -122,13 +122,27 @@ img, video, iframe, embed, object, canvas {
   hyphens: auto;
 }
 
-/* Mobile form improvements */
+  /* Mobile form improvements */
 input, textarea, select, button {
   max-width: 100%;
   font-size: 16px;
   -webkit-appearance: none;
           appearance: none;
   border-radius: 0;
+}
+
+/* EXCEPTION: Keep rounded corners for search elements */
+.search-input,
+.search-btn,
+.search-btn-clear,
+.search-row.advanced,
+.search-select {
+  border-radius: 12px !important;
+}
+
+.search-row.advanced {
+  border-radius: 12px !important;
+  -webkit-border-radius: 12px !important;
 }
 
 input[type="text"],
@@ -687,6 +701,16 @@ select {
     gap: 8px !important;
     align-items: flex-start !important;
     overflow-x: auto !important;
+    border-radius: 12px !important;
+    -webkit-border-radius: 12px !important;
+  }
+
+  /* Keep rounded corners for search buttons and selects on mobile */
+  .search-btn,
+  .search-btn-clear,
+  .search-select {
+    border-radius: 12px !important;
+    -webkit-border-radius: 12px !important;
   }
 
   .search-filter-group {

@@ -64,15 +64,6 @@ const Search: React.FC<SearchProps> = ({
           type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
           className="search-btn"
-          style={{
-            border: '1px solid #75171a',
-            backgroundColor: '#f5f5f0',
-            color: '#75171a',
-            padding: '6px 12px',
-            fontSize: '13px',
-            height: '38px',
-            minHeight: '38px'
-          }}
         >
           {showAdvanced ? t('search.hideAdvanced') || 'Hide Advanced' : t('search.showAdvanced') || 'Advanced Search'}
         </button>
@@ -81,16 +72,7 @@ const Search: React.FC<SearchProps> = ({
           <button
             type="button"
             onClick={handleClear}
-            className="search-btn"
-            style={{
-              border: '1px solid #e74c3c',
-              backgroundColor: '#e74c3c',
-              color: '#fff',
-              padding: '6px 12px',
-              fontSize: '13px',
-              height: '38px',
-              minHeight: '38px'
-            }}
+            className="search-btn search-btn-clear"
           >
             {t('search.clear') || 'Clear'}
           </button>

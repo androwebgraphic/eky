@@ -47,7 +47,7 @@ export const sanitizeUrl = (input: string | undefined | null): string => {
   }
   
   const sanitized = DOMPurify.sanitize(input, {
-    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.-:]|$))/i,
   });
   
   return sanitized.trim();

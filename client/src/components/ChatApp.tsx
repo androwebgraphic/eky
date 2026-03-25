@@ -97,6 +97,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
   const { user, token } = useAuth();
   
   const [dogStatusMap, setDogStatusMap] = useState<Record<string, string>>({});
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [dogOwnerMap, setDogOwnerMap] = useState<Record<string, string>>({});
   const [dogDataMap, setDogDataMap] = useState<Record<string, any>>({});
   const [adoptionDogId, setAdoptionDogId] = useState('');
@@ -127,6 +128,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       }
     }, 300);
     return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userSearchQuery]);
   const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
   const [userWithBlocks] = useState<UserWithBlocks | null>(null);
@@ -261,6 +263,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
 
   useEffect(() => {
     fetchAdoptionRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -268,7 +271,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     if (adoptionConvoUserId && user?._id) {
       startConversation(adoptionConvoUserId);
     }
-  }, [adoptionConvoUserId, user?._id]);
+  }, [adoptionConvoUserId, user?._id]); // eslint-disable-line react-hooks/exhaustive-deps
   
   useEffect(() => {
     if (!selectedConvo && onlineUsers.length > 0 && user?._id && !adoptionConvoUserId) {

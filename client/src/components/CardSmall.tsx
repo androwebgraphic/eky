@@ -100,35 +100,43 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
 
 		let base = filename;
-
 		base = base.replace(/\.(jpg|jpeg|png|webp)$/i, '');
 
-		if (base.includes('-') && !base.startsWith('pexels-')) {
-			base = base.replace(/-orig$/, '');
-			const uploadedMatch = base.match(/^(.+?)-\d{10,13}-[a-z0-9]{6}-\d{3,4}$/);
-			if (uploadedMatch) {
-				base = uploadedMatch[1];
-			}
-		} else if (base.startsWith('pexels-')) {
-			base = base.replace(/-orig$/, '');
-			const pexelsMatch = base.match(/^pexels-(.+?)-\d+(-\d{10,13}-[a-z0-9]{6}-\d{3,4})?$/);
-			if (pexelsMatch) {
-				base = pexelsMatch[1];
-			}
-		}
+		// Remove size suffixes (320, 640, 1024) and random hashes
+		base = base.replace(/-(\d{3,4})$/, '');
+		base = base.replace(/-\d{10,13}-[a-z0-9]{6}$/, '');
+		base = base.replace(/-orig$/, '');
 
 		return base;
 	};
 
 	const validImages = (images || []).filter(img => img && img.url && typeof img.url === 'string' && img.url.trim() !== '');
+	
+	// Filter for unique images - group different sizes of same photo together
 	const uniqueImages = validImages.filter((img, idx, arr) => {
 		const base = getImageBase(img.url);
 		return arr.findIndex(other => getImageBase(other.url) === base) === idx;
 	});
 
 	if (uniqueImages.length) {
-		const sorted = [...uniqueImages].sort((a, b) => (b.width || 0) - (a.width || 0));
+		// Sort by width descending, but prioritize 320px for mobile
+		const sorted = [...uniqueImages].sort((a, b) => {
+			const aWidth = a.width || 0;
+			const bWidth = b.width || 0;
+			const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+			// On mobile, prefer 320px images; on desktop, prefer largest
+			if (isMobile) {
+				// Find 320px image first, then smallest
+				if (aWidth === 320 && bWidth !== 320) return -1;
+				if (bWidth === 320 && aWidth !== 320) return 1;
+				return (aWidth || 9999) - (bWidth || 9999);
+			}
+			return bWidth - aWidth;
+		});
 		largestImgUrl = toAbsUrl(sorted[0].url);
+		console.log('[CARD IMAGE] Selected image URL:', sorted[0].url, 'Full URL:', largestImgUrl);
+	} else {
+		console.log('[CARD IMAGE] No images found for dog:', name);
 	}
 
 	const [imgError, setImgError] = React.useState(false);
@@ -163,24 +171,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 	const posterUrl = video && video.poster && video.poster.length
 		? toAbsUrl(video.poster[video.poster.length - 1].url)
 		: undefined;
-
-	const styles = {
-		details: {
-			background: '#72211f', color: '#fff', border: 'none', fontWeight: 600
-		},
-		adopt: {
-			background: '#43a047', color: '#fff', border: 'none', fontWeight: 600
-		},
-		wishlist: {
-			background: '#dbb69d', color: '#fff', border: 'none', fontWeight: 600
-		},
-		edit: {
-			background: '#ff9800', color: '#fff', border: 'none', fontWeight: 600
-		},
-		remove: {
-			background: '#d32f2f', color: '#fff', border: 'none', fontWeight: 600
-		}
-	};
 
 	const handleAdopt = async () => {
 		if (!props._id) {

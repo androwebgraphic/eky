@@ -1,45 +1,59 @@
-import mongoose from 'mongoose';
-import Dog from '../models/dogModel.js';
-import User from '../models/userModel.js';
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
+const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
+const dotenv = require('dotenv');
+dotenv.config({ path: __dirname + '/../.env' });
 
-dotenv.config();
-
-const MONGODB_URI = process.env.MONGO_URI;
+const Dog = require('../models/dogModel.js');
+const uploadsPath = path.join(__dirname, '../uploads/dogs');
 
 async function deleteOrphanedDogs() {
   try {
-    await mongoose.connect(MONGODB_URI);
-    console.log('Connected to MongoDB');
+    // Connect to MongoDB
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/eky');
+    console.log('[DELETE] Connected to MongoDB');
 
-    // Find all dogs and check if their user exists after populate
-    const allDogs = await Dog.find().populate('user');
-    const orphanedDogs = allDogs.filter(dog => !dog.user);
-    
-    console.log(`\nFound ${orphanedDogs.length} orphaned dogs (null or deleted user):`);
-    
-    for (const dog of orphanedDogs) {
-      console.log(`  - ${dog.name} (${dog._id})`);
-      
-      // Delete associated files
-      const dogDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
-      if (fs.existsSync(dogDir)) {
-        console.log(`    Deleting directory: ${dogDir}`);
-        fs.rmSync(dogDir, { recursive: true, force: true });
+    // Get all dogs from database
+    const allDogs = await Dog.find({});
+    console.log(`[DELETE] Found ${allDogs.length} dogs in database`);
+
+    let orphanedCount = 0;
+    let validCount = 0;
+    let deletedIds = [];
+
+    for (const dog of allDogs) {
+      const dogFolder = path.join(uploadsPath, dog._id.toString());
+      const folderExists = fs.existsSync(dogFolder);
+
+      if (!folderExists) {
+        console.log(`[DELETE] Deleting orphaned dog: ${dog._id} (${dog.name}) - Folder missing`);
+        deletedIds.push(dog._id);
+        orphanedCount++;
+      } else {
+        validCount++;
       }
-      
-      // Delete from database
-      await Dog.findByIdAndDelete(dog._id);
-      console.log(`    ✅ Deleted from database`);
     }
-    
-    console.log(`\n✅ Deleted ${orphanedDogs.length} orphaned dogs`);
-    
-    await mongoose.connection.close();
+
+    if (deletedIds.length === 0) {
+      console.log('[DELETE] No orphaned dogs found. All dogs have valid image folders!');
+      await mongoose.disconnect();
+      process.exit(0);
+    }
+
+    // Delete all orphaned dogs
+    console.log(`\n[DELETE] Deleting ${deletedIds.length} orphaned dogs...`);
+    const deleteResult = await Dog.deleteMany({ _id: { $in: deletedIds } });
+    console.log(`[DELETE] Deleted ${deleteResult.deletedCount} dogs from database`);
+
+    console.log(`\n[DELETE] Summary:`);
+    console.log(`  - Valid dogs (with images): ${validCount}`);
+    console.log(`  - Orphaned dogs deleted: ${orphanedCount}`);
+
+    await mongoose.disconnect();
+    console.log('[DELETE] Done!');
+    process.exit(0);
   } catch (error) {
-    console.error('Error:', error);
+    console.error('[DELETE] Error:', error);
     process.exit(1);
   }
 }

@@ -28,6 +28,7 @@ const Notification: React.FC<NotificationProps> = ({
 
       return () => clearTimeout(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [duration]);
 
   const handleClose = () => {

@@ -23,17 +23,9 @@ const adoptionRoutes = require('./routes/adoptionRoutes.js'); // <-- Add adoptio
 
 const app = express();
 
-// 3. Set up CORS middleware FIRST
-const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://172.20.10.4:3000', 'http://172.20.10.4:3001', 'http://192.168.1.100:3000', 'http://192.168.1.100:3001'];
+// 3. Set up CORS middleware FIRST (more permissive for development)
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: true, // Allow all origins for development
   credentials: true
 }));
 // 4. Load environment variables
@@ -53,16 +45,6 @@ app.get('/health', (req, res) => {
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(cookieParser());
-
-// Log all POST requests to /api/dogs for debugging
-app.use('/api/dogs', (req, res, next) => {
-  if (req.method === 'POST') {
-    console.log('[ROUTE INTERCEPT] POST to /api/dogs detected');
-    console.log('[ROUTE INTERCEPT] Full path:', req.originalUrl);
-    console.log('[ROUTE INTERCEPT] params:', req.params);
-  }
-  next();
-});
 
 // 9. Initialize Passport
 app.use(passport.initialize());
@@ -85,8 +67,16 @@ function setUploadsCORS(req, res, next) {
   res.header('Expires', '0');
   next();
 }
-app.use('/uploads', setUploadsCORS, express.static(uploadsPath));
-app.use('/u', setUploadsCORS, express.static(uploadsPath));
+app.use('/uploads', setUploadsCORS, express.static(uploadsPath, {
+  setHeaders: (res, path) => {
+    console.log('[STATIC FILE] Serving:', path, 'Status: OK');
+  }
+}));
+app.use('/u', setUploadsCORS, express.static(uploadsPath, {
+  setHeaders: (res, path) => {
+    console.log('[STATIC FILE] Serving:', path, 'Status: OK');
+  }
+}));
 app.use("/api/users", userRoutes);
 app.use("/api/dogs", dogRoutes);
 app.use("/api/auth", authRoutes);
@@ -108,22 +98,15 @@ const httpServer = http.createServer({ maxHeaderSize: 1024 * 1024 }, app);
 httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`Server started at:`);
   console.log(`  Local:   http://localhost:${PORT}`);
-  console.log(`  Network: http://172.20.10.4:${PORT}`);
+  console.log(`  Network: http://172.20.10.2:${PORT}`);
 });
 
 const { Server: SocketIOServer } = require('socket.io');
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: function(origin, callback) {
-      // allow requests with no origin (like mobile apps, curl, etc.)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        return callback(new Error('Not allowed by CORS'));
-      }
-    },
-    methods: ['GET', 'POST']
+    origin: true, // Allow all origins for development
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 

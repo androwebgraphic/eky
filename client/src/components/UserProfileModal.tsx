@@ -44,7 +44,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     if (!profilePicture) return "../img/androcolored-80x80.jpg";
     let url = profilePicture.startsWith('/') ? profilePicture : '/' + profilePicture;
     if (url.startsWith('/uploads/') || url.startsWith('/u/')) {
-      const apiBase = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      // Use the same logic as getApiUrl - use frontend's hostname
+      const apiBase = process.env.REACT_APP_API_URL || 
+        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? `http://${window.location.hostname}:3001`
+          : `http://${window.location.hostname}:3001`);
       const fullUrl = apiBase + url;
       if (cacheBuster) {
         return `${fullUrl}?v=${cacheBuster}`;
@@ -164,7 +168,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       return `http://${window.location.hostname}:3001`;
     }
-    return `http://172.20.10.2:3001`;
+    // Use the frontend's hostname for backend (same network)
+    return `http://${window.location.hostname}:3001`;
   };
 
   const handleAdopt = async (dogId: string) => {
@@ -232,57 +237,109 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('[PROFILE SAVE] ===== FORM SUBMITTED =====');
+    console.log('[PROFILE SAVE] Event type:', e.type);
+    console.log('[PROFILE SAVE] ===== FUNCTION CALLED =====');
+    console.log('[PROFILE SAVE] Starting profile update...');
+    console.log('[PROFILE SAVE] Token exists:', !!token);
+    console.log('[PROFILE SAVE] Form data:', formData);
+    
+    if (!token) {
+      console.error('[PROFILE SAVE] NO TOKEN!');
+      setError('Not authenticated');
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     setSuccess(null);
+    
+    const API_URL = getApiUrl();
+    console.log('[PROFILE SAVE] API_URL:', API_URL);
+    console.log('[PROFILE SAVE] Current hostname:', window.location.hostname);
+    
     try {
-      const API_URL = getApiUrl();
-      const uploadFormData = new FormData();
-      uploadFormData.append('name', formData.name);
-      uploadFormData.append('username', formData.username);
-      uploadFormData.append('email', formData.email);
-      uploadFormData.append('phone', formData.phone);
-      if (profilePicture) {
-        uploadFormData.append('profilePicture', profilePicture);
-      }
-      const response = await fetch(`${API_URL}/api/users/profile`, {
+      console.log('[PROFILE SAVE] Step 1: Testing connectivity...');
+      const healthResponse = await fetch(`${API_URL}/health`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000)
+      });
+      console.log('[PROFILE SAVE] Health check status:', healthResponse.status);
+      
+      console.log('[PROFILE SAVE] Step 2: Sending PUT request to /api/users/profile');
+      console.log('[PROFILE SAVE] Request body:', JSON.stringify({
+        name: formData.name,
+        username: formData.username,
+        email: formData.email,
+        phone: formData.phone,
+      }));
+      
+      const jsonResponse = await fetch(`${API_URL}/api/users/profile`, {
         method: 'PUT',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: uploadFormData,
+        body: JSON.stringify({
+          name: formData.name,
+          username: formData.username,
+          email: formData.email,
+          phone: formData.phone,
+        }),
+        signal: AbortSignal.timeout(10000)
       });
-      const data = await response.json();
-      if (response.ok) {
-        setSuccess('Profile updated successfully!');
-        const cacheBuster = Date.now().toString();
-        const updatedUser = {
-          ...data.user,
-          _profilePicCacheBuster: cacheBuster
-        };
-        updateUser(updatedUser);
-        setProfilePicKey(Date.now());
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        setProfilePicture(null);
-        setProfilePicturePreview('');
-        setFormData({
-          name: data.user.name,
-          email: data.user.email,
-          username: data.user.username,
-          phone: data.user.phone || ''
-        });
-        setTimeout(() => {
-          setIsEditing(false);
-        }, 500);
-      } else {
-        setError(data.message || 'Failed to update profile');
+      
+      console.log('[PROFILE SAVE] Response received! Status:', jsonResponse.status);
+      console.log('[PROFILE SAVE] Response OK:', jsonResponse.ok);
+      
+      if (!jsonResponse.ok) {
+        const errorText = await jsonResponse.text();
+        console.error('[PROFILE SAVE] Error response:', errorText);
+        throw new Error(`Server returned ${jsonResponse.status}: ${errorText}`);
       }
-    } catch (error) {
-      console.error('Profile update error:', error);
-      setError('Network error. Please try again.');
+      
+      const data = await jsonResponse.json();
+      console.log('[PROFILE SAVE] Success! Response data:', data);
+      console.log('[PROFILE SAVE] User data:', data.user);
+      
+      handleSuccess(data.user);
+      
+    } catch (error: any) {
+      console.error('[PROFILE SAVE] CATCH ERROR:', error);
+      console.error('[PROFILE SAVE] Error name:', error.name);
+      console.error('[PROFILE SAVE] Error message:', error.message);
+      console.error('[PROFILE SAVE] Error stack:', error.stack);
+      
+      if (error.name === 'AbortError') {
+        setError('Request timed out. Check your network connection.');
+      } else {
+        setError(error.message || 'Network error. Please try again.');
+      }
     } finally {
+      console.log('[PROFILE SAVE] ===== FINALLY =====');
       setLoading(false);
     }
+  };
+  
+  const handleSuccess = (updatedUserData: any) => {
+    setSuccess('Profile updated successfully!');
+    const cacheBuster = Date.now().toString();
+    const updatedUser = {
+      ...updatedUserData,
+      _profilePicCacheBuster: cacheBuster
+    };
+    updateUser(updatedUser);
+    setProfilePicKey(Date.now());
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setProfilePicture(null);
+    setProfilePicturePreview('');
+    setFormData({
+      name: updatedUser.name,
+      email: updatedUser.email,
+      username: updatedUser.username,
+      phone: updatedUser.phone || ''
+    });
+    setIsEditing(false);
   };
 
   const handleDeleteAccount = async () => {

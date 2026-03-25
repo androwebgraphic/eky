@@ -43,7 +43,7 @@ exports.createAdoptionRequest = async (req, res) => {
       await conversation.save();
     }
 
-    // Create adoption request message in chat with dog data
+    // Create adoption request message in chat
     await ChatMessage.create({
       conversationId: conversation._id,
       sender: adopterId,
@@ -51,18 +51,7 @@ exports.createAdoptionRequest = async (req, res) => {
       message: `Adoption Request: I am interested in adopting ${dog.name}. ${message || ''}`,
       messageType: 'adoption_request',
       dogId: dogId,
-      requiresAction: true,
-      dogData: {
-        _id: dog._id,
-        name: dog.name,
-        breed: dog.breed,
-        age: dog.age,
-        size: dog.size,
-        gender: dog.gender,
-        location: dog.location || dog.place,
-        thumbnail: dog.thumbnail,
-        images: dog.images
-      }
+      requiresAction: true
     });
 
     // Create adoption request

@@ -34,7 +34,8 @@ const Statistics: React.FC = () => {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       return `http://${window.location.hostname}:3001`;
     }
-    return 'http://172.20.10.2:3001';
+    // Use the frontend's hostname for backend (same network)
+    return `http://${window.location.hostname}:3001`;
   };
 
   useEffect(() => {

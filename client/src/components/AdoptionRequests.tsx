@@ -54,6 +54,7 @@ const AdoptionRequests: React.FC = () => {
   useEffect(() => {
     fetchRequests();
     fetchCurrentUserId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchCurrentUserId = () => {

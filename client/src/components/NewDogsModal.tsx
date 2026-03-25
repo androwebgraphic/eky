@@ -4,26 +4,6 @@ import { Link } from 'react-router-dom';
 import '../sass/partials/_modal-styles.scss'; 
 import { useTranslation } from 'react-i18next';
 
-// Get API URL with proper fallbacks for mobile network access
-const getApiUrl = () => {
-  if (process.env.REACT_APP_API_URL !== undefined && process.env.REACT_APP_API_URL.trim() !== '') {
-    return process.env.REACT_APP_API_URL;
-  }
-  const hostname = window.location.hostname;
-  if (window.location.protocol === 'https:') {
-    return `https://${hostname}`;
-  }
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return `http://${hostname}:3001`;
-  }
-  // For IP addresses (including mobile network access)
-  if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
-    return `http://${hostname}:3001`;
-  }
-  // Fallback - use current protocol and hostname
-  return `${window.location.protocol}//${hostname}:3001`;
-};
-
 // Helper function to convert relative/absolute URLs to absolute URLs
 const toAbsUrl = (url?: string) => {
   if (!url) {

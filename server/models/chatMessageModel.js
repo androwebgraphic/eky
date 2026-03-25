@@ -9,18 +9,6 @@ const chatMessageSchema = new mongoose.Schema({
   // Special message types for adoption flow
   messageType: { type: String, enum: ['text', 'adoption_request', 'adoption_confirmed', 'adoption_denied', 'adoption_cancelled', 'adoption_completed'], default: 'text' },
   dogId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dog' },
-  // Embedded dog data for display in adoption request messages
-  dogData: {
-    _id: { type: mongoose.Schema.Types.ObjectId },
-    name: { type: String },
-    breed: { type: String },
-    age: { type: Number },
-    size: { type: String },
-    gender: { type: String },
-    location: { type: String },
-    thumbnail: { type: Object },
-    images: { type: Array }
-  },
   // For tracking who can take action on this message
   requiresAction: { type: Boolean, default: false },
   actionTakenBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }

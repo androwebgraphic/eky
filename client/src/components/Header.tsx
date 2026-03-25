@@ -41,7 +41,7 @@ const RegisterIcon: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
 );
 
 const Header: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user, logout, isAuthenticated, updateUser } = useAuth();
   const [apiOk, setApiOk] = useState<boolean | null>(null);
   const [uptime, setUptime] = useState<number | null>(null);
@@ -63,7 +63,8 @@ const Header: React.FC = () => {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       return `http://${window.location.hostname}:3001`;
     }
-    return 'http://172.20.10.2:3001';
+    // Use the frontend's hostname for backend (same network)
+    return `http://${window.location.hostname}:3001`;
   };
 
   // Fetch new dogs since last visit

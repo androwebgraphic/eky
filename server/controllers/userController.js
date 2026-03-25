@@ -288,7 +288,7 @@ const updateProfile = async (req, res) => {
 					   console.error('[PROFILE UPLOAD ERROR] File is not an image:', req.file.mimetype);
 					   return res.status(400).json({ message: 'Uploaded file is not an image.' });
 				   }
-				   // Determine extension and sharp pipeline
+				// Determine extension and sharp pipeline
 				// FORCE PNG: Always save as PNG with .png extension
 				const ext = '.png';
 				const filename = `profile-${Date.now()}${ext}`;
@@ -297,8 +297,8 @@ const updateProfile = async (req, res) => {
 				try {
 					await sharp(req.file.buffer)
 						.rotate()
-						.resize(300, 300, { fit: 'cover', position: 'center' })
-						.png({ quality: 90 })
+						.resize(300, 300, { fit: 'cover', position: 'center', fastShrinkOnLoad: true })
+						.png({ quality: 85, compressionLevel: 6 })
 						.toFile(filepath);
 				} catch (sharpErr) {
 					console.error('[PROFILE UPLOAD ERROR] sharp.toFile failed:', filepath, sharpErr);

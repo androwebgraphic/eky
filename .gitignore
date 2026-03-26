@@ -6,3 +6,9 @@ eky.pub
 ekykey
 ekykey.pub
 .env.development.local
+node_modules/
+client/node_modules/
+server/node_modules/
+client/screenshots/
+.env
+.DS_Store

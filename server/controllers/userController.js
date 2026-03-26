@@ -76,6 +76,7 @@ const jwt = require('jsonwebtoken');
 const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
+const { optimizeImage } = require('../utils/imageOptimizer');
 
 const getAllUsers = async (req, res) => {
 	try {
@@ -288,20 +289,21 @@ const updateProfile = async (req, res) => {
 					   console.error('[PROFILE UPLOAD ERROR] File is not an image:', req.file.mimetype);
 					   return res.status(400).json({ message: 'Uploaded file is not an image.' });
 				   }
-				// Determine extension and sharp pipeline
-				// FORCE PNG: Always save as PNG with .png extension
+				// Use optimizer to process profile picture with metadata stripping
 				const ext = '.png';
 				const filename = `profile-${Date.now()}${ext}`;
 				const filepath = path.join(uploadDir, filename);
-				console.log('[PROFILE UPLOAD FINAL DEBUG] FORCED PNG branch. Filename:', filename, 'Filepath:', filepath);
+				console.log('[PROFILE UPLOAD FINAL DEBUG] Optimized PNG branch. Filename:', filename, 'Filepath:', filepath);
 				try {
-					await sharp(req.file.buffer)
-						.rotate()
-						.resize(300, 300, { fit: 'cover', position: 'center', fastShrinkOnLoad: true })
-						.png({ quality: 85, compressionLevel: 6 })
-						.toFile(filepath);
+					const optimizedBuffer = await optimizeImage(req.file.buffer, {
+						width: 300,
+						height: 300,
+						format: 'png',
+						quality: 85
+					});
+					fs.writeFileSync(filepath, optimizedBuffer);
 				} catch (sharpErr) {
-					console.error('[PROFILE UPLOAD ERROR] sharp.toFile failed:', filepath, sharpErr);
+					console.error('[PROFILE UPLOAD ERROR] Image optimization failed:', filepath, sharpErr);
 					return res.status(500).json({ message: 'Failed to save processed image.' });
 				}
 				// Double-check file existence after write

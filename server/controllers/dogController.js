@@ -6,6 +6,7 @@ const ChatConversation = require('../models/chatConversationModel');
 const ChatMessage = require('../models/chatMessageModel');
 
 const { getOrientationTransform } = require('../utils/orientation');
+const { optimizeImage, createOptimizedVariants } = require('../utils/imageOptimizer');
 
 // Constants for media restrictions
 const MAX_IMAGES_NON_ADMIN = 3;
@@ -187,25 +188,31 @@ const updateDog = async (req, res) => {
               const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
               const outName = `${baseName}-${uniqueSuffix}-${w}${ext}`;
               const outPath = path.join(uploadDir, outName);
-              let sharpInstance = sharp(processedBuffer);
-              // Optionally apply orientationTransform here if needed
-              const buffer = await sharpInstance.resize({ width: w }).withMetadata().jpeg({ quality: 90 }).toBuffer();
+              const buffer = await optimizeImage(processedBuffer, {
+                width: w,
+                format: 'jpeg',
+                quality: 85
+              });
               fs.writeFileSync(outPath, buffer);
-              console.log(`[IMAGE SAVE] Saved variant: ${outPath}`);
+              console.log(`[IMAGE SAVE] Saved optimized variant: ${outPath}`);
               imageVariants.push({ url: `/u/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
             } catch (imgErr) {
               console.error(`[IMAGE ERROR] Failed to save variant for width ${w}:`, imgErr);
             }
           }
-          // Save original
+          // Save optimized original
           try {
             const origName = `${baseName}-orig.jpg`;
             const origPath = path.join(uploadDir, origName);
-            fs.writeFileSync(origPath, processedBuffer);
-            console.log(`[IMAGE SAVE] Saved original: ${origPath}`);
+            const origBuffer = await optimizeImage(processedBuffer, {
+              format: 'jpeg',
+              quality: 85
+            });
+            fs.writeFileSync(origPath, origBuffer);
+            console.log(`[IMAGE SAVE] Saved optimized original: ${origPath}`);
             imageVariants.push({ url: `/u/dogs/${dog._id}/${origName}`, width: null, size: 'orig' });
           } catch (origErr) {
-            console.error('[IMAGE ERROR] Failed to save original image:', origErr);
+            console.error('[IMAGE ERROR] Failed to optimize original image:', origErr);
           }
           dog.images.push(...imageVariants);
           mediaIndex++;
@@ -457,22 +464,33 @@ const createDog = async (req, res) => {
           const ext = '.jpg';
           const baseName = `img-${mediaIndex}`;
           for (const w of [320, 640, 1024]) {
-            const outName = `${baseName}-${w}${ext}`;
-            const outPath = path.join(uploadDir, outName);
-            const buffer = await sharp(mediaFile.buffer)
-              .rotate()
-              .resize({ width: w })
-              .withMetadata()
-              .jpeg({ quality: 90 })
-              .toBuffer();
-            fs.writeFileSync(outPath, buffer);
-            imageVariants.push({ url: `/u/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
+            try {
+              const outName = `${baseName}-${w}${ext}`;
+              const outPath = path.join(uploadDir, outName);
+              const buffer = await optimizeImage(mediaFile.buffer, {
+                width: w,
+                format: 'jpeg',
+                quality: 85
+              });
+              fs.writeFileSync(outPath, buffer);
+              imageVariants.push({ url: `/u/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
+            } catch (imgErr) {
+              console.error(`[IMAGE ERROR] Failed to optimize variant for width ${w}:`, imgErr);
+            }
           }
-          // Save original
-          const origName = `${baseName}-orig${ext}`;
-          const origPath = path.join(uploadDir, origName);
-          fs.writeFileSync(origPath, mediaFile.buffer);
-          imageVariants.push({ url: `/u/dogs/${dog._id}/${origName}`, width: null, size: 'orig' });
+          // Save optimized original
+          try {
+            const origName = `${baseName}-orig${ext}`;
+            const origPath = path.join(uploadDir, origName);
+            const origBuffer = await optimizeImage(mediaFile.buffer, {
+              format: 'jpeg',
+              quality: 85
+            });
+            fs.writeFileSync(origPath, origBuffer);
+            imageVariants.push({ url: `/u/dogs/${dog._id}/${origName}`, width: null, size: 'orig' });
+          } catch (origErr) {
+            console.error('[IMAGE ERROR] Failed to optimize original image:', origErr);
+          }
           dog.images.push(...imageVariants);
           mediaIndex++;
         } else if (mediaFile.mimetype.startsWith('video/')) {
@@ -488,16 +506,19 @@ const createDog = async (req, res) => {
             const posterVariants = [];
             const ext = '.jpg';
             await Promise.all(sizes.map(async (w) => {
-              const outName = `poster-${w}${ext}`;
-              const outPath = path.join(uploadDir, outName);
-              const buffer = await sharp(posterFile.buffer)
-                .rotate()
-                .resize({ width: w })
-                .withMetadata()
-                .jpeg({ quality: 80 })
-                .toBuffer();
-              fs.writeFileSync(outPath, buffer);
-              posterVariants.push({ url: `/u/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
+              try {
+                const outName = `poster-${w}${ext}`;
+                const outPath = path.join(uploadDir, outName);
+                const buffer = await optimizeImage(posterFile.buffer, {
+                  width: w,
+                  format: 'jpeg',
+                  quality: 80
+                });
+                fs.writeFileSync(outPath, buffer);
+                posterVariants.push({ url: `/u/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
+              } catch (posterErr) {
+                console.error(`[POSTER ERROR] Failed to optimize poster at width ${w}:`, posterErr);
+              }
             }));
             dog.video.poster = posterVariants;
             // create a tiny 64px thumbnail from the poster for list display (if thumbnail not set)
@@ -505,12 +526,11 @@ const createDog = async (req, res) => {
               try {
                 const thumbName = `thumb-64${ext}`;
                 const thumbPath = path.join(uploadDir, thumbName);
-                const thumbBuffer = await sharp(posterFile.buffer)
-                  .rotate()
-                  .resize({ width: 64 })
-                  .withMetadata()
-                  .jpeg({ quality: 70 })
-                  .toBuffer();
+                const thumbBuffer = await optimizeImage(posterFile.buffer, {
+                  width: 64,
+                  format: 'jpeg',
+                  quality: 70
+                });
                 fs.writeFileSync(thumbPath, thumbBuffer);
                 dog.thumbnail = { url: `/u/dogs/${dog._id}/${thumbName}`, width: 64, size: '64' };
               } catch (thumbErr) {
@@ -526,12 +546,11 @@ const createDog = async (req, res) => {
       try {
         const thumbName = `thumb-64.jpg`;
         const thumbPath = path.join(uploadDir, thumbName);
-        const thumbBuffer = await sharp(firstImageFile.buffer)
-          .rotate()
-          .resize({ width: 64 })
-          .withMetadata()
-          .jpeg({ quality: 70 })
-          .toBuffer();
+        const thumbBuffer = await optimizeImage(firstImageFile.buffer, {
+          width: 64,
+          format: 'jpeg',
+          quality: 70
+        });
         fs.writeFileSync(thumbPath, thumbBuffer);
         dog.thumbnail = { url: `/u/dogs/${dog._id}/${thumbName}`, width: 64, size: '64' };
       } catch (thumbErr) {

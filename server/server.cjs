@@ -24,9 +24,26 @@ const adoptionRoutes = require('./routes/adoptionRoutes.js'); // <-- Add adoptio
 const app = express();
 
 // 3. Set up CORS middleware FIRST (more permissive for development)
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://eky-3xf1.onrender.com'
+];
+
 app.use(cors({
-  origin: true, // Allow all origins for development
-  credentials: true
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('[CORS] Origin not allowed:', origin);
+      callback(null, true); // Allow for now for debugging
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 // 4. Load environment variables
 dotenv.config({ path: '.env' });
@@ -104,7 +121,7 @@ httpServer.listen(PORT, '0.0.0.0', () => {
 const { Server: SocketIOServer } = require('socket.io');
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: true, // Allow all origins for development
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true
   }

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { getApiUrl } from '../utils/apiUrl';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -57,15 +58,6 @@ const Header: React.FC = () => {
   const headerRef = useRef<HTMLElement | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Get API URL for profile pictures
-  const getApiUrl = () => {
-    if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return `http://${window.location.hostname}:3001`;
-    }
-    // Use the frontend's hostname for backend (same network)
-    return `http://${window.location.hostname}:3001`;
-  };
 
   // Fetch new dogs since last visit
   const fetchNewDogs = useCallback(async () => {

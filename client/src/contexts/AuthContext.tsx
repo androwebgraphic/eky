@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getApiUrl } from '../utils/apiUrl';
 
 interface User {
   _id: string;
@@ -43,14 +44,6 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Helper function to get API URL dynamically
-const getApiUrl = () => {
-  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-  // Dynamically construct API URL based on current hostname
-  const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-  const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
-  return `${protocol}//${hostname}:3001`;
-};
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);

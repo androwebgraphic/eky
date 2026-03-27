@@ -220,7 +220,7 @@ img.welcome {
   justify-content: space-around;
   align-items: center;
   gap: 2rem;
-  background-color: #72211f;
+  background-color: #c44a0b;
   color: variables.$offwhite;
 
   img {
@@ -264,7 +264,7 @@ nav#top ul {
   z-index: 9999;
   overflow: visible;
   padding: 0.5rem;
-  background: #72211f;
+  background: #c44a0b;
 }
 
 a {
@@ -289,7 +289,7 @@ nav#top select {
   font-size: 1.6rem;
   padding: 0.4rem 0.6rem;
   background-color: #f5f5f5;
-  color: #72211f;
+  color: #c44a0b;
   border: none;
   border-radius: 0.4rem;
   cursor: pointer;
@@ -587,7 +587,7 @@ button.view-full {
         cursor: pointer;
         margin: 0;
         padding: 0;
-        accent-color: #72211f;
+        accent-color: #c44a0b;
         -webkit-appearance: radio;
         appearance: radio;
         user-select: auto;
@@ -631,7 +631,7 @@ button.view-full {
       cursor: pointer;
       margin: 0;
       padding: 0;
-      accent-color: #72211f;
+      accent-color: #c44a0b;
       -webkit-appearance: checkbox;
       appearance: checkbox;
       user-select: auto;
@@ -642,7 +642,7 @@ button.view-full {
 
 #vacine,
 #castrats {
-  color: #72211f;
+  color: #c44a0b;
   width: 2rem;
   height: 2rem;
   border-radius: 3rem;
@@ -845,7 +845,7 @@ footer {
   justify-content: space-around;
   align-items: center;
   gap: 0.5rem;
-  background: #72211f;
+  background: #c44a0b;
   box-shadow: 0.1rem 0.1rem 0.8rem #535151;
   height: auto;
   min-height: 4rem;

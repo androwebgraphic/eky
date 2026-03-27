@@ -48,7 +48,7 @@ header {
   right: 0 !important;
   z-index: 1000 !important;
   width: 100vw !important;
-  background: #72211f;
+  background: #c44a0b;
   padding: 10px;
   box-sizing: border-box;
 }
@@ -61,7 +61,7 @@ nav#top {
   right: 0 !important;
   width: 100vw !important;
   z-index: 1000 !important;
-  background: #72211f !important;
+  background: #c44a0b !important;
   overflow: visible !important;
   pointer-events: auto !important;
 }
@@ -1012,7 +1012,7 @@ select {
     font-size: 11px !important;
     font-weight: 600 !important;
     margin-bottom: 4px !important;
-    color: #75171a !important;
+    color: #c44a0b !important;
     white-space: nowrap !important;
   }
 
@@ -1120,7 +1120,7 @@ select {
     font-weight: 600 !important;
     margin-bottom: 4px !important;
     padding: 4px 8px !important;
-    color: #72211f !important;
+    color: #c44a0b !important;
   }
 
   .search-select {

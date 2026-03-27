@@ -6,7 +6,7 @@ Error: Invalid CSS after "  color: variables": expected ";", was ".$offwhite;"
 200:   justify-content: space-around;
 201:   align-items: center;
 202:   gap: 2rem;
-203:   background-color: #72211f;
+203:   background-color: #c44a0b;
 204:   color: variables.$offwhite;
 205: 
 206:   img {
@@ -44,4 +44,4 @@ Backtrace:
 body:before {
   white-space: pre;
   font-family: monospace;
-  content: "Error: Invalid CSS after \"  color: variables\": expected \";\", was \".$offwhite;\"\A         on line 204 of /Applications/MAMP/htdocs/eky/client/src/sass/partials/layout.scss\A \A 199:   flex-wrap: wrap;\A 200:   justify-content: space-around;\A 201:   align-items: center;\A 202:   gap: 2rem;\A 203:   background-color: #72211f;\A 204:   color: variables.$offwhite;\A 205: \A 206:   img {\A 207:     width: 4rem;\A 208:     height: 4rem;\A 209:     border-radius: 50%;"; }
+  content: "Error: Invalid CSS after \"  color: variables\": expected \";\", was \".$offwhite;\"\A         on line 204 of /Applications/MAMP/htdocs/eky/client/src/sass/partials/layout.scss\A \A 199:   flex-wrap: wrap;\A 200:   justify-content: space-around;\A 201:   align-items: center;\A 202:   gap: 2rem;\A 203:   background-color: #c44a0b;\A 204:   color: variables.$offwhite;\A 205: \A 206:   img {\A 207:     width: 4rem;\A 208:     height: 4rem;\A 209:     border-radius: 50%;"; }

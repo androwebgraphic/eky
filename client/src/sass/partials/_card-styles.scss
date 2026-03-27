@@ -156,7 +156,7 @@
       font-weight: 700;
       font-size: 24px;
       margin-bottom: 4px;
-      color: #75171a;
+      color: #c44a0b;
       text-align: center;
 
       @media (min-width: 768px) {
@@ -280,7 +280,7 @@
       transition: all 0.2s;
 
       &.btn-details {
-        background: #72211f;
+        background: #c44a0b;
         color: #fbe1cd;
       }
 
@@ -296,7 +296,7 @@
 
       &.btn-wishlist {
         background: #dbb69d;
-        color: #72211f;
+        color: #c44a0b;
 
         &.in-wishlist {
           background: #a67c52;
@@ -305,7 +305,7 @@
 
       &.btn-edit {
         background: #d7c96c;
-        color: #72211f;
+        color: #c44a0b;
       }
 
       &.btn-remove {
@@ -371,7 +371,7 @@
   }
 
   .dog-details-name {
-    color: #75171a;
+    color: #c44a0b;
     text-align: center;
     font-size: 28px;
     margin-top: 0;
@@ -452,7 +452,7 @@
       }
 
       &.btn-view {
-        background: #72211f;
+        background: #c44a0b;
         color: #fff;
         margin-right: 8px;
       }

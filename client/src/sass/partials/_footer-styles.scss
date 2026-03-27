@@ -18,7 +18,7 @@
       justify-content: space-around;
       align-items: center;
       gap: 0.5rem;
-      background: #72211f;
+      background: #c44a0b;
       box-shadow: 0.1rem 0.1rem 0.8rem #535151;
       height: auto;
       min-height: 4rem;
@@ -144,7 +144,7 @@
       outline: none;
 
       &:focus {
-        border-color: #72211f;
+        border-color: #c44a0b;
       }
     }
   }
@@ -208,16 +208,16 @@
     .quick-filter-btn {
       padding: 10px 20px;
       background: transparent;
-      border: 1px solid #72211f;
+      border: 1px solid #c44a0b;
       border-radius: 20px;
       cursor: pointer;
       font-size: 14px;
-      color: #72211f;
+      color: #c44a0b;
       transition: all 0.2s;
 
       &:hover,
       &.active {
-        background: #72211f;
+        background: #c44a0b;
         color: #fff;
       }
     }
@@ -245,7 +245,7 @@
   .search-submit-btn {
     width: 100%;
     padding: 12px 24px;
-    background: #72211f;
+    background: #c44a0b;
     color: #fff;
     border: none;
     border-radius: 6px;

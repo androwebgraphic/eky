@@ -6,7 +6,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #75171a !important;
+  background: #c44a0b !important;
   color: #f8f8f8;
   overflow-x: hidden;
 }
@@ -17,7 +17,7 @@ html {
   padding: 0 !important;
   font-size: 62.5%;
   overflow: hidden; /* Prevent body scrolling */
-  background: #75171a !important;
+  background: #c44a0b !important;
   overflow-x: hidden;
 }
 
@@ -118,7 +118,7 @@ nav#top {
       -ms-flex-align: center;
           align-items: center;
   padding: 1rem;
-  background: #72211f;
+  background: #c44a0b;
 }
 
 a {
@@ -338,7 +338,7 @@ img.welcome {
 
 #vacine,
 #castrats {
-  color: #72211f;
+  color: #c44a0b;
   width: 2rem;
   height: 2rem;
   border-radius: 3rem;
@@ -446,7 +446,7 @@ button {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  background: #72211f;
+  background: #c44a0b;
   height: auto;
   min-height: 80px;
   box-sizing: border-box;

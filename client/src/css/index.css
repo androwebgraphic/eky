@@ -1123,7 +1123,7 @@ img {
       -ms-flex-align: center;
           align-items: center;
   gap: 2rem;
-  background-color: #72211f;
+  background-color: #c44a0b;
   color: #f5f5f5;
 }
 .UserHeader img, header img {
@@ -1182,7 +1182,7 @@ nav#top ul {
   z-index: 9999;
   overflow: visible;
   padding: 0.5rem;
-  background: #72211f;
+  background: #c44a0b;
 }
 
 a {
@@ -1209,7 +1209,7 @@ nav#top select {
   font-size: 1.6rem;
   padding: 0.4rem 0.6rem;
   background-color: #f5f5f5;
-  color: #72211f;
+  color: #c44a0b;
   border: none;
   border-radius: 0.4rem;
   cursor: pointer;
@@ -1310,18 +1310,18 @@ button {
   background: #fbe1cd;
   border-radius: 0.8rem;
   border: none;
-  border: 2px solid #72211f;
+  border: 2px solid #c44a0b;
   -webkit-transition: background 0.2s, color 0.2s;
   transition: background 0.2s, color 0.2s;
 }
 
 #start_btn:hover, #start_btn:focus {
-  background: #72211f;
+  background: #c44a0b;
   color: #fbe1cd;
 }
 
 button, .button {
-  background: #72211f;
+  background: #c44a0b;
   color: #fbe1cd;
   border: none;
   border-radius: 15px;
@@ -1382,7 +1382,7 @@ button:hover, .button:hover, button:focus, .button:focus {
 }
 
 .search-input:focus {
-  outline: 2px solid #72211f;
+  outline: 2px solid #c44a0b;
   background-color: #fff;
   box-shadow: 0 0 5px rgba(114, 33, 31, 0.3);
 }
@@ -1401,9 +1401,9 @@ button:hover, .button:hover, button:focus, .button:focus {
   font-size: 13px;
   padding: 6px 12px;
   border-radius: 12px;
-  border: 1px solid #75171a;
+  border: 1px solid #c44a0b;
   background-color: #f5f5f0;
-  color: #75171a;
+  color: #c44a0b;
   cursor: pointer;
   -webkit-transition: all 0.2s ease;
   transition: all 0.2s ease;
@@ -1426,7 +1426,7 @@ button:hover, .button:hover, button:focus, .button:focus {
 }
 
 .search-btn:hover {
-  background-color: #75171a;
+  background-color: #c44a0b;
   color: #f5f5f0;
 }
 
@@ -1482,7 +1482,7 @@ button:hover, .button:hover, button:focus, .button:focus {
 .search-filter-label {
   font-size: 14px;
   font-weight: 600;
-  color: #75171a;
+  color: #c44a0b;
   margin-bottom: 5px;
 }
 
@@ -1491,7 +1491,7 @@ button:hover, .button:hover, button:focus, .button:focus {
   height: 38px;
   font-size: 14px;
   padding: 8px 12px;
-  border: 1px solid #75171a;
+  border: 1px solid #c44a0b;
   border-radius: 0.8rem;
   background-color: #fff;
   color: #333;
@@ -1507,7 +1507,7 @@ button:hover, .button:hover, button:focus, .button:focus {
 }
 
 .search-select:focus {
-  outline: 2px solid #72211f;
+  outline: 2px solid #c44a0b;
   box-shadow: 0 0 5px rgba(114, 33, 31, 0.3);
 }
 
@@ -1523,7 +1523,7 @@ button:hover, .button:hover, button:focus, .button:focus {
   }
   
   .search-input:focus {
-    outline: 2px solid #72211f;
+    outline: 2px solid #c44a0b;
     box-shadow: 0 0 5px rgba(114, 33, 31, 0.3);
   }
   
@@ -1540,9 +1540,9 @@ button:hover, .button:hover, button:focus, .button:focus {
     font-size: 13px !important;
     padding: 6px 12px !important;
     border-radius: 12px !important;
-    border: 1px solid #75171a !important;
+    border: 1px solid #c44a0b !important;
     background-color: #f5f5f0 !important;
-    color: #75171a !important;
+    color: #c44a0b !important;
     cursor: pointer !important;
     -webkit-transition: all 0.2s ease;
     transition: all 0.2s ease;
@@ -1565,7 +1565,7 @@ button:hover, .button:hover, button:focus, .button:focus {
   }
   
   .search-btn:hover {
-    background-color: #75171a;
+    background-color: #c44a0b;
     color: #f5f5f0;
   }
   
@@ -1605,7 +1605,7 @@ button:hover, .button:hover, button:focus, .button:focus {
   .search-filter-label {
     font-size: 1.2rem;
     font-weight: 600;
-    color: #75171a;
+    color: #c44a0b;
     margin-bottom: 5px;
   }
   
@@ -1615,7 +1615,7 @@ button:hover, .button:hover, button:focus, .button:focus {
     height: 2.6rem;
     font-size: 1.3rem;
     padding: 0.5rem;
-    border: 1px solid #75171a;
+    border: 1px solid #c44a0b;
     border-radius: 12px !important;
     background-color: #fff;
     color: #333;
@@ -1631,7 +1631,7 @@ button:hover, .button:hover, button:focus, .button:focus {
   }
   
   .search-select:focus {
-    outline: 2px solid #72211f;
+    outline: 2px solid #c44a0b;
     box-shadow: 0 0 5px rgba(114, 33, 31, 0.3);
   }
 }
@@ -1909,7 +1909,7 @@ button.view-full {
   cursor: pointer;
   margin: 0;
   padding: 0;
-  accent-color: #72211f;
+  accent-color: #c44a0b;
   -webkit-appearance: radio;
   -moz-appearance: radio;
        appearance: radio;
@@ -1972,7 +1972,7 @@ button.view-full {
   cursor: pointer;
   margin: 0;
   padding: 0;
-  accent-color: #72211f;
+  accent-color: #c44a0b;
   -webkit-appearance: checkbox;
   -moz-appearance: checkbox;
        appearance: checkbox;
@@ -1985,7 +1985,7 @@ button.view-full {
 
 #vacine,
 #castrats {
-  color: #72211f;
+  color: #c44a0b;
   width: 2rem;
   height: 2rem;
   border-radius: 3rem;
@@ -2244,7 +2244,7 @@ footer {
       -ms-flex-align: center;
           align-items: center;
   gap: 0.5rem;
-  background: #72211f;
+  background: #c44a0b;
   -webkit-box-shadow: 0.1rem 0.1rem 0.8rem #535151;
           box-shadow: 0.1rem 0.1rem 0.8rem #535151;
   height: auto;
@@ -2451,7 +2451,7 @@ h1.extra-large {
   border-radius: 15px !important;
   padding: 0.2em 0.7em !important;
   background: rgb(215.1275862069, 110.9448275862, 108.3724137931) !important;
-  color: #72211f !important;
+  color: #c44a0b !important;
   border: none !important;
 }
 
@@ -2536,7 +2536,7 @@ h1.extra-large {
 }
 
 .view-details-btn {
-  background: #72211f;
+  background: #c44a0b;
   color: #fbe1cd;
   border: 2px solid #1f4b72;
   border-radius: 15px;
@@ -2553,7 +2553,7 @@ h1.extra-large {
 }
 
 .adopt-btn {
-  background: #72211f;
+  background: #c44a0b;
   color: #fbe1cd;
   border: 2px solid #1f4b72;
   border-radius: 15px;
@@ -2593,7 +2593,7 @@ h1.extra-large {
 
 .like {
   background: #fbe1cd;
-  color: #72211f;
+  color: #c44a0b;
   border: 2px solid #1f4b72;
   border-radius: 15px;
   font-size: 12px;
@@ -2612,7 +2612,7 @@ h1.extra-large {
 
 .wishlist {
   background: #fbe1cd;
-  color: #72211f;
+  color: #c44a0b;
   border: 2px solid #1f4b72;
   border-radius: 15px;
   font-size: 12px;
@@ -3138,7 +3138,7 @@ h1.extra-large {
   font-weight: 700;
   font-size: 24px;
   margin-bottom: 4px;
-  color: #75171a;
+  color: #c44a0b;
   text-align: center;
 }
 @media (min-width: 768px) {
@@ -3275,7 +3275,7 @@ h1.extra-large {
   transition: all 0.2s;
 }
 .card-small .card-small-actions .card-small-btn.btn-details {
-  background: #72211f;
+  background: #c44a0b;
   color: #fbe1cd;
 }
 .card-small .card-small-actions .card-small-btn.btn-adopt {
@@ -3288,14 +3288,14 @@ h1.extra-large {
 }
 .card-small .card-small-actions .card-small-btn.btn-wishlist {
   background: #dbb69d;
-  color: #72211f;
+  color: #c44a0b;
 }
 .card-small .card-small-actions .card-small-btn.btn-wishlist.in-wishlist {
   background: #a67c52;
 }
 .card-small .card-small-actions .card-small-btn.btn-edit {
   background: #d7c96c;
-  color: #72211f;
+  color: #c44a0b;
 }
 .card-small .card-small-actions .card-small-btn.btn-remove {
   background: #e74c3c;
@@ -3360,7 +3360,7 @@ h1.extra-large {
   border-radius: 12px;
 }
 .dog-details .dog-details-name {
-  color: #75171a;
+  color: #c44a0b;
   text-align: center;
   font-size: 28px;
   margin-top: 0;
@@ -3442,7 +3442,7 @@ h1.extra-large {
   cursor: not-allowed;
 }
 .dog-details .dog-details-actions .details-action-btn.btn-view {
-  background: #72211f;
+  background: #c44a0b;
   color: #fff;
   margin-right: 8px;
 }
@@ -3558,7 +3558,7 @@ h1.extra-large {
       -ms-flex-align: center;
           align-items: center;
   gap: 2rem;
-  background-color: #72211f;
+  background-color: #c44a0b;
   color: #f5f5f5;
 }
 @media (max-width: 768px) {
@@ -3664,7 +3664,7 @@ h1.extra-large {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  background-color: #72211f;
+  background-color: #c44a0b;
   color: #f5f5f5;
   z-index: 9999;
 }
@@ -3786,7 +3786,7 @@ h1.extra-large {
   left: 0;
   width: 250px;
   height: 100%;
-  background: #72211f;
+  background: #c44a0b;
   z-index: 10000;
   padding: 1rem;
   display: -webkit-box;
@@ -3856,7 +3856,7 @@ h1.extra-large {
 }
 
 .UserHeader {
-  background: #75171a;
+  background: #c44a0b;
   color: #f8f8f8;
   min-height: 60px;
   margin: 0;
@@ -3866,7 +3866,7 @@ h1.extra-large {
   width: 100vw;
   position: fixed;
   z-index: 1000;
-  border-top: 4px solid #75171a;
+  border-top: 4px solid #c44a0b;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
 }
@@ -4101,7 +4101,7 @@ h1.extra-large {
   min-height: 60px;
   z-index: 1000;
   padding: 10px 20px;
-  background-color: #75171a;
+  background-color: #c44a0b;
   color: #f8f8f8;
   font-size: 20px;
   font-weight: bold;
@@ -4276,7 +4276,7 @@ h1.extra-large {
   top: 60px;
   left: 0;
   right: 0;
-  background-color: #75171a;
+  background-color: #c44a0b;
   padding: 20px;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -4474,7 +4474,7 @@ h1.extra-large {
     top: 50px;
     left: 0;
     right: 0;
-    background-color: #75171a;
+    background-color: #c44a0b;
     padding: 15px;
     display: -webkit-box;
     display: -ms-flexbox;
@@ -4543,7 +4543,7 @@ h1.extra-large {
       -ms-flex-align: center;
           align-items: center;
   gap: 0.5rem;
-  background: #72211f;
+  background: #c44a0b;
   -webkit-box-shadow: 0.1rem 0.1rem 0.8rem #535151;
           box-shadow: 0.1rem 0.1rem 0.8rem #535151;
   height: auto;
@@ -4684,7 +4684,7 @@ h1.extra-large {
   outline: none;
 }
 .footer-search-content .search-modal-input .search-input:focus {
-  border-color: #72211f;
+  border-color: #c44a0b;
 }
 .footer-search-content .search-history {
   margin-bottom: 1rem;
@@ -4750,16 +4750,16 @@ h1.extra-large {
 .footer-search-content .search-quick-filters .quick-filter-btn {
   padding: 10px 20px;
   background: transparent;
-  border: 1px solid #72211f;
+  border: 1px solid #c44a0b;
   border-radius: 20px;
   cursor: pointer;
   font-size: 14px;
-  color: #72211f;
+  color: #c44a0b;
   -webkit-transition: all 0.2s;
   transition: all 0.2s;
 }
 .footer-search-content .search-quick-filters .quick-filter-btn:hover, .footer-search-content .search-quick-filters .quick-filter-btn.active {
-  background: #72211f;
+  background: #c44a0b;
   color: #fff;
 }
 .footer-search-content .search-location-filter {
@@ -4781,7 +4781,7 @@ h1.extra-large {
 .footer-search-content .search-submit-btn {
   width: 100%;
   padding: 12px 24px;
-  background: #72211f;
+  background: #c44a0b;
   color: #fff;
   border: none;
   border-radius: 6px;

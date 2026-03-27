@@ -19,18 +19,18 @@
 /* removed extra closing brace */
   font-size: 11px;
   border-radius: 8px;
-  border: 2px solid #72211f;
+  border: 2px solid #c44a0b;
   font-weight: 600;
   cursor: pointer;
   background: #fbe1cd;
-  color: #72211f;
+  color: #c44a0b;
   min-width: 60px;
   max-width: 150px;
   white-space: nowrap;
   transition: background 0.2s, color 0.2s;
 }
 .chat-app-action-btn.delete {
-  background: #72211f;
+  background: #c44a0b;
   color: #fbe1cd;
 }
 .chat-app-action-btn.block {

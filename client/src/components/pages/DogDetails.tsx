@@ -536,7 +536,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         )}
       </div>
       <div className="description">
-        <h3 style={{ color: '#75171a', textAlign: 'center', fontSize: 28 }}>
+        <h3 style={{ color: '#c44a0b', textAlign: 'center', fontSize: 28 }}>
           {name}
         </h3>
         {breed && (

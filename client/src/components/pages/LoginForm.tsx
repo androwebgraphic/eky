@@ -153,7 +153,7 @@ const LoginForm: React.FC = () => {
             style={{
               flex: '3',
               padding: '0.75rem 1.5rem',
-              backgroundColor: '#75171a',
+              backgroundColor: '#c44a0b',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
@@ -167,7 +167,7 @@ const LoginForm: React.FC = () => {
               e.currentTarget.style.backgroundColor = '#5c1114';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = '#75171a';
+              e.currentTarget.style.backgroundColor = '#c44a0b';
             }}
           >
             {t('button.register')}

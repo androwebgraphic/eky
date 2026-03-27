@@ -529,9 +529,9 @@ button, a, .clickable {
   /* Reduce header height */
   header,
   .UserHeader {
-    min-height: 45px !important;
-    height: 45px !important;
-    padding: 0.25rem 0.5rem !important;
+    min-height: 55px !important;
+    height: 55px !important;
+    padding: 0.25rem 0.5rem 0.25rem 0.5rem!important;
   }
   
   /* Reduce footer height */
@@ -552,9 +552,9 @@ button, a, .clickable {
   #footer-nav .sharedog-icon,
   nav#top .sharedog-icon,
   header .sharedog-icon {
-    font-size: 2rem !important;
-    width: 28px !important;
-    height: 28px !important;
+    font-size: 3rem !important;
+    width: 30px !important;
+    height: 30px !important;
   }
   
   #footer-nav img {
@@ -1379,4 +1379,66 @@ select {
   align-items: center !important;
   justify-content: center !important;
   flex-shrink: 0 !important;
+}
+
+/* Fix icon alignment in authenticated mobile menu */
+@media (max-width: 768px) {
+  .authenticated-mobile-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+  }
+  
+  .authenticated-mobile-link .sharedog-icon,
+  .authenticated-mobile-link svg {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+/* Fix authenticated header icons: make properly sized and centered on mobile */
+@media (max-width: 768px) {
+  /* Make ALL icons the same size - 28px */
+  .UserHeader .sharedog-icon,
+  .authenticated-hamburger-btn .sharedog-icon {
+    font-size: 28px !important;
+    width: 28px !important;
+    height: 28px !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+  
+  /* User avatar - same 28px */
+  .header-avatar-inner {
+    width: 28px !important;
+    height: 28px !important;
+  }
+  
+  /* Notification bell - same 28px */
+  .notification-bell-icon {
+    width: 28px !important;
+    height: 28px !important;
+  }
+  
+  /* Use grid for perfect centering of ALL containers */
+  .UserHeader .header-right-inner > div,
+  .UserHeader .header-right-inner > .notification-wrapper,
+  .UserHeader .header-right-inner > .header-user-info-inner,
+  .authenticated-hamburger-btn {
+    display: grid !important;
+    place-items: center !important;
+    height: 50px !important;
+  }
+  
+  /* Remove any conflicting flex properties */
+  .UserHeader .header-right-inner > div > *,
+  .UserHeader .header-right-inner > .notification-wrapper > *,
+  .UserHeader .header-right-inner > .header-user-info-inner > * {
+    display: inline-block !important;
+    vertical-align: middle !important;
+  }
 }

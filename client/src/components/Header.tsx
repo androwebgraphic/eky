@@ -259,15 +259,26 @@ const Header: React.FC = () => {
     <>
       {isAuthenticated ? (
         <>
-        <header className="UserHeader">
-          <div className="header-content-inner">
+        <header className="UserHeader" style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="header-content-inner" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            width: '100%',
+            height: '50px'
+          }}>
             {/* Mobile hamburger menu button */}
             {isMobile && (
               <button 
                 className="authenticated-hamburger-btn"
                 onClick={toggleMobileMenu}
                 aria-label="Toggle menu"
-                style={{fontSize: '32px'}}
+                style={{
+                  fontSize: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '50px'
+                }}
               >
                 <span className="sharedog-icon sharedog-Hamby" style={{fontSize: '32px'}}></span>
               </button>
@@ -284,15 +295,23 @@ const Header: React.FC = () => {
             
             <div className="header-flex-spacer" />
             {/* Right: Language Selector, Notifications, and User Info */}
-            <div className="header-right-inner">
-              <LanguageSelector />
-              <div className="notification-wrapper">
+            <div className="header-right-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', height: '50px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', height: '50px' }}>
+                <LanguageSelector />
+              </div>
+              <div className="notification-wrapper" style={{ display: 'flex', alignItems: 'center', height: '50px' }}>
                 <NotificationBell count={newDogsCount} onClick={handleNotificationClick} />
               </div>
               {user && (
                 <div 
                   className="header-user-info-inner"
-                  style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+                  style={{ 
+                    cursor: 'pointer', 
+                    pointerEvents: 'auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    height: '50px'
+                  }}
                   onClick={e => { 
                     e.preventDefault();
                     e.stopPropagation();

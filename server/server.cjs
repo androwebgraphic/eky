@@ -26,8 +26,7 @@ const app = express();
 // 3. Set up CORS middleware FIRST (more permissive for development)
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://eky-3xf1.onrender.com',
-  'https://sharedog-backend-o8ta.onrender.com'
+  'https://eky-3xf1.onrender.com'
 ];
 
 app.use(cors({

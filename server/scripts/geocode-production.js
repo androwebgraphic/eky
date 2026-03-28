@@ -5,8 +5,9 @@ require('dotenv').config({ path: '../.env' });
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/eky';
+    const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/eky';
     console.log('[GEOCODE] Connecting to MongoDB...');
+    console.log('[GEOCODE] Using URI:', uri.replace(/:([^:@]+)@/, ':***@')); // Hide password
     await mongoose.connect(uri);
     console.log('[GEOCODE] ✅ Connected to MongoDB');
   } catch (error) {

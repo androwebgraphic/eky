@@ -808,151 +808,79 @@ const listDogs = async (req, res) => {
       if (!isNaN(userLat) && !isNaN(userLng)) {
         console.log('[LISTDOGS] Valid coordinates received, using geospatial sorting');
         try {
-          // TWO-TIER APPROACH:
-          // 1. First, get dogs with valid coordinates (not [0,0]) sorted by distance
-          // 2. Then, get dogs without valid coordinates ([0,0]) sorted by creation date
-          // 3. Combine them: dogs with coordinates first, then dogs without
+          // JAVASCRIPT-BASED GEOLOCATION SORTING:
+          // 1. Fetch all dogs with user data
+          // 2. Calculate distances in JavaScript using Haversine formula
+          // 3. Separate dogs: valid coords vs [0,0] coords
+          // 4. Sort and combine: valid coords first (by distance), then [0,0] (by date)
           
-          // Query 1: Dogs with valid coordinates (not [0,0])
-          const dogsWithDistance = await Dog.aggregate([
-            {
-              $match: {
-                'coordinates.coordinates': { $ne: [0, 0] }
-              }
-            },
-            {
-              $geoNear: {
-                near: {
-                  type: 'Point',
-                  coordinates: [userLng, userLat]
-                },
-                distanceField: 'distance',
-                spherical: true,
-                key: 'coordinates'
-              }
-            },
-            {
-              $lookup: {
-                from: 'users',
-                localField: 'user',
-                foreignField: '_id',
-                as: 'user'
-              }
-            },
-            {
-              $unwind: '$user'
-            },
-            {
-              $project: {
-                name: 1,
-                breed: 1,
-                age: 1,
-                color: 1,
-                location: 1,
-                description: 1,
-                size: 1,
-                gender: 1,
-                vaccinated: 1,
-                neutered: 1,
-                coordinates: 1,
-                images: 1,
-                video: 1,
-                thumbnail: 1,
-                user: {
-                  _id: 1,
-                  name: 1,
-                  username: 1,
-                  email: 1,
-                  phone: 1,
-                  person: 1
-                },
-                createdAt: 1,
-                likes: 1,
-                adoptionStatus: 1,
-                adoptionQueue: 1,
-                distance: 1
-              }
+          const allDogs = await Dog.find()
+            .populate('user', 'name username email phone person')
+            .lean();
+          
+          // Calculate distance using Haversine formula
+          const calculateDistance = (lat1, lon1, lat2, lon2) => {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+              Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; // Distance in km
+          };
+          
+          // Add distance to each dog and separate by coordinates
+          const dogsWithValidCoords = [];
+          const dogsWithZeroCoords = [];
+          
+          allDogs.forEach(dog => {
+            const coords = dog.coordinates?.coordinates;
+            if (coords && coords[0] !== 0 && coords[1] !== 0) {
+              // Valid coordinates - calculate distance
+              dog.distance = calculateDistance(
+                userLat, userLng,
+                coords[1], coords[0] // Note: coords[0] is longitude, coords[1] is latitude
+              ) * 1000; // Convert to meters for consistency with $geoNear
+              dogsWithValidCoords.push(dog);
+            } else {
+              // Invalid or [0,0] coordinates
+              dog.distance = null;
+              dogsWithZeroCoords.push(dog);
             }
-          ]);
+          });
           
-          // Query 2: Dogs without valid coordinates ([0,0]) - sorted by creation date (newest first)
-          const dogsWithoutCoords = await Dog.aggregate([
-            {
-              $match: {
-                'coordinates.coordinates': [0, 0]
-              }
-            },
-            {
-              $lookup: {
-                from: 'users',
-                localField: 'user',
-                foreignField: '_id',
-                as: 'user'
-              }
-            },
-            {
-              $unwind: '$user'
-            },
-            {
-              $sort: { createdAt: -1 }
-            },
-            {
-              $project: {
-                name: 1,
-                breed: 1,
-                age: 1,
-                color: 1,
-                location: 1,
-                description: 1,
-                size: 1,
-                gender: 1,
-                vaccinated: 1,
-                neutered: 1,
-                coordinates: 1,
-                images: 1,
-                video: 1,
-                thumbnail: 1,
-                user: {
-                  _id: 1,
-                  name: 1,
-                  username: 1,
-                  email: 1,
-                  phone: 1,
-                  person: 1
-                },
-                createdAt: 1,
-                likes: 1,
-                adoptionStatus: 1,
-                adoptionQueue: 1,
-                distance: { $literal: null } // Explicitly set distance to null
-              }
-            }
-          ]);
+          // Sort dogs with valid coords by distance (nearest first)
+          dogsWithValidCoords.sort((a, b) => a.distance - b.distance);
           
-          // Combine results: dogs with coordinates first, then dogs without
-          const allDogs = [...dogsWithDistance, ...dogsWithoutCoords];
+          // Sort [0,0] dogs by creation date (newest first)
+          dogsWithZeroCoords.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          
+          // Combine results: dogs with valid coords first, then dogs with [0,0] coords
+          const sortedDogs = [...dogsWithValidCoords, ...dogsWithZeroCoords];
           
           console.log('[LISTDOGS] Two-tier sorting completed');
-          console.log(`[LISTDOGS] Dogs with valid coordinates: ${dogsWithDistance.length}`);
-          console.log(`[LISTDOGS] Dogs without valid coordinates: ${dogsWithoutCoords.length}`);
+          console.log(`[LISTDOGS] Dogs with valid coordinates: ${dogsWithValidCoords.length}`);
+          console.log(`[LISTDOGS] Dogs without valid coordinates: ${dogsWithZeroCoords.length}`);
           console.log(`[LISTDOGS] Total dogs returned: ${allDogs.length}`);
           
-          if (dogsWithDistance.length > 0) {
+          if (dogsWithValidCoords.length > 0) {
             console.log('[LISTDOGS] First 5 dogs with distances (nearest first):');
-            dogsWithDistance.slice(0, 5).forEach(dog => {
+            dogsWithValidCoords.slice(0, 5).forEach(dog => {
               const distKm = dog.distance ? (dog.distance / 1000).toFixed(2) : 'N/A';
               console.log(`[LISTDOGS] - ${dog.name} (ID: ${dog._id}): ${distKm}km away, coords:`, dog.coordinates);
             });
           }
           
-          if (dogsWithoutCoords.length > 0) {
+          if (dogsWithZeroCoords.length > 0) {
             console.log('[LISTDOGS] First 3 dogs without coordinates (sorted by newest):');
-            dogsWithoutCoords.slice(0, 3).forEach(dog => {
+            dogsWithZeroCoords.slice(0, 3).forEach(dog => {
               console.log(`[LISTDOGS] - ${dog.name} (ID: ${dog._id}): created at ${new Date(dog.createdAt).toISOString()}`);
             });
           }
           
-          res.json(allDogs);
+          res.json(sortedDogs);
           return;
         } catch (aggErr) {
           console.error('[LISTDOGS] Geospatial aggregation error:', aggErr);

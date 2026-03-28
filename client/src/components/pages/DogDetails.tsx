@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import '../../css/modal.css';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMapModal } from '../../contexts/MapModalContext';
+import { getApiUrl } from '../../utils/apiUrl';
 
 
 interface MediaVariant { url: string; width?: number; size?: string }
@@ -163,15 +164,8 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
     };
   }, []);
   
-  // Helper function to get API base URL - define before use in event listeners
-  const getApiBase = () => {
-    if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return `http://${window.location.hostname}:3001`;
-    }
-    return `http://${window.location.hostname}:3001`;
-  };
-  const apiBase = getApiBase();
+  // Use centralized API URL utility
+  const apiBase = getApiUrl();
   
   // Safely check if current user is the owner
   // If owner data is missing or incomplete, assume NOT owner to allow buttons to show

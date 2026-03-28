@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { getApiUrl } from '../utils/apiUrl';
 
 interface ImageType {
 	url: string;
@@ -78,10 +79,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 			return url;
 		}
 		const cacheBuster = (window as any).__EKY_IMAGE_CB || ((window as any).__EKY_IMAGE_CB = Date.now());
-		// Dynamically construct API URL based on current hostname
-		const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-		const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
-		const apiBase = process.env.REACT_APP_API_URL || `${protocol}//${hostname}:3001`;
+		const apiBase = getApiUrl();
 		if (/^https?:\/\//.test(url)) {
 			return url + (url.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
 		}
@@ -214,10 +212,8 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		}
 
 		try {
-			// Dynamically construct API URL based on current hostname
-			const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-			const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
-			const apiBase = process.env.REACT_APP_API_URL || `${protocol}//${hostname}:3001`;
+			// Use centralized API URL utility
+			const apiBase = getApiUrl();
 			console.log('[ADOPT DEBUG] Token being used:', authToken ? authToken.substring(0, 20) + '...' : 'NO TOKEN');
 			const response = await fetch(`${apiBase}/api/dogs/${props._id}/adopt-request`, {
 				method: 'POST',

@@ -70,6 +70,7 @@ const updateDog = async (req, res) => {
       console.warn('[UPDATE DEBUG] Not authorized to update dog. req.user._id:', req.user._id, 'dog.user:', dog.user);
       return res.status(403).json({ message: 'Not authorized to update this dog' });
     }
+
     // Get keepImages from request body or default to all current images
     let keepImages = req.body.keepImages;
     if (typeof keepImages === 'string') {
@@ -134,6 +135,7 @@ const updateDog = async (req, res) => {
         console.log('[DELETE DEBUG] dog.images after save:', dog.images);
       }
     }
+
     // If keepImages is empty and no new images are uploaded, remove all images
     if ((!keepImages || keepImages.length === 0) && (!req.files || !req.files.media)) {
       console.log('[DELETE DEBUG] keepImages is empty, setting dog.images = [] and saving...');
@@ -141,6 +143,7 @@ const updateDog = async (req, res) => {
       await dog.save();
       console.log('[DELETE DEBUG] dog.images after save:', dog.images);
     }
+
     console.log('[SAVE DEBUG] Before save, dog.images:', dog.images);
 
     // Handle new uploaded images (media) - save to local uploads
@@ -198,7 +201,7 @@ const updateDog = async (req, res) => {
         if (
           mediaFile.mimetype === 'image/heic' ||
           mediaFile.mimetype === 'image/heif' ||
-          (mediaFile.originalname && /.heic|.heif$/i.test(mediaFile.originalname))
+          (mediaFile.originalname && /\.heic|\.heif$/i.test(mediaFile.originalname))
         ) {
           throw new Error('HEIC/HEIF images are not supported. Please convert to JPEG or PNG before uploading.');
         }
@@ -242,16 +245,20 @@ const updateDog = async (req, res) => {
         }
       }
     }
+
     console.log('[SAVE DEBUG] About to save dog, images:', dog.images);
     await dog.save();
     console.log('[SAVE DEBUG] After save, dog.images:', dog.images);
+
     // Always fetch the latest dog object with populated fields after save
     const updatedDog = await Dog.findById(dog._id).lean();
     console.log(`[UPDATE DOG] Dog ${dog._id} updated successfully.`);
     console.log('[UPDATE DOG] updatedDog.images:', updatedDog.images);
+
     // Emit Socket.IO event to all clients
     const { io } = require('../socket');
     if (io) io.emit('dogUpdated', { dog: updatedDog });
+
     return res.status(200).json({ message: 'Dog updated successfully', dog: updatedDog });
   } catch (err) {
     console.error('[UPDATE DOG ERROR]', err);
@@ -260,6 +267,7 @@ const updateDog = async (req, res) => {
 };
 
 // End updateDog
+
 // POST /api/dogs/:id/adopt-confirm
 const confirmAdoption = async (req, res) => {
   try {
@@ -296,6 +304,7 @@ const confirmAdoption = async (req, res) => {
       console.log('[CONFIRM ADOPTION] Not authorized:', userId);
       return res.status(403).json({ message: 'Not authorized to confirm adoption' });
     }
+
     // If both confirmed, mark as adopted and clear adoptionQueue, then allow removal elsewhere if needed
     if (dog.adoptionQueue.ownerConfirmed && dog.adoptionQueue.adopterConfirmed) {
       // Delete dog from DB after both confirmations
@@ -303,22 +312,24 @@ const confirmAdoption = async (req, res) => {
       try {
         let convo = await ChatConversation.findOne({ participants: { $all: [ownerId, adopterId] } });
         if (convo) {
-          // Send translation keys and variables
-          await ChatMessage.create({ conversationId: convo._id, sender: ownerId, recipient: adopterId, message: { key: 'adoptionConfirmed', dogName } });
-          await ChatMessage.create({ conversationId: convo._id, sender: adopterId, recipient: ownerId, message: { key: 'adoptionConfirmed', dogName } });
-          await ChatMessage.create({ conversationId: convo._id, sender: ownerId, recipient: adopterId, message: { key: 'adoptionCompletedClosed', dogName } });
-          await ChatMessage.create({ conversationId: convo._id, sender: adopterId, recipient: ownerId, message: { key: 'adoptionCompletedClosed', dogName } });
+          // Send STRING messages (not objects)
+          await ChatMessage.create({ conversationId: convo._id, sender: ownerId, recipient: adopterId, message: `Adoption confirmed for ${dogName}`, messageType: 'adoption_confirmed', dogId: dog._id });
+          await ChatMessage.create({ conversationId: convo._id, sender: adopterId, recipient: ownerId, message: `Adoption confirmed for ${dogName}`, messageType: 'adoption_confirmed', dogId: dog._id });
+          await ChatMessage.create({ conversationId: convo._id, sender: ownerId, recipient: adopterId, message: `Adoption completed for ${dogName}. Dog has been removed from the database.`, messageType: 'adoption_completed', dogId: dog._id });
+          await ChatMessage.create({ conversationId: convo._id, sender: adopterId, recipient: ownerId, message: `Adoption completed for ${dogName}. Dog has been removed from the database.`, messageType: 'adoption_completed', dogId: dog._id });
           await ChatConversation.findByIdAndUpdate(convo._id, { updatedAt: Date.now() });
+          
           // Use io property from socket.js
           const { io } = require('../socket');
           if (io) {
-            io.to(ownerId).emit('receiveMessage', { conversationId: convo._id, sender: adopterId, message: { key: 'adoptionCompletedClosed', dogName } });
-            io.to(adopterId).emit('receiveMessage', { conversationId: convo._id, sender: ownerId, message: { key: 'adoptionCompletedClosed', dogName } });
+            io.to(ownerId).emit('receiveMessage', { conversationId: convo._id, sender: adopterId, message: `Adoption completed for ${dogName}. Dog has been removed from the database.`, messageType: 'adoption_completed', dogId: dog._id });
+            io.to(adopterId).emit('receiveMessage', { conversationId: convo._id, sender: ownerId, message: `Adoption completed for ${dogName}. Dog has been removed from the database.`, messageType: 'adoption_completed', dogId: dog._id });
           }
         }
       } catch (msgErr) {
         console.warn('Failed to send adoption confirmation message:', msgErr);
       }
+
       console.log(`[CONFIRM ADOPTION] Attempting to delete dog. dogId: ${dogId}, type: ${typeof dogId}`);
       const deletedDog = await Dog.findByIdAndDelete(dogId);
       if (deletedDog) {
@@ -334,6 +345,7 @@ const confirmAdoption = async (req, res) => {
           console.error(`[CONFIRM ADOPTION] Dog not found after failed delete.`);
         }
       }
+
       // Only set removed: true if dog was actually deleted
       return res.json({ message: 'Adoption confirmed and dog deleted', adopted: true, removed: !!deletedDog, dogId });
     } else if (justConfirmed) {
@@ -361,9 +373,11 @@ const deleteDog = async (req, res) => {
       console.warn('Dog not found for id:', req.params.id);
       return res.status(404).json({ message: 'Dog not found', id: req.params.id });
     }
+
     // Debug: print user and dog ownership
     console.log('[DELETE DEBUG] req.user:', req.user);
     console.log('[DELETE DEBUG] dog.user:', dog.user);
+
     // Authorization check: only the user who created the dog or superadmin can delete it
     const isSuperAdmin = req.user.role === 'superadmin';
     const isOwner = dog.user.toString() === req.user._id.toString();
@@ -372,6 +386,7 @@ const deleteDog = async (req, res) => {
       console.warn('[DELETE DEBUG] Not authorized. req.user._id:', req.user._id, 'dog.user:', dog.user);
       return res.status(403).json({ message: 'Not authorized to delete this dog' });
     }
+
     // Remove all files in uploads/dogs/<id>
     const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
     try {
@@ -386,11 +401,14 @@ const deleteDog = async (req, res) => {
     } catch (e) {
       console.warn('Error cleaning up files for dog:', dog._id, e);
     }
+
     await dog.deleteOne();
     console.log('Dog deleted:', dog._id);
+
     // Emit Socket.IO event to all clients
     const { io } = require('../socket');
     if (io) io.emit('dogDeleted', { id: dog._id });
+
     res.json({ message: 'Dog deleted', id: dog._id });
   } catch (err) {
     console.error('Error in deleteDog:', err);
@@ -409,6 +427,7 @@ const createDog = async (req, res) => {
     } else {
       console.warn('No media files received in req.files.media');
     }
+
   try {
     // Check if user is superadmin
     const isSuperAdmin = isUserSuperAdmin(req.user);
@@ -472,7 +491,7 @@ const createDog = async (req, res) => {
     console.log(`[CONFIRM ADOPTION] Dog ${dog._id} after confirm/save. adoptionStatus: ${dog.adoptionStatus}, adoptionQueue:`, dog.adoptionQueue);
 
     const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
-    // Ensure local uploadDir creation for images.
+
     // files from multer (memory storage)
     // image file field name: 'media' (image or video)
     // optional poster image for videos: 'poster'
@@ -510,6 +529,7 @@ const createDog = async (req, res) => {
               quality: 85
             });
             fs.writeFileSync(origPath, origBuffer);
+            console.log(`[IMAGE SAVE] Saved optimized original: ${origPath}`);
             imageVariants.push({ url: `/u/dogs/${dog._id}/${origName}`, width: null, size: 'orig' });
           } catch (origErr) {
             console.error('[IMAGE ERROR] Failed to optimize original image:', origErr);
@@ -544,7 +564,7 @@ const createDog = async (req, res) => {
               }
             }));
             dog.video.poster = posterVariants;
-            // create a tiny 64px thumbnail from the poster for list display (if thumbnail not set)
+            // create a tiny 64px thumbnail from poster for list display (if thumbnail not set)
             if (!dog.thumbnail) {
               try {
                 const thumbName = `thumb-64${ext}`;
@@ -563,6 +583,7 @@ const createDog = async (req, res) => {
           }
       }
     }
+
     // Generate and save 64px thumbnail from first image if not set
     const firstImageFile = mediaArray.find(f => f.mimetype.startsWith('image/'));
     if (firstImageFile && !dog.thumbnail) {
@@ -594,7 +615,7 @@ const createDog = async (req, res) => {
     if (err && err.stack) console.error(err.stack);
     res.status(500).json({ message: 'Server error', error: err.message, stack: err.stack });
   }
-  }
+}
 // End createDog
 
 // POST /api/dogs/admin/geocode - Geocode all dogs with [0,0] coordinates
@@ -647,7 +668,7 @@ const geocodeAllDogs = async (req, res) => {
       await Dog.collection.createIndex({ coordinates: '2dsphere' });
       console.log('[GEOCODE] ✅ 2dsphere index created successfully');
     } catch (indexErr) {
-      console.log('[GEOCODE] ℹ️  Index may already exist:', indexErr.message);
+      console.log('[GEOCODE] ℹ️ Index may already exist:', indexErr.message);
     }
     
     console.log(`[GEOCODE] Complete! Success: ${successCount}, Failed: ${failureCount}`);
@@ -673,8 +694,6 @@ function fixUrl(url) {
   return url;
 }
 
-
-
 const getDogById = async (req, res) => {
   try {
     const dog = await Dog.findById(req.params.id)
@@ -692,8 +711,8 @@ const getDogById = async (req, res) => {
     if (err && err.stack) console.error('[getDogById] Stack:', err.stack);
     res.status(500).json({ message: 'Server error', error: err.message, stack: err.stack });
   }
-
 }
+
 // POST /api/dogs/:id/like
 const likeDog = async (req, res) => {
   try {
@@ -717,6 +736,7 @@ const likeDog = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 }
+
 // DELETE /api/dogs/:id/like
 const unlikeDog = async (req, res) => {
   try {
@@ -735,9 +755,10 @@ const unlikeDog = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 }
+
 // GET /api/dogs/pending-adoptions
 const getPendingAdoptions = async (req, res) => {
-    console.log('[getPendingAdoptions] userId:', req.user._id);
+  console.log('[getPendingAdoptions] userId:', req.user._id);
   try {
     // Robustly match user IDs as strings
     const userId = req.user._id.toString();
@@ -747,6 +768,7 @@ const getPendingAdoptions = async (req, res) => {
     })
       .populate({ path: 'user', select: 'name username _id' })
       .populate({ path: 'adoptionQueue.adopter', select: 'name username _id' });
+
     // Filter in JS to ensure string match for both owner and adopter, and adoptionQueue must exist
     const filtered = dogs.filter(dog => {
       if (!dog.adoptionQueue || !dog.adoptionQueue.adopter) return false;
@@ -754,13 +776,13 @@ const getPendingAdoptions = async (req, res) => {
       const adopterId = dog.adoptionQueue.adopter && dog.adoptionQueue.adopter._id ? dog.adoptionQueue.adopter._id.toString() : '';
       return ownerId === userId || adopterId === userId;
     });
+
     console.log(`[getPendingAdoptions] userId: ${userId}, found ${filtered.length} valid pending dogs`);
     return res.json(filtered);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 }
-
 
 // GET /api/dogs
 const listDogs = async (req, res) => {
@@ -877,7 +899,6 @@ const getNewDogsSince = async (req, res) => {
   }
 };
 
-
 // Cancel adoption for a dog
 const cancelAdoption = async (req, res) => {
   try {
@@ -902,41 +923,42 @@ const cancelAdoption = async (req, res) => {
     try {
       const ownerId = dog.user && dog.user._id ? dog.user._id.toString() : dog.user.toString();
       const adopterId = req.user._id.toString();
+      
       let convo = await ChatConversation.findOne({ participants: { $all: [ownerId, adopterId] } });
       if (!convo) {
         convo = await ChatConversation.create({ participants: [ownerId, adopterId] });
       }
-    const sysMsg = `Adoption canceled for dog ${dog.name}. The dog is now available for adoption again.`;
-    await ChatMessage.create({ 
-      conversationId: convo._id, 
-      sender: null, 
-      recipient: null, 
-      message: sysMsg,
-      messageType: 'adoption_cancelled',
-      dogId: dog._id
-    });
-    const { io } = require('../socket');
-    if (io) {
-      io.to(ownerId).emit('receiveMessage', { 
+      
+      // Create STRING message (not null sender/recipient)
+      const sysMsg = `Adoption canceled for dog ${dog.name}. The dog is now available for adoption again.`;
+      await ChatMessage.create({ 
         conversationId: convo._id, 
-        sender: null, 
         message: sysMsg,
         messageType: 'adoption_cancelled',
         dogId: dog._id
       });
-      io.to(adopterId).emit('receiveMessage', { 
-        conversationId: convo._id, 
-        sender: null, 
-        message: sysMsg,
-        messageType: 'adoption_cancelled',
-        dogId: dog._id
-      });
-      // Also emit dogUpdated to refresh adoption status
-      io.emit('dogUpdated', { dog: { _id: dog._id, adoptionStatus: 'available' } });
-    }
+      
+      const { io } = require('../socket');
+      if (io) {
+        io.to(ownerId).emit('receiveMessage', { 
+          conversationId: convo._id, 
+          message: sysMsg,
+          messageType: 'adoption_cancelled',
+          dogId: dog._id
+        });
+        io.to(adopterId).emit('receiveMessage', { 
+          conversationId: convo._id, 
+          message: sysMsg,
+          messageType: 'adoption_cancelled',
+          dogId: dog._id
+        });
+        // Also emit dogUpdated to refresh adoption status
+        io.emit('dogUpdated', { dog: { _id: dog._id, adoptionStatus: 'available' } });
+      }
     } catch (e) {
       console.warn('Failed to emit adoption-cancel event to both users:', e);
     }
+
     res.json({ message: 'Adoption canceled', dog });
   } catch (err) {
     console.error('Cancel adoption error:', err);
@@ -956,6 +978,7 @@ const adoptRequest = async (req, res) => {
     if (dog.adoptionQueue && dog.adoptionQueue.adopter) {
       return res.status(400).json({ message: 'There is already a pending adoption request for this dog' });
     }
+
     dog.adoptionStatus = 'pending';
     dog.adoptionQueue = {
       adopter: req.user._id,
@@ -969,38 +992,41 @@ const adoptRequest = async (req, res) => {
     try {
       const ownerId = dog.user && dog.user._id ? dog.user._id.toString() : dog.user.toString();
       const adopterId = req.user._id.toString();
+      
       // Find or create conversation
       let convo = await ChatConversation.findOne({ participants: { $all: [ownerId, adopterId] } });
       if (!convo) {
         convo = await ChatConversation.create({ participants: [ownerId, adopterId] });
       }
-      const sysMsg = `Adoption process started for dog ${dog.name}. Please confirm adoption if you agree.`;
+      
+      // Create STRING message (not null sender/recipient)
+      const ownerMsg = `Adoption Request: ${req.user.name || req.user.username} wants to adopt ${dog.name}.`;
+      const adopterMsg = `Adoption process started for dog ${dog.name}. Please confirm adoption if you agree.`;
+      
       await ChatMessage.create({ 
         conversationId: convo._id, 
         sender: null, 
         recipient: ownerId, 
-        message: `Adoption Request: ${req.user.name || req.user.username} wants to adopt ${dog.name}.`,
+        message: ownerMsg,
         messageType: 'adoption_request',
         dogId: dog._id,
         requiresAction: true
       });
+      
       // Use io property from socket.js
       const { io } = require('../socket');
       if (io) {
         io.to(ownerId).emit('receiveMessage', { 
           conversationId: convo._id, 
           sender: null, 
-          recipient: ownerId,
-          message: `Adoption Request: ${req.user.name || req.user.username} wants to adopt ${dog.name}.`,
+          message: ownerMsg,
           messageType: 'adoption_request', 
           dogId: dog._id,
           requiresAction: true
         });
         io.to(adopterId).emit('receiveMessage', { 
           conversationId: convo._id, 
-          sender: null, 
-          recipient: adopterId,
-          message: sysMsg,
+          message: adopterMsg,
           messageType: 'adoption',
           dogId: dog._id
         });

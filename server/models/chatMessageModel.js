@@ -2,8 +2,9 @@ const mongoose = require('mongoose');
 
 const chatMessageSchema = new mongoose.Schema({
   conversationId: { type: mongoose.Schema.Types.ObjectId, ref: 'ChatConversation', required: true },
-  sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  recipient: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  // Make sender and recipient optional to allow system messages
+  sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  recipient: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   message: { type: String, required: true },
   sentAt: { type: Date, default: Date.now },
   // Special message types for adoption flow

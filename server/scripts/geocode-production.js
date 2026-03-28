@@ -54,9 +54,12 @@ const migrateDogs = async () => {
   try {
     console.log('[GEOCODE] ========== STARTING MIGRATION ==========');
     
-    // Find all dogs with coordinates [0,0]
+    // Find all dogs without valid coordinates
     const dogs = await Dog.find({
-      'coordinates.coordinates': [0, 0]
+      $or: [
+        { coordinates: { $exists: false } },
+        { 'coordinates.coordinates': [0, 0] }
+      ]
     });
     
     console.log(`[GEOCODE] Found ${dogs.length} dogs to geocode`);

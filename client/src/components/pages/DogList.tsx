@@ -120,7 +120,7 @@ function DogList() {
 		};
 	}, []);
 
-		// Auto-focus search input if #search is in URL hash (for initial page load)
+	// Auto-focus search input if #search is in URL hash (for initial page load)
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	React.useEffect(() => {
 		console.log('[FOCUS] ========== FOCUS EFFECT RUNNING ==========');
@@ -147,48 +147,59 @@ function DogList() {
 	useEffect(() => {
 		const getUserLocation = () => {
 			if (!navigator.geolocation) {
-				console.log('[LOCATION] Geolocation not supported');
+				console.log('[LOCATION] ❌ Geolocation not supported by browser');
 				setLocationPermission('denied');
+				console.log('[LOCATION] ℹ️ Dogs will be sorted by creation date (newest first)');
 				return;
 			}
 			
+			console.log('[LOCATION] 🔍 Requesting user location...');
+			
+			// Single attempt with generous timeout
 			navigator.geolocation.getCurrentPosition(
 				(position) => {
 					const { latitude, longitude } = position.coords;
-					console.log('[LOCATION] Got user coordinates:', { latitude, longitude });
+					console.log('[LOCATION] ✅ Got user coordinates:', { latitude, longitude });
 					setUserLocation({ lat: latitude, lng: longitude });
 					setLocationPermission('granted');
+					console.log('[LOCATION] ℹ️ Dogs will be sorted by distance from your location');
 				},
 				(error) => {
-					console.warn('[LOCATION] Geolocation error:', error);
+					console.warn('[LOCATION] ❌ Geolocation error:', error);
 					console.warn('[LOCATION] Error code:', error.code);
 					console.warn('[LOCATION] Error message:', error.message);
-					setLocationPermission('denied');
 					
-					// If timeout, try with longer timeout
-					if (error.code === 3) {
-						console.log('[LOCATION] Timeout error, retrying with longer timeout...');
-						navigator.geolocation.getCurrentPosition(
-							(pos) => {
-								const { latitude, longitude } = pos.coords;
-								console.log('[LOCATION] Got user coordinates on retry:', { latitude, longitude });
-								setUserLocation({ lat: latitude, lng: longitude });
-								setLocationPermission('granted');
-							},
-							(err) => {
-								console.warn('[LOCATION] Retry also failed:', err);
-								setLocationPermission('denied');
-							},
-							{ timeout: 30000, enableHighAccuracy: false }
-						);
+					let errorMsg = '';
+					switch (error.code) {
+						case 1:
+							errorMsg = 'Location permission denied by user';
+							break;
+						case 2:
+							errorMsg = 'Location unavailable (position unavailable)';
+							break;
+						case 3:
+							errorMsg = 'Location request timed out';
+							break;
+						default:
+							errorMsg = 'Unknown geolocation error';
 					}
+					
+					console.log('[LOCATION] ℹ️ ' + errorMsg);
+					setLocationPermission('denied');
+					console.log('[LOCATION] ℹ️ Dogs will be sorted by creation date (newest first)');
+					console.log('[LOCATION] 💡 To enable location-based sorting, allow location access in your browser settings');
 				},
-				{ timeout: 15000, enableHighAccuracy: false }
+				{ 
+					timeout: 60000, // 60 seconds - much longer for desktop browsers
+					enableHighAccuracy: false, // Don't need high accuracy for distance sorting
+					maximumAge: 300000 // Accept cached position up to 5 minutes old
+				}
 			);
 		};
 		
+		// Only try to get location once
 		getUserLocation();
-	}, []);
+	}, []); // Empty dependency array - run once on mount
 
 	// Read URL search parameters from footer search modal
 	useEffect(() => {
@@ -275,7 +286,7 @@ function DogList() {
 		}
 	};
 
-		useEffect(() => {
+	useEffect(() => {
 		const fetchDogs = () => {
 			setLoading(true);
 			const headers: Record<string, string> = {};
@@ -291,7 +302,9 @@ function DogList() {
 			if (userLocation) {
 				params.append('lat', userLocation.lat.toString());
 				params.append('lng', userLocation.lng.toString());
-				console.log('[DOG-LIST] Fetching dogs with location sorting:', userLocation);
+				console.log('[DOG-LIST] 📍 Fetching dogs with location-based sorting:', userLocation);
+			} else {
+				console.log('[DOG-LIST] 📅 Fetching dogs sorted by creation date (newest first)');
 			}
 			if (params.toString()) {
 				url += `?${params.toString()}`;
@@ -343,6 +356,9 @@ function DogList() {
 			if (userLocation) {
 				params.append('lat', userLocation.lat.toString());
 				params.append('lng', userLocation.lng.toString());
+				console.log('[DOG-LIST] 📍 Refreshing dogs with location-based sorting');
+			} else {
+				console.log('[DOG-LIST] 📅 Refreshing dogs sorted by creation date');
 			}
 			if (params.toString()) {
 				url += `?${params.toString()}`;

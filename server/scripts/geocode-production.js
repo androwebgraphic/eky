@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 const Dog = require('../models/dogModel');
+const path = require('path');
+
+// Load .env file (same way as other scripts)
 require('dotenv').config({ path: '../.env' });
 
 // Connect to MongoDB

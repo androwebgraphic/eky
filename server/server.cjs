@@ -71,15 +71,22 @@ app.use('/api/chat', chatRoutes);
 // Use uploads directory at server directory to match where multer saves files
 const uploadsPath = path.join(__dirname, 'uploads');
 console.log('[STATIC DEBUG] uploadsPath resolved to:', uploadsPath);
-// Apply CORS middleware to static file routes
-app.use('/uploads', cors(), express.static(uploadsPath, {
+// Apply CORS middleware to static file routes with permissive settings
+const staticCors = cors({
+  origin: '*',
+  methods: ['GET', 'OPTIONS'],
+  credentials: false
+});
+app.use('/uploads', staticCors, express.static(uploadsPath, {
   setHeaders: (res, path) => {
     console.log('[STATIC FILE] Serving:', path, 'Status: OK');
+    res.setHeader('Access-Control-Allow-Origin', '*');
   }
 }));
-app.use('/u', cors(), express.static(uploadsPath, {
+app.use('/u', staticCors, express.static(uploadsPath, {
   setHeaders: (res, path) => {
     console.log('[STATIC FILE] Serving:', path, 'Status: OK');
+    res.setHeader('Access-Control-Allow-Origin', '*');
   }
 }));
 app.use("/api/users", userRoutes);

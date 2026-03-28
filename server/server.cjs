@@ -78,20 +78,22 @@ function setUploadsCORS(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  res.header('Access-Control-Allow-Credentials', 'false');
+  // Set these before handling OPTIONS
+  res.header('Access-Control-Expose-Headers', 'Content-Length, Content-Type');
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
+  // IMPORTANT: Do NOT set Access-Control-Allow-Credentials: false
+  // This causes issues with cache busters in some browsers
   // Allow cache buster without CORS issues by varying on Origin
-  res.header('Vary', 'Origin');
-  // Prevent caching of profile images
-  res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.header('Pragma', 'no-cache');
-  res.header('Expires', '0');
+  res.header('Vary', 'Origin, Accept-Encoding');
   // Set proper content type for images to prevent opaque response issues
   res.header('Cross-Origin-Resource-Policy', 'cross-origin');
   res.header('Cross-Origin-Embedder-Policy', 'credentialless');
+  // Enable caching but allow revalidation to prevent OpaqueResponseBlocking
+  res.header('Cache-Control', 'public, max-age=0, must-revalidate');
+  res.header('Pragma', 'no-cache');
   next();
 }
 app.use('/uploads', setUploadsCORS, express.static(uploadsPath, {

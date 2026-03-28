@@ -78,17 +78,19 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		if (!url) {
 			return url;
 		}
-		const cacheBuster = (window as any).__EKY_IMAGE_CB || ((window as any).__EKY_IMAGE_CB = Date.now());
 		const apiBase = getApiUrl();
-		if (/^https?:\/\//.test(url)) {
-			return url + (url.includes('?') ? '&' : '?') + 'cb=' + cacheBuster;
+		// Remove any existing cache buster to prevent OpaqueResponseBlocking
+		let cleanUrl = url.split('?')[0];
+		
+		if (/^https?:\/\//.test(cleanUrl)) {
+			return cleanUrl;
 		}
 		// Handle absolute paths starting with /
-		if (url.startsWith('/')) {
-			return apiBase + url + '?cb=' + cacheBuster;
+		if (cleanUrl.startsWith('/')) {
+			return apiBase + cleanUrl;
 		}
 		// Handle relative paths (uploads/, u/dogs/, etc.)
-		return apiBase + '/' + url.replace(/^\/+/, '') + '?cb=' + cacheBuster;
+		return apiBase + '/' + cleanUrl.replace(/^\/+/, '');
 	}
 
 	const getImageBase = (url: string) => {

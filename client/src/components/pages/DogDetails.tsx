@@ -449,10 +449,12 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
       // NOW convert to absolute URLs
       const toAbs = (u?: string) => {
         if (!u) return u;
-        if (/^https?:\/\//.test(u)) return u + (u.includes('?') ? '&' : '?') + 'cb=' + Date.now();
-        if (u.startsWith('/u/dogs/') || u.startsWith('/uploads/')) return apiBase + u + '?cb=' + Date.now();
-        if (u.startsWith('u/dogs/') || u.startsWith('uploads/')) return apiBase + '/' + u + '?cb=' + Date.now();
-        return apiBase + '/' + u.replace(/^\/+/,'') + '?cb=' + Date.now();
+        // Remove any existing cache buster to prevent OpaqueResponseBlocking
+        let cleanUrl = u.split('?')[0];
+        if (/^https?:\/\//.test(cleanUrl)) return cleanUrl;
+        if (cleanUrl.startsWith('/u/dogs/') || cleanUrl.startsWith('/uploads/')) return apiBase + cleanUrl;
+        if (cleanUrl.startsWith('u/dogs/') || cleanUrl.startsWith('uploads/')) return apiBase + '/' + cleanUrl;
+        return apiBase + '/' + cleanUrl.replace(/^\/+/,'');
       };
       
       // Sort by width descending and convert to absolute URLs
@@ -474,10 +476,12 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
     } else if (thumbnail && thumbnail.url) {
       const toAbs = (u?: string) => {
         if (!u) return u;
-        if (/^https?:\/\//.test(u)) return u + (u.includes('?') ? '&' : '?') + 'cb=' + Date.now();
-        if (u.startsWith('/u/dogs/') || u.startsWith('/uploads/')) return apiBase + u + '?cb=' + Date.now();
-        if (u.startsWith('u/dogs/') || u.startsWith('uploads/')) return apiBase + '/' + u + '?cb=' + Date.now();
-        return apiBase + '/' + u.replace(/^\/+/,'') + '?cb=' + Date.now();
+        // Remove any existing cache buster to prevent OpaqueResponseBlocking
+        let cleanUrl = u.split('?')[0];
+        if (/^https?:\/\//.test(cleanUrl)) return cleanUrl;
+        if (cleanUrl.startsWith('/u/dogs/') || cleanUrl.startsWith('/uploads/')) return apiBase + cleanUrl;
+        if (cleanUrl.startsWith('u/dogs/') || cleanUrl.startsWith('uploads/')) return apiBase + '/' + cleanUrl;
+        return apiBase + '/' + cleanUrl.replace(/^\/+/,'');
       };
       return [{ url: toAbs(thumbnail.url) }];
     }

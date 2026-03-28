@@ -73,6 +73,10 @@ function DogList() {
 	// User's location for distance sorting
 	const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 	const [locationPermission, setLocationPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
+	const [manualLocationInput, setManualLocationInput] = useState('');
+	const [geocodingManual, setGeocodingManual] = useState(false);
+	const [showManualLocationInput, setShowManualLocationInput] = useState(false);
+	const [locationMessage, setLocationMessage] = useState<string>('');
 
 	// Debug logging on mount
 	React.useEffect(() => {
@@ -143,12 +147,51 @@ function DogList() {
 		console.log('[FOCUS] ========== FOCUS EFFECT END ==========');
 	}, []);
 
+	// Handle manual location geocoding
+	const handleManualLocationSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!manualLocationInput.trim()) return;
+		
+		setGeocodingManual(true);
+		setLocationMessage('');
+		
+		try {
+			console.log('[MANUAL LOCATION] Geocoding:', manualLocationInput);
+			const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(manualLocationInput.trim())}&limit=1`, {
+				headers: {
+					'User-Agent': 'EkyApp/1.0'
+				}
+			});
+			const data = await resp.json();
+			
+			if (data && data.length > 0) {
+				const lat = parseFloat(data[0].lat);
+				const lng = parseFloat(data[0].lon);
+				console.log('[MANUAL LOCATION] ✅ Got coordinates:', { lat, lng });
+				setUserLocation({ lat, lng });
+				setLocationPermission('granted');
+				setLocationMessage(`✅ Using location: ${data[0].display_name}`);
+				setShowManualLocationInput(false);
+				setManualLocationInput('');
+			} else {
+				setLocationMessage('❌ Location not found. Please try a different location name.');
+			}
+		} catch (err) {
+			console.error('[MANUAL LOCATION] Error:', err);
+			setLocationMessage('❌ Failed to geocode location. Please try again.');
+		} finally {
+			setGeocodingManual(false);
+		}
+	};
+
 	// Get user's location for distance-based sorting
 	useEffect(() => {
 		const getUserLocation = () => {
 			if (!navigator.geolocation) {
 				console.log('[LOCATION] ❌ Geolocation not supported by browser');
 				setLocationPermission('denied');
+				setLocationMessage('ℹ️ Geolocation not supported. Enter your location manually for distance-based sorting.');
+				setShowManualLocationInput(true);
 				console.log('[LOCATION] ℹ️ Dogs will be sorted by creation date (newest first)');
 				return;
 			}
@@ -162,6 +205,7 @@ function DogList() {
 					console.log('[LOCATION] ✅ Got user coordinates:', { latitude, longitude });
 					setUserLocation({ lat: latitude, lng: longitude });
 					setLocationPermission('granted');
+					setLocationMessage(`✅ Location detected: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
 					console.log('[LOCATION] ℹ️ Dogs will be sorted by distance from your location');
 				},
 				(error) => {
@@ -186,6 +230,8 @@ function DogList() {
 					
 					console.log('[LOCATION] ℹ️ ' + errorMsg);
 					setLocationPermission('denied');
+					setLocationMessage(`ℹ️ ${errorMsg}. Enter your location manually for distance-based sorting.`);
+					setShowManualLocationInput(true);
 					console.log('[LOCATION] ℹ️ Dogs will be sorted by creation date (newest first)');
 					console.log('[LOCATION] 💡 To enable location-based sorting, allow location access in your browser settings');
 				},
@@ -454,6 +500,98 @@ function DogList() {
 				searchActive={searchActive}
 			/>
 		</div>
+
+		{/* Location status message and manual input */}
+		{locationMessage && (
+			<div style={{ 
+				padding: '12px 16px', 
+				maxWidth: '1200px', 
+				width: '100%', 
+				margin: '10px auto', 
+				boxSizing: 'border-box',
+				background: locationMessage.startsWith('✅') ? '#d4edda' : '#fff3cd',
+				border: `1px solid ${locationMessage.startsWith('✅') ? '#c3e6cb' : '#ffeaa7'}`,
+				borderRadius: '8px',
+				fontSize: '14px',
+				display: 'flex',
+				flexDirection: 'column',
+				gap: '8px'
+			}}>
+				<div>{locationMessage}</div>
+				{showManualLocationInput && !userLocation && (
+					<form onSubmit={handleManualLocationSubmit} style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+						<input
+							type="text"
+							value={manualLocationInput}
+							onChange={(e) => setManualLocationInput(e.target.value)}
+							placeholder="Enter your city (e.g., Zagreb, Croatia)"
+							disabled={geocodingManual}
+							style={{
+								flex: '1',
+								minWidth: '200px',
+								padding: '8px 12px',
+								border: '1px solid #ddd',
+								borderRadius: '6px',
+								fontSize: '14px'
+							}}
+						/>
+						<button
+							type="submit"
+							disabled={geocodingManual || !manualLocationInput.trim()}
+							style={{
+								padding: '8px 16px',
+								background: '#007bff',
+								color: 'white',
+								border: 'none',
+								borderRadius: '6px',
+								fontSize: '14px',
+								cursor: geocodingManual || !manualLocationInput.trim() ? 'not-allowed' : 'pointer',
+								opacity: geocodingManual || !manualLocationInput.trim() ? 0.6 : 1
+							}}
+						>
+							{geocodingManual ? 'Finding...' : 'Set Location'}
+						</button>
+						<button
+							type="button"
+							onClick={() => setShowManualLocationInput(false)}
+							style={{
+								padding: '8px 16px',
+								background: '#6c757d',
+								color: 'white',
+								border: 'none',
+								borderRadius: '6px',
+								fontSize: '14px',
+								cursor: 'pointer'
+							}}
+						>
+							Cancel
+						</button>
+					</form>
+				)}
+				{userLocation && (
+					<button
+						onClick={() => {
+							setUserLocation(null);
+							setLocationMessage('');
+							setShowManualLocationInput(true);
+						}}
+						style={{
+							padding: '6px 12px',
+							background: 'transparent',
+							color: '#007bff',
+							border: '1px solid #007bff',
+							borderRadius: '4px',
+							fontSize: '12px',
+							cursor: 'pointer',
+							alignSelf: 'flex-start'
+						}}
+					>
+						Clear Location
+					</button>
+				)}
+			</div>
+		)}
+
 			<div style={{ maxWidth: '1600px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
 			<main
 				style={{

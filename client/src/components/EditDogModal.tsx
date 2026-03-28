@@ -350,7 +350,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
         const url = getImageUrl(img.url);
         const base = getImageBase(img.url);
         allBases.push(base);
-        console.log('[EDITDOG] Processing image', imgIndex, ':', { url, base, width });
+        console.log('[EDITDOG] Processing image', imgIndex, ':', { url, base, width: img.width });
         
         if (!baseToImage.has(base)) {
           baseToImage.set(base, img);
@@ -371,8 +371,8 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
       });
       
       const uniqueList = Array.from(baseToImage.values());
-      const finalUnique = [];
-      const usedBases = new Set();
+      const finalUnique: any[] = [];
+      const usedBases = new Set<string>();
       
       uniqueList.forEach((img, idx) => {
         const currentBase = getImageBase(img.url);
@@ -542,7 +542,8 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
     } catch (err: any) {
       if (!isMounted.current) return;
       console.error('[EDITDOG] Submit error:', err);
-      if (mediaFiles.length > 0 && (err.message === 'Failed to fetch' || err.message === 'NetworkError when attempting to fetch resource.') {
+      const isNetworkError = err.message === 'Failed to fetch' || err.message === 'NetworkError when attempting to fetch resource.';
+      if (mediaFiles.length > 0 && isNetworkError) {
         setSubmitError('Failed to upload images. Please check your connection or try again.');
       } else {
         setSubmitError(err.message || 'Failed to update dog');
@@ -679,7 +680,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
                         onChange={e => {
                           setSelectedToDelete(prev => {
                             const next = new Set(prev);
-                            if (e.target.checked) {
+                            if (e.target.checked === true) {
                               next.add(idx);
                             } else {
                               next.delete(idx);
@@ -746,6 +747,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
                 {t('editdog.noPhotos') || 'No photos selected'}
               </p>
             )}
+          </div>
 
           {/* Dog name */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -925,7 +927,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
             gap: '1rem'
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <style>
+              <style>{`
                 .editdog-radio-input {
                   -webkit-appearance: radio !important;
                   -moz-appearance: radio !important;
@@ -940,7 +942,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
                 }
                 .editdog-radio-input-male { accent-color: #1976d2; }
                 .editdog-radio-input-female { accent-color: #e91e63; }
-              </style>
+              `}</style>
               <label htmlFor="editdog-gender-male" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>
                 <input 
                   id="editdog-gender-male"

@@ -74,26 +74,14 @@ console.log('[STATIC DEBUG] uploadsPath resolved to:', uploadsPath);
 // Add CORS headers for all /uploads and /u responses (before static middleware)
 function setUploadsCORS(req, res, next) {
   console.log('[CORS DEBUG] /uploads CORS middleware triggered for:', req.originalUrl);
-  // For static assets, allow all origins (no credentials) to prevent OpaqueResponseBlocking
+  // Simple CORS for static assets - just allow all origins
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  // Set these before handling OPTIONS
-  res.header('Access-Control-Expose-Headers', 'Content-Length, Content-Type');
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
-  // IMPORTANT: Do NOT set Access-Control-Allow-Credentials: false
-  // This causes issues with cache busters in some browsers
-  // Allow cache buster without CORS issues by varying on Origin
-  res.header('Vary', 'Origin, Accept-Encoding');
-  // Set proper content type for images to prevent opaque response issues
-  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
-  res.header('Cross-Origin-Embedder-Policy', 'credentialless');
-  // Enable caching but allow revalidation to prevent OpaqueResponseBlocking
-  res.header('Cache-Control', 'public, max-age=0, must-revalidate');
-  res.header('Pragma', 'no-cache');
+  // Don't set any additional headers that might cause conflicts
   next();
 }
 app.use('/uploads', setUploadsCORS, express.static(uploadsPath, {

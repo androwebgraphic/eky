@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
+import { getApiUrl } from '../utils/apiUrl';
 import '../../css/edit-modal.css';
 
 // Comprehensive list of dog breeds with "Mixed Breed" at the top
@@ -214,13 +215,6 @@ interface EditDogModalProps {
   onClose: () => void;
   onSave: (updatedDog: any) => void;
 }
-
-const getApiUrl = () => {
-  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-  const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-  const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
-  return `${protocol}//${hostname}:3001`;
-};
 
 const getImageUrl = (url: string) => {
   if (!url) return '';

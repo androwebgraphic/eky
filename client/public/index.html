@@ -27,10 +27,33 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Eky App</title>
+    <style>
+      /* Prevent flash of unstyled content */
+      #root:not(:empty) {
+        display: block !important;
+      }
+      #root:empty {
+        display: none !important;
+      }
+      /* Show loading state while React mounts */
+      body {
+        background-color: #f5f5f5;
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <!-- Add inline script to show root immediately once React starts mounting -->
+    <script>
+      // Show root element as soon as possible to prevent flash
+      window.addEventListener('DOMContentLoaded', function() {
+        var root = document.getElementById('root');
+        if (root) {
+          root.style.display = 'block';
+        }
+      });
+    </script>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.

@@ -9,14 +9,7 @@ import DogDetails from './DogDetails';
 import type { DogDetailsProps } from './DogDetails';
 import { useAuth } from '../../contexts/AuthContext';
 import Search from '../Search';
-
-const getApiUrl = () => {
-  if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
-  // Dynamically construct API URL based on current hostname
-  const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-  const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
-  return `${protocol}//${hostname}:3001`;
-};
+import { getApiUrl } from '../../utils/apiUrl';
 
 // Portal containers for DogList modals
 const detailsModalRoot = document.getElementById('doglist-details-root') || (() => {

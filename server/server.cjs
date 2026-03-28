@@ -1,4 +1,3 @@
-
 console.log('[SERVER DEBUG] server.cjs loaded and running');
 
 const dotenv = require("dotenv");
@@ -45,18 +44,12 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 // 4. Load environment variables
 dotenv.config({ path: '.env' });
 
 // 5. Connect to DB
 connectDB();
-
-
-
-// 7. Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', uptime: process.uptime() });
-});
 
 // 8. Set up body parsers
 app.use(express.json({ limit: '100mb' }));
@@ -68,49 +61,108 @@ app.use(passport.initialize());
 
 // 10. Use routes
 app.use('/api/chat', chatRoutes);
+
 // Use uploads directory at server directory to match where multer saves files
 const uploadsPath = path.join(__dirname, 'uploads');
 console.log('[STATIC DEBUG] uploadsPath resolved to:', uploadsPath);
-// Apply CORS middleware to static file routes with permissive settings
+
+// Apply CORS middleware to static file routes with permissive settings and security headers
 const staticCors = cors({
   origin: '*',
   methods: ['GET', 'OPTIONS'],
-  credentials: false
+  credentials: false,
+  preflightContinue: false,
+  optionsSuccessStatus: 200
 });
+
 app.use('/uploads', staticCors, express.static(uploadsPath, {
-  setHeaders: (res, path) => {
-    console.log('[STATIC FILE] Serving:', path, 'Status: OK');
+  setHeaders: (res, filePath) => {
+    console.log('[STATIC FILE] Serving:', filePath, 'Status: OK');
     res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'false');
+    res.setHeader('Vary', 'Origin');
+    // Critical headers to prevent OpaqueResponseBlocking
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+    // Set proper content type based on file extension
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeTypes = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.webp': 'image/webp',
+      '.gif': 'image/gif',
+      '.svg': 'image/svg+xml',
+      '.mp4': 'video/mp4',
+      '.webm': 'video/webm'
+    };
+    if (mimeTypes[ext]) {
+      res.setHeader('Content-Type', mimeTypes[ext]);
+    }
   }
 }));
+
 app.use('/u', staticCors, express.static(uploadsPath, {
-  setHeaders: (res, path) => {
-    console.log('[STATIC FILE] Serving:', path, 'Status: OK');
+  setHeaders: (res, filePath) => {
+    console.log('[STATIC FILE] Serving:', filePath, 'Status: OK');
     res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'false');
+    res.setHeader('Vary', 'Origin');
+    // Critical headers to prevent OpaqueResponseBlocking
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+    // Set proper content type based on file extension
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeTypes = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.webp': 'image/webp',
+      '.gif': 'image/gif',
+      '.svg': 'image/svg+xml',
+      '.mp4': 'video/mp4',
+      '.webm': 'video/webm'
+    };
+    if (mimeTypes[ext]) {
+      res.setHeader('Content-Type', mimeTypes[ext]);
+    }
   }
 }));
+
 app.use("/api/users", userRoutes);
 app.use("/api/dogs", dogRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/adoption", adoptionRoutes);
 app.use("/api/stats", statsRoutes);
+
+// Health check endpoint - must be after CORS middleware
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', uptime: process.uptime() });
+});
+
 // If you want to use the auth middleware globally, use ONLY the function, not the module object:
 // const auth = require('./middleware/auth.js');
 // app.use(auth); // Uncomment if you want global auth protection
 
-// ... rest of your Socket.IO code
-
-// Removed leftover manual CORS header logic. Only use cors middleware above.
- 
- // Start server after all middleware and routes are set up
-
+// Start server after all middleware and routes are set up
 const PORT = process.env.PORT || 3001;
-// Duplicate declaration removed. Use the first allowedOrigins declaration only.
+
 const httpServer = http.createServer({ maxHeaderSize: 1024 * 1024 }, app);
+
+// Configure timeout settings to prevent 502 errors
+httpServer.setTimeout(60000); // 60 second timeout for requests
+httpServer.keepAliveTimeout = 65000; // Keep-alive timeout
+httpServer.headersTimeout = 66000; // Headers timeout
+
 httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`Server started at:`);
   console.log(`  Local:   http://localhost:${PORT}`);
   console.log(`  Network: http://172.20.10.2:${PORT}`);
+  console.log(`  Timeouts configured: Request=60s, KeepAlive=65s, Headers=66s`);
 });
 
 const { Server: SocketIOServer } = require('socket.io');
@@ -170,7 +222,6 @@ io.on('connection', (socket) => {
     io.to(recipient).emit('notification', { from: sender, message });
   });
 
-
   // Typing indicator
   socket.on('typing', ({ recipient, sender }) => {
     io.to(recipient).emit('typing', { from: sender });
@@ -194,13 +245,13 @@ io.on('connection', (socket) => {
     }
   });
 });
- 
- // Graceful error handler for common listen errors
- httpServer.on('error', (err) => {
-   if (err && err.code === 'EADDRINUSE') {
-     console.error(`Port ${PORT} already in use. Stop the running process or change PORT.`);
-   } else {
-     console.error('Server error:', err);
-   }
-   process.exit(1);
- });
+
+// Graceful error handler for common listen errors
+httpServer.on('error', (err) => {
+  if (err && err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} already in use. Stop the running process or change PORT.`);
+  } else {
+    console.error('Server error:', err);
+  }
+  process.exit(1);
+});

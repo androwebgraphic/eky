@@ -71,25 +71,13 @@ app.use('/api/chat', chatRoutes);
 // Use uploads directory at server directory to match where multer saves files
 const uploadsPath = path.join(__dirname, 'uploads');
 console.log('[STATIC DEBUG] uploadsPath resolved to:', uploadsPath);
-// Add CORS headers for all /uploads and /u responses (before static middleware)
-function setUploadsCORS(req, res, next) {
-  console.log('[CORS DEBUG] /uploads CORS middleware triggered for:', req.originalUrl);
-  // Simple CORS for static assets - just allow all origins
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  // Don't set any additional headers that might cause conflicts
-  next();
-}
-app.use('/uploads', setUploadsCORS, express.static(uploadsPath, {
+// Serve static files WITHOUT custom CORS middleware - let Express handle it
+app.use('/uploads', express.static(uploadsPath, {
   setHeaders: (res, path) => {
     console.log('[STATIC FILE] Serving:', path, 'Status: OK');
   }
 }));
-app.use('/u', setUploadsCORS, express.static(uploadsPath, {
+app.use('/u', express.static(uploadsPath, {
   setHeaders: (res, path) => {
     console.log('[STATIC FILE] Serving:', path, 'Status: OK');
   }

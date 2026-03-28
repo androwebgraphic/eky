@@ -44,7 +44,7 @@ const isUserSuperAdmin = (user) => {
 // Helper function to validate video duration
 const validateVideoDuration = async (videoBuffer) => {
   // This is a basic check - in production, you'd use ffprobe or similar
-  // For now, we assume the client has already validated and we'll do a basic check
+  // For now, we assume client has already validated and we'll do a basic check
   // The actual duration validation should happen on client-side before upload
   return true;
 };
@@ -262,7 +262,7 @@ const updateDog = async (req, res) => {
     return res.status(200).json({ message: 'Dog updated successfully', dog: updatedDog });
   } catch (err) {
     console.error('[UPDATE DOG ERROR]', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -315,15 +315,15 @@ const confirmAdoption = async (req, res) => {
           // Send STRING messages (not objects)
           await ChatMessage.create({ conversationId: convo._id, sender: ownerId, recipient: adopterId, message: `Adoption confirmed for ${dogName}`, messageType: 'adoption_confirmed', dogId: dog._id });
           await ChatMessage.create({ conversationId: convo._id, sender: adopterId, recipient: ownerId, message: `Adoption confirmed for ${dogName}`, messageType: 'adoption_confirmed', dogId: dog._id });
-          await ChatMessage.create({ conversationId: convo._id, sender: ownerId, recipient: adopterId, message: `Adoption completed for ${dogName}. Dog has been removed from the database.`, messageType: 'adoption_completed', dogId: dog._id });
-          await ChatMessage.create({ conversationId: convo._id, sender: adopterId, recipient: ownerId, message: `Adoption completed for ${dogName}. Dog has been removed from the database.`, messageType: 'adoption_completed', dogId: dog._id });
+          await ChatMessage.create({ conversationId: convo._id, sender: ownerId, recipient: adopterId, message: `Adoption completed for ${dogName}. Dog has been removed from database.`, messageType: 'adoption_completed', dogId: dog._id });
+          await ChatMessage.create({ conversationId: convo._id, sender: adopterId, recipient: ownerId, message: `Adoption completed for ${dogName}. Dog has been removed from database.`, messageType: 'adoption_completed', dogId: dog._id });
           await ChatConversation.findByIdAndUpdate(convo._id, { updatedAt: Date.now() });
           
           // Use io property from socket.js
           const { io } = require('../socket');
           if (io) {
-            io.to(ownerId).emit('receiveMessage', { conversationId: convo._id, sender: adopterId, message: `Adoption completed for ${dogName}. Dog has been removed from the database.`, messageType: 'adoption_completed', dogId: dog._id });
-            io.to(adopterId).emit('receiveMessage', { conversationId: convo._id, sender: ownerId, message: `Adoption completed for ${dogName}. Dog has been removed from the database.`, messageType: 'adoption_completed', dogId: dog._id });
+            io.to(ownerId).emit('receiveMessage', { conversationId: convo._id, sender: adopterId, message: `Adoption completed for ${dogName}. Dog has been removed from database.`, messageType: 'adoption_completed', dogId: dog._id });
+            io.to(adopterId).emit('receiveMessage', { conversationId: convo._id, sender: ownerId, message: `Adoption completed for ${dogName}. Dog has been removed from database.`, messageType: 'adoption_completed', dogId: dog._id });
           }
         }
       } catch (msgErr) {
@@ -784,20 +784,25 @@ const getPendingAdoptions = async (req, res) => {
   }
 }
 
-// GET /api/dogs
+// GET /api/dogs - Simplified geospatial sorting
 const listDogs = async (req, res) => {
   try {
     const { lat, lng, sortBy } = req.query;
     
-    // If user coordinates are provided, do two-tiered sorting
+    console.log('[LISTDOGS] Received query:', { lat, lng, sortBy });
+    
+    // If user coordinates are provided, do geospatial sorting
     if (lat && lng) {
       const userLat = parseFloat(lat);
       const userLng = parseFloat(lng);
       
+      console.log('[LISTDOGS] Attempting geospatial sort with user location:', { userLat, userLng });
+      
       if (!isNaN(userLat) && !isNaN(userLng)) {
         try {
-          // Step 1: Get dogs WITH coordinates, sorted by distance
-          const dogsWithCoords = await Dog.aggregate([
+          // Single aggregation: returns ALL dogs sorted by distance
+          // Dogs without coordinates will naturally appear at end with null/undefined distance
+          const dogsWithDistance = await Dog.aggregate([
             {
               $geoNear: {
                 near: {
@@ -807,11 +812,6 @@ const listDogs = async (req, res) => {
                 distanceField: 'distance',
                 spherical: true,
                 key: 'coordinates'
-              }
-            },
-            {
-              $match: {
-                'coordinates.coordinates': { $ne: [0, 0] } // Exclude dogs with default [0,0] coordinates
               }
             },
             {
@@ -827,46 +827,71 @@ const listDogs = async (req, res) => {
             },
             {
               $project: {
-                'user.password': 0,
-                'user.passwordResetToken': 0,
-                'user.passwordResetExpires': 0
+                name: 1,
+                breed: 1,
+                age: 1,
+                color: 1,
+                location: 1,
+                description: 1,
+                size: 1,
+                gender: 1,
+                vaccinated: 1,
+                neutered: 1,
+                coordinates: 1,
+                images: 1,
+                video: 1,
+                thumbnail: 1,
+                user: {
+                  _id: 1,
+                  name: 1,
+                  username: 1,
+                  email: 1,
+                  phone: 1,
+                  person: 1
+                },
+                createdAt: 1,
+                likes: 1,
+                adoptionStatus: 1,
+                adoptionQueue: 1,
+                distance: 1
               }
             }
           ]);
           
-          // Step 2: Get dogs WITHOUT coordinates, sorted by creation date
-          const dogsWithoutCoords = await Dog.find({
-            $or: [
-              { coordinates: { $exists: false } },
-              { 'coordinates.coordinates': [0, 0] }
-            ]
-          })
-          .populate('user', 'name username email phone person')
-          .sort({ createdAt: -1 });
+          console.log(`[LISTDOGS] Geospatial query returned ${dogsWithDistance.length} dogs`);
           
-          // Step 3: Combine both arrays - dogs with coords first, then without
-          const allDogs = [...dogsWithCoords, ...dogsWithoutCoords];
+          if (dogsWithDistance.length > 0) {
+            // Log first few dogs with distance for debugging
+            console.log('[LISTDOGS] Sample dogs with distance:', dogsWithDistance.slice(0, 5).map(d => ({
+              name: d.name,
+              location: d.location,
+              distance: d.distance ? Math.round(d.distance / 1000) + 'km' : 'N/A',
+              coords: d.coordinates ? `[${d.coordinates.coordinates[0]}, ${d.coordinates.coordinates[1]}]` : 'null'
+            })));
+          }
           
-          console.log('[LISTDOGS DEBUG] Returning dogs - WITH coordinates (sorted by distance) + WITHOUT coordinates (sorted by date)');
-          console.log(`[LISTDOGS DEBUG] Dogs with coordinates: ${dogsWithCoords.length}, Dogs without coordinates: ${dogsWithoutCoords.length}`);
-          res.json(allDogs);
+          res.json(dogsWithDistance);
           return;
         } catch (aggErr) {
-          console.warn('[LISTDOGS] Aggregation failed, falling back to default sort:', aggErr);
+          console.error('[LISTDOGS] Geospatial aggregation error:', aggErr);
           // Fall back to default sort if aggregation fails
         }
+      } else {
+        console.log('[LISTDOGS] Invalid coordinates provided, falling back to default sort');
       }
     }
     
-    // Default sort by creation date
+    // Default sort by creation date (newest first)
+    console.log('[LISTDOGS] Using default sort by creation date (newest first)');
     const dogs = await Dog.find()
       .populate('user', 'name username email phone person')
       .sort({ createdAt: -1 });
-    console.log('[LISTDOGS DEBUG] Returning dogs:', JSON.stringify(dogs, null, 2));
+    
+    console.log(`[LISTDOGS] Returning ${dogs.length} dogs`);
     res.json(dogs);
   } catch (err) {
     console.error('[LISTDOGS] Error:', err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
@@ -905,7 +930,7 @@ const cancelAdoption = async (req, res) => {
     const dog = await Dog.findById(req.params.id);
     if (!dog) return res.status(404).json({ message: 'Dog not found' });
 
-    // Only the owner or adopter can cancel
+    // Only owner or adopter can cancel
     const userId = req.user._id.toString();
     const isOwner = dog.user.toString() === userId;
     const isAdopter = dog.adoptionQueue && dog.adoptionQueue.adopter && dog.adoptionQueue.adopter.toString() === userId;
@@ -949,7 +974,7 @@ const cancelAdoption = async (req, res) => {
         io.to(adopterId).emit('receiveMessage', { 
           conversationId: convo._id, 
           message: sysMsg,
-          messageType: 'adoption_cancelled',
+          messageType: "adoption_cancelled",
           dogId: dog._id
         });
         // Also emit dogUpdated to refresh adoption status

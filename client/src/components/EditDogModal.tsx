@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import '../../css/edit-modal.css';
 
 // Comprehensive list of dog breeds with "Mixed Breed" at the top
@@ -222,113 +222,90 @@ const getApiUrl = () => {
   return `${protocol}//${hostname}:3001`;
 };
 
-  const getImageUrl = (url: string) => {
-    if (!url) return '';
-    // Handle absolute URLs (http:// or https://)
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return url;
-    }
-    // Handle absolute paths starting with /
-    if (url.startsWith('/')) {
-      return `${getApiUrl()}${url.replace(/^\/+/, '')}`;
-    }
-    // Handle relative paths (uploads/, u/dogs/, etc.)
-    return `${getApiUrl()}/${url.replace(/^\/+/, '')}`;
-  };
+const getImageUrl = (url: string) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  if (url.startsWith('/')) {
+    return `${getApiUrl()}${url}`;
+  }
+  return `${getApiUrl()}/${url.replace(/^\/+/, '')}`;
+};
 
-  // Deduplicate images by base name
-  const getImageBase = (url: string) => {
-    let cleanUrl = url.split('?')[0];
-    const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
-    
-    let base = filename;
-    const originalBase = base; // Keep for logging
-    
-    // Remove file extension
-    base = base.replace(/\.(jpg|jpeg|png|webp)$/i, '');
-    
-    // Handle uploaded files: name-TIMESTAMP-HASH-SIZE -> name
-    // Examples: doggy-1770420370994-1liy0v-320 -> doggy
-    // Also handle: doggy-orig -> doggy
-    if (base.includes('-') && !base.startsWith('pexels-')) {
-      // Remove -orig suffix if present
-      base = base.replace(/-orig$/, '');
-      // Remove -TIMESTAMP-HASH-SIZE suffix (10-13 digit timestamp + 6 char hash + 3-4 digit size)
-      const uploadedMatch = base.match(/^(.+?)-\d{10,13}-[a-z0-9]{6}-\d{3,4}$/);
-      if (uploadedMatch) {
-        base = uploadedMatch[1];
-      } else {
-        // Fallback: if pattern doesn't match, try taking first part before first hyphen
-        const fallbackMatch = base.match(/^(.+?)-/);
-        if (fallbackMatch) {
-          console.log('[getImageBase] Using fallback for:', originalBase, '->', fallbackMatch[1]);
-          base = fallbackMatch[1];
-        }
-      }
-    } else if (base.startsWith('pexels-')) {
-      // Handle Pexels images: pexels-name-ID-TIMESTAMP-HASH-SIZE -> name-ID
-      // Examples: pexels-anyela-malaga-341169564-18062006-1770420371422-qfmvmr-320 -> anyela-malaga-341169564-18062006
-      // Also handle: pexels-name-ID-orig -> name-ID
-      base = base.replace(/-orig$/, '');
-      const pexelsMatch = base.match(/^pexels-(.+?)-\d+(-\d{10,13}-[a-z0-9]{6}-\d{3,4})?$/);
-      if (pexelsMatch) {
-        base = pexelsMatch[1];
-      } else {
-        // Fallback for pexels if pattern doesn't match
-        const pexelsFallbackMatch = base.match(/^pexels-(.+?)-\d+/);
-        if (pexelsFallbackMatch) {
-          console.log('[getImageBase] Using pexels fallback for:', originalBase, '->', pexelsFallbackMatch[1]);
-          base = pexelsFallbackMatch[1];
-        }
+const getImageBase = (url: string) => {
+  let cleanUrl = url.split('?')[0];
+  const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
+  
+  let base = filename;
+  const originalBase = base;
+  
+  base = base.replace(/\.(jpg|jpeg|png|webp)$/i, '');
+  
+  if (base.includes('-') && !base.startsWith('pexels-')) {
+    base = base.replace(/-orig$/, '');
+    const uploadedMatch = base.match(/^(.+?)-\d{10,13}-[a-z0-9]{6}-\d{3,4}$/);
+    if (uploadedMatch) {
+      base = uploadedMatch[1];
+    } else {
+      const fallbackMatch = base.match(/^(.+?)-\d+/);
+      if (fallbackMatch) {
+        console.log('[getImageBase] Using fallback for:', originalBase, '->', fallbackMatch[1]);
+        base = fallbackMatch[1];
       }
     }
-    
-    console.log('[getImageBase] URL:', cleanUrl, 'Original:', originalBase, 'Base:', base);
-    return base;
-  };
+  } else if (base.startsWith('pexels-')) {
+    base = base.replace(/-orig$/, '');
+    const pexelsMatch = base.match(/^pexels-(.+?)-\d+(-\d{10,13}-[a-z0-9]{6}-\d{3,4})?$/);
+    if (pexelsMatch) {
+      base = pexelsMatch[1];
+    } else {
+      const pexelsFallbackMatch = base.match(/^pexels-(.+?)-\d+/);
+      if (pexelsFallbackMatch) {
+        base = pexelsFallbackMatch[1];
+      }
+    }
+  }
+  
+  console.log('[getImageBase] URL:', cleanUrl, 'Original:', originalBase, 'Base:', base);
+  return base;
+};
 
-  // Check if two images are likely duplicates based on similarity
-  const areLikelyDuplicates = (url1: string, url2: string) => {
-    const base1 = getImageBase(url1);
-    const base2 = getImageBase(url2);
-    
-    // Direct match
-    if (base1 === base2) {
-      console.log('[areLikelyDuplicates] Direct match:', base1);
+const areLikelyDuplicates = (url1: string, url2: string) => {
+  const base1 = getImageBase(url1);
+  const base2 = getImageBase(url2);
+  
+  if (base1 === base2) {
+    console.log('[areLikelyDuplicates] Direct match:', base1);
+    return true;
+  }
+  
+  if (base1.includes(base2) || base2.includes(base1)) {
+    const longer = base1.length > base2.length ? base1 : base2;
+    const shorter = base1.length > base2.length ? base2 : base1;
+    if (longer.startsWith(shorter) || longer.endsWith(shorter)) {
+      console.log('[areLikelyDuplicates] Substring match:', shorter, 'in', longer);
       return true;
     }
+  }
+  
+  const cleanUrl1 = url1.split('?')[0];
+  const cleanUrl2 = url2.split('?')[0];
+  const path1 = cleanUrl1.substring(0, cleanUrl1.lastIndexOf('/'));
+  const path2 = cleanUrl2.substring(0, cleanUrl2.lastIndexOf('/'));
+  
+  if (path1 === path2) {
+    const filename1 = cleanUrl1.substring(cleanUrl1.lastIndexOf('/') + 1).replace(/\.(jpg|jpeg|png|webp)$/i, '');
+    const filename2 = cleanUrl2.substring(cleanUrl2.lastIndexOf('/') + 1).replace(/\.(jpg|jpeg|png|webp)$/i, '');
     
-    // Check if one is a substring of other (for edge cases)
-    if (base1.includes(base2) || base2.includes(base1)) {
-      const longer = base1.length > base2.length ? base1 : base2;
-      const shorter = base1.length > base2.length ? base2 : base1;
-      // Only consider it a match if the shorter is a significant portion of the longer
-      if (longer.startsWith(shorter) || longer.endsWith(shorter)) {
-        console.log('[areLikelyDuplicates] Substring match:', shorter, 'in', longer);
-        return true;
-      }
+    if (filename1.startsWith(filename2) || filename2.startsWith(filename1)) {
+      console.log('[areLikelyDuplicates] Filename similarity match:', filename1, filename2);
+      return true;
     }
-    
-    // Fallback: check if URLs are very similar (same directory, similar filename)
-    const cleanUrl1 = url1.split('?')[0];
-    const cleanUrl2 = url2.split('?')[0];
-    const path1 = cleanUrl1.substring(0, cleanUrl1.lastIndexOf('/'));
-    const path2 = cleanUrl2.substring(0, cleanUrl2.lastIndexOf('/'));
-    
-    if (path1 === path2) {
-      // Same directory - check if filenames are similar
-      const filename1 = cleanUrl1.substring(cleanUrl1.lastIndexOf('/') + 1).replace(/\.(jpg|jpeg|png|webp)$/i, '');
-      const filename2 = cleanUrl2.substring(cleanUrl2.lastIndexOf('/') + 1).replace(/\.(jpg|jpeg|png|webp)$/i, '');
-      
-      // Check if one filename starts with the other
-      if (filename1.startsWith(filename2) || filename2.startsWith(filename1)) {
-        console.log('[areLikelyDuplicates] Filename similarity match:', filename1, filename2);
-        return true;
-      }
-    }
-    
-    return false;
-  };
+  }
+  
+  return false;
+};
 
 function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
   const isMounted = useRef(true);
@@ -339,17 +316,12 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<any[]>([]);
-  // Deduplicate images on mount and when dog changes
   const [uniqueImages, setUniqueImages] = useState<any[]>([]);
   
-  // Helper function to format coordinates as GeoJSON Point
   const formatCoordinatesAsGeoJSON = (coords: any) => {
-    if (!coords || (typeof coords.lat === 'number' && typeof coords.lng === 'number' && isNaN(coords.lat) && isNaN(coords.lng))) {
+    if (!coords || typeof coords.lat !== 'number' || typeof coords.lng !== 'number' || isNaN(coords.lat) || isNaN(coords.lng)) {
       return null;
     }
-    // Return GeoJSON Point format: { type: 'Point', coordinates: [lng, lat] }
-    // Note: coordinates order in GeoJSON is [longitude, latitude], but we send as [lat, lng] in the form
-    // So we swap them here to match the expected format
     return {
       type: 'Point',
       coordinates: [coords.lng, coords.lat]
@@ -361,7 +333,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
     if (dog.images && dog.images.length > 0) {
       console.log('[EDITDOG] First few images:', dog.images.slice(0, 3).map(img => ({ url: img.url, width: img.width })));
       const baseToImage = new Map();
-      const allBases: string[] = [];
+      const allBases = [];
       
       dog.images.forEach((img: any, imgIndex: number) => {
         if (!img.url) {
@@ -377,7 +349,6 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
           baseToImage.set(base, img);
           console.log('[EDITDOG]   -> First occurrence, adding to Map (total:', baseToImage.size, ')');
         } else {
-          // Keep one with larger width
           const existing = baseToImage.get(base);
           const imgWidth = img.width || 0;
           const existingWidth = existing.width || 0;
@@ -392,16 +363,13 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
         }
       });
       
-      // Second pass: check for duplicates using similarity matching
       const uniqueList = Array.from(baseToImage.values());
-      const finalUnique: any[] = [];
-      const usedBases = new Set<string>();
+      const finalUnique = [];
+      const usedBases = new Set();
       
-      uniqueList.forEach((img, idx) => {
+      uniqueList.forEach((img) => {
         const currentBase = getImageBase(img.url);
-        console.log('[EDITDOG] Second pass - checking image', idx, 'with base:', currentBase);
         
-        // Check if this base or any similar base has been used
         let isDuplicate = false;
         let matchingBase = '';
         
@@ -425,14 +393,8 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
       console.log('[EDITDOG] === DEDUPLICATION SUMMARY ===');
       console.log('[EDITDOG] Total images:', dog.images.length);
       console.log('[EDITDOG] Unique images:', finalUnique.length);
-      console.log('[EDITDOG] All bases:', allBases);
-      console.log('[EDITDOG] Unique bases:', finalUnique.map(img => getImageBase(img.url)));
-      finalUnique.forEach((img, idx) => {
-        console.log('[EDITDOG] Unique image', idx, 'url:', getImageUrl(img.url), 'base:', getImageBase(img.url), 'width:', img.width);
-      });
       
       setUniqueImages(finalUnique);
-      // Set existingImages for API calls (keep all variants for server to delete properly)
       setExistingImages(dog.images ? [...dog.images] : []);
     } else {
       console.log('[EDITDOG] No images, clearing arrays');
@@ -444,30 +406,13 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Watch age category changes
-  const watchAgeCategory = watch('ageCategory');
-
-  // Update age when category is selected
-  useEffect(() => {
-    if (watchAgeCategory) {
-      const ageValue = parseFloat(watchAgeCategory);
-      if (!isNaN(ageValue)) {
-        setValue('age', ageValue);
-      }
-    }
-  }, [watchAgeCategory, setValue]);
-
-
   useEffect(() => {
     isMounted.current = true;
-    // Only update fields that have values
-    const fieldsToUpdate = ['name', 'breed', 'age', 'color', 'location', 'description', 'size', 'gender', 'vaccinated', 'neutered'];
     Object.entries(dog).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         setValue(key as any, value);
       }
     });
-    setExistingImages(dog.images ? [...dog.images] : []);
     return () => {
       isMounted.current = false;
     };
@@ -484,14 +429,11 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
       const hasRemovedImages = existingImages.length !== (dog.images ? dog.images.length : 0);
       const hasPhotoChanges = hasNewFiles || hasRemovedImages;
       
-      // Format coordinates as GeoJSON Point for server
-      const formattedCoords = formatCoordinatesAsGeoJSON(fields.coordinates);
-      
       if (hasPhotoChanges) {
         const formData = new FormData();
         Object.entries(fields).forEach(([k, v]) => {
-          // Skip coordinates field - we'll handle it separately
           if (k === 'coordinates') {
+            const formattedCoords = formatCoordinatesAsGeoJSON(v);
             if (formattedCoords) {
               formData.append('coordinates', JSON.stringify(formattedCoords));
               console.log('[EDITDOG] Adding coordinates to FormData:', formattedCoords);
@@ -502,15 +444,19 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
             formData.append(k, v as any);
           }
         });
+        
         const keepImagesData = JSON.stringify(existingImages.map(img => img.url));
         formData.append('keepImages', keepImagesData);
+        
         mediaFiles.forEach((file, idx) => {
           formData.append('media', file, file.name);
         });
-        const headers: any = {};
+        
+        const headers = {};
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
+        
         try {
           resp = await fetch(`${getApiUrl()}/api/dogs/${dog._id}`, {
             method: 'PATCH',
@@ -524,12 +470,11 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
           }
           return;
         }
-      }
       } else {
-        const bodyData: any = {};
+        const bodyData = {};
         Object.entries(fields).forEach(([k, v]) => {
-          // Skip coordinates field - we'll handle it separately
           if (k === 'coordinates') {
+            const formattedCoords = formatCoordinatesAsGeoJSON(v);
             if (formattedCoords) {
               bodyData[k] = formattedCoords;
               console.log('[EDITDOG] Adding coordinates to bodyData:', formattedCoords);
@@ -540,10 +485,12 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
             bodyData[k] = v;
           }
         });
-        const headers: any = { 'Content-Type': 'application/json' };
+        
+        const headers = { 'Content-Type': 'application/json' };
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
+        
         resp = await fetch(`${getApiUrl()}/api/dogs/${dog._id}`, {
           method: 'PATCH',
           headers,
@@ -578,7 +525,6 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
           console.log('[EDITDOG] onSave callback completed');
         } catch (saveError) {
           console.error('[EDITDOG] onSave callback error:', saveError);
-          // Don't throw, just log and continue to close modal
         }
       }
       
@@ -599,32 +545,32 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
   };
 
   return ReactDOM.createPortal(
-      <div 
-        className="edit-modal-overlay"
-        style={{
-          position: 'fixed',
-          top: window.innerWidth > 768 ? '0' : '70px',
-          left: '0',
-          right: '0',
-          bottom: window.innerWidth > 768 ? '0' : '70px',
-          width: '100vw',
-          height: '100vh',
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          zIndex: '9999999999999',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: window.innerWidth > 768 ? '16px' : '0',
-          boxSizing: 'border-box',
-          pointerEvents: 'auto',
-          overflow: 'hidden',
-          overscrollBehavior: 'contain'
-        }}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            onClose();
-          }
-        }}
+    <div 
+      className="edit-modal-overlay"
+      style={{
+        position: 'fixed',
+        top: window.innerWidth > 768 ? '0' : '70px',
+        left: '0',
+        right: '0',
+        bottom: window.innerWidth > 768 ? '0' : '70px',
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        zIndex: 9999999999999999,
+        display: 'flex',
+        alignItems: window.innerWidth > 768 ? 'center' : 'flex-start',
+        justifyContent: 'center',
+        padding: window.innerWidth > 768 ? '16px' : '0',
+        boxSizing: 'border-box',
+        pointerEvents: 'auto',
+        overflow: 'hidden',
+        overscrollBehavior: 'contain'
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
     >
       <div 
         style={{
@@ -642,7 +588,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
           zIndex: 2147483647,
           touchAction: 'pan-y',
           overscrollBehavior: 'contain',
-          boxShadow: window.innerWidth > 768 ? '0.4px 24px rgba(0, 0, 0, 0.2)' : '0.4px 24px rgba(0, 0, 0, 0.3)'
+          boxShadow: window.innerWidth > 768 ? '0 4px 24px rgba(0, 0, 0, 0.2)' : '0 4px 24px rgba(0, 0, 0, 0.3)'
         }}
       >
         <button 
@@ -666,7 +612,6 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
             gap: '1rem'
           }}
         >
-          {/* Media preview and upload */}
           <label>{t('adddog.media') || 'Photos'}</label>
           <div className="media-input-row">
             <input
@@ -677,8 +622,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
               multiple
               onChange={e => {
                 const files = Array.from(e.target.files || []);
-                // Validate file sizes (max 10MB per file)
-                const maxSize = 10 * 1024 * 1024; // 10MB
+                const maxSize = 10 * 1024 * 1024;
                 const oversizedFiles = files.filter(f => f.size > maxSize);
                 if (oversizedFiles.length > 0) {
                   alert(`Some files are too large. Maximum size is 10MB per file.\nOversized files:\n${oversizedFiles.map(f => f.name).join('\n')}`);
@@ -731,7 +675,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
                             return next;
                           });
                         }}
-                        style={{ position: 'absolute', top: window.innerWidth <= 768 ? 8 : 2, left: window.innerWidth <= 768 ? 8 : 2, zIndex: 3, width: window.innerWidth <= 768 ? 32 : 20, height: window.innerWidth <= 768 ? 32 : 20, accentColor: '#e74c3c', background: '#fff', border: '2px solid #e74c3c', borderRadius: 6, boxShadow: window.innerWidth <= 768 ? '0.2px 8px rgba(0, 0, 0, 12)' : 'none' }}
+                        style={{ position: 'absolute', top: window.innerWidth <= 768 ? 8 : 2, left: window.innerWidth <= 768 ? 8 : 2, zIndex: 3, width: window.innerWidth <= 768 ? 32 : 20, height: window.innerWidth <= 768 ? 32 : 20, accentColor: '#e74c3c', background: '#fff', border: '2px solid #e74c3c', borderRadius: 6, boxShadow: window.innerWidth <= 768 ? '0 2px 8px rgba(0, 0, 0, 0.12)' : 'none' }}
                         title="Select to delete"
                       />
                       <div style={{
@@ -758,13 +702,11 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
                       </div>
                       <button
                         type="button"
-                        style={{ position: 'absolute', top: window.innerWidth <= 768 ? 8 : 2, right: window.innerWidth <= 768 ? 8 : 2, background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '50%', width: window.innerWidth <= 768 ? 32 : 20, height: window.innerWidth <= 768 ? 32 : 20, minHeight: window.innerWidth <= 768 ? 32 : 20, maxWidth: window.innerWidth <= 768 ? 32 : 20, cursor: 'pointer', fontWeight: 'bold', fontSize: window.innerWidth <= 768 ? 22 : 14, lineHeight: window.innerWidth <= 768 ? '32px' : '20px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: window.innerWidth <= 768 ? '0.2px 8px rgba(0, 0, 0, 12)' : 'none' }}
+                        style={{ position: 'absolute', top: window.innerWidth <= 768 ? 8 : 2, right: window.innerWidth <= 768 ? 8 : 2, background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '50%', width: window.innerWidth <= 768 ? 32 : 20, height: window.innerWidth <= 768 ? 32 : 20, minHeight: window.innerWidth <= 768 ? 32 : 20, maxWidth: window.innerWidth <= 768 ? 32 : 20, cursor: 'pointer', fontWeight: 'bold', fontSize: window.innerWidth <= 768 ? 22 : 14, lineHeight: window.innerWidth <= 768 ? '32px' : '20px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: window.innerWidth <= 768 ? '0 2px 8px rgba(0, 0, 0, 0.12)' : 'none' }}
                         onClick={() => {
-                          // Remove all variants of this image
                           const imgBase = getImageBase(uniqueImages[idx].url);
                           const newUniqueImages = uniqueImages.filter((img) => getImageBase(img.url) !== imgBase);
                           setUniqueImages(newUniqueImages);
-                          // Remove all corresponding variants from existingImages
                           const newExistingImages = existingImages.filter((img) => getImageBase(img.url) !== imgBase);
                           setExistingImages(newExistingImages);
                           setSelectedToDelete(prev => {
@@ -793,7 +735,6 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
               </p>
             )}
 
-          {/* Dog name */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label htmlFor="editdog-name" style={{ fontWeight: 'bold' }}>{t('adddog.name')}</label>
             <input 
@@ -814,7 +755,6 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
             {errors.name && <div className="error" style={{ color: '#e74c3c', fontSize: '0.875rem' }}>{t('adddog.name')} is required</div>}
           </div>
 
-          {/* Breed and Color */}
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: window.innerWidth > 768 ? 'repeat(2, 1fr)' : '1fr',
@@ -866,7 +806,6 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
             </div>
           </div>
 
-          {/* Location and Age */}
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: window.innerWidth > 768 ? 'repeat(2, 1fr)' : '1fr',
@@ -918,7 +857,6 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
             </div>
           </div>
 
-          {/* Description */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label htmlFor="editdog-description" style={{ fontWeight: 'bold' }}>{t('adddog.description')}</label>
             <textarea 
@@ -940,7 +878,6 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
             />
           </div>
 
-          {/* Size */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label htmlFor="editdog-size" style={{ fontWeight: 'bold' }}>{t('adddog.size')}</label>
             <select 
@@ -964,14 +901,13 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
             </select>
           </div>
 
-          {/* Gender */}
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: window.innerWidth > 768 ? 'repeat(2, 1fr)' : '1fr',
             gap: '1rem'
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <style>{`
+              <style>
                 .editdog-radio-input {
                   -webkit-appearance: radio !important;
                   -moz-appearance: radio !important;
@@ -986,7 +922,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
                 }
                 .editdog-radio-input-male { accent-color: #1976d2; }
                 .editdog-radio-input-female { accent-color: #e91e63; }
-              `}</style>
+              </style>
               <label htmlFor="editdog-gender-male" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', cursor: 'pointer' }}>
                 <input 
                   id="editdog-gender-male"
@@ -1010,7 +946,6 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
             </div>
           </div>
 
-          {/* Health */}
           <div 
             id="health" 
             style={{
@@ -1053,7 +988,6 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
             </label>
           </div>
 
-          {/* Submit and error */}
           <div 
             className="form-actions" 
             style={{
@@ -1061,7 +995,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
               flexDirection: 'column',
               gap: '1rem',
               marginTop: '1.5rem',
-              paddingBottom: window.innerWidth > 768 ? '1.5rem' : '1rem',
+              paddingBottom: window.innerWidth > 768 ? '2rem' : '1rem',
               position: 'relative'
             }}
           >
@@ -1072,7 +1006,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
             >
               {submitting ? t('editdog.saving') || 'Saving...' : t('button.save')}
             </button>
-            {submitError && <div className="error" style={{ color: '#e74c3c', fontSize: '0.875rem', textAlign: 'center', marginTop: '1rem' }}>{submitError}</div>}
+            {submitError && <div className="error" style={{ color: '#e74c3c', fontSize: '0.875rem', textAlign: 'center' }}>{submitError}</div>}
           </div>
         </form>
       </div>

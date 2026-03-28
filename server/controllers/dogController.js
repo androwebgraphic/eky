@@ -84,7 +84,7 @@ const updateDog = async (req, res) => {
 
     // Update all editable fields from req.body
     const editableFields = [
-      'name', 'breed', 'age', 'color', 'location', 'description', 'size', 'gender', 'vaccinated', 'neutered'
+      'name', 'breed', 'age', 'color', 'location', 'description', 'size', 'gender', 'vaccinated', 'neutered', 'coordinates'
     ];
     editableFields.forEach(field => {
       if (Object.prototype.hasOwnProperty.call(req.body, field)) {

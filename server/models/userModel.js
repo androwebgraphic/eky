@@ -96,6 +96,20 @@ const userSchema = mongoose.Schema({
 		default: Date.now
 	},
 	
+	// User's location coordinates for distance calculations
+	coordinates: {
+		type: {
+			type: String,
+			enum: ['Point'],
+			required: true,
+			default: 'Point'
+		},
+		coordinates: {
+			type: [Number],
+			default: [0, 0] // [longitude, latitude] in GeoJSON format
+		}
+	},
+	
 	// ...existing code...
 	
 	

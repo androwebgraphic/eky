@@ -14,6 +14,19 @@ const dogSchema = new mongoose.Schema({
   color: String,
   location: String,
   description: String,
+  // Geographic coordinates for distance calculations
+  coordinates: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      required: true,
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number],
+      default: [0, 0] // [longitude, latitude] in GeoJSON format
+    }
+  },
   size: { type: String, enum: ['small','medium','large'], default: 'large' },
   gender: { type: String, enum: ['male', 'female'] },
   vaccinated: { type: Boolean, default: false },
@@ -41,4 +54,12 @@ const dogSchema = new mongoose.Schema({
 });
 
 const Dog = mongoose.model('Dog', dogSchema);
+
+// Create 2dsphere index for geospatial queries
+Dog.collection.createIndex({ coordinates: '2dsphere' }).catch(err => {
+  if (err.code !== 86) { // Ignore "Index already exists" error
+    console.warn('[DOG MODEL] Failed to create geospatial index:', err);
+  }
+});
+
 module.exports = Dog;

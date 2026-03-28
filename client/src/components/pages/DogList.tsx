@@ -69,6 +69,10 @@ function DogList() {
 
 	// Ref for search input to auto-focus when #search is in URL hash
 	const searchInputRef = React.useRef<HTMLInputElement>(null);
+	
+	// User's location for distance sorting
+	const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+	const [locationPermission, setLocationPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
 
 	// Debug logging on mount
 	React.useEffect(() => {
@@ -137,6 +141,53 @@ function DogList() {
 			console.log('[FOCUS] ❌ #search not in URL hash');
 		}
 		console.log('[FOCUS] ========== FOCUS EFFECT END ==========');
+	}, []);
+
+	// Get user's location for distance-based sorting
+	useEffect(() => {
+		const getUserLocation = () => {
+			if (!navigator.geolocation) {
+				console.log('[LOCATION] Geolocation not supported');
+				setLocationPermission('denied');
+				return;
+			}
+			
+			navigator.geolocation.getCurrentPosition(
+				(position) => {
+					const { latitude, longitude } = position.coords;
+					console.log('[LOCATION] Got user coordinates:', { latitude, longitude });
+					setUserLocation({ lat: latitude, lng: longitude });
+					setLocationPermission('granted');
+				},
+				(error) => {
+					console.warn('[LOCATION] Geolocation error:', error);
+					console.warn('[LOCATION] Error code:', error.code);
+					console.warn('[LOCATION] Error message:', error.message);
+					setLocationPermission('denied');
+					
+					// If timeout, try with longer timeout
+					if (error.code === 3) {
+						console.log('[LOCATION] Timeout error, retrying with longer timeout...');
+						navigator.geolocation.getCurrentPosition(
+							(pos) => {
+								const { latitude, longitude } = pos.coords;
+								console.log('[LOCATION] Got user coordinates on retry:', { latitude, longitude });
+								setUserLocation({ lat: latitude, lng: longitude });
+								setLocationPermission('granted');
+							},
+							(err) => {
+								console.warn('[LOCATION] Retry also failed:', err);
+								setLocationPermission('denied');
+							},
+							{ timeout: 30000, enableHighAccuracy: false }
+						);
+					}
+				},
+				{ timeout: 15000, enableHighAccuracy: false }
+			);
+		};
+		
+		getUserLocation();
 	}, []);
 
 	// Read URL search parameters from footer search modal
@@ -233,13 +284,42 @@ function DogList() {
 			if (authToken) {
 				headers['Authorization'] = `Bearer ${authToken}`;
 			}
-			fetch(`${getApiUrl()}/api/dogs`, { headers })
-				.then(res => res.json())
-				.then(data => {
-					setDogs(Array.isArray(data) ? data : []);
+			
+			// Build URL with location parameters if available
+			let url = `${getApiUrl()}/api/dogs`;
+			const params = new URLSearchParams();
+			if (userLocation) {
+				params.append('lat', userLocation.lat.toString());
+				params.append('lng', userLocation.lng.toString());
+				console.log('[DOG-LIST] Fetching dogs with location sorting:', userLocation);
+			}
+			if (params.toString()) {
+				url += `?${params.toString()}`;
+			}
+			
+			console.log('[DOG-LIST] Fetching from URL:', url);
+			
+			fetch(url, { headers })
+				.then(res => {
+					console.log('[DOG-LIST] Response status:', res.status, res.statusText);
+					if (!res.ok) {
+						throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+					}
+					return res.text();
+				})
+				.then(text => {
+					try {
+						const data = JSON.parse(text);
+						setDogs(Array.isArray(data) ? data : []);
+					} catch (parseErr) {
+						console.error('[DOG-LIST] Failed to parse JSON:', parseErr);
+						console.error('[DOG-LIST] Response text:', text.substring(0, 500));
+						throw new Error('Invalid JSON response from server');
+					}
 					setLoading(false);
 				})
 				.catch(err => {
+					console.error('[DOG-LIST] Fetch error:', err);
 					setError('Failed to load dogs');
 					setLoading(false);
 				});
@@ -256,7 +336,19 @@ function DogList() {
 			if (authToken) {
 				headers['Authorization'] = `Bearer ${authToken}`;
 			}
-			fetch(`${getApiUrl()}/api/dogs`, { headers })
+			
+			// Build URL with location parameters if available
+			let url = `${getApiUrl()}/api/dogs`;
+			const params = new URLSearchParams();
+			if (userLocation) {
+				params.append('lat', userLocation.lat.toString());
+				params.append('lng', userLocation.lng.toString());
+			}
+			if (params.toString()) {
+				url += `?${params.toString()}`;
+			}
+			
+			fetch(url, { headers })
 				.then(res => res.json())
 				.then(data => {
 					setDogs(Array.isArray(data) ? data : []);
@@ -272,7 +364,7 @@ function DogList() {
 		return () => {
 			window.removeEventListener('dogUpdated', handleDogUpdated);
 		};
-	}, [token]);
+	}, [token, userLocation]);
 
 	const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 900;
 	const handleEdit = (dog: DogDetailsProps) => {

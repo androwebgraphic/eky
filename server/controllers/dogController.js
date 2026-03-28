@@ -5,6 +5,29 @@ const Dog = require('../models/dogModel');
 const ChatConversation = require('../models/chatConversationModel');
 const ChatMessage = require('../models/chatMessageModel');
 
+// Helper function to geocode a location string to coordinates
+const geocodeLocation = async (location) => {
+  if (!location) return null;
+  try {
+    const query = location.trim();
+    const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
+      headers: {
+        'User-Agent': 'EkyApp/1.0'
+      }
+    });
+    const data = await resp.json();
+    if (data && data.length > 0) {
+      return {
+        type: 'Point',
+        coordinates: [parseFloat(data[0].lon), parseFloat(data[0].lat)]
+      };
+    }
+  } catch (e) {
+    console.error('[GEOCODE] Error geocoding location:', e);
+  }
+  return null;
+};
+
 const { getOrientationTransform } = require('../utils/orientation');
 const { optimizeImage, createOptimizedVariants } = require('../utils/imageOptimizer');
 
@@ -674,12 +697,85 @@ const getPendingAdoptions = async (req, res) => {
 // GET /api/dogs
 const listDogs = async (req, res) => {
   try {
+    const { lat, lng, sortBy } = req.query;
+    
+    // If user coordinates are provided, do two-tiered sorting
+    if (lat && lng) {
+      const userLat = parseFloat(lat);
+      const userLng = parseFloat(lng);
+      
+      if (!isNaN(userLat) && !isNaN(userLng)) {
+        try {
+          // Step 1: Get dogs WITH coordinates, sorted by distance
+          const dogsWithCoords = await Dog.aggregate([
+            {
+              $match: {
+                'coordinates.coordinates': { $ne: [0, 0] } // Exclude dogs with default [0,0] coordinates
+              }
+            },
+            {
+              $geoNear: {
+                near: {
+                  type: 'Point',
+                  coordinates: [userLng, userLat]
+                },
+                distanceField: 'distance',
+                spherical: true,
+                key: 'coordinates'
+              }
+            },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'user',
+                foreignField: '_id',
+                as: 'user'
+              }
+            },
+            {
+              $unwind: '$user'
+            },
+            {
+              $project: {
+                'user.password': 0,
+                'user.passwordResetToken': 0,
+                'user.passwordResetExpires': 0
+              }
+            }
+          ]);
+          
+          // Step 2: Get dogs WITHOUT coordinates, sorted by creation date
+          const dogsWithoutCoords = await Dog.find({
+            $or: [
+              { coordinates: { $exists: false } },
+              { 'coordinates.coordinates': [0, 0] }
+            ]
+          })
+          .populate('user', 'name username email phone person')
+          .sort({ createdAt: -1 });
+          
+          // Step 3: Combine both arrays - dogs with coords first, then without
+          const allDogs = [...dogsWithCoords, ...dogsWithoutCoords];
+          
+          console.log('[LISTDOGS DEBUG] Returning dogs - WITH coordinates (sorted by distance) + WITHOUT coordinates (sorted by date)');
+          console.log(`[LISTDOGS DEBUG] Dogs with coordinates: ${dogsWithCoords.length}, Dogs without coordinates: ${dogsWithoutCoords.length}`);
+          res.json(allDogs);
+          return;
+        } catch (aggErr) {
+          console.warn('[LISTDOGS] Aggregation failed, falling back to default sort:', aggErr);
+          // Fall back to default sort if aggregation fails
+        }
+      }
+    }
+    
+    // Default sort by creation date
     const dogs = await Dog.find()
       .populate('user', 'name username email phone person')
       .sort({ createdAt: -1 });
     console.log('[LISTDOGS DEBUG] Returning dogs:', JSON.stringify(dogs, null, 2));
     res.json(dogs);
   } catch (err) {
+    console.error('[LISTDOGS] Error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };

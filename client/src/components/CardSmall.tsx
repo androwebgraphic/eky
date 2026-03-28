@@ -119,7 +119,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 	// Memoize image URL calculation to prevent re-renders
 	const largestImgUrl = React.useMemo(() => {
 		if (uniqueImages.length === 0) {
-			console.log('[CARD IMAGE] No images found for dog:', name);
 			return undefined;
 		}
 
@@ -138,32 +137,21 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 			return bWidth - aWidth;
 		});
 		const url = toAbsUrl(sorted[0].url);
-		console.log('[CARD IMAGE] Selected image URL:', sorted[0].url, 'Full URL:', url);
 		return url;
-	}, [uniqueImages, name]);
+	}, [uniqueImages]);
 
 	const [imgError, setImgError] = React.useState(false);
 	const [videoError, setVideoError] = React.useState(false);
-	const [, setImgLoaded] = React.useState(false);
-	const [isRetrying, setIsRetrying] = React.useState(false);
-	const [retryCount, setRetryCount] = React.useState(0);
+	const [imgLoaded, setImgLoaded] = React.useState(false);
 
-	// Handle image error with retry logic
+	// Simple error handler - no retry logic to prevent NS_BINDING_ABORTED
 	const handleImgError = React.useCallback(() => {
-		if (retryCount < 2) {
-			// Retry up to 2 times
-			setIsRetrying(true);
-			setTimeout(() => {
-				setRetryCount(prev => prev + 1);
-				setIsRetrying(false);
-				// Force re-render by toggling error state
-				setImgError(false);
-			}, 500);
-		} else {
-			// After retries, show error
-			setImgError(true);
-		}
-	}, [retryCount]);
+		console.error('[CARD IMAGE] Image load error:', {
+			src: largestImgUrl,
+			dog: name
+		});
+		setImgError(true);
+	}, [largestImgUrl, name]);
 
 	const hasVideoUrl = video && typeof video.url === 'string' && video.url.length > 0;
 	const videoUrl = hasVideoUrl ? toAbsUrl(video.url) : undefined;
@@ -307,10 +295,9 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 							<div className="card-small-image-error">{t('alerts.videoFailedToLoad')}</div>
 						) : largestImgUrl && !imgError ? (
 							<img
-								key={`main-${retryCount}`}
 								src={largestImgUrl}
 								alt={name}
-								className={`card-small-image ${isRetrying ? 'loading' : ''}`}
+								className="card-small-image"
 								loading="lazy"
 								onError={handleImgError}
 								onLoad={() => setImgLoaded(true)}
@@ -321,10 +308,9 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 							<div className="card-small-image-error">{t('alerts.imageFailedToLoad') || 'Image failed to load'}</div>
 						) : thumbUrl && !imgError ? (
 							<img
-								key={`thumb-${retryCount}`}
 								src={thumbUrl}
 								alt={name}
-								className={`card-small-image ${isRetrying ? 'loading' : ''}`}
+								className="card-small-image"
 								loading="lazy"
 								onError={handleImgError}
 								onLoad={() => setImgLoaded(true)}

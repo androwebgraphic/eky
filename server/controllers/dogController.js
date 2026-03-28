@@ -104,6 +104,22 @@ const updateDog = async (req, res) => {
         if (field === 'age' && value !== undefined && value !== null && value !== '') {
           value = Number(value);
         }
+        // Parse coordinates from JSON string if needed
+        if (field === 'coordinates' && typeof value === 'string' && value.trim() !== '') {
+          try {
+            const parsed = JSON.parse(value);
+            // Validate GeoJSON Point structure
+            if (parsed && parsed.type === 'Point' && Array.isArray(parsed.coordinates) && parsed.coordinates.length === 2) {
+              value = parsed;
+            } else {
+              console.warn('[UPDATE DOG] Invalid coordinates structure, skipping:', parsed);
+              return;
+            }
+          } catch (parseErr) {
+            console.warn('[UPDATE DOG] Failed to parse coordinates JSON:', value, parseErr);
+            return;
+          }
+        }
         dog[field] = value;
       }
     });

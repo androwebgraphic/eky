@@ -93,8 +93,6 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		return apiBase + '/' + url.replace(/^\/+/, '') + '?cb=' + cacheBuster;
 	}
 
-	let largestImgUrl: string | undefined = undefined;
-
 	const getImageBase = (url: string) => {
 		let cleanUrl = url.split('?')[0];
 		const filename = cleanUrl.substring(cleanUrl.lastIndexOf('/') + 1);
@@ -118,7 +116,13 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		return arr.findIndex(other => getImageBase(other.url) === base) === idx;
 	});
 
-	if (uniqueImages.length) {
+	// Memoize image URL calculation to prevent re-renders
+	const largestImgUrl = React.useMemo(() => {
+		if (uniqueImages.length === 0) {
+			console.log('[CARD IMAGE] No images found for dog:', name);
+			return undefined;
+		}
+
 		// Sort by width descending, but prioritize 320px for mobile
 		const sorted = [...uniqueImages].sort((a, b) => {
 			const aWidth = a.width || 0;
@@ -133,11 +137,10 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 			}
 			return bWidth - aWidth;
 		});
-		largestImgUrl = toAbsUrl(sorted[0].url);
-		console.log('[CARD IMAGE] Selected image URL:', sorted[0].url, 'Full URL:', largestImgUrl);
-	} else {
-		console.log('[CARD IMAGE] No images found for dog:', name);
-	}
+		const url = toAbsUrl(sorted[0].url);
+		console.log('[CARD IMAGE] Selected image URL:', sorted[0].url, 'Full URL:', url);
+		return url;
+	}, [uniqueImages, name]);
 
 	const [imgError, setImgError] = React.useState(false);
 	const [videoError, setVideoError] = React.useState(false);
@@ -289,7 +292,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		>
 				<div className="card-small-image-wrapper">
 					{hasVideoUrl && !videoError ? (
-							<div onClick={e => onViewDetails && onViewDetails(e)} title={t('dogDetails.showMap', 'Show details')}>
+							<div onClick={e => onViewDetails && onViewDetails(e)} title={t('dogDetails.showDetails', 'Show details')}>
 								<video
 									controls
 									width="100%"
@@ -314,7 +317,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 								onError={handleImgError}
 								onLoad={() => setImgLoaded(true)}
 								onClick={e => onViewDetails && onViewDetails(e)}
-								title={t('dogDetails.showMap', 'Show details')}
+								title={t('dogDetails.showDetails', 'Show details')}
 							/>
 						) : imgError ? (
 							<div className="card-small-image-error">{t('alerts.imageFailedToLoad') || 'Image failed to load'}</div>
@@ -328,7 +331,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 								onError={handleImgError}
 								onLoad={() => setImgLoaded(true)}
 								onClick={e => onViewDetails && onViewDetails(e)}
-								title={t('dogDetails.showMap', 'Show details')}
+								title={t('dogDetails.showDetails', 'Show details')}
 							/>
 						) : (
 							<div className="card-small-placeholder" />
@@ -368,7 +371,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 							</span>
 						</div>
 					)}
-					{vaccinated && <div className="card-small-health">{t('fields.vaccinated', 'Vaccinated')}</div>}
+					{vaccinated && <div className="card-small-health">{t('fields.vaccinated')}</div>}
 					{user && (
 						<div className="card-small-user">
 							<span className="user-label">{t('fields.postedBy', 'Posted by')}:</span>{' '}
@@ -393,7 +396,7 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 					>
 						{adoptionStatus && adoptionStatus !== 'available' 
 							? t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)
-							: t('adopt', t('button.adopt', 'Adoptieren'))
+							: t('adopt')
 						}
 					</button>
 					<button
@@ -407,10 +410,10 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 							: <div className="wishlist-heart"><span>❤️</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>}
 					</button>
 					{canEdit && (
-						<button type="button" onClick={onEdit} className="card-small-btn btn-edit">{t('edit', t('button.edit', 'Bearbeiten'))}</button>
+						<button type="button" onClick={onEdit} className="card-small-btn btn-edit">{t('edit')}</button>
 					)}
 					{canEdit && (
-						<button type="button" onClick={onRemove} className="card-small-btn btn-remove">{t('remove', t('button.remove', 'Entfernen'))}</button>
+						<button type="button" onClick={onRemove} className="card-small-btn btn-remove">{t('remove')}</button>
 					)}
 				</div>
 			</div>

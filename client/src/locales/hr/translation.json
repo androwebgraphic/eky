@@ -1,9 +1,12 @@
 {
+  "Accept": "Prihvaćam",
+  "Close": "Zatvori",
   "terms_of_use_title": "Uvjeti Korištenja Aplikacije za Posvajanje Pasa",
   "unauth_subheading": "Morate biti prijavljeni ili registrirani da biste dodali psa, dodali na listu želja ili posvojili.",
   "terms_of_use": "1. Općenito\nOva aplikacija (u daljnjem tekstu 'Aplikacija') je vlasništvo [Ime Vaše Aplikacije/Tvrtke] (u daljnjem tekstu 'Mi' ili 'Naš'). Korištenjem ove Aplikacije, pristajete na sve uvjete navedene u ovom dokumentu. Ako se ne slažete s ovim uvjetima, nemojte koristiti Aplikaciju.\n2. Definiranje Korisnika\nKorisnik je svaka osoba koja koristi Aplikaciju. Korisnici se mogu podijeliti na:\n• Udruge/Azili: Korisnici koji predstavljaju udruge ili azile za napuštene pse.\n• Posvojitelji: Osobe koje traže psa za posvajanje.\n3. Zabrana Prodaje i Oglasa za Prodaju\n• Striktna Zabana: U cijelosti je zabranjeno koristiti Aplikaciju za bilo kakav oblik prodaje, preprodaje, ili oglašavanja za prodaju pasa, mačaka, ili bilo koje druge životinje.\n• Oglasi za uzgoj: Zabranjeno je oglašavanje uzgoja pasa ili drugih životinja.\n• Kazne: Kršenje ovog uvjeta rezultirat će odmahničkom zabranom korisničkog računa i mogućom pravnom tužbom.\n• Korištenje Aplikacije: Aplikacija isključivo namijenjena za povezivanje napuštenih pasa s potencijalnim posvojiteljima i za pružanje informacija o udrugama/azilima.\n4. Korištenje Aplikacije\n• Pravovremeno ažuriranje informacija: Udruge/Azili su odgovorne za održavanje ažuriranih informacija o profilima pasa.\n• Pravila komunikacije: Korištenje Aplikacije za bilo kakav oblik neprimjerenog ponašanja, vrijeđanja, ili spamiranje je zabranjeno.\n• Privatnost: Mi se obvezujemo da ćemo zaštititi privatnost korisnika u skladu s našom politikom privatnosti (link do politike privatnosti).\n• Autorska prava: Svi sadržaji na Aplikaciji su zaštićeni autorskim pravima. Neovlaštena upotreba je zabranjena.\n5. Odgovornost\n• Nema garancija: Mi ne jamčimo uspjeh posvajanja ili bilo kakav drugi ishod.\n• Ograničena odgovornost: Mi nismo odgovorni za bilo kakve štete ili gubitke nastale korištenjem Aplikacije.\n• Korisnička odgovornost: Korisnici su odgovorni za svoje postupke i odluke.\n6. Promjene Uvjeta Korištenja\n• Mi zadržavamo pravo da u bilo kojem trenutku promijenimo ove uvjete korištenja.\n• Korisnici su odgovorni za redovito provjeravanje ažuriranih uvjeta korištenja.\n• Nastavak korištenja Aplikacije nakon promjene uvjeta znači prihvaćanje novih uvjeta.\n7. Zakonska Nadležnost\nOvi uvjeti korištenja podliježu zakonima [Vaša zemlja/država] .",
-  "Accept": "Prihvaćam",
-  "Close": "Zatvori",
+  "adopt": "Posvoji",
+  "edit": "Uredi",
+  "remove": "Ukloni",
   "nav": {
     "about": "O nama",
     "login": "Logiraj se",
@@ -225,7 +228,10 @@
     "approximateLocation": "Prikazujem približnu lokaciju",
     "searchBasedLocation": "Koristim pretraživanje lokacije",
     "viewFullMap": "Prikaži punu kartu",
-    "mapPreview": "Pregled karte"
+    "mapPreview": "Pregled karte",
+    "showMap": "Prikaži kartu",
+    "showMoreImages": "Prikaži sve slike",
+    "showDetails": "Prikaži detalje"
   },
   "users": {
     "title": "Korisnici",
@@ -241,6 +247,7 @@
     "gender": "Spol:",
     "likes": "Sviđanja:",
     "vaccination": "Cijepljenje:",
+    "vaccinated": "Cijepljen",
     "description": "Opis:",
     "phone": "Telefon:",
     "email": "E-mail:",

@@ -262,7 +262,7 @@ const updateDog = async (req, res) => {
     return res.status(200).json({ message: 'Dog updated successfully', dog: updatedDog });
   } catch (err) {
     console.error('[UPDATE DOG ERROR]', err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
@@ -517,7 +517,7 @@ const createDog = async (req, res) => {
               fs.writeFileSync(outPath, buffer);
               imageVariants.push({ url: `/u/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
             } catch (imgErr) {
-              console.error(`[IMAGE ERROR] Failed to optimize variant for width ${w}:`, imgErr);
+              console.error(`[IMAGE ERROR] Failed to save variant for width ${w}:`, imgErr);
             }
           }
           // Save optimized original
@@ -784,21 +784,29 @@ const getPendingAdoptions = async (req, res) => {
   }
 }
 
-// GET /api/dogs - Simplified geospatial sorting
+// GET /api/dogs - Enhanced with detailed logging for debugging
 const listDogs = async (req, res) => {
   try {
     const { lat, lng, sortBy } = req.query;
     
-    console.log('[LISTDOGS] Received query:', { lat, lng, sortBy });
+    // Log incoming request for debugging
+    console.log('==============================================');
+    console.log('[LISTDOGS] Incoming request');
+    console.log('[LISTDOGS] Full URL:', req.url);
+    console.log('[LISTDOGS] Method:', req.method);
+    console.log('[LISTDOGS] Query params:', JSON.stringify({ lat, lng, sortBy }));
+    console.log('==============================================');
     
     // If user coordinates are provided, do geospatial sorting
     if (lat && lng) {
       const userLat = parseFloat(lat);
       const userLng = parseFloat(lng);
       
-      console.log('[LISTDOGS] Attempting geospatial sort with user location:', { userLat, userLng });
+      console.log('[LISTDOGS] Attempting geospatial sort');
+      console.log('[LISTDOGS] User coordinates:', { lat: userLat, lng: userLng });
       
       if (!isNaN(userLat) && !isNaN(userLng)) {
+        console.log('[LISTDOGS] Valid coordinates received, using geospatial sorting');
         try {
           // Single aggregation: returns ALL dogs sorted by distance
           // Dogs without coordinates will naturally appear at end with null/undefined distance
@@ -858,26 +866,26 @@ const listDogs = async (req, res) => {
             }
           ]);
           
-          console.log(`[LISTDOGS] Geospatial query returned ${dogsWithDistance.length} dogs`);
+          console.log('[LISTDOGS] Geospatial aggregation completed');
+          console.log(`[LISTDOGS] Found ${dogsWithDistance.length} dogs with distance calculation`);
           
           if (dogsWithDistance.length > 0) {
-            // Log first few dogs with distance for debugging
-            console.log('[LISTDOGS] Sample dogs with distance:', dogsWithDistance.slice(0, 5).map(d => ({
-              name: d.name,
-              location: d.location,
-              distance: d.distance ? Math.round(d.distance / 1000) + 'km' : 'N/A',
-              coords: d.coordinates ? `[${d.coordinates.coordinates[0]}, ${d.coordinates.coordinates[1]}]` : 'null'
-            })));
+            console.log('[LISTDOGS] First 5 dogs with distances:');
+            dogsWithDistance.slice(0, 5).forEach(dog => {
+              const distKm = dog.distance ? (dog.distance / 1000).toFixed(2) : 'N/A';
+              console.log(`[LISTDOGS] - ${dog.name} (ID: ${dog._id}): ${distKm}km away, coords:`, dog.coordinates);
+            });
           }
           
           res.json(dogsWithDistance);
           return;
         } catch (aggErr) {
           console.error('[LISTDOGS] Geospatial aggregation error:', aggErr);
+          console.error('[LISTDOGS] Error details:', aggErr.message);
           // Fall back to default sort if aggregation fails
         }
       } else {
-        console.log('[LISTDOGS] Invalid coordinates provided, falling back to default sort');
+        console.log('[LISTDOGS] Invalid or missing coordinates, falling back to default sort');
       }
     }
     
@@ -887,10 +895,11 @@ const listDogs = async (req, res) => {
       .populate('user', 'name username email phone person')
       .sort({ createdAt: -1 });
     
-    console.log(`[LISTDOGS] Returning ${dogs.length} dogs`);
+    console.log(`[LISTDOGS] Returning ${dogs.length} dogs with default sort`);
     res.json(dogs);
   } catch (err) {
     console.error('[LISTDOGS] Error:', err);
+    console.error('[LISTDOGS] Error stack:', err.stack);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
@@ -974,7 +983,7 @@ const cancelAdoption = async (req, res) => {
         io.to(adopterId).emit('receiveMessage', { 
           conversationId: convo._id, 
           message: sysMsg,
-          messageType: "adoption_cancelled",
+          messageType: 'adoption_cancelled',
           dogId: dog._id
         });
         // Also emit dogUpdated to refresh adoption status

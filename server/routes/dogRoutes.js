@@ -3,7 +3,7 @@ const multer = require('multer');
 const auth = require('../middleware/auth.js');
 const authMiddleware = auth;
 const { isAdmin, isSuperAdmin } = auth;
-const { createDog, getDogById, updateDog, deleteDog, likeDog, unlikeDog, confirmAdoption, getPendingAdoptions, listDogs, cancelAdoption, adoptRequest, getNewDogsSince } = require('../controllers/dogController.js');
+const { createDog, getDogById, updateDog, deleteDog, likeDog, unlikeDog, confirmAdoption, getPendingAdoptions, listDogs, cancelAdoption, adoptRequest, getNewDogsSince, geocodeAllDogs } = require('../controllers/dogController.js');
 console.log('dogController:', { createDog, getDogById, updateDog, deleteDog, likeDog, unlikeDog, confirmAdoption, getPendingAdoptions, listDogs, cancelAdoption, adoptRequest, getNewDogsSince });
 const router = express.Router();
 
@@ -49,6 +49,14 @@ router.post('/superadmin/adopt-cancel/:id', authMiddleware, async (req, res) => 
     return res.status(403).json({ message: 'Admin privileges required' });
   }
   return cancelAdoption(req, res);
+});
+// Superadmin geocoding route
+router.post('/admin/geocode', authMiddleware, async (req, res) => {
+  const { isSuperAdmin } = require('../middleware/auth.js');
+  if (!isSuperAdmin(req.user)) {
+    return res.status(403).json({ message: 'Only superadmin can trigger geocoding' });
+  }
+  return geocodeAllDogs(req, res);
 });
 
 // Parameterized routes

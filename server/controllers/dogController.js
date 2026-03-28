@@ -597,6 +597,74 @@ const createDog = async (req, res) => {
   }
 // End createDog
 
+// POST /api/dogs/admin/geocode - Geocode all dogs with [0,0] coordinates
+const geocodeAllDogs = async (req, res) => {
+  try {
+    console.log('[GEOCODE] Geocode request received');
+    
+    // Check if user is superadmin
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Only superadmin can trigger geocoding' });
+    }
+    
+    // Find all dogs with coordinates [0,0]
+    const dogs = await Dog.find({
+      'coordinates.coordinates': [0, 0]
+    });
+    
+    console.log(`[GEOCODE] Found ${dogs.length} dogs to geocode`);
+    
+    if (dogs.length === 0) {
+      return res.json({ message: 'All dogs are already geocoded!', successCount: 0, failureCount: 0 });
+    }
+    
+    let successCount = 0;
+    let failureCount = 0;
+    
+    // Process each dog
+    for (let i = 0; i < dogs.length; i++) {
+      const dog = dogs[i];
+      console.log(`[GEOCODE] Processing ${i + 1}/${dogs.length}: ${dog.name} (${dog.location})`);
+      
+      // Geocode location
+      const coordinates = await geocodeLocation(dog.location);
+      
+      if (coordinates) {
+        await Dog.findByIdAndUpdate(dog._id, { coordinates });
+        successCount++;
+        console.log(`[GEOCODE] ✅ Successfully geocoded ${dog.name}`);
+      } else {
+        failureCount++;
+        console.log(`[GEOCODE] ❌ Failed to geocode ${dog.name}`);
+      }
+      
+      // Wait 1 second between requests (Nominatim rate limit)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
+    // Create 2dsphere index
+    try {
+      await Dog.collection.createIndex({ coordinates: '2dsphere' });
+      console.log('[GEOCODE] ✅ 2dsphere index created successfully');
+    } catch (indexErr) {
+      console.log('[GEOCODE] ℹ️  Index may already exist:', indexErr.message);
+    }
+    
+    console.log(`[GEOCODE] Complete! Success: ${successCount}, Failed: ${failureCount}`);
+    
+    res.json({ 
+      message: 'Geocoding complete',
+      successCount,
+      failureCount,
+      total: dogs.length
+    });
+    
+  } catch (err) {
+    console.error('[GEOCODE] Error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 function fixUrl(url) {
   if (!url) return url;
   if (url.startsWith('https://sharedog-homeless-backend.onrender.com')) {
@@ -960,5 +1028,6 @@ module.exports = {
   listDogs,
   getNewDogsSince,
   cancelAdoption,
-  adoptRequest
+  adoptRequest,
+  geocodeAllDogs
 };

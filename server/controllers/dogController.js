@@ -808,9 +808,18 @@ const listDogs = async (req, res) => {
       if (!isNaN(userLat) && !isNaN(userLng)) {
         console.log('[LISTDOGS] Valid coordinates received, using geospatial sorting');
         try {
-          // Single aggregation: returns ALL dogs sorted by distance
-          // Dogs without coordinates will naturally appear at end with null/undefined distance
+          // TWO-TIER APPROACH:
+          // 1. First, get dogs with valid coordinates (not [0,0]) sorted by distance
+          // 2. Then, get dogs without valid coordinates ([0,0]) sorted by creation date
+          // 3. Combine them: dogs with coordinates first, then dogs without
+          
+          // Query 1: Dogs with valid coordinates (not [0,0])
           const dogsWithDistance = await Dog.aggregate([
+            {
+              $match: {
+                'coordinates.coordinates': { $ne: [0, 0] }
+              }
+            },
             {
               $geoNear: {
                 near: {
@@ -866,18 +875,84 @@ const listDogs = async (req, res) => {
             }
           ]);
           
-          console.log('[LISTDOGS] Geospatial aggregation completed');
-          console.log(`[LISTDOGS] Found ${dogsWithDistance.length} dogs with distance calculation`);
+          // Query 2: Dogs without valid coordinates ([0,0]) - sorted by creation date (newest first)
+          const dogsWithoutCoords = await Dog.aggregate([
+            {
+              $match: {
+                'coordinates.coordinates': [0, 0]
+              }
+            },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'user',
+                foreignField: '_id',
+                as: 'user'
+              }
+            },
+            {
+              $unwind: '$user'
+            },
+            {
+              $sort: { createdAt: -1 }
+            },
+            {
+              $project: {
+                name: 1,
+                breed: 1,
+                age: 1,
+                color: 1,
+                location: 1,
+                description: 1,
+                size: 1,
+                gender: 1,
+                vaccinated: 1,
+                neutered: 1,
+                coordinates: 1,
+                images: 1,
+                video: 1,
+                thumbnail: 1,
+                user: {
+                  _id: 1,
+                  name: 1,
+                  username: 1,
+                  email: 1,
+                  phone: 1,
+                  person: 1
+                },
+                createdAt: 1,
+                likes: 1,
+                adoptionStatus: 1,
+                adoptionQueue: 1,
+                distance: { $literal: null } // Explicitly set distance to null
+              }
+            }
+          ]);
+          
+          // Combine results: dogs with coordinates first, then dogs without
+          const allDogs = [...dogsWithDistance, ...dogsWithoutCoords];
+          
+          console.log('[LISTDOGS] Two-tier sorting completed');
+          console.log(`[LISTDOGS] Dogs with valid coordinates: ${dogsWithDistance.length}`);
+          console.log(`[LISTDOGS] Dogs without valid coordinates: ${dogsWithoutCoords.length}`);
+          console.log(`[LISTDOGS] Total dogs returned: ${allDogs.length}`);
           
           if (dogsWithDistance.length > 0) {
-            console.log('[LISTDOGS] First 5 dogs with distances:');
+            console.log('[LISTDOGS] First 5 dogs with distances (nearest first):');
             dogsWithDistance.slice(0, 5).forEach(dog => {
               const distKm = dog.distance ? (dog.distance / 1000).toFixed(2) : 'N/A';
               console.log(`[LISTDOGS] - ${dog.name} (ID: ${dog._id}): ${distKm}km away, coords:`, dog.coordinates);
             });
           }
           
-          res.json(dogsWithDistance);
+          if (dogsWithoutCoords.length > 0) {
+            console.log('[LISTDOGS] First 3 dogs without coordinates (sorted by newest):');
+            dogsWithoutCoords.slice(0, 3).forEach(dog => {
+              console.log(`[LISTDOGS] - ${dog.name} (ID: ${dog._id}): created at ${new Date(dog.createdAt).toISOString()}`);
+            });
+          }
+          
+          res.json(allDogs);
           return;
         } catch (aggErr) {
           console.error('[LISTDOGS] Geospatial aggregation error:', aggErr);

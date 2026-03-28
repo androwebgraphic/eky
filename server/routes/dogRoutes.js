@@ -51,13 +51,7 @@ router.post('/superadmin/adopt-cancel/:id', authMiddleware, async (req, res) => 
   return cancelAdoption(req, res);
 });
 // Superadmin geocoding route
-router.post('/admin/geocode', authMiddleware, async (req, res) => {
-  const { isSuperAdmin } = require('../middleware/auth.js');
-  if (!isSuperAdmin(req.user)) {
-    return res.status(403).json({ message: 'Only superadmin can trigger geocoding' });
-  }
-  return geocodeAllDogs(req, res);
-});
+router.post('/admin/geocode', authMiddleware, geocodeAllDogs);
 
 // Parameterized routes
 router.post('/:id/adopt-confirm', authMiddleware, confirmAdoption);

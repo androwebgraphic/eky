@@ -777,11 +777,6 @@ const listDogs = async (req, res) => {
           // Step 1: Get dogs WITH coordinates, sorted by distance
           const dogsWithCoords = await Dog.aggregate([
             {
-              $match: {
-                'coordinates.coordinates': { $ne: [0, 0] } // Exclude dogs with default [0,0] coordinates
-              }
-            },
-            {
               $geoNear: {
                 near: {
                   type: 'Point',
@@ -790,6 +785,11 @@ const listDogs = async (req, res) => {
                 distanceField: 'distance',
                 spherical: true,
                 key: 'coordinates'
+              }
+            },
+            {
+              $match: {
+                'coordinates.coordinates': { $ne: [0, 0] } // Exclude dogs with default [0,0] coordinates
               }
             },
             {

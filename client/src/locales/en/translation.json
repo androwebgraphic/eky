@@ -204,6 +204,7 @@
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
+    "remove": "Remove",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
@@ -257,6 +258,18 @@
   },
   "language": {
     "selectAria": "Select language"
+  },
+  "location": {
+    "enterLocation": "Enter your location below to see dogs sorted by distance:",
+    "cityPlaceholder": "Enter city (e.g. New York, USA)",
+    "setLocation": "Set Location",
+    "finding": "Finding...",
+    "usingSavedLocation": "✅ Using my saved location",
+    "usingLocation": "✅ Using location: {{displayName}}",
+    "locationDetected": "✅ Location detected: {{lat}}, {{lng}}",
+    "locationNotFound": "❌ Location not found. Try a different location.",
+    "geocodeFailed": "❌ Location geocoding failed. Try again.",
+    "clearLocation": "Clear location"
   },
   "adoption": {
     "title": "Requests",

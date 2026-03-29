@@ -205,10 +205,11 @@
   },
   "common": {
     "close": "Zatvori",
-    "cancel": "Odustani",
+    "cancel": "Otkaži",
     "save": "Spremi",
     "delete": "Obriši",
     "edit": "Uredi",
+    "remove": "Ukloni",
     "loading": "Učitavanje...",
     "error": "Greška",
     "success": "Uspjeh",

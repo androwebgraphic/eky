@@ -394,10 +394,10 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 							: <div className="wishlist-heart"><span>❤️</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>}
 					</button>
 					{canEdit && (
-						<button type="button" onClick={onEdit} className="card-small-btn btn-edit">{t('edit')}</button>
+						<button type="button" onClick={onEdit} className="card-small-btn btn-edit">{t('common.edit')}</button>
 					)}
 					{canEdit && (
-						<button type="button" onClick={onRemove} className="card-small-btn btn-remove">{t('remove')}</button>
+						<button type="button" onClick={onRemove} className="card-small-btn btn-remove">{t('common.remove')}</button>
 					)}
 				</div>
 			</div>

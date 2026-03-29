@@ -6,6 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import { sanitizeFormData, sanitizeEmail, sanitizePhone, sanitizeUsername } from '../../utils/sanitize';
+import { getApiUrl } from '../../utils/apiUrl';
 // import { useAuth } from '../../contexts/AuthContext';
 
 interface RegisterFormData {
@@ -68,7 +69,7 @@ const RegisterForm: React.FC = () => {
 
       // Remove passwordAgain from data before sending to server
       const { passwordAgain, remember, ...registrationData } = sanitizedData;
-      const response = await fetch('http://localhost:3001/api/users/registracija', {
+      const response = await fetch(`${getApiUrl()}/api/users/registracija`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

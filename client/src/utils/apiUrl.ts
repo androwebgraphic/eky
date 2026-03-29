@@ -31,4 +31,5 @@ export const getApiBaseUrl = (): string => {
   const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
   
   return `${protocol}//${hostname}`;
-};
+};// Force rebuild Sun Mar 29 01:36:06 CET 2026
+export const BUILD_TIMESTAMP = 1774744861;

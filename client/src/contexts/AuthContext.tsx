@@ -119,7 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('🌐 API URL:', getApiUrl());
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // Increased to 30 seconds
 
       const response = await fetch(`${getApiUrl()}/api/users/logiranje`, {
         method: 'POST',

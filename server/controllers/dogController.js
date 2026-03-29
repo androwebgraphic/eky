@@ -4,6 +4,13 @@ const sharp = require('sharp');
 const Dog = require('../models/dogModel');
 const ChatConversation = require('../models/chatConversationModel');
 const ChatMessage = require('../models/chatMessageModel');
+const {
+  uploadImageVariants,
+  uploadVideoToCloudinary,
+  uploadImageToCloudinary,
+  deleteFolder,
+  deleteFromCloudinary
+} = require('../config/cloudinary');
 
 // Helper function to geocode a location string to coordinates
 const geocodeLocation = async (location) => {
@@ -513,111 +520,83 @@ const createDog = async (req, res) => {
     // optional poster image for videos: 'poster'
     if (req.files && req.files.media && req.files.media.length > 0) {
       const mediaArray = Array.isArray(req.files.media) ? req.files.media : [req.files.media];
-      const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
-      fs.mkdirSync(uploadDir, { recursive: true });
+      const folder = `dogs/${dog._id}`;
       let mediaIndex = 0;
+      
       for (const mediaFile of mediaArray) {
         if (mediaFile.mimetype.startsWith('image/')) {
-          const imageVariants = [];
-          const ext = '.jpg';
+          // Upload image variants to Cloudinary
           const baseName = `img-${mediaIndex}`;
-          for (const w of [320, 640, 1024]) {
-            try {
-              const outName = `${baseName}-${w}${ext}`;
-              const outPath = path.join(uploadDir, outName);
-              const buffer = await optimizeImage(mediaFile.buffer, {
-                width: w,
-                format: 'jpeg',
-                quality: 85
-              });
-              fs.writeFileSync(outPath, buffer);
-              imageVariants.push({ url: `/u/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
-            } catch (imgErr) {
-              console.error(`[IMAGE ERROR] Failed to save variant for width ${w}:`, imgErr);
-            }
-          }
-          // Save optimized original
-          try {
-            const origName = `${baseName}-orig${ext}`;
-            const origPath = path.join(uploadDir, origName);
-            const origBuffer = await optimizeImage(mediaFile.buffer, {
-              format: 'jpeg',
-              quality: 85
-            });
-            fs.writeFileSync(origPath, origBuffer);
-            console.log(`[IMAGE SAVE] Saved optimized original: ${origPath}`);
-            imageVariants.push({ url: `/u/dogs/${dog._id}/${origName}`, width: null, size: 'orig' });
-          } catch (origErr) {
-            console.error('[IMAGE ERROR] Failed to optimize original image:', origErr);
-          }
+          const imageVariants = await uploadImageVariants(mediaFile.buffer, baseName, folder);
           dog.images.push(...imageVariants);
           mediaIndex++;
         } else if (mediaFile.mimetype.startsWith('video/')) {
-          const videoExt = path.extname(mediaFile.originalname) || '.mp4';
-          const videoName = `video-${mediaIndex}${videoExt}`;
-          const videoPath = path.join(uploadDir, videoName);
-          fs.writeFileSync(videoPath, mediaFile.buffer);
-          dog.video = { url: `/u/dogs/${dog._id}/${videoName}`, poster: [] };
+          // Upload video to Cloudinary
+          const videoPublicId = `video-${mediaIndex}`;
+          const videoResult = await uploadVideoToCloudinary(mediaFile.buffer, {
+            folder,
+            publicId: videoPublicId,
+            tags: ['video', `dog:${dog._id}`]
+          });
+          
+          dog.video = {
+            url: videoResult.secure_url,
+            publicId: videoResult.public_id,
+            resourceType: videoResult.resource_type,
+            format: videoResult.format,
+            poster: []
+          };
           mediaIndex++;
-          // process poster image if provided
+          
+          // Process poster image if provided
           if (req.files.poster && req.files.poster[0]) {
             const posterFile = req.files.poster[0];
-            const posterVariants = [];
-            const ext = '.jpg';
-            await Promise.all(sizes.map(async (w) => {
-              try {
-                const outName = `poster-${w}${ext}`;
-                const outPath = path.join(uploadDir, outName);
-                const buffer = await optimizeImage(posterFile.buffer, {
-                  width: w,
-                  format: 'jpeg',
-                  quality: 80
-                });
-                fs.writeFileSync(outPath, buffer);
-                posterVariants.push({ url: `/u/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
-              } catch (posterErr) {
-                console.error(`[POSTER ERROR] Failed to optimize poster at width ${w}:`, posterErr);
-              }
-            }));
+            const posterBaseName = `poster-${mediaIndex}`;
+            const posterVariants = await uploadImageVariants(posterFile.buffer, posterBaseName, folder);
             dog.video.poster = posterVariants;
-            // create a tiny 64px thumbnail from poster for list display (if thumbnail not set)
+            
+            // Create a tiny 64px thumbnail from poster for list display
             if (!dog.thumbnail) {
-              try {
-                const thumbName = `thumb-64${ext}`;
-                const thumbPath = path.join(uploadDir, thumbName);
-                const thumbBuffer = await optimizeImage(posterFile.buffer, {
-                  width: 64,
-                  format: 'jpeg',
-                  quality: 70
-                });
-                fs.writeFileSync(thumbPath, thumbBuffer);
-                dog.thumbnail = { url: `/u/dogs/${dog._id}/${thumbName}`, width: 64, size: '64' };
-              } catch (thumbErr) {
-                console.warn('Thumbnail creation failed', thumbErr);
-              }
+              const thumbResult = await uploadImageToCloudinary(posterFile.buffer, {
+                folder,
+                publicId: `thumb-64`,
+                transformation: [
+                  { width: 64, quality: 'auto', fetch_format: 'auto' }
+                ]
+              });
+              dog.thumbnail = {
+                url: thumbResult.secure_url,
+                publicId: thumbResult.public_id,
+                width: 64,
+                size: '64'
+              };
             }
           }
+        }
       }
-    }
 
-    // Generate and save 64px thumbnail from first image if not set
-    const firstImageFile = mediaArray.find(f => f.mimetype.startsWith('image/'));
-    if (firstImageFile && !dog.thumbnail) {
-      try {
-        const thumbName = `thumb-64.jpg`;
-        const thumbPath = path.join(uploadDir, thumbName);
-        const thumbBuffer = await optimizeImage(firstImageFile.buffer, {
-          width: 64,
-          format: 'jpeg',
-          quality: 70
-        });
-        fs.writeFileSync(thumbPath, thumbBuffer);
-        dog.thumbnail = { url: `/u/dogs/${dog._id}/${thumbName}`, width: 64, size: '64' };
-      } catch (thumbErr) {
-        console.warn('Thumbnail creation failed', thumbErr);
+      // Generate and save 64px thumbnail from first image if not set
+      const firstImageFile = mediaArray.find(f => f.mimetype.startsWith('image/'));
+      if (firstImageFile && !dog.thumbnail) {
+        try {
+          const thumbResult = await uploadImageToCloudinary(firstImageFile.buffer, {
+            folder: `dogs/${dog._id}`,
+            publicId: `thumb-64`,
+            transformation: [
+              { width: 64, quality: 'auto', fetch_format: 'auto' }
+            ]
+          });
+          dog.thumbnail = {
+            url: thumbResult.secure_url,
+            publicId: thumbResult.public_id,
+            width: 64,
+            size: '64'
+          };
+        } catch (thumbErr) {
+          console.warn('Thumbnail creation failed', thumbErr);
+        }
       }
     }
-  }
 
     await dog.save();
     // Re-fetch dog with populated user info

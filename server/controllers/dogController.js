@@ -137,9 +137,21 @@ const updateDog = async (req, res) => {
     if (Array.isArray(keepImages)) {
       if (keepImages.length > 0) {
         const removedImages = dog.images.filter(img => !keepImages.includes(img.url));
-        const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
+        
+        // Delete removed images from Cloudinary
         for (const img of removedImages) {
+          if (img.publicId) {
+            try {
+              await deleteFromCloudinary(img.publicId, img.resourceType || 'image');
+              console.log(`[CLOUDINARY] Deleted image: ${img.publicId}`);
+            } catch (err) {
+              console.warn(`[CLOUDINARY] Failed to delete image ${img.publicId}:`, err);
+            }
+          }
+          
+          // Also try to delete from local filesystem if it exists (for old images)
           if (img.url && typeof img.url === 'string' && (img.url.includes(`/u/dogs/${dog._id}/`) || img.url.includes(`/uploads/dogs/${dog._id}/`))) {
+            const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
             const fileName = img.url.includes(`/u/dogs/${dog._id}/`) 
               ? img.url.split(`/u/dogs/${dog._id}/`)[1] 
               : img.url.split(`/uploads/dogs/${dog._id}/`)[1];
@@ -149,10 +161,35 @@ const updateDog = async (req, res) => {
             }
           }
         }
+        
         dog.images = dog.images.filter(img => keepImages.includes(img.url));
       } else {
-        // If keepImages is an empty array, remove all images
-        console.log('[DELETE DEBUG] keepImages is empty array, clearing dog.images and saving...');
+        // If keepImages is an empty array, remove all images from Cloudinary
+        console.log('[DELETE DEBUG] keepImages is empty array, clearing dog.images and deleting from Cloudinary...');
+        
+        // Delete all images from Cloudinary
+        for (const img of dog.images) {
+          if (img.publicId) {
+            try {
+              await deleteFromCloudinary(img.publicId, img.resourceType || 'image');
+              console.log(`[CLOUDINARY] Deleted image: ${img.publicId}`);
+            } catch (err) {
+              console.warn(`[CLOUDINARY] Failed to delete image ${img.publicId}:`, err);
+            }
+          }
+        }
+        
+        // Delete thumbnail from Cloudinary
+        if (dog.thumbnail && dog.thumbnail.publicId) {
+          try {
+            await deleteFromCloudinary(dog.thumbnail.publicId, 'image');
+            console.log(`[CLOUDINARY] Deleted thumbnail: ${dog.thumbnail.publicId}`);
+            dog.thumbnail = null;
+          } catch (err) {
+            console.warn(`[CLOUDINARY] Failed to delete thumbnail:`, err);
+          }
+        }
+        
         dog.images = [];
         await dog.save();
         console.log('[DELETE DEBUG] dog.images after save:', dog.images);
@@ -169,7 +206,7 @@ const updateDog = async (req, res) => {
 
     console.log('[SAVE DEBUG] Before save, dog.images:', dog.images);
 
-    // Handle new uploaded images (media) - save to local uploads
+    // Handle new uploaded images (media) - upload to Cloudinary
     if (req.files && req.files.media) {
       // Check if user is superadmin
       const isSuperAdmin = isUserSuperAdmin(req.user);
@@ -177,7 +214,7 @@ const updateDog = async (req, res) => {
       // Get video duration from request body
       const videoDuration = req.body.videoDuration ? parseFloat(req.body.videoDuration) : null;
       
-      console.log('Processing new media files for local uploads...');
+      console.log('Processing new media files for Cloudinary upload...');
       const mediaArray = Array.isArray(req.files.media) ? req.files.media : [req.files.media];
       console.log('Media array length:', mediaArray.length);
       
@@ -212,15 +249,13 @@ const updateDog = async (req, res) => {
         }
       }
       
-      const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
-      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+      const folder = `dogs/${dog._id}`;
       let mediaIndex = 0;
+      
       for (const mediaFile of mediaArray) {
         console.log(`[UPLOAD-DEBUG] Processing file: ${mediaFile.originalname}, mimetype: ${mediaFile.mimetype}, size: ${mediaFile.size}`);
-        console.log(`[UPLOAD] File: ${mediaFile.originalname}, mimetype: ${mediaFile.mimetype}`);
-        const orientationTransform = getOrientationTransform(mediaFile.buffer);
-        console.log(`[ORIENTATION] ${mediaFile.originalname}: Detected orientation transform:`, orientationTransform);
-        let processedBuffer = mediaFile.buffer;
+        
+        // Check for HEIC/HEIF
         if (
           mediaFile.mimetype === 'image/heic' ||
           mediaFile.mimetype === 'image/heif' ||
@@ -228,43 +263,80 @@ const updateDog = async (req, res) => {
         ) {
           throw new Error('HEIC/HEIF images are not supported. Please convert to JPEG or PNG before uploading.');
         }
+        
         if (mediaFile.mimetype.startsWith('image/')) {
-          const imageVariants = [];
-          const ext = '.jpg';
-          const baseName = path.parse(mediaFile.originalname).name.replace(/[^a-zA-Z0-9_-]/g, '');
-          for (const w of [320, 640, 1024]) {
+          // Upload image variants to Cloudinary
+          const baseName = `img-${mediaIndex}`;
+          const imageVariants = await uploadImageVariants(mediaFile.buffer, baseName, folder);
+          dog.images.push(...imageVariants);
+          console.log(`[CLOUDINARY] Uploaded ${imageVariants.length} image variants for ${mediaFile.originalname}`);
+          mediaIndex++;
+          
+          // Update thumbnail if this is the first image and no thumbnail exists
+          if (mediaIndex === 1 && !dog.thumbnail) {
             try {
-              const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-              const outName = `${baseName}-${uniqueSuffix}-${w}${ext}`;
-              const outPath = path.join(uploadDir, outName);
-              const buffer = await optimizeImage(processedBuffer, {
-                width: w,
-                format: 'jpeg',
-                quality: 85
+              const thumbResult = await uploadImageToCloudinary(mediaFile.buffer, {
+                folder,
+                publicId: `thumb-64`,
+                transformation: [
+                  { width: 64, quality: 'auto', fetch_format: 'auto' }
+                ]
               });
-              fs.writeFileSync(outPath, buffer);
-              console.log(`[IMAGE SAVE] Saved optimized variant: ${outPath}`);
-              imageVariants.push({ url: `/u/dogs/${dog._id}/${outName}`, width: w, size: `${w}` });
-            } catch (imgErr) {
-              console.error(`[IMAGE ERROR] Failed to save variant for width ${w}:`, imgErr);
+              dog.thumbnail = {
+                url: thumbResult.secure_url,
+                publicId: thumbResult.public_id,
+                width: 64,
+                size: '64'
+              };
+              console.log('[CLOUDINARY] Created thumbnail from first image');
+            } catch (thumbErr) {
+              console.warn('[CLOUDINARY] Failed to create thumbnail:', thumbErr);
             }
           }
-          // Save optimized original
-          try {
-            const origName = `${baseName}-orig.jpg`;
-            const origPath = path.join(uploadDir, origName);
-            const origBuffer = await optimizeImage(processedBuffer, {
-              format: 'jpeg',
-              quality: 85
-            });
-            fs.writeFileSync(origPath, origBuffer);
-            console.log(`[IMAGE SAVE] Saved optimized original: ${origPath}`);
-            imageVariants.push({ url: `/u/dogs/${dog._id}/${origName}`, width: null, size: 'orig' });
-          } catch (origErr) {
-            console.error('[IMAGE ERROR] Failed to optimize original image:', origErr);
-          }
-          dog.images.push(...imageVariants);
+        } else if (mediaFile.mimetype.startsWith('video/')) {
+          // Upload video to Cloudinary
+          const videoPublicId = `video-${mediaIndex}`;
+          const videoResult = await uploadVideoToCloudinary(mediaFile.buffer, {
+            folder,
+            publicId: videoPublicId,
+            tags: ['video', `dog:${dog._id}`]
+          });
+          
+          dog.video = {
+            url: videoResult.secure_url,
+            publicId: videoResult.public_id,
+            resourceType: videoResult.resource_type,
+            format: videoResult.format,
+            poster: []
+          };
           mediaIndex++;
+          
+          console.log('[CLOUDINARY] Uploaded video:', videoResult.public_id);
+          
+          // Process poster image if provided
+          if (req.files.poster && req.files.poster[0]) {
+            const posterFile = req.files.poster[0];
+            const posterBaseName = `poster-${mediaIndex}`;
+            const posterVariants = await uploadImageVariants(posterFile.buffer, posterBaseName, folder);
+            dog.video.poster = posterVariants;
+            
+            // Create a tiny 64px thumbnail from poster for list display
+            if (!dog.thumbnail) {
+              const thumbResult = await uploadImageToCloudinary(posterFile.buffer, {
+                folder,
+                publicId: `thumb-64`,
+                transformation: [
+                  { width: 64, quality: 'auto', fetch_format: 'auto' }
+                ]
+              });
+              dog.thumbnail = {
+                url: thumbResult.secure_url,
+                publicId: thumbResult.public_id,
+                width: 64,
+                size: '64'
+              };
+            }
+          }
         }
       }
     }
@@ -410,7 +482,53 @@ const deleteDog = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to delete this dog' });
     }
 
-    // Remove all files in uploads/dogs/<id>
+    // Delete all images from Cloudinary
+    for (const img of dog.images) {
+      if (img.publicId) {
+        try {
+          await deleteFromCloudinary(img.publicId, img.resourceType || 'image');
+          console.log(`[CLOUDINARY] Deleted image: ${img.publicId}`);
+        } catch (err) {
+          console.warn(`[CLOUDINARY] Failed to delete image ${img.publicId}:`, err);
+        }
+      }
+    }
+
+    // Delete thumbnail from Cloudinary
+    if (dog.thumbnail && dog.thumbnail.publicId) {
+      try {
+        await deleteFromCloudinary(dog.thumbnail.publicId, 'image');
+        console.log(`[CLOUDINARY] Deleted thumbnail: ${dog.thumbnail.publicId}`);
+      } catch (err) {
+        console.warn(`[CLOUDINARY] Failed to delete thumbnail:`, err);
+      }
+    }
+
+    // Delete video from Cloudinary
+    if (dog.video && dog.video.publicId) {
+      try {
+        await deleteFromCloudinary(dog.video.publicId, 'video');
+        console.log(`[CLOUDINARY] Deleted video: ${dog.video.publicId}`);
+      } catch (err) {
+        console.warn(`[CLOUDINARY] Failed to delete video:`, err);
+      }
+
+      // Delete video poster images
+      if (dog.video.poster && Array.isArray(dog.video.poster)) {
+        for (const poster of dog.video.poster) {
+          if (poster.publicId) {
+            try {
+              await deleteFromCloudinary(poster.publicId, 'image');
+              console.log(`[CLOUDINARY] Deleted poster: ${poster.publicId}`);
+            } catch (err) {
+              console.warn(`[CLOUDINARY] Failed to delete poster ${poster.publicId}:`, err);
+            }
+          }
+        }
+      }
+    }
+
+    // Also clean up local files if they exist (for old images)
     const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
     try {
       if (fs.existsSync(uploadDir)) {
@@ -422,7 +540,7 @@ const deleteDog = async (req, res) => {
         console.log('Upload dir does not exist:', uploadDir);
       }
     } catch (e) {
-      console.warn('Error cleaning up files for dog:', dog._id, e);
+      console.warn('Error cleaning up local files for dog:', dog._id, e);
     }
 
     await dog.deleteOne();

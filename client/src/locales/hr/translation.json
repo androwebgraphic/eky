@@ -73,7 +73,9 @@
     "addFirst": "Dodaj prvog psa",
     "confirmRemove": "Jeste li sigurni da želite ukloniti {{name}}?",
     "failedToRemove": "Neuspješno uklanjanje psa",
-    "failedToLoad": "Neuspješno učitavanje pasa"
+    "failedToLoad": "Neuspješno učitavanje pasa",
+    "loadError": "Neuspješno učitavanje pasa",
+    "refreshError": "Neuspješno osvježavanje pasa nakon ažuriranja"
   },
   "register": {
     "register": "Registracija",

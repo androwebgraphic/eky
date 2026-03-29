@@ -163,7 +163,7 @@ function DogList() {
 				console.log('[MANUAL LOCATION] ✅ Got coordinates:', { lat, lng });
 				setUserLocation({ lat, lng });
 				setLocationPermission('granted');
-				setLocationMessage(`✅ Using location: ${data[0].display_name}`);
+				setLocationMessage(`✅ ${t('location.usingLocation', { displayName: data[0].display_name })}`);
 				setShowManualLocationInput(false);
 				setManualLocationInput('');
 				
@@ -171,11 +171,11 @@ function DogList() {
 				localStorage.setItem('userLocation', JSON.stringify({ lat, lng, displayName: data[0].display_name }));
 				console.log('[MANUAL LOCATION] ✅ Saved to localStorage');
 			} else {
-				setLocationMessage('❌ Location not found. Please try a different location name.');
+				setLocationMessage(`❌ ${t('location.locationNotFound')}`);
 			}
 		} catch (err) {
 			console.error('[MANUAL LOCATION] Error:', err);
-			setLocationMessage('❌ Failed to geocode location. Please try again.');
+			setLocationMessage(`❌ ${t('location.geocodeFailed')}`);
 		} finally {
 			setGeocodingManual(false);
 		}
@@ -203,7 +203,7 @@ function DogList() {
 			console.log('[LOCATION] ✅ Found location in user profile:', { lat: userLat, lng: userLng });
 			setUserLocation({ lat: userLat, lng: userLng });
 			setLocationPermission('granted');
-			setLocationMessage('✅ Using your saved location');
+			setLocationMessage(`✅ ${t('location.usingSavedLocation')}`);
 			console.log('[LOCATION] ℹ️ Dogs will be sorted by distance from your saved location');
 			return;
 		}
@@ -219,7 +219,7 @@ function DogList() {
 				console.log('[LOCATION] Setting userLocation state...');
 				setUserLocation({ lat: parsed.lat, lng: parsed.lng });
 				setLocationPermission('granted');
-				setLocationMessage(`✅ Using location: ${parsed.displayName}`);
+				setLocationMessage(`✅ ${t('location.usingLocation', { displayName: parsed.displayName })}`);
 				console.log('[LOCATION] ✅ State updated, skipping geolocation');
 				console.log('[LOCATION] ℹ️ Dogs will be sorted by distance from saved location');
 				return;
@@ -237,7 +237,7 @@ function DogList() {
 			if (!navigator.geolocation) {
 				console.log('[LOCATION] ❌ Geolocation not supported by browser');
 				setLocationPermission('denied');
-				setLocationMessage('ℹ️ Enter your location below to see dogs sorted by distance from you:');
+				setLocationMessage(`ℹ️ ${t('location.enterLocation')}`);
 				setShowManualLocationInput(true);
 				console.log('[LOCATION] ℹ️ Dogs will be sorted by creation date (newest first)');
 				return;
@@ -246,7 +246,7 @@ function DogList() {
 			console.log('[LOCATION] 🔍 Requesting user location (more aggressive)...');
 			
 			// Always show manual input immediately (don't wait for geolocation)
-			setLocationMessage('ℹ️ Enter your location below to see dogs sorted by distance from you:');
+			setLocationMessage(`ℹ️ ${t('location.enterLocation')}`);
 			setShowManualLocationInput(true);
 			
 			// More aggressive geolocation: shorter timeout, higher accuracy
@@ -256,7 +256,7 @@ function DogList() {
 					console.log('[LOCATION] ✅ Got user coordinates:', { latitude, longitude });
 					setUserLocation({ lat: latitude, lng: longitude });
 					setLocationPermission('granted');
-					setLocationMessage(`✅ Location detected: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+					setLocationMessage(`✅ ${t('location.locationDetected', { lat: latitude.toFixed(4), lng: longitude.toFixed(4) })}`);
 					console.log('[LOCATION] ℹ️ Dogs will be sorted by distance from your location');
 					
 					// Hide manual input when location is detected
@@ -266,10 +266,11 @@ function DogList() {
 					saveLocationToProfile(latitude, longitude);
 					
 					// Also save to localStorage
+					const detectedName = `✅ ${t('location.locationDetected', { lat: latitude.toFixed(4), lng: longitude.toFixed(4) })}`;
 					localStorage.setItem('userLocation', JSON.stringify({ 
 						lat: latitude, 
 						lng: longitude, 
-						displayName: `Detected: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}` 
+						displayName: detectedName 
 					}));
 					console.log('[LOCATION] ✅ Saved to localStorage');
 				},
@@ -297,7 +298,7 @@ function DogList() {
 					setLocationPermission('denied');
 					// Don't overwrite location message if already set
 					if (!locationMessage) {
-						setLocationMessage(`ℹ️ Enter your location below to see dogs sorted by distance from you:`);
+						setLocationMessage(`ℹ️ ${t('location.enterLocation')}`);
 					}
 					console.log('[LOCATION] ℹ️ Dogs will be sorted by creation date (newest first)');
 					console.log('[LOCATION] 💡 To enable location-based sorting, allow location access in your browser settings');
@@ -473,7 +474,7 @@ function DogList() {
 				})
 				.catch(err => {
 					console.error('[DOG-LIST] Fetch error:', err);
-					setError('Failed to load dogs');
+					setError(t('doglist.loadError') || 'Failed to load dogs');
 					setLoading(false);
 				});
 		};
@@ -540,7 +541,7 @@ function DogList() {
 				setLoading(false);
 			})
 			.catch(err => {
-				setError('Failed to refresh dogs after update');
+				setError(t('doglist.refreshError') || 'Failed to refresh dogs after update');
 				setLoading(false);
 			});
 	};
@@ -618,7 +619,7 @@ function DogList() {
 							type="text"
 							value={manualLocationInput}
 							onChange={(e) => setManualLocationInput(e.target.value)}
-							placeholder="Enter your city (e.g., Zagreb, Croatia)"
+							placeholder={t('location.cityPlaceholder')}
 							disabled={geocodingManual}
 							style={{
 								flex: '1',
@@ -643,7 +644,7 @@ function DogList() {
 								opacity: geocodingManual || !manualLocationInput.trim() ? 0.6 : 1
 							}}
 						>
-							{geocodingManual ? 'Finding...' : 'Set Location'}
+							{geocodingManual ? t('location.finding') : t('location.setLocation')}
 						</button>
 						<button
 							type="button"
@@ -658,7 +659,7 @@ function DogList() {
 								cursor: 'pointer'
 							}}
 						>
-							Cancel
+							{t('common.cancel')}
 						</button>
 					</form>
 				)}
@@ -683,7 +684,7 @@ function DogList() {
 							alignSelf: 'flex-start'
 						}}
 					>
-						Clear Location
+						{t('location.clearLocation')}
 					</button>
 				)}
 			</div>
@@ -899,7 +900,7 @@ function DogList() {
 						<h3 className="doglist-map-title">
 							📍 {mapDog.name} - {mapDog.location}
 						</h3>
-						{mapLoading && <div style={{ textAlign: 'center', padding: 20 }}>{t('dogDetails.loadingMap', 'Loading map...')}</div>}
+						{mapLoading && <div style={{ textAlign: 'center', padding: 20 }}>{t('dogDetails.loadingMap')}</div>}
 						{mapError && <div style={{ textAlign: 'center', padding: 20, color: '#e74c3c' }}>{mapError}</div>}
 						{mapCoords && !mapLoading && (
 							<iframe

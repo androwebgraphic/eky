@@ -66,7 +66,9 @@
     "addFirst": "Első kutya hozzáadása",
     "confirmRemove": "Biztos, hogy el akarod távolítani a következőt: {{name}}?",
     "failedToRemove": "A kutya eltávolítása sikertelen",
-    "failedToLoad": "A kutyák betöltése sikertelen"
+    "failedToLoad": "A kutyák betöltése sikertelen",
+    "loadError": "A kutyák betöltése sikertelen",
+    "refreshError": "A kutyák frissítése sikertelen a frissítés után"
   },
   "register": {
     "register": "Regisztráció",
@@ -246,6 +248,18 @@
   },
   "language": {
     "selectAria": "Nyelv kiválasztása"
+  },
+  "location": {
+    "enterLocation": "Írd be a helyszíned lent, hogy lásd a kutyákat távolság szerint rendezve:",
+    "cityPlaceholder": "Írd be a várost (pl. Budapest, Magyarország)",
+    "setLocation": "Helyszín beállítása",
+    "finding": "Keresés...",
+    "usingSavedLocation": "✅ A mentett helyszínt használom",
+    "usingLocation": "✅ Helyszín használata: {{displayName}}",
+    "locationDetected": "✅ Helyszín észlelve: {{lat}}, {{lng}}",
+    "locationNotFound": "❌ A helyszín nem található. Próbálj másik helyszínt.",
+    "geocodeFailed": "❌ A helyszín geokódolása sikertelen. Próbáld újra.",
+    "clearLocation": "Helyszín törlése"
   },
   "adoption": {
     "title": "Kérések",

@@ -52,15 +52,29 @@
     "allGenders": "Alle Geschlechter",
     "allSizes": "Alle Größen",
     "allLocations": "Alle Orte",
+    "allAges": "Alle Alter",
     "noResults": "Keine Hunde entsprechen deinen Suchkriterien.",
     "showAdvanced": "Erweiterte Suche",
     "hideAdvanced": "Erweiterte Suche ausblenden",
     "gender": "Geschlecht",
     "size": "Größe",
-    "location": "Ort"
+    "location": "Ort",
+    "age": "Alter",
+    "age.puppy": "Welpe (0-1 Jahr)",
+    "age.young": "Junger Hund (1-3 Jahre)",
+    "age.adult": "Erwachsener (3-8 Jahre)",
+    "age.senior": "Senior (8+ Jahre)"
   },
   "doglist": {
-    "title": "Wähle deinen treuen Freund"
+    "title": "Wähle deinen treuen Freund",
+    "loading": "Hunde werden geladen...",
+    "empty": "Keine Hunde vorhanden.",
+    "addFirst": "Ersten Hund hinzufügen",
+    "confirmRemove": "Sind Sie sicher, dass Sie {{name}} entfernen möchten?",
+    "failedToRemove": "Entfernen des Hundes fehlgeschlagen",
+    "failedToLoad": "Laden der Hunde fehlgeschlagen",
+    "loadError": "Laden der Hunde fehlgeschlagen",
+    "refreshError": "Aktualisieren der Hunde nach Update fehlgeschlagen"
   },
   "register": {
     "register": "Registrieren",
@@ -239,6 +253,18 @@
   },
   "language": {
     "selectAria": "Sprache auswählen"
+  },
+  "location": {
+    "enterLocation": "Geben Sie Ihren Standort unten ein, um Hunde nach Entfernung sortiert zu sehen:",
+    "cityPlaceholder": "Stadt eingeben (z.B. Berlin, Deutschland)",
+    "setLocation": "Standort festlegen",
+    "finding": "Suche...",
+    "usingSavedLocation": "✅ Ich verwende meinen gespeicherten Standort",
+    "usingLocation": "✅ Standort verwenden: {{displayName}}",
+    "locationDetected": "✅ Standort erkannt: {{lat}}, {{lng}}",
+    "locationNotFound": "❌ Standort nicht gefunden. Versuchen Sie einen anderen Standort.",
+    "geocodeFailed": "❌ Standort-Geocodierung fehlgeschlagen. Versuchen Sie es erneut.",
+    "clearLocation": "Standort löschen"
   },
   "adoption": {
     "title": "Anfragen",

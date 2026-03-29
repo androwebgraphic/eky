@@ -45,6 +45,34 @@ console.log('[WISHLIST DEBUG] After router.get(/wishlist)');
 router.get('/search', auth, searchUsers);
 router.put('/last-visit', auth, updateLastVisit);
 
+// Update user's location coordinates
+router.put('/location', auth, async (req, res) => {
+  try {
+    const { lat, lng } = req.body;
+    
+    if (typeof lat !== 'number' || typeof lng !== 'number') {
+      return res.status(400).json({ message: 'Invalid coordinates' });
+    }
+    
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { 
+        coordinates: {
+          type: 'Point',
+          coordinates: [lng, lat] // GeoJSON format: [longitude, latitude]
+        }
+      },
+      { new: true }
+    ).select('-password');
+    
+    console.log('[USER LOCATION] Updated location for user', user.username, ':', { lat, lng });
+    res.json(user);
+  } catch (error) {
+    console.error('[USER LOCATION] Error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Superadmin routes for managing all users
 router.get('/all', auth, isSuperAdmin, getAllUsers);
 

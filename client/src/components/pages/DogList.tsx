@@ -166,6 +166,10 @@ function DogList() {
 				setLocationMessage(`✅ Using location: ${data[0].display_name}`);
 				setShowManualLocationInput(false);
 				setManualLocationInput('');
+				
+				// Save to localStorage for persistence across page refreshes
+				localStorage.setItem('userLocation', JSON.stringify({ lat, lng, displayName: data[0].display_name }));
+				console.log('[MANUAL LOCATION] ✅ Saved to localStorage');
 			} else {
 				setLocationMessage('❌ Location not found. Please try a different location name.');
 			}
@@ -177,21 +181,75 @@ function DogList() {
 		}
 	};
 
-	// Get user's location for distance-based sorting
-	useEffect(() => {
+	// Load location from user profile, localStorage, or request geolocation
+	// Only run once on mount (not on every user update)
+	const hasTriedGeolocation = React.useRef(false);
+	
+	React.useEffect(() => {
+		console.log('[LOCATION] ========== CHECKING LOCATION SOURCES ==========');
+		
+		// Prevent repeated geolocation attempts
+		if (hasTriedGeolocation.current) {
+			console.log('[LOCATION] Already attempted geolocation, skipping');
+			return;
+		}
+		hasTriedGeolocation.current = true;
+		
+		// Priority 1: Check if user has location in their profile
+		if (user && user.coordinates && user.coordinates.coordinates && 
+		    user.coordinates.coordinates[0] !== 0 && user.coordinates.coordinates[1] !== 0) {
+			const userLat = user.coordinates.coordinates[1]; // Latitude is second element
+			const userLng = user.coordinates.coordinates[0]; // Longitude is first element
+			console.log('[LOCATION] ✅ Found location in user profile:', { lat: userLat, lng: userLng });
+			setUserLocation({ lat: userLat, lng: userLng });
+			setLocationPermission('granted');
+			setLocationMessage('✅ Using your saved location');
+			console.log('[LOCATION] ℹ️ Dogs will be sorted by distance from your saved location');
+			return;
+		}
+		
+		// Priority 2: Check localStorage
+		const savedLocation = localStorage.getItem('userLocation');
+		console.log('[LOCATION] savedLocation from localStorage:', savedLocation);
+		
+		if (savedLocation) {
+			try {
+				const parsed = JSON.parse(savedLocation);
+				console.log('[LOCATION] ✅ Parsed saved location:', parsed);
+				console.log('[LOCATION] Setting userLocation state...');
+				setUserLocation({ lat: parsed.lat, lng: parsed.lng });
+				setLocationPermission('granted');
+				setLocationMessage(`✅ Using location: ${parsed.displayName}`);
+				console.log('[LOCATION] ✅ State updated, skipping geolocation');
+				console.log('[LOCATION] ℹ️ Dogs will be sorted by distance from saved location');
+				return;
+			} catch (e) {
+				console.error('[LOCATION] ❌ Failed to parse saved location:', e);
+				localStorage.removeItem('userLocation');
+				console.log('[LOCATION] Removed invalid saved location');
+			}
+		} else {
+			console.log('[LOCATION] No saved location found in localStorage');
+		}
+		
+		// Priority 3: Try browser geolocation (once only)
 		const getUserLocation = () => {
 			if (!navigator.geolocation) {
 				console.log('[LOCATION] ❌ Geolocation not supported by browser');
 				setLocationPermission('denied');
-				setLocationMessage('ℹ️ Geolocation not supported. Enter your location manually for distance-based sorting.');
+				setLocationMessage('ℹ️ Enter your location below to see dogs sorted by distance from you:');
 				setShowManualLocationInput(true);
 				console.log('[LOCATION] ℹ️ Dogs will be sorted by creation date (newest first)');
 				return;
 			}
 			
-			console.log('[LOCATION] 🔍 Requesting user location...');
+			console.log('[LOCATION] 🔍 Requesting user location (more aggressive)...');
 			
-			// Single attempt with generous timeout
+			// Always show manual input immediately (don't wait for geolocation)
+			setLocationMessage('ℹ️ Enter your location below to see dogs sorted by distance from you:');
+			setShowManualLocationInput(true);
+			
+			// More aggressive geolocation: shorter timeout, higher accuracy
 			navigator.geolocation.getCurrentPosition(
 				(position) => {
 					const { latitude, longitude } = position.coords;
@@ -200,6 +258,20 @@ function DogList() {
 					setLocationPermission('granted');
 					setLocationMessage(`✅ Location detected: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
 					console.log('[LOCATION] ℹ️ Dogs will be sorted by distance from your location');
+					
+					// Hide manual input when location is detected
+					setShowManualLocationInput(false);
+					
+					// Save to user profile for future use
+					saveLocationToProfile(latitude, longitude);
+					
+					// Also save to localStorage
+					localStorage.setItem('userLocation', JSON.stringify({ 
+						lat: latitude, 
+						lng: longitude, 
+						displayName: `Detected: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}` 
+					}));
+					console.log('[LOCATION] ✅ Saved to localStorage');
 				},
 				(error) => {
 					console.warn('[LOCATION] ❌ Geolocation error:', error);
@@ -209,10 +281,10 @@ function DogList() {
 					let errorMsg = '';
 					switch (error.code) {
 						case 1:
-							errorMsg = 'Location permission denied by user';
+							errorMsg = 'Location permission denied';
 							break;
 						case 2:
-							errorMsg = 'Location unavailable (position unavailable)';
+							errorMsg = 'Location unavailable';
 							break;
 						case 3:
 							errorMsg = 'Location request timed out';
@@ -223,22 +295,47 @@ function DogList() {
 					
 					console.log('[LOCATION] ℹ️ ' + errorMsg);
 					setLocationPermission('denied');
-					setLocationMessage(`ℹ️ ${errorMsg}. Enter your location manually for distance-based sorting.`);
-					setShowManualLocationInput(true);
+					// Don't overwrite location message if already set
+					if (!locationMessage) {
+						setLocationMessage(`ℹ️ Enter your location below to see dogs sorted by distance from you:`);
+					}
 					console.log('[LOCATION] ℹ️ Dogs will be sorted by creation date (newest first)');
 					console.log('[LOCATION] 💡 To enable location-based sorting, allow location access in your browser settings');
 				},
 				{ 
-					timeout: 60000, // 60 seconds - much longer for desktop browsers
-					enableHighAccuracy: false, // Don't need high accuracy for distance sorting
-					maximumAge: 300000 // Accept cached position up to 5 minutes old
+					timeout: 10000, // 10 seconds - even shorter timeout
+					enableHighAccuracy: true, // Request higher accuracy
+					maximumAge: 60000 // Accept cached position up to 1 minute old (fresher)
 				}
 			);
 		};
 		
-		// Only try to get location once
+		// Function to save location to user profile
+		const saveLocationToProfile = async (lat: number, lng: number) => {
+			try {
+				const authToken = token || localStorage.getItem('token');
+				if (!authToken || !user) return;
+				
+				const resp = await fetch(`${getApiUrl()}/api/users/location`, {
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${authToken}`
+					},
+					body: JSON.stringify({ lat, lng })
+				});
+				
+				if (resp.ok) {
+					console.log('[LOCATION] ✅ Location saved to user profile');
+				}
+			} catch (e) {
+				console.warn('[LOCATION] Failed to save location to profile:', e);
+			}
+		};
+		
+		// Try to get location (once only)
 		getUserLocation();
-	}, []); // Empty dependency array - run once on mount
+	}, [user]); // Only run when user logs in, not on token updates
 
 	// Read URL search parameters from footer search modal
 	useEffect(() => {
@@ -349,7 +446,11 @@ function DogList() {
 				url += `?${params.toString()}`;
 			}
 			
-			console.log('[DOG-LIST] Fetching from URL:', url);
+			console.log('[DOG-LIST] ================================================');
+		console.log('[DOG-LIST] Fetching from URL:', url);
+		console.log('[DOG-LIST] userLocation state:', userLocation);
+		console.log('[DOG-LIST] locationMessage state:', locationMessage);
+		console.log('[DOG-LIST] ================================================');
 			
 			fetch(url, { headers })
 				.then(res => {
@@ -567,6 +668,9 @@ function DogList() {
 							setUserLocation(null);
 							setLocationMessage('');
 							setShowManualLocationInput(true);
+							// Clear from localStorage
+							localStorage.removeItem('userLocation');
+							console.log('[LOCATION] ✅ Cleared location from localStorage');
 						}}
 						style={{
 							padding: '6px 12px',
@@ -732,22 +836,22 @@ function DogList() {
 								aria-label="Close"
 								title="Close"
 							>
-								<span>×</span>
+								<span>&times;</span>
 							</button>
-                          <DogDetails
-                                key={detailsDog._id}
-                                {...detailsDog}
-                                gender={
-                                  detailsDog.gender === 'male' || detailsDog.gender === 'female'
-                                    ? detailsDog.gender
-                                    : undefined
-                                }
-                                user={detailsDog.user || null}
-                                place={detailsDog.place}
-                                location={detailsDog.location || detailsDog.place}
-                                onClose={() => setDetailsDog(null)}
-                                onEdit={handleEdit}
-                          />
+							<DogDetails
+								key={detailsDog._id}
+								{...detailsDog}
+								gender={
+									detailsDog.gender === 'male' || detailsDog.gender === 'female'
+										? detailsDog.gender
+										: undefined
+								}
+								user={detailsDog.user || null}
+								place={detailsDog.place}
+								location={detailsDog.location || detailsDog.place}
+								onClose={() => setDetailsDog(null)}
+								onEdit={handleEdit}
+							/>
 						</div>
 					</div>
 				) : (
@@ -759,7 +863,7 @@ function DogList() {
 								aria-label="Close"
 								title="Close"
 							>
-								<span>×</span>
+								<span>&times;</span>
 							</button>
 							<DogDetails
 								key={detailsDog._id}
@@ -790,7 +894,7 @@ function DogList() {
 							aria-label="Close"
 							title="Close"
 						>
-							<span>×</span>
+							<span>&times;</span>
 						</button>
 						<h3 className="doglist-map-title">
 							📍 {mapDog.name} - {mapDog.location}

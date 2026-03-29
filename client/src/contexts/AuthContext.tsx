@@ -11,6 +11,10 @@ interface User {
   role?: string;
   _profilePicCacheBuster?: string;
   lastVisit?: string | Date;
+  coordinates?: {
+    type: string;
+    coordinates: [number, number]; // [longitude, latitude]
+  };
 }
 
 interface AuthContextType {

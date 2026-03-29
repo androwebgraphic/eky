@@ -12,3 +12,4 @@ server/node_modules/
 client/screenshots/
 .env
 .DS_Store
+*.md

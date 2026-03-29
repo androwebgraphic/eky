@@ -77,6 +77,8 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 const { optimizeImage } = require('../utils/imageOptimizer');
+const cloudinary = require('cloudinary').v2;
+const { uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 
 const getAllUsers = async (req, res) => {
 	try {
@@ -260,64 +262,66 @@ const updateProfile = async (req, res) => {
 		// Handle profile picture upload if provided
 		let profilePictureUrl = '';
 		if (req.file) {
-			// Use uploads directory at project root (parent of server directory)
-			const projectRoot = path.join(__dirname, '..');
-			// Convert userId to string for path operations
-			const userIdStr = userId.toString();
-			const uploadDir = path.join(projectRoot, 'uploads', 'users', userIdStr);
-			
-			// Create directory if it doesn't exist
-			   if (!fs.existsSync(uploadDir)) {
-				   try {
-					   fs.mkdirSync(uploadDir, { recursive: true });
-				   } catch (mkdirErr) {
-					   console.error('[PROFILE UPLOAD ERROR] Failed to create uploadDir:', uploadDir, mkdirErr);
-					   return res.status(500).json({ message: 'Failed to create upload directory.' });
-				   }
-			   }
-
 			try {
-				   // Validate file buffer
-				   if (!req.file.buffer || !req.file.buffer.length) {
-					   console.error('[PROFILE UPLOAD ERROR] File buffer is empty!');
-					   return res.status(400).json({ message: 'Uploaded file is empty or invalid.' });
-				   }
-				   // Log first 16 bytes for debug
-				   console.log('[PROFILE UPLOAD DEBUG] First 16 bytes:', req.file.buffer.slice(0, 16));
-				   // Optionally, check mimetype
-				   if (!req.file.mimetype.startsWith('image/')) {
-					   console.error('[PROFILE UPLOAD ERROR] File is not an image:', req.file.mimetype);
-					   return res.status(400).json({ message: 'Uploaded file is not an image.' });
-				   }
-				// Use optimizer to process profile picture with metadata stripping
-				const ext = '.png';
-				const filename = `profile-${Date.now()}${ext}`;
-				const filepath = path.join(uploadDir, filename);
-				console.log('[PROFILE UPLOAD FINAL DEBUG] Optimized PNG branch. Filename:', filename, 'Filepath:', filepath);
-				try {
-					const optimizedBuffer = await optimizeImage(req.file.buffer, {
-						width: 300,
-						height: 300,
-						format: 'png',
-						quality: 85
+				// Validate file buffer
+				if (!req.file.buffer || !req.file.buffer.length) {
+					console.error('[PROFILE UPLOAD ERROR] File buffer is empty!');
+					return res.status(400).json({ message: 'Uploaded file is empty or invalid.' });
+				}
+				
+				// Validate it's an image
+				if (!req.file.mimetype.startsWith('image/')) {
+					console.error('[PROFILE UPLOAD ERROR] File is not an image:', req.file.mimetype);
+					return res.status(400).json({ message: 'Uploaded file is not an image.' });
+				}
+
+				// Delete old profile picture from Cloudinary if it exists and is a Cloudinary URL
+				const user = await User.findById(userId);
+				if (user && user.profilePicture && user.profilePicture.includes('cloudinary.com')) {
+					try {
+						// Extract public ID from Cloudinary URL
+						const urlParts = user.profilePicture.split('/');
+						const filename = urlParts[urlParts.length - 1];
+						const folder = urlParts[urlParts.length - 2];
+						const publicId = `${folder}/${filename}`;
+						console.log('[CLOUDINARY] Deleting old profile picture:', publicId);
+						await deleteFromCloudinary(publicId);
+					} catch (deleteErr) {
+						console.error('[CLOUDINARY] Error deleting old profile picture:', deleteErr.message);
+					}
+				}
+
+				// Upload new profile picture to Cloudinary
+				console.log('[CLOUDINARY] Uploading new profile picture for user:', userId);
+				const userIdStr = userId.toString();
+				
+				// Upload multiple sizes for profile picture
+				const sizes = [300, 150, 64];
+				const uploadPromises = sizes.map(async (size) => {
+					const publicId = `users/${userIdStr}/profile-${size}`;
+					return uploadToCloudinary(req.file.buffer, {
+						publicId: publicId,
+						folder: 'users',
+						transformation: [
+							{ width: size, height: size, crop: 'fill', quality: 'auto', fetch_format: 'auto' }
+						]
 					});
-					fs.writeFileSync(filepath, optimizedBuffer);
-				} catch (sharpErr) {
-					console.error('[PROFILE UPLOAD ERROR] Image optimization failed:', filepath, sharpErr);
-					return res.status(500).json({ message: 'Failed to save processed image.' });
+				});
+
+				// Wait for all sizes to upload
+				const uploadResults = await Promise.all(uploadPromises);
+				console.log('[CLOUDINARY] Uploaded profile picture sizes:', uploadResults.map(r => r.width));
+
+				// Use the 300px version as the main profile picture
+				const mainUpload = uploadResults.find(r => r.width === 300);
+				if (!mainUpload) {
+					throw new Error('Failed to upload profile picture');
 				}
-				// Double-check file existence after write
-				if (!fs.existsSync(filepath)) {
-					console.error('[PROFILE UPLOAD ERROR] File not found after sharp.toFile:', filepath);
-					return res.status(500).json({ message: 'Image file missing after save.' });
-				}
-				console.log('Image processing completed successfully');
-				// Set relative URL for database storage (use /u/ path to match server route)
-				profilePictureUrl = `/u/users/${userIdStr}/${filename}`;
-				console.log('Profile picture URL:', profilePictureUrl);
-			} catch (imageError) {
-				console.log('Error processing profile picture:', imageError);
-				return res.status(500).json({ message: 'Error processing profile picture' });
+				profilePictureUrl = mainUpload.url;
+				console.log('[CLOUDINARY] Profile picture URL:', profilePictureUrl);
+			} catch (cloudinaryError) {
+				console.error('[PROFILE UPLOAD ERROR] Cloudinary upload failed:', cloudinaryError);
+				return res.status(500).json({ message: 'Failed to upload profile picture to cloud storage.' });
 			}
 		}
 		

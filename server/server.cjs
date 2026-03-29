@@ -13,6 +13,7 @@ const userRoutes = require("./routes/userRoutes.js");
 const dogRoutes = require("./routes/dogRoutes.js");
 const authRoutes = require("./routes/authRoutes.js");
 const statsRoutes = require("./routes/statsRoutes.js");
+const testCloudinaryRoute = require("./routes/test-cloudinary-route.js");
 const auth = require('./middleware/auth.js');
 const cors = require('cors');
 const chatRoutes = require('./routes/chatRoutes.js'); // <-- Add this here
@@ -138,6 +139,7 @@ app.use("/api/dogs", dogRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/adoption", adoptionRoutes);
 app.use("/api/stats", statsRoutes);
+app.use("/api/test", testCloudinaryRoute);
 
 // Health check endpoint - must be after CORS middleware
 app.get('/health', (req, res) => {

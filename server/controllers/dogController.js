@@ -628,8 +628,20 @@ const createDog = async (req, res) => {
       user: req.user._id,
       images: []
     });
+    
+    // Geocode the location to get coordinates for location-based sorting
+    console.log('[CREATE DOG] Geocoding location:', location);
+    const coordinates = await geocodeLocation(location);
+    if (coordinates) {
+      dog.coordinates = coordinates;
+      console.log('[CREATE DOG] Successfully geocoded:', coordinates);
+    } else {
+      console.warn('[CREATE DOG] Failed to geocode location, setting default [0,0]');
+      dog.coordinates = { type: 'Point', coordinates: [0, 0] };
+    }
+    
     await dog.save();
-    console.log(`[CONFIRM ADOPTION] Dog ${dog._id} after confirm/save. adoptionStatus: ${dog.adoptionStatus}, adoptionQueue:`, dog.adoptionQueue);
+    console.log(`[CREATE DOG] Dog ${dog._id} saved with coordinates:`, dog.coordinates);
 
     const uploadDir = path.join(process.cwd(), 'uploads', 'dogs', String(dog._id));
 

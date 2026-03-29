@@ -1,4 +1,3 @@
-const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 const Dog = require('../models/dogModel');
@@ -94,6 +93,10 @@ const updateDog = async (req, res) => {
     const editableFields = [
       'name', 'breed', 'age', 'color', 'location', 'description', 'size', 'gender', 'vaccinated', 'neutered', 'coordinates'
     ];
+    
+    // Check if location is being updated
+    const locationChanged = req.body.location && req.body.location !== dog.location;
+    
     editableFields.forEach(field => {
       if (Object.prototype.hasOwnProperty.call(req.body, field)) {
         let value = req.body[field];
@@ -111,25 +114,26 @@ const updateDog = async (req, res) => {
         if (field === 'age' && value !== undefined && value !== null && value !== '') {
           value = Number(value);
         }
-        // Parse coordinates from JSON string if needed
-        if (field === 'coordinates' && typeof value === 'string' && value.trim() !== '') {
-          try {
-            const parsed = JSON.parse(value);
-            // Validate GeoJSON Point structure
-            if (parsed && parsed.type === 'Point' && Array.isArray(parsed.coordinates) && parsed.coordinates.length === 2) {
-              value = parsed;
-            } else {
-              console.warn('[UPDATE DOG] Invalid coordinates structure, skipping:', parsed);
-              return;
-            }
-          } catch (parseErr) {
-            console.warn('[UPDATE DOG] Failed to parse coordinates JSON:', value, parseErr);
-            return;
-          }
+        // Don't auto-update coordinates field from req.body - we'll geocode it instead
+        if (field === 'coordinates') {
+          return; // Skip coordinates - we'll geocode location instead
         }
         dog[field] = value;
       }
     });
+    
+    // Geocode location if it changed
+    if (locationChanged && dog.location) {
+      console.log('[UPDATE DOG] Location changed, re-geocoding:', dog.location);
+      const coordinates = await geocodeLocation(dog.location);
+      if (coordinates) {
+        dog.coordinates = coordinates;
+        console.log('[UPDATE DOG] Successfully re-geocoded:', coordinates);
+      } else {
+        console.warn('[UPDATE DOG] Failed to re-geocode location, keeping existing or setting default [0,0]');
+        dog.coordinates = { type: 'Point', coordinates: [0, 0] };
+      }
+    }
 
     // Ensure dog.images is always an array
     if (!Array.isArray(dog.images)) dog.images = [];

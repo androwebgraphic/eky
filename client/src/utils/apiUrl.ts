@@ -9,9 +9,22 @@ export const getApiUrl = (): string => {
     return process.env.REACT_APP_API_URL;
   }
   
-  // Dynamically construct URL based on current protocol
-  const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
+  // Check if we're on Render production
   const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+  
+  // Known production backend URLs - add your Render backend URL here
+  if (hostname.includes('onrender.com') || hostname.includes('render.com')) {
+    // Try to extract the service name from frontend URL and construct backend URL
+    // If frontend is sharedog-abc.onrender.com, backend should be sharedog-backend-abc.onrender.com
+    if (hostname.includes('sharedog')) {
+      return 'https://sharedog-backend-o8ta.onrender.com';
+    }
+    // Fallback for other Render apps
+    return 'https://sharedog-backend-o8ta.onrender.com';
+  }
+  
+  // Dynamically construct URL based on current protocol for local development
+  const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:';
   
   return `${protocol}//${hostname}:3001`;
 };

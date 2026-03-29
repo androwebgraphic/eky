@@ -243,6 +243,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     console.log('[PROFILE SAVE] Starting profile update...');
     console.log('[PROFILE SAVE] Token exists:', !!token);
     console.log('[PROFILE SAVE] Form data:', formData);
+    console.log('[PROFILE SAVE] Profile picture exists:', !!profilePicture);
     
     if (!token) {
       console.error('[PROFILE SAVE] NO TOKEN!');
@@ -267,26 +268,32 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       console.log('[PROFILE SAVE] Health check status:', healthResponse.status);
       
       console.log('[PROFILE SAVE] Step 2: Sending PUT request to /api/users/profile');
-      console.log('[PROFILE SAVE] Request body:', JSON.stringify({
-        name: formData.name,
-        username: formData.username,
-        email: formData.email,
-        phone: formData.phone,
-      }));
+      
+      // Use FormData to send both text fields and file
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('username', formData.username);
+      formDataToSend.append('email', formData.email);
+      if (formData.phone) {
+        formDataToSend.append('phone', formData.phone);
+      }
+      
+      // Add profile picture if selected
+      if (profilePicture) {
+        console.log('[PROFILE SAVE] Adding profile picture to FormData');
+        formDataToSend.append('profilePicture', profilePicture);
+      }
+      
+      console.log('[PROFILE SAVE] FormData entries:', Array.from(formDataToSend.entries()));
       
       const jsonResponse = await fetch(`${API_URL}/api/users/profile`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
+          // Note: Don't set Content-Type when sending FormData - browser sets it automatically with boundary
         },
-        body: JSON.stringify({
-          name: formData.name,
-          username: formData.username,
-          email: formData.email,
-          phone: formData.phone,
-        }),
-        signal: AbortSignal.timeout(10000)
+        body: formDataToSend,
+        signal: AbortSignal.timeout(30000) // Increased timeout for file upload
       });
       
       console.log('[PROFILE SAVE] Response received! Status:', jsonResponse.status);
@@ -301,6 +308,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       const data = await jsonResponse.json();
       console.log('[PROFILE SAVE] Success! Response data:', data);
       console.log('[PROFILE SAVE] User data:', data.user);
+      console.log('[PROFILE SAVE] Profile picture URL:', data.user?.profilePicture);
       
       handleSuccess(data.user);
       

@@ -3866,35 +3866,38 @@ h1.extra-large {
 }
 
 .header-message-wrapper {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
+  width: 100% !important;
+  position: relative !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 .header-message-wrapper.mobile {
   -webkit-box-flex: 0;
-      -ms-flex-positive: 0;
-          flex-grow: 0;
-  position: relative;
-  width: auto;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+}
+.header-message-wrapper.desktop {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
 }
 .header-message-wrapper.desktop {
   -webkit-box-flex: 1;
       -ms-flex-positive: 1;
           flex-grow: 1;
-  position: absolute;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-          transform: translateX(-50%);
-  max-width: 500px;
+  position: relative;
+  left: 0;
+  -webkit-transform: none;
+          transform: none;
+  max-width: 100%;
   width: 100%;
-  margin-left: 0;
-  margin-right: 0;
+  margin: 0;
 }
 
 .header-message-text {

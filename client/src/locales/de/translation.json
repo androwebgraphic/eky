@@ -84,10 +84,11 @@
     "phone": "Mobiltelefon",
     "password": "Passwort",
     "passwordAgain": "Passwort wiederholen",
-    "person": "Private Person oder Verein?",
-    "remember": "Erinnere dich an mich",
+    "person": "Privatperson oder Verein?",
+    "remember": "Eingeloggt bleiben",
     "already": "Schon ein Nutzer?",
-    "altRegister": "Oder registrieren Sie mit Ihrem Konto..."
+    "altRegister": "Oder registrieren Sie mit Ihrem Konto...",
+    "acceptTermsRequired": "Sie müssen die Nutzungsbedingungen akzeptieren, um sich zu registrieren"
   },
   "registerOptions": {
     "private": "Private Person",

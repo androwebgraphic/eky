@@ -127,7 +127,7 @@ const Header: React.FC = () => {
 
   // Handle notification bell click
   const handleNotificationClick = () => {
-    // Store the current new dogs in a separate state for the modal
+    // Store# Store current new dogs in a separate state for the modal
     setNewDogsForModal([...newDogs]);
     setShowNewDogsModal(true);
     // Don't update lastVisit here - update it when modal closes
@@ -201,7 +201,7 @@ const Header: React.FC = () => {
       const mobileMenu = document.querySelector('.authenticated-mobile-menu');
       const hamburgerBtn = document.querySelector('.authenticated-hamburger-btn');
       
-      // Close if clicking outside both the menu and hamburger button
+      // Close if clicking outside both menu and hamburger button
       if (mobileMenuOpen && 
           mobileMenu && 
           hamburgerBtn && 
@@ -497,36 +497,30 @@ const Header: React.FC = () => {
           )}
         </header>
 
-        {/* Message - show for all non-authenticated users */}
+        {/* Message bar - positioned UNDER header for unauthenticated users */}
         {!isAuthenticated && (
           <div 
-            className="header-message-wrapper"
             style={{
-              position: 'fixed',
-              top: '62px',
-              left: 0,
-              right: 0,
-              padding: '12px 20px',
-              background: 'rgba(0, 0, 0, 0.9)',
-              zIndex: 998,
+              padding: '8px 20px',
+              background: '#ff0000',
+              zIndex: 99999,
               textAlign: 'center',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center'
+              display: 'block',
+              width: '100%',
+              minHeight: '35px',
+              height: 'auto',
+              position: 'absolute',
+              top: '50px',
+              left: '0',
+              right: '0',
+              margin: '0',
+              border: '3px solid #00ff00',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              color: '#ffffff'
             }}
           >
-            <p 
-              className="header-message-text"
-              style={{
-                margin: 0,
-                color: '#ff9800',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                textAlign: 'center'
-              }}
-            >
-              {t('nav.mustBeLoggedIn')}
-            </p>
+            {t('nav.mustBeLoggedIn')}
           </div>
         )}
         </>

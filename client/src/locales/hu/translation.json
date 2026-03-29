@@ -72,16 +72,17 @@
   },
   "register": {
     "register": "Regisztráció",
-    "name": "A neved",
+    "name": "Az Ön neve",
     "username": "Felhasználónév",
     "email": "E-mail",
     "phone": "Mobiltelefon",
     "password": "Jelszó",
     "passwordAgain": "Jelszó újra",
     "person": "Magánszemély vagy Egyesület?",
-    "remember": "Emlékezz rám",
-    "already": "Már felhasználó vagy?",
-    "altRegister": "Vagy regisztrálj a fiókkal..."
+    "remember": "Emlékezzen rám",
+    "already": "Már felhasználó?",
+    "altRegister": "Vagy regisztráljon a fiókjával...",
+    "acceptTermsRequired": "El kell fogadnia a Felhasználási feltételeket a regisztrációhoz"
   },
   "registerOptions": {
     "private": "Magánszemély",

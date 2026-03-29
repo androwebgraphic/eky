@@ -130,39 +130,10 @@ const RegisterForm: React.FC = () => {
         <input type="password" id="register-passwordAgain" name="passwordAgain" autoComplete="new-password" placeholder={t('register.passwordAgain')} {...register('passwordAgain')} />
         <p className="error">{errors.passwordAgain?.message as string}</p>
 
-        <div style={{ margin: '1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <label htmlFor="register-remember" style={{ cursor: 'pointer', fontSize: '1rem' }}>
-            <input 
-              type="checkbox" 
-              id="register-remember" 
-              name="remember" 
-              autoComplete="off" 
-              {...register('remember')}
-              style={{
-                width: '20px',
-                height: '20px',
-                cursor: 'pointer',
-                accentColor: '#1976d2'
-              }}
-            />
-            <span style={{ marginLeft: '0.5rem', cursor: 'pointer' }}>{t('register.remember')}</span>
-          </label>
-        </div>
-
         <div style={{ margin: '1rem 0' }}>
-          <p style={{ margin: 0, marginBottom: '0.5rem', fontSize: '1rem' }}>
-            <strong>{t('register.already')}</strong>
+          <p style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', color: '#666', fontStyle: 'italic', fontWeight: 'bold' }}>
+            * {t('register.acceptTermsRequired') || 'You must accept the Terms of Use to register'}
           </p>
-          <p 
-            className="log" 
-            onClick={() => { navigate('/logiranje'); }}
-            style={{ margin: 0, cursor: 'pointer', color: '#1976d2' }}
-          >
-            {t('nav.login')}...
-          </p>
-        </div>
-
-        <div style={{ margin: '1rem 0' }}>
           <input
             type="checkbox"
             id="register-acceptTerms"

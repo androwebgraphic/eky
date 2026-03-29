@@ -83,7 +83,8 @@
     "person": "Private person or Association?",
     "remember": "Remember me",
     "already": "Already a user?",
-    "altRegister": "Or register with your account..."
+    "altRegister": "Or register with your account...",
+    "acceptTermsRequired": "You must accept the Terms of Use to register"
   },
   "registerOptions": {
     "private": "Private person",

@@ -81,14 +81,15 @@
     "register": "Registracija",
     "name": "Vaše ime",
     "username": "Korisničko ime",
-    "email": "Vaša e-mail",
-    "phone": "Mobilni telefon",
-    "password": "Zaporka",
-    "passwordAgain": "Ponovi zaporku",
+    "email": "Email",
+    "phone": "Broj mobitela",
+    "password": "Lozinka",
+    "passwordAgain": "Ponovite lozinku",
     "person": "Privatna osoba ili Udruga?",
     "remember": "Zapamti me",
-    "already": "Već si korisnik?",
-    "altRegister": "Ili se registrirajte s Vašim računom..."
+    "already": "Već ste korisnik?",
+    "altRegister": "Ili se registrirajte sa svojim računom...",
+    "acceptTermsRequired": "Morate prihvatiti Uvjete korištenja za registraciju"
   },
   "registerOptions": {
     "private": "Privatna osoba",

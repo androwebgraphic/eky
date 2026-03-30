@@ -139,6 +139,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loadingRequests, setLoadingRequests] = useState(false);
   const socketRef = useRef<any>(null);
+  const [activeTab, setActiveTab] = useState<'online' | 'offline'>('online');
 
   const sendMessage = async () => {
     if (!selectedConvo || !token || !input.trim()) {
@@ -570,14 +571,24 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     // Listen for openChat event from backend (auto-open chat)
     socketRef.current.on('openChat', async (data) => {
       console.log('[SOCKET] openChat event received:', data);
-      if (data.conversationId && !selectedConvo) {
-        // Find the conversation in online users or create it
-        const otherUser = onlineUsers.find(u => 
-          selectedConvo?.participants.includes(u._id) || 
-          u._id !== user._id
-        );
-        if (otherUser) {
-          await startConversation(otherUser._id);
+      if (data.conversationId) {
+        try {
+          // Fetch the conversation details
+          const res = await fetch(`${getApiUrl()}/api/chat/conversations/${data.conversationId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const convo = await res.json();
+            // Find the other participant's ID
+            const otherUserId = convo.participants.find((id: string) => id !== user._id);
+            if (otherUserId) {
+              // Start conversation with the other user
+              await startConversation(otherUserId);
+              console.log('[SOCKET] Chat opened automatically for conversation:', data.conversationId);
+            }
+          }
+        } catch (err) {
+          console.error('[SOCKET] Error opening chat:', err);
         }
       }
     });
@@ -986,7 +997,47 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
           <span>×</span>
         </button>
         <div className="chat-app-sidebar">
-        <div className="chat-users-header">{t('onlineUsers') || 'Online Users'}</div>
+        {/* Tab Navigation */}
+        <div style={{ display: 'flex', borderBottom: '1px solid #eee', marginBottom: '8px' }}>
+          <button
+            onClick={() => setActiveTab('online')}
+            style={{
+              flex: 1,
+              padding: '8px',
+              background: activeTab === 'online' ? '#e6f7ff' : 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              borderBottom: activeTab === 'online' ? '2px solid #1890ff' : '2px solid transparent',
+              fontWeight: activeTab === 'online' ? 'bold' : 'normal',
+              fontSize: '13px',
+              color: activeTab === 'online' ? '#1890ff' : '#666',
+              transition: 'all 0.2s'
+            }}
+          >
+            {t('online') || 'Online'} ({onlineUsers.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('offline')}
+            style={{
+              flex: 1,
+              padding: '8px',
+              background: activeTab === 'offline' ? '#e6f7ff' : 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              borderBottom: activeTab === 'offline' ? '2px solid #1890ff' : '2px solid transparent',
+              fontWeight: activeTab === 'offline' ? 'bold' : 'normal',
+              fontSize: '13px',
+              color: activeTab === 'offline' ? '#1890ff' : '#666',
+              transition: 'all 0.2s'
+            }}
+          >
+            {t('offline') || 'Offline'} ({allConversations.filter((c: any) => !onlineUsers.some((u: any) => u._id === c.otherUser?._id)).length})
+          </button>
+        </div>
+        
+        <div className="chat-users-header" style={{ marginTop: '8px' }}>
+          {activeTab === 'online' ? (t('onlineUsers') || 'Online Users') : (t('offlineUsers') || 'Offline Users')}
+        </div>
         <div style={{ position: 'relative' }}>
           <input
             className="chat-app-search"
@@ -1050,8 +1101,8 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
           </ul>
         )}
         
-        {/* Show offline conversations with unread messages */}
-        {allConversations.length > 0 && userSearchQuery.length === 0 && (
+        {/* Show offline conversations with unread messages - only in offline tab */}
+        {activeTab === 'offline' && allConversations.length > 0 && userSearchQuery.length === 0 && (
           <div style={{ marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
             <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px', paddingLeft: '8px' }}>
               {t('recentConversations') || 'Recent Conversations'}
@@ -1189,6 +1240,31 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (convo) {
+                        setSelectedConvo(convo);
+                        handleDeleteConversation();
+                      }
+                    }}
+                    style={{
+                      position: 'absolute',
+                      bottom: '8px',
+                      right: '8px',
+                      background: '#f44336',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '4px 8px',
+                      fontSize: '11px',
+                      cursor: 'pointer',
+                      zIndex: 2
+                    }}
+                    title="Delete conversation"
+                  >
+                    {t('delete') || 'Delete'}
+                  </button>
                 </li>
               );
             })}

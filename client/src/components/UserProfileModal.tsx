@@ -44,9 +44,20 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
 
   const getProfileImageUrl = (profilePicture: string | undefined, cacheBuster?: string) => {
     if (!profilePicture) return "../img/androcolored-80x80.jpg";
+    
+    // Check if URL is already absolute (Cloudinary URL) - do this FIRST
+    if (/^https?:\/\//i.test(profilePicture)) {
+      // Cloudinary absolute URL - don't prepend backend URL
+      if (cacheBuster) {
+        return `${profilePicture}?v=${cacheBuster}`;
+      }
+      return profilePicture;
+    }
+    
+    // For relative paths, normalize and prepend backend URL
     let url = profilePicture.startsWith('/') ? profilePicture : '/' + profilePicture;
     if (url.startsWith('/uploads/') || url.startsWith('/u/')) {
-      // Use to same logic as getApiUrl - use frontend's hostname
+      // Use same logic as getApiUrl - use frontend's hostname
       const apiBase = process.env.REACT_APP_API_URL || 
         (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
           ? `http://${window.location.hostname}:3001`
@@ -57,13 +68,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       }
       return fullUrl;
     }
-    if (/^https?:\/\//.test(url)) {
-      // Append cache buster to all external URLs (including Cloudinary)
-      if (cacheBuster) {
-        return `${url}?v=${cacheBuster}`;
-      }
-      return url;
-    }
+    
     return '../img/androcolored-80x80.jpg';
   };
 

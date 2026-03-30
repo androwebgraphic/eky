@@ -1182,6 +1182,7 @@ const adoptRequest = async (req, res) => {
       // Use io property from socket.js
       const { io } = require('../socket');
       if (io) {
+        // Send messages to both users
         io.to(ownerId).emit('receiveMessage', { 
           conversationId: convo._id, 
           sender: null, 
@@ -1196,6 +1197,10 @@ const adoptRequest = async (req, res) => {
           messageType: 'adoption',
           dogId: dog._id
         });
+        
+        // Auto-open chat for both users when adoption request is sent
+        io.to(ownerId).emit('openChat', { conversationId: convo._id });
+        io.to(adopterId).emit('openChat', { conversationId: convo._id });
       }
     } catch (e) {
       console.warn('Failed to emit adoption-request event to both users:', e);

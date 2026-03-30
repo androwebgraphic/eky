@@ -340,49 +340,7 @@ const Header: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', height: '50px' }}>
                 <LanguageSelector />
               </div>
-              {/* Chat icon with unread badge */}
-              <div 
-                style={{ 
-                  position: 'relative', 
-                  marginRight: '15px', 
-                  cursor: 'pointer',
-                  height: '50px',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-                onClick={() => window.dispatchEvent(new CustomEvent('openChatModal'))}
-                title={t('button.chat') || 'Chat'}
-              >
-                <span 
-                  className="sharedog-icon sharedog-Message" 
-                  style={{ fontSize: '28px', color: '#f5f5f5' }}
-                ></span>
-                {unreadMessages > 0 && (
-                  <span 
-                    style={{
-                      position: 'absolute',
-                      top: '-2px',
-                      right: '-2px',
-                      backgroundColor: '#f44336',
-                      color: 'white',
-                      borderRadius: '50%',
-                      width: '18px',
-                      height: '18px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '11px',
-                      fontWeight: 'bold',
-                      border: '1px solid white',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                      zIndex: 1
-                    }}
-                  >
-                    {unreadMessages > 9 ? '9+' : unreadMessages}
-                  </span>
-                )}
-              </div>
-              <div className="notification-wrapper" style={{ display: 'flex', alignItems: 'center', height: '50px' }}>
+                <div className="notification-wrapper" style={{ display: 'flex', alignItems: 'center', height: '50px' }}>
                 <NotificationBell count={newDogsCount} onClick={handleNotificationClick} />
               </div>
               {user && (
@@ -406,13 +364,23 @@ const Header: React.FC = () => {
                     src={
                       user.profilePicture 
                         ? (() => {
-                          let url = user.profilePicture.startsWith('/') ? user.profilePicture : '/' + user.profilePicture;
-                          const fullUrl = `${getApiUrl()}${url}`;
-                          if (user._profilePicCacheBuster) {
-                            // Use cache buster only (no dynamic Date.now())
-                            return `${fullUrl}?v=${user._profilePicCacheBuster}`;
+                          const pic = user.profilePicture;
+                          // Check if URL is already absolute (Cloudinary URL)
+                          if (/^https?:\/\//i.test(pic)) {
+                            // Cloudinary absolute URL - don't prepend backend URL
+                            if (user._profilePicCacheBuster) {
+                              return `${pic}?v=${user._profilePicCacheBuster}`;
+                            }
+                            return pic;
+                          } else {
+                            // Relative path - prepend backend URL
+                            let url = pic.startsWith('/') ? pic : '/' + pic;
+                            const fullUrl = `${getApiUrl()}${url}`;
+                            if (user._profilePicCacheBuster) {
+                              return `${fullUrl}?v=${user._profilePicCacheBuster}`;
+                            }
+                            return fullUrl;
                           }
-                          return fullUrl;
                         })()
                         : '../img/androcolored-80x80.jpg'
                     }

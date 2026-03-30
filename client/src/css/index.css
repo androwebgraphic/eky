@@ -1561,6 +1561,8 @@ button.view-full {
   padding: 0.6rem 0.8rem;
   border-radius: 0.6rem;
   font-weight: 600;
+  position: relative;
+  z-index: 999999;
 }
 
 .notification.success {

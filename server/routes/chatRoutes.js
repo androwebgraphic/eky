@@ -1,6 +1,6 @@
 
 const express = require('express');
-const { getOrCreateConversation, sendMessage, getMessages, getUserConversations, deleteChatHistory, blockUser, unblockUser } = require('../controllers/chatController.js');
+const { getOrCreateConversation, sendMessage, getMessages, getUserConversations, deleteChatHistory, blockUser, unblockUser, getUnreadCount, markMessagesAsRead } = require('../controllers/chatController.js');
 const { getUserById } = require('../controllers/userController.js');
 const auth = require('../middleware/auth.js');
 
@@ -27,5 +27,11 @@ router.get('/messages/:conversationId', auth, getMessages);
 
 // Get all conversations for a user
 router.get('/conversations/:userId', auth, getUserConversations);
+
+// Get unread message count for a user
+router.get('/unread/:userId', auth, getUnreadCount);
+
+// Mark messages as read for a conversation
+router.post('/mark-read/:userId', auth, markMessagesAsRead);
 
 module.exports = router;

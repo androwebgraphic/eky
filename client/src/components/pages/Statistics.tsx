@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import './Statistics.css';
 
 interface DogStats {
@@ -23,9 +24,12 @@ interface StatsData {
 
 const Statistics: React.FC = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
 
   const getApiUrl = () => {
     if (process.env.REACT_APP_API_URL) {
@@ -38,28 +42,60 @@ const Statistics: React.FC = () => {
     return `http://${window.location.hostname}:3001`;
   };
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const apiUrl = getApiUrl();
-        const response = await fetch(`${apiUrl}/api/stats`);
-        const data = await response.json();
-        
-        if (data.success) {
-          setStats(data.data);
-        } else {
-          setError('Failed to fetch statistics');
-        }
-      } catch (err) {
-        setError('Error connecting to server');
-        console.error('Error fetching statistics:', err);
-      } finally {
-        setLoading(false);
+  const fetchStats = async () => {
+    try {
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/api/stats`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setStats(data.data);
+      } else {
+        setError('Failed to fetch statistics');
       }
-    };
+    } catch (err) {
+      setError('Error connecting to server');
+      console.error('Error fetching statistics:', err);
+    }
+  };
 
+  useEffect(() => {
     fetchStats();
   }, []);
+
+  const handleResetAdoptedDogs = async () => {
+    if (!window.confirm('Are you sure you want to reset all adopted dogs back to available status? This is for testing purposes only.')) {
+      return;
+    }
+
+    setResetting(true);
+    setResetMessage(null);
+
+    try {
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/api/stats/reset-adopted`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setResetMessage(data.message || `Successfully reset ${data.resetCount} dogs`);
+        // Refresh stats after reset
+        await fetchStats();
+      } else {
+        setResetMessage(data.message || 'Failed to reset adopted dogs');
+      }
+    } catch (err) {
+      setResetMessage('Error resetting adopted dogs');
+      console.error('Error resetting adopted dogs:', err);
+    } finally {
+      setResetting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -90,6 +126,12 @@ const Statistics: React.FC = () => {
           {t('statistics.title') || 'Application Statistics'}
         </h1>
 
+        {resetMessage && (
+          <div className="modal-alert success" style={{ marginBottom: '1rem', padding: '1rem', borderRadius: '8px' }}>
+            {resetMessage}
+          </div>
+        )}
+
         {stats && (
           <>
             <div className="statistics-grid">
@@ -114,10 +156,32 @@ const Statistics: React.FC = () => {
                     <div className="stat-number">{stats.dogs.pending}</div>
                     <div className="stat-label">{t('statistics.pending') || 'Pending'}</div>
                   </div>
-                  <div className="stat-card adopted-card">
+                  <div className="stat-card adopted-card" style={{ position: 'relative' }}>
                     <div className="stat-icon">🎉</div>
                     <div className="stat-number">{stats.dogs.adopted}</div>
                     <div className="stat-label">{t('statistics.adopted') || 'Adopted'}</div>
+                    {stats.dogs.adopted > 0 && (
+                      <button
+                        onClick={handleResetAdoptedDogs}
+                        disabled={resetting}
+                        style={{
+                          position: 'absolute',
+                          top: '5px',
+                          right: '5px',
+                          padding: '4px 8px',
+                          fontSize: '0.7rem',
+                          backgroundColor: resetting ? '#ccc' : '#f44336',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: resetting ? 'not-allowed' : 'pointer',
+                          opacity: '0.9'
+                        }}
+                        title="Reset adopted dogs to available (testing)"
+                      >
+                        {resetting ? '...' : '↺'}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 const Dog = require('../models/dogModel');
 const User = require('../models/userModel');
+const AdoptionRequest = require('../models/adoptionRequestModel');
 
 // Get application statistics
 const getStats = async (req, res) => {
@@ -45,6 +46,59 @@ const getStats = async (req, res) => {
   }
 };
 
+// Reset adopted dogs back to available (for testing purposes)
+const resetAdoptedDogs = async (req, res) => {
+  try {
+    console.log('[STATS] Resetting adopted dogs to available status...');
+    
+    // Find all adopted dogs
+    const adoptedDogs = await Dog.find({ adoptionStatus: 'adopted' });
+    console.log(`[STATS] Found ${adoptedDogs.length} adopted dogs to reset`);
+    
+    if (adoptedDogs.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No adopted dogs to reset',
+        resetCount: 0
+      });
+    }
+    
+    // Reset each adopted dog
+    const dogIds = adoptedDogs.map(dog => dog._id);
+    
+    // Update dogs back to available status
+    const updateResult = await Dog.updateMany(
+      { adoptionStatus: 'adopted' },
+      {
+        adoptionStatus: 'available',
+        $unset: { adoptionQueue: '' }
+      }
+    );
+    
+    // Optionally update related adoption requests
+    await AdoptionRequest.updateMany(
+      { dog: { $in: dogIds }, status: 'adopted' },
+      { status: 'completed' }
+    );
+    
+    console.log(`[STATS] Reset ${updateResult.modifiedCount} dogs to available status`);
+    
+    res.json({
+      success: true,
+      message: `Successfully reset ${updateResult.modifiedCount} adopted dogs to available status`,
+      resetCount: updateResult.modifiedCount
+    });
+  } catch (error) {
+    console.error('[STATS] Error resetting adopted dogs:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error resetting adopted dogs',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
-  getStats
+  getStats,
+  resetAdoptedDogs
 };

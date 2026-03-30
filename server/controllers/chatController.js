@@ -80,6 +80,50 @@ const getUserConversations = async (req, res) => {
   res.json(convos);
 };
 
+// Get unread message count for a user
+const getUnreadCount = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) return res.status(400).json({ error: 'Missing userId' });
+
+    const unreadCount = await ChatMessage.countDocuments({
+      recipient: userId,
+      readAt: { $exists: false }
+    });
+
+    res.json({ unreadCount });
+  } catch (error) {
+    console.error('Error getting unread count:', error);
+    res.status(500).json({ error: 'Failed to get unread count' });
+  }
+};
+
+// Mark messages as read for a conversation
+const markMessagesAsRead = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { conversationId } = req.body;
+    
+    if (!userId || !conversationId) {
+      return res.status(400).json({ error: 'Missing userId or conversationId' });
+    }
+
+    const result = await ChatMessage.updateMany(
+      {
+        conversationId,
+        recipient: userId,
+        readAt: { $exists: false }
+      },
+      { readAt: new Date() }
+    );
+
+    res.json({ success: true, markedCount: result.modifiedCount });
+  } catch (error) {
+    console.error('Error marking messages as read:', error);
+    res.status(500).json({ error: 'Failed to mark messages as read' });
+  }
+};
+
 module.exports = {
   deleteChatHistory,
   blockUser,
@@ -87,5 +131,7 @@ module.exports = {
   getOrCreateConversation,
   sendMessage,
   getMessages,
-  getUserConversations
+  getUserConversations,
+  getUnreadCount,
+  markMessagesAsRead
 };

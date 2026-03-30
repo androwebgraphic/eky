@@ -133,7 +133,7 @@ const signupUser = async (req, res) => {
 
 	try {
 
-		const { name, email, username, password, person, phone } = req.body;
+		const { name, email, username, password, person, phone, location } = req.body;
 		const user = await User.findOne({ $or: [{ email }, { username }] });
 
 		if (user) {
@@ -152,7 +152,8 @@ const signupUser = async (req, res) => {
 		username,
 		password: hashedPassword,
 		person: person || 'private',
-		phone
+		phone,
+		location
 	});
 	
 	await newUser.save();
@@ -165,7 +166,8 @@ const signupUser = async (req, res) => {
 			email:newUser.email,
 			username: newUser.username,
 			phone: newUser.phone,
-			person: newUser.person
+			person: newUser.person,
+			location: newUser.location
 		})
 	}else{
 		
@@ -333,6 +335,7 @@ const updateProfile = async (req, res) => {
 		if (profilePictureUrl) {
 			updateData.profilePicture = profilePictureUrl;
 		}
+		// Note: location is handled via geolocation API, not manual input in profile update
 		// Allow superadmin to change user roles
 		if (role && req.user.role === 'superadmin') {
 			updateData.role = role;
@@ -364,7 +367,8 @@ const updateProfile = async (req, res) => {
 				email: updatedUser.email,
 				username: updatedUser.username,
 				phone: updatedUser.phone,
-				profilePicture: updatedUser.profilePicture
+				profilePicture: updatedUser.profilePicture,
+				location: updatedUser.location
 			}
 		});
 		
@@ -459,6 +463,41 @@ const updateLastVisit = async (req, res) => {
 	}
 };
 
+// Update user location coordinates
+const updateUserLocation = async (req, res) => {
+	try {
+		const userId = req.user._id;
+		const { latitude, longitude } = req.body;
+		
+		if (!latitude || !longitude) {
+			return res.status(400).json({ message: 'Latitude and longitude are required' });
+		}
+		
+		// Validate coordinates
+		if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+			return res.status(400).json({ message: 'Invalid coordinates' });
+		}
+		
+		const user = await User.findById(userId);
+		if (!user) {
+			return res.status(404).json({ message: 'User not found' });
+		}
+		
+		// Update coordinates (MongoDB uses GeoJSON format: [longitude, latitude])
+		user.coordinates = {
+			type: 'Point',
+			coordinates: [parseFloat(longitude), parseFloat(latitude)]
+		};
+		
+		await user.save();
+		
+		res.json({ success: true, message: 'Location updated successfully', coordinates: user.coordinates });
+	} catch (error) {
+		console.error('[UPDATE LOCATION] Error:', error);
+		res.status(500).json({ message: error.message });
+	}
+};
+
 module.exports = {
 	signupUser: async (req, res) => await signupUser(req, res),
 	loginUser: async (req, res) => await loginUser(req, res),
@@ -471,5 +510,6 @@ module.exports = {
 	getUserById: async (req, res) => await getUserById(req, res),
 	searchUsers: async (req, res) => await searchUsers(req, res),
 	getAllUsers: async (req, res) => await getAllUsers(req, res),
-	updateLastVisit: async (req, res) => await updateLastVisit(req, res)
+	updateLastVisit: async (req, res) => await updateLastVisit(req, res),
+	updateUserLocation: async (req, res) => await updateUserLocation(req, res)
 };

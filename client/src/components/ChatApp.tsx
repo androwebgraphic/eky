@@ -513,6 +513,21 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       }
     });
     
+    // Listen for openChat event from backend (auto-open chat)
+    socketRef.current.on('openChat', async (data) => {
+      console.log('[SOCKET] openChat event received:', data);
+      if (data.conversationId && !selectedConvo) {
+        // Find the conversation in online users or create it
+        const otherUser = onlineUsers.find(u => 
+          selectedConvo?.participants.includes(u._id) || 
+          u._id !== user._id
+        );
+        if (otherUser) {
+          await startConversation(otherUser._id);
+        }
+      }
+    });
+    
     socketRef.current.on('receiveMessage', (msg) => {
       const adoptionSystemKeywords = ['confirmed', 'completed', 'closed', 'canceled', 'cancelled'];
       const isAdoptionSystemMsg = (msg.messageType === 'adoption' || msg.messageType === 'adoption_cancelled') && msg.dogId && msg.message && adoptionSystemKeywords.some(k => msg.message.toLowerCase().includes(k));
@@ -575,6 +590,17 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     if (!selectedConvo || !token) {
       return;
     }
+    
+    // Mark messages as read when opening conversation
+    fetch(`${getApiUrl()}/api/chat/mark-read/${user._id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ conversationId: selectedConvo._id })
+    }).catch(err => console.error('Error marking messages as read:', err));
+    
     fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })

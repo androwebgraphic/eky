@@ -11,6 +11,7 @@ interface User {
   username?: string;
   name?: string;
   phone?: string;
+  location?: string;
 }
 
 interface UserProfileModalProps {
@@ -34,6 +35,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
      email: typedUser?.email || '',
      username: typedUser?.username || '',
      phone: typedUser?.phone || '',
+     location: typedUser?.location || '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,13 +78,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
           email: typedUser.email || '',
           username: typedUser.username || '',
           phone: typedUser.phone || '',
+          location: typedUser.location || '',
       });
       setProfilePicture(null);
       setProfilePicturePreview('');
       setError(null);
       setSuccess(null);
     } else if (isOpen && !user) {
-      setFormData({ name: '', email: '', username: '', phone: '' });
+      setFormData({ name: '', email: '', username: '', phone: '', location: '' });
       setProfilePicture(null);
       setProfilePicturePreview('');
       setError(null);
@@ -345,7 +348,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       name: updatedUser.name,
       email: updatedUser.email,
       username: updatedUser.username,
-      phone: updatedUser.phone || ''
+      phone: updatedUser.phone || '',
+      location: updatedUser.location || ''
     });
     setIsEditing(false);
   };
@@ -498,6 +502,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                 </div>
 
                 <div className="modal-form-group">
+                  <label>{t('fields.location')}</label>
+                  <input type="text" id="profileLocation" name="location" value={formData.location} onChange={handleInputChange} autoComplete="address-level2" />
+                </div>
+
+                <div className="modal-form-group">
                   <label>{t('userProfile.email')}</label>
                   <input type="email" id="profileEmailInput" name="email" value={formData.email} onChange={handleInputChange} required autoComplete="email" />
                 </div>
@@ -537,6 +546,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
                 </div>
                 <div className="profile-field">
                   <span className="field-label">{t('userProfile.phone')}:</span> {typedUser ? typedUser.phone : ''}
+                </div>
+                <div className="profile-field">
+                  <span className="field-label">{t('fields.location')}:</span> {typedUser ? typedUser.location : ''}
                 </div>
                 <div className="modal-button-group">
                   <button onClick={() => setIsEditing(true)} className="btn-primary">

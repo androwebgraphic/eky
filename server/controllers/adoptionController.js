@@ -3,6 +3,7 @@ const Dog = require('../models/dogModel');
 const User = require('../models/userModel');
 const ChatConversation = require('../models/chatConversationModel');
 const ChatMessage = require('../models/chatMessageModel');
+const { io } = require('../socket');
 
 // Create a new adoption request
 exports.createAdoptionRequest = async (req, res) => {
@@ -75,6 +76,18 @@ exports.createAdoptionRequest = async (req, res) => {
         adopterConfirmed: false
       }
     });
+
+    // Emit socket events to both owner and adopter to open chat
+    if (io && typeof io.to === 'function') {
+      io.to(dog.user.toString()).emit('openChat', {
+        conversationId: conversation._id,
+        message: 'Adoption request received'
+      });
+      io.to(adopterId).emit('openChat', {
+        conversationId: conversation._id,
+        message: 'Adoption request sent'
+      });
+    }
 
     // Populate and return request
     await adoptionRequest.populate('dog adopter owner', 'name email');

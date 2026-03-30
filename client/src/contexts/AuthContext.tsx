@@ -100,6 +100,46 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }).catch(() => {
         setLoading(false);
       });
+      
+      // Request geolocation permission and update user's location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            console.log('[GEOLOCATION] Got coordinates:', latitude, longitude);
+            
+            try {
+              const token = localStorage.getItem('token');
+              if (!token) return;
+              
+              const response = await fetch(`${getApiUrl()}/api/users/location`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ lat: latitude, lng: longitude })
+              });
+              
+              if (response.ok) {
+                console.log('[GEOLOCATION] Updated user location successfully');
+                // Refresh user data to get updated coordinates
+                refreshUser();
+              }
+            } catch (err) {
+              console.error('[GEOLOCATION] Error updating location:', err);
+            }
+          },
+          (error) => {
+            console.log('[GEOLOCATION] Geolocation permission denied or error:', error.message);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000 // Cache for 5 minutes
+          }
+        );
+      }
     } else {
       setLoading(false);
     }

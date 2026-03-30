@@ -18,6 +18,7 @@ interface RegisterFormData {
   password: string;
   passwordAgain: string;
   remember?: boolean;
+  location: string;
 }
 
 const RegisterForm: React.FC = () => {
@@ -37,6 +38,7 @@ const RegisterForm: React.FC = () => {
     phone: yup.string().required(t('register.phone') + ' ' + t('validation.required')),
     password: yup.string().min(6, t('validation.passwordMin', { min: 6 })).max(20).required(t('validation.passwordRequired')),
     passwordAgain: yup.string().oneOf([yup.ref('password'), null], t('register.passwordAgain')).required(t('register.passwordAgain')),
+    location: yup.string().required(t('fields.location') + ' ' + t('validation.required')),
   });
 
   const {
@@ -121,6 +123,20 @@ const RegisterForm: React.FC = () => {
         <label htmlFor="register-phone">{t('register.phone')}</label>
         <input type="tel" id="register-phone" name="phone" autoComplete="tel" placeholder={t('register.phone')} {...register('phone')} />
         <p className="error">{errors.phone?.message as string}</p>
+
+        <label htmlFor="register-location">{t('fields.location')}</label>
+        <input 
+          type="text" 
+          id="register-location" 
+          name="location" 
+          autoComplete="address-level2" 
+          placeholder={t('register.location') || 'Enter your city or location'} 
+          {...register('location')} 
+        />
+        <p className="error">{errors.location?.message as string}</p>
+        <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '-0.5rem', marginBottom: '1rem' }}>
+          {t('register.locationHelp') || 'This helps us show dogs nearest to you'}
+        </p>
 
         <label htmlFor="register-password">{t('register.password')}</label>
         <input type="password" id="register-password" name="password" autoComplete="new-password" placeholder={t('register.password')} {...register('password')} />

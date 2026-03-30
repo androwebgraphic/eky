@@ -61,21 +61,28 @@ const Statistics: React.FC = () => {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        setError(errorData.message || 'Failed to fetch statistics');
+        const errorMsg = `Failed to fetch statistics (${response.status}): ${errorData.message || 'Server error'}`;
+        console.error('[STATS] Error:', errorMsg);
+        setError(errorMsg);
         setLoading(false);
         return;
       }
       
       const data = await response.json();
       
-      if (data.success) {
+      console.log('[STATS] Received data:', data);
+      
+      if (data.success && data.data) {
         setStats(data.data);
       } else {
-        setError('Failed to fetch statistics');
+        const errorMsg = data.message || 'Invalid response format';
+        console.error('[STATS] Invalid response:', errorMsg);
+        setError(errorMsg);
       }
     } catch (err) {
-      setError('Error connecting to server');
-      console.error('Error fetching statistics:', err);
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      console.error('[STATS] Connection error:', err);
+      setError(`Error connecting to server: ${errorMsg}`);
     } finally {
       setLoading(false);
     }

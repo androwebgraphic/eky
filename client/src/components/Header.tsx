@@ -43,7 +43,7 @@ const RegisterIcon: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
 
 const Header: React.FC = () => {
   const { t } = useTranslation();
-  const { user, logout, isAuthenticated, updateUser } = useAuth();
+  const { user, logout, isAuthenticated, updateUser, token } = useAuth();
   const [apiOk, setApiOk] = useState<boolean | null>(null);
   const [uptime, setUptime] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -54,6 +54,7 @@ const Header: React.FC = () => {
   const [showNewDogsModal, setShowNewDogsModal] = useState(false);
   const [newDogs, setNewDogs] = useState<any[]>([]);
   const [newDogsForModal, setNewDogsForModal] = useState<any[]>([]);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const timerRef = useRef<number | null>(null);
   const headerRef = useRef<HTMLElement | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -154,6 +155,46 @@ const Header: React.FC = () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
     };
   }, [checkHealth]);
+
+  // Fetch unread message count
+  useEffect(() => {
+    if (!isAuthenticated || !user || !token) {
+      setUnreadMessages(0);
+      return;
+    }
+    
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch(`${getApiUrl()}/api/chat/unread/${user._id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.unreadCount !== undefined) {
+          setUnreadMessages(data.unreadCount);
+        }
+      } catch (err) {
+        console.error('[HEADER] Error fetching unread count:', err);
+      }
+    };
+    
+    fetchUnreadCount();
+    
+    // Poll for unread count every 10 seconds
+    const unreadInterval = setInterval(fetchUnreadCount, 10000);
+    
+    return () => clearInterval(unreadInterval);
+  }, [isAuthenticated, user, token, getApiUrl]);
+
+  // Listen for new messages via custom event
+  useEffect(() => {
+    const handleNewMessage = () => {
+      // Increment unread count temporarily, will be refreshed by poll
+      setUnreadMessages(prev => prev + 1);
+    };
+    
+    window.addEventListener('chat-message-received', handleNewMessage);
+    return () => window.removeEventListener('chat-message-received', handleNewMessage);
+  }, []);
 
   // Start polling for new dogs
   useEffect(() => {
@@ -294,10 +335,52 @@ const Header: React.FC = () => {
             )}
             
             <div className="header-flex-spacer" />
-            {/* Right: Language Selector, Notifications, and User Info */}
+            {/* Right: Language Selector, Chat, Notifications, and User Info */}
             <div className="header-right-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', height: '50px' }}>
               <div style={{ display: 'flex', alignItems: 'center', height: '50px' }}>
                 <LanguageSelector />
+              </div>
+              {/* Chat icon with unread badge */}
+              <div 
+                style={{ 
+                  position: 'relative', 
+                  marginRight: '15px', 
+                  cursor: 'pointer',
+                  height: '50px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+                onClick={() => window.dispatchEvent(new CustomEvent('openChatModal'))}
+                title={t('button.chat') || 'Chat'}
+              >
+                <span 
+                  className="sharedog-icon sharedog-Message" 
+                  style={{ fontSize: '28px', color: '#f5f5f5' }}
+                ></span>
+                {unreadMessages > 0 && (
+                  <span 
+                    style={{
+                      position: 'absolute',
+                      top: '-2px',
+                      right: '-2px',
+                      backgroundColor: '#f44336',
+                      color: 'white',
+                      borderRadius: '50%',
+                      width: '18px',
+                      height: '18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                      border: '1px solid white',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                      zIndex: 1
+                    }}
+                  >
+                    {unreadMessages > 9 ? '9+' : unreadMessages}
+                  </span>
+                )}
               </div>
               <div className="notification-wrapper" style={{ display: 'flex', alignItems: 'center', height: '50px' }}>
                 <NotificationBell count={newDogsCount} onClick={handleNotificationClick} />

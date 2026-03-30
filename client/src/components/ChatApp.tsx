@@ -1067,14 +1067,28 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                 return (
                   <li key={convo._id}
                       className={`chat-user-item ${selectedConvo && selectedConvo._id === convo._id ? 'selected' : ''}`}
-                      onClick={() => startConversation(otherUser._id)}
                       style={{ opacity: '0.8', position: 'relative' }}>
                     <img 
                       src={getProfilePic(otherUser)}
                       alt={otherUser?.userName || 'User'}
                       className="chat-user-avatar"
                     />
-                    <span className="chat-user-name">{otherUser?.userName || otherUser?._id}</span>
+                    <div className="chat-user-info">
+                      <span className="chat-user-name">{otherUser?.userName || otherUser?._id}</span>
+                      {convo.lastMessage && (
+                        <span className="chat-user-preview" style={{ 
+                          fontSize: '11px', 
+                          color: '#666', 
+                          display: 'block',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          maxWidth: '120px'
+                        }}>
+                          {convo.lastMessage}
+                        </span>
+                      )}
+                    </div>
                     <span className="chat-user-status" style={{ background: '#ccc' }} title="Offline"></span>
                     {convo.unreadCount > 0 && (
                       <span
@@ -1100,6 +1114,29 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                         {convo.unreadCount > 9 ? '9+' : convo.unreadCount}
                       </span>
                     )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedConvo(convo);
+                        handleDeleteConversation();
+                      }}
+                      style={{
+                        position: 'absolute',
+                        bottom: '8px',
+                        right: '8px',
+                        background: '#f44336',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        fontSize: '11px',
+                        cursor: 'pointer',
+                        zIndex: 2
+                      }}
+                      title="Delete conversation"
+                    >
+                      {t('delete') || 'Delete'}
+                    </button>
                   </li>
                 );
               }).filter(Boolean)}

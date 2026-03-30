@@ -332,10 +332,12 @@ const updateProfile = async (req, res) => {
 		if (phone) {
 			updateData.phone = phone;
 		}
+		if (req.body.location) {
+			updateData.location = req.body.location;
+		}
 		if (profilePictureUrl) {
 			updateData.profilePicture = profilePictureUrl;
 		}
-		// Note: location is handled via geolocation API, not manual input in profile update
 		// Allow superadmin to change user roles
 		if (role && req.user.role === 'superadmin') {
 			updateData.role = role;

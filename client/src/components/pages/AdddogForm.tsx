@@ -510,9 +510,12 @@ const AdddogForm: React.FC = () => {
         // Dispatch event to refresh dog list with proper location-based sorting
         window.dispatchEvent(new CustomEvent('dog-added'));
         
+        // Navigate after showing success message for 4 seconds
         setTimeout(() => {
-          if (isMountedRef.current) navigate('/psi');
-        }, 2500);
+          if (isMountedRef.current) {
+            navigate('/psi');
+          }
+        }, 4000);
       }
     } catch (err: any) {
       if (err.name === 'AbortError') {

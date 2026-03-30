@@ -32,7 +32,7 @@ const Statistics: React.FC = () => {
   const [resetMessage, setResetMessage] = useState<string | null>(null);
 
   const getApiUrl = () => {
-    if (process.env.REACT_APP_API_URL) {
+    if (process.env.REACT_APP_API_URL !== undefined && process.env.REACT_APP_API_URL.trim() !== '') {
       return process.env.REACT_APP_API_URL;
     }
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -45,7 +45,27 @@ const Statistics: React.FC = () => {
   const fetchStats = async () => {
     try {
       const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/api/stats`);
+      const token = localStorage.getItem('token');
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`${apiUrl}/api/stats`, {
+        headers
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        setError(errorData.message || 'Failed to fetch statistics');
+        setLoading(false);
+        return;
+      }
+      
       const data = await response.json();
       
       if (data.success) {
@@ -56,6 +76,8 @@ const Statistics: React.FC = () => {
     } catch (err) {
       setError('Error connecting to server');
       console.error('Error fetching statistics:', err);
+    } finally {
+      setLoading(false);
     }
   };
 

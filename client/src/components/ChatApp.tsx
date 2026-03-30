@@ -131,6 +131,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userSearchQuery]);
   const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
+  const [allConversations, setAllConversations] = useState<any[]>([]);
   const [userWithBlocks] = useState<UserWithBlocks | null>(null);
   const [confirmingAdoption, setConfirmingAdoption] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -260,6 +261,59 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       setLoadingRequests(false);
     }
   };
+
+  // Fetch all conversations (both online and offline users)
+  useEffect(() => {
+    if (!token || !user?._id) {
+      setAllConversations([]);
+      return;
+    }
+
+    const fetchAllConversations = async () => {
+      try {
+        const apiUrl = getApiUrl();
+        const response = await fetch(`${apiUrl}/api/chat/conversations/${user._id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const conversations = await response.json();
+          
+          // Fetch user details for each conversation
+          const conversationsWithUsers = await Promise.all(
+            conversations.map(async (convo: any) => {
+              const otherUserId = convo.participants.find((id: string) => id !== user._id);
+              if (!otherUserId) return null;
+              
+              try {
+                const userRes = await fetch(`${apiUrl}/api/users/${otherUserId}`, {
+                  headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (userRes.ok) {
+                  const otherUser = await userRes.json();
+                  return {
+                    ...convo,
+                    otherUser
+                  };
+                }
+              } catch (err) {
+                console.error('Error fetching user details:', err);
+              }
+              return convo;
+            })
+          );
+          
+          // Filter out nulls and sort by last message time
+          const validConversations = conversationsWithUsers.filter(c => c !== null);
+          setAllConversations(validConversations);
+        }
+      } catch (err) {
+        console.error('Error fetching conversations:', err);
+      }
+    };
+
+    fetchAllConversations();
+  }, [token, user?._id]);
 
   useEffect(() => {
     fetchAdoptionRequests();
@@ -995,23 +1049,112 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
             ))}
           </ul>
         )}
-        {onlineUsers.length === 0 && searchResults.length === 0 ? (
-          <div className="chat-users-empty">{t('noUsersOnline') || 'No users online.'}</div>
-        ) : (
+        
+        {/* Show offline conversations with unread messages */}
+        {allConversations.length > 0 && userSearchQuery.length === 0 && (
+          <div style={{ marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+            <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px', paddingLeft: '8px' }}>
+              {t('recentConversations') || 'Recent Conversations'}
+            </div>
+            <ul className="chat-users-list">
+              {allConversations.map((convo: any) => {
+                const otherUser = convo.otherUser;
+                const isOnline = onlineUsers.some((u: any) => u._id === otherUser?._id);
+                const isOffline = !isOnline;
+                // Only show offline conversations (online ones already shown above)
+                if (isOnline) return null;
+                
+                return (
+                  <li key={convo._id}
+                      className={`chat-user-item ${selectedConvo && selectedConvo._id === convo._id ? 'selected' : ''}`}
+                      onClick={() => startConversation(otherUser._id)}
+                      style={{ opacity: '0.8', position: 'relative' }}>
+                    <img 
+                      src={getProfilePic(otherUser)}
+                      alt={otherUser?.userName || 'User'}
+                      className="chat-user-avatar"
+                    />
+                    <span className="chat-user-name">{otherUser?.userName || otherUser?._id}</span>
+                    <span className="chat-user-status" style={{ background: '#ccc' }} title="Offline"></span>
+                    {convo.unreadCount > 0 && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '-2px',
+                          right: '20px',
+                          backgroundColor: '#f44336',
+                          color: 'white',
+                          borderRadius: '50%',
+                          width: '18px',
+                          height: '18px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          border: '1px solid white',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                          zIndex: 1
+                        }}
+                      >
+                        {convo.unreadCount > 9 ? '9+' : convo.unreadCount}
+                      </span>
+                    )}
+                  </li>
+                );
+              }).filter(Boolean)}
+            </ul>
+          </div>
+        )}
+        
+        {onlineUsers.length === 0 && allConversations.length === 0 && searchResults.length === 0 && userSearchQuery.length === 0 ? (
+          <div className="chat-users-empty">{t('noConversations') || 'No conversations yet.'}</div>
+        ) : onlineUsers.length > 0 && (
           <ul className="chat-users-list">
-            {onlineUsers.map(u => (
-              <li key={u._id} 
-                  className={`chat-user-item ${selectedConvo && selectedConvo.participants.includes(u._id) ? 'selected' : ''}`}
-                  onClick={() => startConversation(u._id)}>
-                <img 
-                  src={getProfilePic(u)}
-                  alt={u.userName || 'User'}
-                  className="chat-user-avatar"
-                />
-                <span key={`name-${u._id}`} className="chat-user-name">{u.userName || u._id}</span>
-                <span key={`status-${u._id}`} className="chat-user-status" title="Online"></span>
-              </li>
-            ))}
+            {onlineUsers.map(u => {
+              // Find conversation for this user and get unread count
+              const convo = allConversations.find((c: any) => c.participants.includes(u._id));
+              const unreadCount = convo?.unreadCount || 0;
+              
+              return (
+                <li key={u._id} 
+                    className={`chat-user-item ${selectedConvo && selectedConvo.participants.includes(u._id) ? 'selected' : ''}`}
+                    onClick={() => startConversation(u._id)}
+                    style={{ position: 'relative' }}>
+                  <img 
+                    src={getProfilePic(u)}
+                    alt={u.userName || 'User'}
+                    className="chat-user-avatar"
+                  />
+                  <span key={`name-${u._id}`} className="chat-user-name">{u.userName || u._id}</span>
+                  <span key={`status-${u._id}`} className="chat-user-status" title="Online"></span>
+                  {unreadCount > 0 && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-2px',
+                        right: '20px',
+                        backgroundColor: '#f44336',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: '18px',
+                        height: '18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        border: '1px solid white',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                        zIndex: 1
+                      }}
+                    >
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

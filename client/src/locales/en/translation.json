@@ -84,7 +84,9 @@
     "remember": "Remember me",
     "already": "Already a user?",
     "altRegister": "Or register with your account...",
-    "acceptTermsRequired": "You must accept the Terms of Use to register"
+    "acceptTermsRequired": "You must accept the Terms of Use to register",
+    "location": "Enter your city or location",
+    "locationHelp": "This helps us show dogs nearest to you"
   },
   "registerOptions": {
     "private": "Private person",
@@ -314,6 +316,10 @@
     "block": "Block",
     "unblock": "Unblock",
     "deleteConversation": "Delete Conversation",
+    "deleteMessage": "Delete Message",
+    "searchUsers": "Search users...",
+    "recentConversations": "Recent Conversations",
+    "noConversations": "No conversations yet.",
     "adoptionPending": "Adoption pending for this dog.",
     "confirmAdoption": "Confirm Adoption",
     "confirming": "Confirming...",

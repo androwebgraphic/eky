@@ -481,10 +481,9 @@ function DogList() {
 
 		fetchDogs();
 
-		// Listen for dog updates from Socket.IO (via ChatApp window events)
-		const handleDogUpdated = async (event: Event) => {
-			console.log('[DOG-LIST] dogUpdated event received');
-			// Refetch dogs to get latest data
+		// Refresh dogs function (shared between dogUpdated and dog-added events)
+		const refreshDogs = async () => {
+			console.log('[DOG-LIST] Refreshing dogs...');
 			const headers: Record<string, string> = {};
 			const authToken = token || localStorage.getItem('token');
 			if (authToken) {
@@ -511,15 +510,29 @@ function DogList() {
 					setDogs(Array.isArray(data) ? data : []);
 				})
 				.catch(err => {
-					console.error('[DOG-LIST] Failed to refresh dogs after update:', err);
+					console.error('[DOG-LIST] Failed to refresh dogs:', err);
 				});
 		};
 
-		// Listen for custom dogUpdated event
+		// Listen for dog updates from Socket.IO (via ChatApp window events)
+		const handleDogUpdated = async (event: Event) => {
+			console.log('[DOG-LIST] dogUpdated event received');
+			refreshDogs();
+		};
+
+		// Listen for new dog added event
+		const handleDogAdded = async (event: Event) => {
+			console.log('[DOG-LIST] dog-added event received');
+			refreshDogs();
+		};
+
+		// Listen for custom events
 		window.addEventListener('dogUpdated', handleDogUpdated);
+		window.addEventListener('dog-added', handleDogAdded);
 
 		return () => {
 			window.removeEventListener('dogUpdated', handleDogUpdated);
+			window.removeEventListener('dog-added', handleDogAdded);
 		};
 	}, [token, userLocation]);
 

@@ -76,8 +76,23 @@ const getMessages = async (req, res) => {
 const getUserConversations = async (req, res) => {
   const { userId } = req.params;
   if (!userId) return res.status(400).json({ error: 'Missing userId' });
+  
   const convos = await ChatConversation.find({ participants: userId }).sort({ updatedAt: -1 });
-  res.json(convos);
+  
+  // Add unread count for each conversation
+  const convosWithUnread = await Promise.all(convos.map(async (convo) => {
+    const unreadCount = await ChatMessage.countDocuments({
+      conversationId: convo._id,
+      recipient: userId,
+      readAt: { $exists: false }
+    });
+    return {
+      ...convo.toObject(),
+      unreadCount
+    };
+  }));
+  
+  res.json(convosWithUnread);
 };
 
 // Get unread message count for a user

@@ -64,6 +64,7 @@ const RegisterForm: React.FC = () => {
         username: sanitizeUsername(data.username),
         email: sanitizeEmail(data.email),
         phone: sanitizePhone(data.phone),
+        location: data.location, // Include location for distance-based sorting
         password: data.password, // Don't sanitize password
         passwordAgain: data.passwordAgain, // Don't sanitize password
         remember: data.remember

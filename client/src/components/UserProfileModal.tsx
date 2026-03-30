@@ -46,7 +46,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
     if (!profilePicture) return "../img/androcolored-80x80.jpg";
     let url = profilePicture.startsWith('/') ? profilePicture : '/' + profilePicture;
     if (url.startsWith('/uploads/') || url.startsWith('/u/')) {
-      // Use the same logic as getApiUrl - use frontend's hostname
+      // Use to same logic as getApiUrl - use frontend's hostname
       const apiBase = process.env.REACT_APP_API_URL || 
         (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
           ? `http://${window.location.hostname}:3001`
@@ -57,7 +57,13 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       }
       return fullUrl;
     }
-    if (/^https?:\/\//.test(url)) return url;
+    if (/^https?:\/\//.test(url)) {
+      // Append cache buster to all external URLs (including Cloudinary)
+      if (cacheBuster) {
+        return `${url}?v=${cacheBuster}`;
+      }
+      return url;
+    }
     return '../img/androcolored-80x80.jpg';
   };
 
@@ -279,6 +285,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) 
       formDataToSend.append('email', formData.email);
       if (formData.phone) {
         formDataToSend.append('phone', formData.phone);
+      }
+      if (formData.location) {
+        formDataToSend.append('location', formData.location);
       }
       
       // Add profile picture if selected

@@ -78,7 +78,7 @@ const fs = require('fs');
 const path = require('path');
 const { optimizeImage } = require('../utils/imageOptimizer');
 const cloudinary = require('cloudinary').v2;
-const { uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
+const { uploadImageToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 
 const getAllUsers = async (req, res) => {
 	try {
@@ -301,7 +301,7 @@ const updateProfile = async (req, res) => {
 				const sizes = [300, 150, 64];
 				const uploadPromises = sizes.map(async (size) => {
 					const publicId = `users/${userIdStr}/profile-${size}`;
-					return uploadToCloudinary(req.file.buffer, {
+					return uploadImageToCloudinary(req.file.buffer, {
 						publicId: publicId,
 						folder: 'users',
 						transformation: [

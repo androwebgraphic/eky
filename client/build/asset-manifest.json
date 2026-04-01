@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "/static/css/main.d9c22ec5.css",
-    "main.js": "/static/js/main.c4d19d03.js",
+    "main.css": "/static/css/main.7c458a61.css",
+    "main.js": "/static/js/main.fed5507e.js",
     "static/media/sharedog-icon.svg": "/static/media/sharedog-icon.384fb38aca278ca46039.svg",
     "static/media/sharedog-icon.eot": "/static/media/sharedog-icon.193da4499af19b756b8e.eot",
     "static/media/sharedog-icon.woff": "/static/media/sharedog-icon.005ebb98fbe0f6a32346.woff",
     "static/media/sharedog-icon.ttf": "/static/media/sharedog-icon.e401d965c60477aadf20.ttf",
     "index.html": "/index.html",
     "static/media/chat-icon.svg": "/static/media/chat-icon.25f4fcefd31d221d69a4.svg",
-    "main.d9c22ec5.css.map": "/static/css/main.d9c22ec5.css.map",
-    "main.c4d19d03.js.map": "/static/js/main.c4d19d03.js.map"
+    "main.7c458a61.css.map": "/static/css/main.7c458a61.css.map",
+    "main.fed5507e.js.map": "/static/js/main.fed5507e.js.map"
   },
   "entrypoints": [
-    "static/css/main.d9c22ec5.css",
-    "static/js/main.c4d19d03.js"
+    "static/css/main.7c458a61.css",
+    "static/js/main.fed5507e.js"
   ]
 }

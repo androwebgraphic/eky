@@ -283,16 +283,18 @@
     "selectAria": "Odaberite jezik"
   },
   "location": {
-    "enterLocation": "Unesite svoju lokaciju ispod da biste vidjeli pse sortirane prema udaljenosti od vas:",
+    "enterLocation": "Unesite svoju lokaciju ispod da biste vidjeli pse sortirane po udaljenosti:",
     "cityPlaceholder": "Unesite grad (npr. Zagreb, Hrvatska)",
     "setLocation": "Postavi lokaciju",
     "finding": "Tražim...",
     "usingSavedLocation": "✅ Koristim svoju spremljenu lokaciju",
     "usingLocation": "✅ Koristim lokaciju: {{displayName}}",
     "locationDetected": "✅ Lokacija detektirana: {{lat}}, {{lng}}",
-    "locationNotFound": "❌ Lokacija nije pronađena. Pokušajte drugi naziv lokacije.",
-    "geocodeFailed": "❌ Neuspješno geokodiranje lokacije. Pokušajte ponovno.",
-    "clearLocation": "Obriši lokaciju"
+    "locationNotFound": "❌ Lokacija nije pronađena. Pokušajte drugu lokaciju.",
+    "geocodeFailed": "❌ Geokodiranje lokacije nije uspjelo. Pokušajte ponovo.",
+    "clearLocation": "Obriši lokaciju",
+    "showLocation": "Prikaži postavke lokacije",
+    "hideLocation": "Sakrij postavke lokacije"
   },
   "adoption": {
     "title": "Zahtjevi",

@@ -497,8 +497,8 @@ const Header: React.FC = () => {
           )}
         </>
       ) : (
-         <>
-         <header className="header-mobile-container mobile-nav-only">
+        <>
+        <header className="header-mobile-container mobile-nav-only">
           {/* Mobile navigation - simple icon bar for unauthenticated users */}
           {isMobile && (
             <nav className="mobile-nav-simple">
@@ -547,33 +547,6 @@ const Header: React.FC = () => {
             </div>
           )}
         </header>
-
-        {/* Message bar - positioned UNDER header for unauthenticated users */}
-        {!isAuthenticated && (
-          <div 
-            style={{
-              padding: '8px 20px',
-              background: '#ff0000',
-              zIndex: 99999,
-              textAlign: 'center',
-              display: 'block',
-              width: '100%',
-              minHeight: '35px',
-              height: 'auto',
-              position: 'absolute',
-              top: '50px',
-              left: '0',
-              right: '0',
-              margin: '0',
-              border: '3px solid #00ff00',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              color: '#ffffff'
-            }}
-          >
-            {t('nav.mustBeLoggedIn')}
-          </div>
-        )}
         </>
       )}
       

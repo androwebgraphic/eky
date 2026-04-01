@@ -1,51 +1,26 @@
 /* Mobile-First Responsive Fixes */
 /* These rules prevent viewport scaling issues on mobile devices */
 
-/* Improve viewport constraint */
+/* CRITICAL: Simple scroll fix - let the page scroll normally */
 html {
-  width: 100vw;
-  max-width: 100vw;
-  overflow-x: hidden;
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-  -webkit-overflow-scrolling: touch;
+  /* No overrides - let browser handle naturally */
 }
 
 body {
-  width: 100vw;
-  max-width: 100vw;
-  overflow-x: hidden;
-  position: relative;
+  /* No overrides - let browser handle naturally */
 }
 
-/* Fix main wrapper specifically for mobile */
+/* Fix main wrapper - ensure it has height for flexbox to work */
 #Wrap {
-  width: 100vw !important;
-  max-width: 100vw !important;
-  overflow-x: hidden !important;
+  /* CRITICAL: Use both min-height and height for proper flexbox scrolling */
+  min-height: 100dvh !important;  /* Dynamic viewport height for mobile browsers */
+  height: 100dvh !important;  /* Dynamic viewport height for mobile browsers */
   min-width: 320px !important;
-  height: 100vh !important;
-  display: flex !important;
-  flex-direction: column !important;
 }
 
-/* Scrollable content area */
-.scrollable-content {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-  padding-top: 60px;
-  padding-bottom: 50px;
-}
-
-/* General header positioning */
+/* General header positioning - NO position, use flexbox only */
 header {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
+  flex-shrink: 0 !important;
   z-index: 1000 !important;
   width: 100vw !important;
   background: #c44a0b;
@@ -55,10 +30,7 @@ header {
 
 /* Ensure nav stays visible and responsive to scrolling */
 nav#top {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
+  flex-shrink: 0 !important;
   width: 100vw !important;
   z-index: 1000 !important;
   background: #c44a0b !important;
@@ -70,22 +42,34 @@ nav#top ul, nav#top a, nav#top li {
   pointer-events: auto !important;
 }
 
-/* Ensure footer is visible on mobile */
+/* Ensure footer is visible on mobile - NO position, use flexbox only */
 footer, #footer-nav {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
   width: 100vw !important;
-  height: 50px !important;
+  min-width: 100vw !important;
+  max-width: 100vw !important;
+  height: 60px !important;
+  min-height: 60px !important;
+  max-height: 60px !important;
   z-index: 9999 !important;
   pointer-events: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  /* NO position property - let flexbox place it at bottom naturally */
+  /* Safe area for Safari iOS toolbar - use env() and add padding-bottom */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5px) !important;
+}
+
+/* Ensure footer container has proper padding for safe area */
+#footer-nav {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5px) !important;
 }
 
 #footer-nav ul {
   width: 100vw !important;
-  height: 50px !important;
-  min-height: 50px !important;
+  height: 60px !important;
+  min-height: 60px !important;
   padding: 0 !important;
   margin: 0 !important;
   display: flex !important;
@@ -202,123 +186,32 @@ pre {
 /* REMOVED: pointer-events: none on .scrollable-content was blocking all clicks */
 /* This was preventing users from clicking on buttons, inputs, and other elements */
 
-/* Mobile-specific grid fixes */
+  /* Mobile-specific grid fixes */
 .grid, .flex, .flexbox {
   max-width: 100%;
   overflow: hidden;
 }
 
-/* Make breed select specifically narrower on all screens - HIGHEST SPECIFICITY */
-#adddog-form #breed,
-#adddog-form .breed-select,
-form #breed,
-form .breed-select,
-#breed,
-.breed-select {
-  max-width: 150px !important;
-  width: auto !important;
-  z-index: 9999 !important;
-  position: relative !important;
-}
+/* REMOVED: All max-width rules for selects - let index.css two-column layout work */
 
-/* Ensure select dropdowns work properly on mobile */
-#adddog-form select,
-#adddog-breed,
-#adddog-age-category,
-#adddog-size {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="%23333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 24px;
-  padding-right: 40px;
-  cursor: pointer;
-  pointer-events: auto !important;
-  touch-action: manipulation !important;
-  min-height: 44px; /* Touch-friendly size */
-  max-width: 400px; /* Make dropdowns narrower */
-  width: 100%;
-  position: relative;
-  z-index: 10;
-}
-
-/* Make sure select dropdowns expand fully on mobile */
-@media screen and (max-width: 768px) {
-  /* Make breed select specifically narrower FIRST - so it overrides the general rule */
-  #breed,
-  .breed-select {
-    max-width: 150px !important;
-    width: auto !important;
-    position: relative;
-    z-index: 9999;
-  }
-
-  /* BREED, AGE CATEGORY, AND SIZE SELECTS MUST COME FIRST to override general rule */
-  #breed,
-  .breed-select,
-  #adddog-form #breed,
-  #adddog-form .breed-select,
-  #adddog-age-category,
-  #adddog-size {
-    max-width: 150px !important;
-    width: auto !important;
-    position: relative !important;
-    z-index: 9999 !important;
-  }
-
-  #adddog-form select,
-  #adddog-breed,
-  #adddog-age-category,
-  #adddog-size {
-    font-size: 16px !important;
-    padding: 12px 40px 12px 12px !important;
-    min-height: 44px !important;
-    border: 1px solid #ccc !important;
-    border-radius: 4px !important;
-    background-color: #fff !important;
-    pointer-events: auto !important;
-    touch-action: manipulation !important;
-    -webkit-tap-highlight-color: transparent !important;
-    position: relative;
-    z-index: 10;
-  }
-
-  /* Ensure options are clickable */
-  #adddog-form select option,
-  #adddog-breed option,
-  #adddog-age-category option,
-  #adddog-size option {
-    padding: 10px !important;
-    min-height: 44px !important;
-    font-size: 16px !important;
-  }
-}
-
-/* Header and navigation fixes */
+/* Header and navigation fixes - use flexbox instead of fixed */
 header, .header, .navbar, nav {
   max-width: 100vw;
   overflow-x: hidden;
   box-sizing: border-box;
-  position: fixed !important;
+  flex-shrink: 0 !important;
   width: 100% !important;
 }
 
-/* Navigation should be at very top */
+/* Navigation should stay in flow */
 nav#top {
   z-index: 1000 !important;
-  top: 0 !important;
 }
 
-/* Ensure header is always on top */
+/* Ensure header is in flow */
 header {
   z-index: 1001 !important;
-  top: 0 !important;
   margin-top: 0 !important;
-  position: fixed !important;
-  left: 0 !important;
-  right: 0 !important;
   width: 100vw !important;
   max-width: 100vw;
   overflow-x: hidden;
@@ -519,11 +412,10 @@ button, a, .clickable {
   
   /* Even more compact for iPhone SE (375px width) */
   
-  /* Reduce padding and margins */
+  /* Reduce padding and margins - CRITICAL: Remove margins that interfere with flexbox */
   main {
     padding: 0.25rem !important;
-    margin-top: 5.5rem !important;
-    margin-bottom: 4rem !important;
+    margin: 0 !important;
   }
   
   /* Reduce header height */
@@ -534,36 +426,34 @@ button, a, .clickable {
     padding: 0.25rem 0.5rem 0.25rem 0.5rem!important;
   }
   
-  /* Reduce footer height */
+  /* Reduce footer height - UPDATED TO 60px */
   #footer-nav {
-    height: 45px !important;
+    height: 60px !important;
   }
   
   #footer-nav ul {
-    height: 45px !important;
-    min-height: 45px !important;
+    height: 60px !important;
+    min-height: 60px !important;
   }
   
   #footer-nav ul li {
-    height: 45px !important;
+    height: 60px !important;
   }
   
-  /* Smaller footer icons */
-  #footer-nav .sharedog-icon,
-  nav#top .sharedog-icon,
-  header .sharedog-icon {
-    font-size: 3rem !important;
-    width: 30px !important;
-    height: 30px !important;
+  /* Footer icons - 50px on mobile */
+  #footer-nav .sharedog-icon {
+    font-size: 3.5rem !important;
+    width: 50px !important;
+    height: 50px !important;
   }
   
   #footer-nav img {
-    width: 24px !important;
-    height: 24px !important;
-    min-width: 24px !important;
-    max-width: 24px !important;
-    min-height: 24px !important;
-    max-height: 24px !important;
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
   }
   
   /* Reduce card padding */
@@ -680,6 +570,11 @@ select {
   caret-color: #333 !important;
 }
 
+/* REMOVED: Do NOT override #Wrap > main - let index.css flexbox handle scrolling */
+
+/* Forms - DO NOT override display, let index.css flexbox handle layout */
+/* #register-form, #login-form, #adddog-form are already flex-direction: column in index.css */
+
   /* Prevent zoom on focus for mobile */
   @media screen and (max-width: 899px) {
   input, textarea, select {
@@ -693,27 +588,14 @@ select {
   
   /* REMOVED: Universal selector * { max-width: 100vw !important; } - was breaking card layout */
 
-  /* BREED, AGE CATEGORY, AND SIZE SELECTS */
-  #breed,
-  .breed-select,
-  #adddog-form #breed,
-  #adddog-form .breed-select,
-  #adddog-age-category,
-  #adddog-size {
-    max-width: 150px !important;
-    width: auto !important;
-    position: relative !important;
-    z-index: 9999 !important;
-  }
-
   nav#top {
     min-height: 50px !important;
     padding: 0.5rem 0 !important;
   }
 
   #footer-nav ul {
-    min-height: 50px !important;
-    height: 50px !important;
+    min-height: 60px !important;
+    height: 60px !important;
     padding: 0 !important;
     margin: 0 !important;
     display: flex !important;
@@ -725,7 +607,7 @@ select {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    height: 50px !important;
+    height: 60px !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -738,51 +620,36 @@ select {
     padding: 0 0.5rem !important;
   }
 
-  /* Icon sizing for mobile - SMALLER AND LIGHTER */
+  /* Icon sizing for mobile - 50px */
   #footer-nav .sharedog-icon {
-    font-size: 2rem !important; /* Reduced from 2.5rem */
-    font-weight: 500 !important; /* Reduced from default bold */
+    font-size: 2.2rem !important;
+    font-weight: 500 !important;
     padding: 0 !important;
     margin: 0 !important;
     line-height: 1 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 28px !important; /* Reduced from 32px */
-    height: 28px !important;
-  }
-
-  /* Header nav icons on mobile - SMALLER AND LIGHTER */
-  nav#top .sharedog-icon,
-  header .sharedog-icon {
-    font-size: 1.8rem !important; /* Reduced from 2.5rem */
-    font-weight: 400 !important; /* Lighter, not bold */
-    padding: 0 !important;
-    margin: 0 !important;
-    line-height: 1 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 26px !important; /* Reduced from 32px */
-    height: 26px !important;
+    width: 50px !important;
+    height: 50px !important;
   }
 
   #footer-nav img {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
-    max-width: 28px !important;
-    min-height: 28px !important;
-    max-height: 28px !important;
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
   }
 
   #footer-nav .eky-add-dog {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 2rem !important;
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 2.2rem !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -965,10 +832,12 @@ select {
     display: none !important;
   }
 
-  /* Ensure main content doesn't get hidden behind footer on mobile */
-  main {
-    margin-bottom: 100px !important;
-  }
+/* Ensure main content uses flexbox properly - NO margin-bottom needed */
+main {
+  margin-bottom: 0 !important;
+}
+
+/* REMOVED conflicting flex: 1 rule - let the earlier display: block rule apply */
 
   /* Make advanced search buttons smaller on mobile */
   .search-btn {
@@ -1048,7 +917,7 @@ select {
     gap: 0.5rem !important;
   }
 
-  /* Icon sizing for desktop */
+  /* Icon sizing for desktop - 32px (unchanged) */
   #footer-nav .sharedog-icon,
   #footer-nav .eky-add-dog,
   #footer-nav img {
@@ -1402,7 +1271,7 @@ select {
 
 /* Fix authenticated header icons: make properly sized and centered on mobile */
 @media (max-width: 768px) {
-  /* Make ALL icons the same size - 28px */
+  /* Make ALL icons the same size - 26px */
   .UserHeader .sharedog-icon,
   .authenticated-hamburger-btn .sharedog-icon {
     font-size: 28px !important;
@@ -1440,5 +1309,227 @@ select {
   .UserHeader .header-right-inner > .header-user-info-inner > * {
     display: inline-block !important;
     vertical-align: middle !important;
+  }
+}
+/* Simple fix: Ensure main content scrolls naturally */
+#Wrap > main {
+  /* Already has flex: 1 1 auto in index.css - just ensure scrolling works */
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+  /* CRITICAL: About page mobile layout fix - reduce ALL spacing */
+@media screen and (max-width: 768px) {
+  /* Target ALL h3 elements in main */
+  h3,
+  main h3,
+  main > h3,
+  main > div h3 {
+    margin: 2px 0 !important;
+    padding: 0 !important;
+    font-size: 2.6rem !important;
+    line-height: 3.0rem !important;
+    max-height: none !important;
+    overflow: visible !important;
+    color: #FF9800 !important;
+  }
+  
+  /* Target ALL p elements in main */
+  p,
+  main p,
+  main > p,
+  main > div p {
+    margin: 0.5rem 0 !important;
+    padding: 0 !important;
+    font-size: 1.6rem !important;
+    line-height: 2.0rem !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  /* Move logo container up - HIGHEST SPECIFICITY */
+  div.logo,
+  .logo,
+  div[class*="logo"] {
+    margin-top: -40px !important;
+    margin-bottom: -5px !important;
+    padding: 0 !important;
+  }
+  
+  /* Make logo larger as requested - HIGHEST SPECIFICITY */
+  div.logo img,
+  .logo img,
+  div.logo img.welcome,
+  .logo img.welcome,
+  div[class*="logo"] img {
+    width: 70% !important;
+    max-width: 220px !important;
+    height: auto !important;
+    min-width: 130px !important;
+  }
+  
+  /* Move button up and make it compact - HIGHEST SPECIFICITY */
+  button#start_btn,
+  #start_btn,
+  button[id="start_btn"],
+  button.sharedog-Paw,
+  button.sharedog-Paw#start_btn {
+    margin-top: 0rem !important;
+    margin-bottom: 0.5rem !important;
+    padding: 0.2rem 0.6rem !important;
+    font-size: 1.4rem !important;
+    min-height: 28px !important;
+  }
+  
+  /* Reduce padding on mobile for button container */
+  .about-button-container {
+    padding: 0 1rem !important;
+    margin: 1rem 0 0.5rem 0 !important;
+  }
+  
+  /* Reduce heart icon */
+  .sharedog-icon.sharedog-Heart,
+  span.sharedog-Heart {
+    font-size: 1.3rem !important;
+    margin: 0 !important;
+    vertical-align: middle !important;
+  }
+}
+
+/* Ultra-compact for very small screens */
+@media screen and (max-width: 375px) {
+  h3,
+  main h3 {
+    margin: 2px 0 !important;
+    padding: 0 !important;
+    font-size: 2.8rem !important;
+    line-height: 3.2rem !important;
+    max-height: none !important;
+    overflow: visible !important;
+    color: #FF9800 !important;
+  }
+  
+  p,
+  main p {
+    margin: 0.2rem 0 !important;
+    padding: 0 !important;
+    font-size: 1.8rem !important;
+    line-height: 2.2rem !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  div.logo,
+  .logo {
+    margin-top: -50px !important;
+    margin-bottom: -8px !important;
+  }
+  
+  div.logo img,
+  .logo img,
+  div.logo img.welcome,
+  .logo img.welcome {
+    width: 65% !important;
+    max-width: 180px !important;
+    min-width: 110px !important;
+  }
+  
+  button#start_btn,
+  #start_btn,
+  button.sharedog-Paw {
+    margin-top: -35px !important;
+    margin-bottom: -8px !important;
+    padding: 0.2rem 0.5rem !important;
+    font-size: 0.95rem !important;
+    min-height: 32px !important;
+  }
+}
+
+/* CRITICAL FIX: Allow forms to scroll fully on mobile */
+@media screen and (max-width: 768px) {
+  /* Keep viewport constraints for fixed header/footer layout */
+  html, body, #root {
+    /* Let index.css handle these - no overrides needed */
+  }
+  
+  /* Ensure Wrap maintains proper flexbox for fixed header/footer */
+  #Wrap {
+    min-height: 100dvh !important;
+    height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  
+  /* Header stays fixed at top */
+  header {
+    position: relative !important;
+    flex-shrink: 0 !important;
+    z-index: 1000 !important;
+  }
+  
+  /* Main content scrolls and can grow - THIS is what should scroll */
+  #Wrap > main {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding-bottom: 60px !important; /* Space for footer */
+  }
+  
+  /* Footer stays fixed at bottom */
+  footer {
+    position: relative !important;
+    flex-shrink: 0 !important;
+    z-index: 1000 !important;
+  }
+  
+  /* Forms should flow naturally and be fully accessible */
+  #login-form,
+  #register-form,
+  #adddog-form {
+    overflow: visible !important;
+    max-height: none !important;
+    min-height: auto !important;
+    position: relative !important;
+  }
+  
+  /* Ensure form labels and inputs are visible */
+  #login-form label,
+  #register-form label,
+  #adddog-form label,
+  #login-form input,
+  #register-form input,
+  #adddog-form input,
+  #login-form select,
+  #register-form select,
+  #adddog-form select,
+  #login-form textarea,
+  #register-form textarea,
+  #adddog-form textarea {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+  
+  /* Ensure form buttons are visible and clickable */
+  #login-form button,
+  #register-form button,
+  #adddog-form button {
+    position: relative !important;
+    z-index: 1 !important;
+    display: inline-block !important;
+    visibility: visible !important;
+  }
+  
+  /* Ensure error messages are visible */
+  #login-form .error,
+  #register-form .error,
+  #adddog-form .error {
+    position: relative !important;
+    z-index: 1 !important;
+    display: block !important;
+    visibility: visible !important;
   }
 }

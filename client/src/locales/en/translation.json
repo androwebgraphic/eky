@@ -272,7 +272,9 @@
     "locationDetected": "✅ Location detected: {{lat}}, {{lng}}",
     "locationNotFound": "❌ Location not found. Try a different location.",
     "geocodeFailed": "❌ Location geocoding failed. Try again.",
-    "clearLocation": "Clear location"
+    "clearLocation": "Clear location",
+    "showLocation": "Show Location Settings",
+    "hideLocation": "Hide Location Settings"
   },
   "adoption": {
     "title": "Requests",

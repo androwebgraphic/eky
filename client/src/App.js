@@ -28,51 +28,8 @@ const App = () => {
     }
   }, []);
 
-  // Global scroll style for html/body/root/main
-  useEffect(() => {
-    if (typeof document !== 'undefined' && !document.getElementById('eky-global-scroll-style')) {
-      const globalScrollStyle = `
-        html, body, #root {
-          height: 100% !important;
-          min-height: 100% !important;
-          overflow-y: auto !important;
-          -webkit-overflow-scrolling: touch !important;
-        }
-        main {
-          min-height: 100vh;
-          height: auto;
-          overflow-y: auto;
-        }
-      `;
-      const style = document.createElement('style');
-      style.id = 'eky-global-scroll-style';
-      style.innerHTML = globalScrollStyle;
-      document.head.appendChild(style);
-    }
-  }, []);
+  // Removed global scroll styles - let CSS handle everything
 
-  // #Wrap scroll style for mobile
-  useEffect(() => {
-    if (typeof document !== 'undefined' && !document.getElementById('eky-wrap-scroll-style')) {
-      const wrapScrollStyle = `
-        #Wrap {
-          min-height: 100vh !important;
-          height: auto !important;
-          overflow-y: auto !important;
-          -webkit-overflow-scrolling: touch !important;
-          margin-top: 0 !important;
-          margin-bottom: 16px !important;
-          box-sizing: border-box !important;
-          padding-left: 0 !important;
-          padding-right: 0 !important;
-        }
-      `;
-      const style = document.createElement('style');
-      style.id = 'eky-wrap-scroll-style';
-      style.innerHTML = wrapScrollStyle;
-      document.head.appendChild(style);
-    }
-  }, []);
 
   const [showChatModal, setShowChatModal] = useState(false);
   const [adoptionConvoUserId, setAdoptionConvoUserId] = useState(null);
@@ -103,7 +60,9 @@ const App = () => {
       <ErrorBoundary>
         <div id="Wrap">
           <Header />
-          <Navbar />
+          <main>
+            <Navbar />
+          </main>
           <Footer onChatClick={() => setShowChatModal(true)} />
         </div>
         {showChatModal && (

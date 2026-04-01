@@ -93,7 +93,7 @@ const RegisterForm: React.FC = () => {
   };
 
   return (
-    <main>
+    <>
       <h2>{t('register.register') || t('nav.register')}</h2>
 
       <form id="register-form" onSubmit={handleSubmit(onSubmit)}>
@@ -204,7 +204,7 @@ const RegisterForm: React.FC = () => {
       />
 
       {/* ...removed alternative social register... */}
-    </main>
+    </>
   );
 };
 

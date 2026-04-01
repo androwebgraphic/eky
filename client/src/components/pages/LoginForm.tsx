@@ -70,7 +70,7 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <main style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+    <>
       <h2 style={{ margin: 0 }}>{t('login.title')}</h2>
       <form 
         id="login-form" 
@@ -175,7 +175,7 @@ const LoginForm: React.FC = () => {
         </div>
       </form>
       {/* ...removed alternative social login... */}
-    </main>
+    </>
   );
 };
 

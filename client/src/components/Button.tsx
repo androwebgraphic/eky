@@ -8,7 +8,7 @@ interface ButtonProps {
 const Button: React.FC<ButtonProps> = ({ text }) => {
   const navigate = useNavigate();
   return (
-    <button name="go" value="submit" id="start_btn" className="sharedog-icon sharedog-Paw" onClick={() => navigate('/psi')}>
+    <button name="go" value="submit" id="start_btn" onClick={() => navigate('/psi')}>
       {text}
     </button>
   );

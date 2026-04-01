@@ -538,7 +538,7 @@ const AdddogForm: React.FC = () => {
   };
 
   return (
-    <main>
+    <>
       <h2>{t('adddog.title')}</h2>
 
       <form id="adddog-form" onSubmit={handleSubmit(onSubmit)}>
@@ -646,7 +646,7 @@ const AdddogForm: React.FC = () => {
           {successMessage && <div className="notification success" role="status">{successMessage}</div>}
         </div>
       </form>
-    </main>
+    </>
   );
 };
 

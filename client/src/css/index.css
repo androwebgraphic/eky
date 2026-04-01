@@ -1,11 +1,19 @@
-body {
-  height: 100%;
+/* Height chain for flexbox layout */
+html, body, #root {
+  height: 100% !important;
+  max-height: 100vh !important;
   margin: 0;
   padding: 0;
+  overflow: hidden !important; /* Prevent body scroll, let main element handle scrolling */
+}
+
+/* Make root a flexbox container */
+#root {
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 html {
-  height: 100%;
   font-size: 62.5%;
 }
 
@@ -94,7 +102,7 @@ a {
   border-radius: 8px;
   padding: 30px;
   width: 100%;
-  max-width: 500px;
+  max-width: 500px visible always;
   max-height: 80vh;
   overflow-y: auto;
   -webkit-box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
@@ -432,7 +440,7 @@ a {
             justify-content: center !important;
     text-align: center !important;
   }
-  /* Textarea should be full width and come before buttons in the flex order */
+  /* Textarea should be full width and come before buttons in flex order */
   .dog-details-buttons-container textarea {
     width: 100% !important;
     margin: 10px 0 !important;
@@ -1061,39 +1069,60 @@ img.welcome {
   color: red;
 }
 
+/* Flexbox layout for fixed header/footer with scrollable content */
 #Wrap {
-  min-width: 320px;
-  display: -ms-grid;
-  display: grid;
-  -ms-grid-columns: 1fr;
-  grid-template-columns: 1fr;
-  -ms-grid-rows: auto 1fr auto;
-  grid-template-rows: auto 1fr auto;
-  background-image: url("/img/dog_paw.png");
-  background-color: rgba(253, 124, 43, 0.1843137255);
-  background-position: cover;
-  -ms-flex-line-pack: start;
-      align-content: start;
-  min-height: 100vh;
-  height: 100%;
-  backdrop-filter: blur(0);
-  padding: 0;
-  overflow: hidden;
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-box-direction: normal !important;
+      -ms-flex-direction: column !important;
+          flex-direction: column !important;
+  -webkit-box-flex: 1 !important;
+      -ms-flex: 1 !important;
+          flex: 1 !important;
+  min-height: 0 !important;
 }
 
-#Wrap > *:nth-child(1) {
-  -ms-grid-row: 1;
-  -ms-grid-column: 1;
+/* All children of Wrap are flex items */
+#Wrap > * {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
 }
 
-#Wrap > *:nth-child(2) {
-  -ms-grid-row: 2;
-  -ms-grid-column: 1;
+/* Header - fixed, no flex shrinking */
+header {
+  -webkit-box-flex: 0 !important;
+      -ms-flex: 0 0 auto !important;
+          flex: 0 0 auto !important;
 }
 
-#Wrap > *:nth-child(3) {
-  -ms-grid-row: 3;
-  -ms-grid-column: 1;
+/* Main content area - scrollable, fills remaining space */
+#Wrap > main {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-box-direction: normal !important;
+      -ms-flex-direction: column !important;
+          flex-direction: column !important;
+  -webkit-box-flex: 1 !important;
+      -ms-flex: 1 1 auto !important;
+          flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  min-height: 0 !important;  /* Critical for flexbox scrolling */
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Footer - fixed, no flex shrinking */
+footer {
+  -webkit-box-flex: 0 !important;
+      -ms-flex: 0 0 auto !important;
+          flex: 0 0 auto !important;
 }
 
 img {
@@ -1162,8 +1191,6 @@ img {
 nav#top ul {
   width: 100%;
   height: 2rem;
-  position: fixed;
-  top: 0;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -1183,6 +1210,7 @@ nav#top ul {
   overflow: visible;
   padding: 0.5rem;
   background: #c44a0b;
+  flex-shrink: 0;
 }
 
 a {
@@ -1191,18 +1219,6 @@ a {
   padding: 0.5rem 0.7rem;
   white-space: nowrap;
   text-decoration: none;
-}
-@media (max-width: 768px) {
-  a {
-    font-size: 2rem;
-    padding: 0.4rem 0.5rem;
-  }
-}
-@media (max-width: 480px) {
-  a {
-    font-size: 2rem;
-    padding: 0.3rem 0.4rem;
-  }
 }
 
 nav#top select {
@@ -1215,38 +1231,36 @@ nav#top select {
   cursor: pointer;
   white-space: nowrap;
 }
-@media (max-width: 768px) {
-  nav#top select {
-    font-size: 1.4rem;
-    padding: 0.3rem 0.5rem;
-  }
-}
-@media (max-width: 480px) {
-  nav#top select {
-    font-size: 1.2rem;
-    padding: 0.3rem 0.4rem;
-  }
-}
-
-main {
+/* Default main styling for when not inside #Wrap */
+main:not(#Wrap > main) {
   width: 95%;
   max-width: 1200px;
   display: -ms-grid;
   display: grid;
   -ms-grid-columns: 1fr;
   grid-template-columns: 1fr;
-  margin: 9rem auto 3rem auto;
+  margin: 0 auto;
   padding: 1rem;
   background-color: rgba(247, 239, 228, 0.4);
   border-radius: 2rem;
-  overflow-y: auto;
-  overflow-x: hidden;
+  min-height: 0;
   backdrop-filter: blur(8px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  main {
+    width: 98%;
+    margin: 0 auto;
+    padding: 0.75rem;
+    border-radius: 1.5rem;
+  }
 }
 @media (max-width: 768px) {
   main {
     width: 98%;
-    margin: 7rem auto 2.5rem auto;
+    margin: 0 auto;
     padding: 0.75rem;
     border-radius: 1.5rem;
   }
@@ -1254,7 +1268,7 @@ main {
 @media (max-width: 480px) {
   main {
     width: 100%;
-    margin: 7rem auto 2rem auto;
+    margin: 0 auto;
     padding: 0.5rem;
     border-radius: 1rem;
   }
@@ -1305,7 +1319,7 @@ button {
 #start_btn {
   width: auto;
   font-size: 1.8rem;
-  padding: 1rem;
+  padding: 0.7rem 1rem;
   color: #1f4b72;
   background: #fbe1cd;
   border-radius: 0.8rem;
@@ -1389,14 +1403,96 @@ button:hover, .button:hover, button:focus, .button:focus {
   -webkit-box-pack: start;
       -ms-flex-pack: start;
           justify-content: flex-start;
+  /* REMOVED: overflow on forms - let main element handle scrolling */
+  /* Forms should flow naturally within main */
 }
-#login-form input:not([type=radio]):not([type=checkbox]),
+
+/* Two-column layout for form inputs on mobile */
+@media (max-width: 768px) {
+  #login-form,
+  #adddog-form,
+  #register-form {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+    padding: 0 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  #login-form label,
+  #adddog-form label,
+  #register-form label {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+  #login-form input:not([type="checkbox"]):not([type="radio"]),
+  #login-form select,
+  #login-form textarea,
+  #adddog-form input:not([type="checkbox"]):not([type="radio"]),
+  #adddog-form select,
+  #adddog-form textarea,
+  #register-form input:not([type="checkbox"]):not([type="radio"]),
+  #register-form select,
+  #register-form textarea {
+    flex: 0 0 calc(50% - 5px) !important;
+    min-width: calc(50% - 5px) !important;
+    max-width: calc(50% - 5px) !important;
+    width: calc(50% - 5px) !important;
+  }
+  #adddog-form #gender,
+  #adddog-form #health,
+  #adddog-form #media-upload {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+  #adddog-form .gender-options {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    gap: 10px !important;
+    justify-content: center !important;
+  }
+  #login-form .error,
+  #adddog-form .error,
+  #register-form .error {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+  #login-form .form-actions,
+  #adddog-form .form-actions,
+  #register-form .form-actions {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+  #login-form button[type="submit"],
+  #login-form button#login,
+  #adddog-form button[type="submit"],
+  #adddog-form .form-actions button,
+  #register-form button[type="submit"],
+  #register-form button#register {
+    flex: 1 1 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+}
+#login-form input:not([type="radio"]):not([type="checkbox"]),
 #login-form select,
 #login-form textarea,
-#adddog-form input:not([type=radio]):not([type=checkbox]),
+#adddog-form input:not([type="radio"]):not([type="checkbox"]),
 #adddog-form select,
 #adddog-form textarea,
-#register-form input:not([type=radio]):not([type=checkbox]),
+#register-form input:not([type="radio"]):not([type="checkbox"]),
 #register-form select,
 #register-form textarea {
   padding: 0.5rem;
@@ -1414,23 +1510,6 @@ button:hover, .button:hover, button:focus, .button:focus {
   padding: 0.5rem;
   color: #2e3b5d;
 }
-#login-form input::-webkit-input-placeholder, #adddog-form input::-webkit-input-placeholder, #register-form input::-webkit-input-placeholder {
-  font-size: 1.4rem;
-}
-#login-form input::-moz-placeholder, #adddog-form input::-moz-placeholder, #register-form input::-moz-placeholder {
-  font-size: 1.4rem;
-}
-#login-form input:-ms-input-placeholder, #adddog-form input:-ms-input-placeholder, #register-form input:-ms-input-placeholder {
-  font-size: 1.4rem;
-}
-#login-form input::-ms-input-placeholder, #adddog-form input::-ms-input-placeholder, #register-form input::-ms-input-placeholder {
-  font-size: 1.4rem;
-}
-#login-form input::placeholder,
-#adddog-form input::placeholder,
-#register-form input::placeholder {
-  font-size: 1.4rem;
-}
 #login-form #login,
 #adddog-form #login,
 #register-form #login {
@@ -1438,19 +1517,13 @@ button:hover, .button:hover, button:focus, .button:focus {
 }
 
 #register-form {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: start;
-      -ms-flex-pack: start;
-          justify-content: flex-start;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 100%;
+  padding: 1rem 0.5rem;
 }
 #register-form input {
   padding: 0.5rem;
@@ -1466,6 +1539,7 @@ button:hover, .button:hover, button:focus, .button:focus {
 }
 #register-form #register {
   margin-top: 0.5rem;
+  margin-bottom: 2rem;
 }
 
 /* media upload preview styles */
@@ -1484,7 +1558,7 @@ button:hover, .button:hover, button:focus, .button:focus {
   width: 100%;
 }
 
-#media-upload input[type=file] {
+#media-upload input[type="file"] {
   margin-top: 0.5rem;
 }
 
@@ -1627,7 +1701,7 @@ button.view-full {
       -ms-user-select: none;
           user-select: none;
 }
-#gender .gender-options label input[type=radio] {
+#gender .gender-options label input[type="radio"] {
   width: 1.8rem;
   height: 1.8rem;
   cursor: pointer;
@@ -1690,7 +1764,7 @@ button.view-full {
       -ms-user-select: none;
           user-select: none;
 }
-#health label input[type=checkbox] {
+#health label input[type="checkbox"] {
   width: 2rem;
   height: 2rem;
   cursor: pointer;
@@ -1708,7 +1782,7 @@ button.view-full {
 }
 
 #vacine,
-#castrats {
+#castrate {
   color: #c44a0b;
   width: 2rem;
   height: 2rem;
@@ -1734,9 +1808,8 @@ button.view-full {
 }
 @media (max-width: 480px) {
   #Doglist {
-    -ms-grid-columns: 1fr;
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
   }
 }
 
@@ -1944,9 +2017,7 @@ button.view-full {
 
 footer {
   width: 100%;
-  position: fixed;
-  left: 0;
-  bottom: 0;
+  flex-shrink: 0;
   z-index: 1000;
 }
 
@@ -2123,8 +2194,8 @@ h1 {
 h2 {
   font-size: 2.8rem;
   background: #42210b;
-  background: -webkit-gradient(linear, left bottom, left top, from(#42210b), to(#b16c2e));
-  background: linear-gradient(to top, #42210b 0%, #b16c2e 100%);
+  background: -webkit-gradient(linear, left bottom, left top, from(#42210B), to(#B16C2E));
+  background: linear-gradient(to top, #42210B 0%, #B16C2E 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -3375,9 +3446,6 @@ h1.extra-large {
 }
 
 .header-mobile {
-  position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
   padding: 0.75rem 0.5rem;
   margin: 0;
@@ -3392,7 +3460,7 @@ h1.extra-large {
           align-items: center;
   background-color: #c44a0b;
   color: #f5f5f5;
-  z-index: 9999;
+  flex-shrink: 0;
 }
 .header-mobile .header-left {
   display: -webkit-box;
@@ -3587,12 +3655,9 @@ h1.extra-large {
   min-height: 60px;
   margin: 0;
   padding: 0;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  position: fixed;
+  width: 100%;
+  flex-shrink: 0;
   z-index: 1000;
-  border-top: 4px solid #c44a0b;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
 }
@@ -3820,11 +3885,8 @@ h1.extra-large {
 }
 
 .header-mobile-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   min-height: 60px;
+  flex-shrink: 0;
   z-index: 1000;
   padding: 10px 20px;
   background-color: #c44a0b;
@@ -3921,6 +3983,7 @@ h1.extra-large {
   right: 0;
   background-color: #c44a0b;
   padding: 20px;
+  display: -webkit-box;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -4075,7 +4138,8 @@ h1.extra-large {
     height: 50px;
     padding: 0 4px;
     -ms-flex-item-align: center !important;
-        -ms-grid-row-align: center !important;
+        -ms-grid-row-align: center;
+        -ms-grid-row-align: center;
         align-self: center !important;
   }
   .header-user-info-inner {
@@ -4087,7 +4151,8 @@ h1.extra-large {
     padding: 0 8px;
     margin: 0;
     -ms-flex-item-align: center !important;
-        -ms-grid-row-align: center !important;
+        -ms-grid-row-align: center;
+        -ms-grid-row-align: center;
         align-self: center !important;
   }
   .header-avatar-inner {
@@ -4163,9 +4228,7 @@ h1.extra-large {
 }
 .footer-desktop {
   width: 100%;
-  position: fixed;
-  left: 0;
-  bottom: 0;
+  flex-shrink: 0;
   z-index: 1000;
 }
 .footer-desktop .footer-nav ul {
@@ -4528,11 +4591,106 @@ h1.extra-large {
           filter: drop-shadow(0 1px 2px #1976d2);
   color: #2196f3;
 }
-.footer-chat-btn .chat-label {
-  display: none;
+
+/* About page styles */
+.about-paragraphs {
+  max-width: 800px;
+  margin: 0 auto;
 }
-@media (min-width: 769px) {
-  .footer-chat-btn .chat-label {
-    display: inline-block;
+
+.about-paragraphs p {
+  font-size: 2.5rem;
+  margin: 0.2rem 0;
+  line-height: 2.8rem;
+}
+
+@media (max-width: 768px) {
+  .about-paragraphs p {
+    font-size: 2.8rem;
+    line-height: 3.2rem;
+  }
+}
+
+.about-button-container {
+  margin: -2rem 0 1rem 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  width: 100%;
+}
+
+.about-button-container #start_btn {
+  display: block;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .about-button-container {
+    margin: -1rem 0 0.5rem 0;
+    padding: 0 1rem;
+  }
+  .about-button-container #start_btn {
+    padding: 0.3rem 0.8rem;
+    font-size: 1.4rem;
+    width: auto;
+    max-width: 90%;
+  }
+}
+
+
+/* AGGRESSIVE: Force larger font sizes for About page paragraphs */
+main .about-paragraphs p,
+.about-paragraphs p,
+.about-paragraphs > p,
+div.about-paragraphs p {
+  font-size: 4.0rem !important;
+  line-height: 4.5rem !important;
+  margin: 0rem 0 !important;
+}
+
+@media (max-width: 768px) {
+  main .about-paragraphs p,
+  .about-paragraphs p,
+  .about-paragraphs > p,
+  div.about-paragraphs p {
+    font-size: 4.5rem !important;
+    line-height: 5.0rem !important;
+    margin: 0rem 0 !important;
+  }
+}
+
+/* AGGRESSIVE: Move button HIGHER on desktop */
+main .about-button-container #start_btn,
+.about-button-container #start_btn {
+  margin-top: -8rem !important;
+  margin-bottom: -3rem !important;
+}
+
+@media (max-width: 768px) {
+  main .about-button-container #start_btn,
+  .about-button-container #start_btn {
+    margin-top: -6rem !important;
+    margin-bottom: -2rem !important;
+    padding: 0.15rem 0.5rem !important;
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Increase logo size */
+.welcome {
+  max-width: 40% !important;
+  width: 40% !important;
+}
+
+@media (max-width: 768px) {
+  .welcome {
+    max-width: 65% !important;
+    width: 65% !important;
   }
 }

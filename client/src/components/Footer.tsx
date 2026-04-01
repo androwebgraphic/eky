@@ -73,19 +73,19 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
           <ul>
             <Link to="/psi">
               <li title={t('nav.dogs')}>
-                <span className="sharedog-icon sharedog-Paw" style={{fontSize: '36px'}}></span>
+                <span className="sharedog-icon sharedog-Paw" style={{fontSize: '50px'}}></span>
                 <span className="desktop-label">{t('footer.dogs')}</span>
               </li>
             </Link>
             <li title={t('button.chat') || 'Chat'} onClick={typeof onChatClick === 'function' ? onChatClick : undefined} style={{ position: 'relative' }}>
-              <span className="sharedog-icon sharedog-Message" style={{fontSize: '36px'}}></span>
+              <span className="sharedog-icon sharedog-Message" style={{fontSize: '50px'}}></span>
               <span className="desktop-label">{t('footer.chat')}</span>
               {unreadCount > 0 && (
                 <span 
                   style={{
                     position: 'absolute',
-                    top: '-5px',
-                    right: '-5px',
+                    top: '5px',
+                    right: '0',
                     backgroundColor: '#f44336',
                     color: 'white',
                     borderRadius: '50%',
@@ -106,19 +106,19 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
             </li>
             <Link to="/dodajpsa">
               <li title={t('adddog.title')}>
-                <span className="sharedog-icon sharedog-Add-dog" style={{fontSize: '36px'}}>+</span>
+                <span className="sharedog-icon sharedog-Add-dog" style={{fontSize: '50px'}}>+</span>
                 <span className="desktop-label">{t('footer.addDog')}</span>
               </li>
             </Link>
             {isAuthenticated && user ? (
               <li title={`${user.username} - ${t('userProfile.welcome') || 'User Profile'}`} onClick={handleUserIconClick}>
-                <span className="sharedog-icon sharedog-User" style={{fontSize: '36px'}}></span>
+                <span className="sharedog-icon sharedog-User" style={{fontSize: '50px'}}></span>
                 <span className="desktop-label">{t('footer.profile')}</span>
               </li>
             ) : (
               <Link to="/logiranje">
                 <li title={t('nav.login')}>
-                  <span className="sharedog-icon sharedog-User" style={{fontSize: '36px'}}></span>
+                  <span className="sharedog-icon sharedog-User" style={{fontSize: '50px'}}></span>
                   <span className="desktop-label">{t('footer.login')}</span>
                 </li>
               </Link>
@@ -140,7 +140,7 @@ const Footer: React.FC<FooterProps> = ({ onChatClick }) => {
               }}
               style={{ cursor: 'pointer' } as any}
             >
-              <span className="sharedog-icon sharedog-Search" style={{fontSize: '36px'}}></span>
+              <span className="sharedog-icon sharedog-Search" style={{fontSize: '50px'}}></span>
               <span className="desktop-label">{t('footer.search')}</span>
             </li>
           </ul>

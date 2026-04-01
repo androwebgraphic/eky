@@ -254,16 +254,18 @@
     "selectAria": "Nyelv kiválasztása"
   },
   "location": {
-    "enterLocation": "Írd be a helyszíned lent, hogy lásd a kutyákat távolság szerint rendezve:",
-    "cityPlaceholder": "Írd be a várost (pl. Budapest, Magyarország)",
+    "enterLocation": "Adja meg a tartózkodási helyét lent a kutyák távolság szerinti rendezéséhez:",
+    "cityPlaceholder": "Adjon meg egy várost (pl. Budapest, Magyarország)",
     "setLocation": "Helyszín beállítása",
     "finding": "Keresés...",
-    "usingSavedLocation": "✅ A mentett helyszínt használom",
+    "usingSavedLocation": "✅ A mentett helyszínemet használom",
     "usingLocation": "✅ Helyszín használata: {{displayName}}",
-    "locationDetected": "✅ Helyszín észlelve: {{lat}}, {{lng}}",
-    "locationNotFound": "❌ A helyszín nem található. Próbálj másik helyszínt.",
-    "geocodeFailed": "❌ A helyszín geokódolása sikertelen. Próbáld újra.",
-    "clearLocation": "Helyszín törlése"
+    "locationDetected": "✅ Helyszín érzékelve: {{lat}}, {{lng}}",
+    "locationNotFound": "❌ Helyszín nem található. Próbáljon másik helyszínt.",
+    "geocodeFailed": "❌ Helyszín geokódolása sikertelen. Próbálja újra.",
+    "clearLocation": "Helyszín törlése",
+    "showLocation": "Helyszín beállítások megjelenítése",
+    "hideLocation": "Helyszín beállítások elrejtése"
   },
   "adoption": {
     "title": "Kérések",

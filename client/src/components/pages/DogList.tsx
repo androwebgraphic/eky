@@ -70,6 +70,7 @@ function DogList() {
 	const [geocodingManual, setGeocodingManual] = useState(false);
 	const [showManualLocationInput, setShowManualLocationInput] = useState(false);
 	const [locationMessage, setLocationMessage] = useState<string>('');
+	const [showLocationSection, setShowLocationSection] = useState(false);
 
 	// Debug logging on mount
 	React.useEffect(() => {
@@ -593,8 +594,27 @@ function DogList() {
 
 	return (
 		<>
+		{/* Header */}
+		<div style={{ 
+			textAlign: 'center', 
+			padding: '20px 16px 10px 16px',
+			maxWidth: '1200px', 
+			width: '100%', 
+			margin: '0 auto', 
+			boxSizing: 'border-box'
+		}}>
+			<h2 style={{ 
+				fontSize: '2.4rem',
+				color: '#c44a0b',
+				margin: '0',
+				padding: '0'
+			}}>
+				{t('button.findFriend')}
+			</h2>
+		</div>
+
 		{/* Search bar */}
-		<div style={{ padding: '0 16px', paddingTop: window.innerWidth > 768 ? '80px' : '80px', maxWidth: '1200px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+		<div style={{ padding: '0 16px', paddingTop: '10px', maxWidth: '1200px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
 			<Search
 				searchTerm={searchTerm}
 				onSearchChange={setSearchTerm}
@@ -609,99 +629,122 @@ function DogList() {
 			/>
 		</div>
 
-		{/* Location status message and manual input */}
-		{locationMessage && (
-			<div style={{ 
-				padding: '12px 16px', 
-				maxWidth: '1200px', 
-				width: '100%', 
-				margin: '10px auto', 
-				boxSizing: 'border-box',
-				background: locationMessage.startsWith('✅') ? '#d4edda' : '#fff3cd',
-				border: `1px solid ${locationMessage.startsWith('✅') ? '#c3e6cb' : '#ffeaa7'}`,
-				borderRadius: '8px',
-				fontSize: '14px',
-				display: 'flex',
-				flexDirection: 'column',
-				gap: '8px'
-			}}>
-				<div>{locationMessage}</div>
-				{showManualLocationInput && !userLocation && (
-					<form onSubmit={handleManualLocationSubmit} style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-						<input
-							type="text"
-							value={manualLocationInput}
-							onChange={(e) => setManualLocationInput(e.target.value)}
-							placeholder={t('location.cityPlaceholder')}
-							disabled={geocodingManual}
-							style={{
-								flex: '1',
-								minWidth: '200px',
-								padding: '8px 12px',
-								border: '1px solid #ddd',
-								borderRadius: '6px',
-								fontSize: '14px'
-							}}
-						/>
+		{/* Collapsible Location Section */}
+		<div style={{ maxWidth: '1200px', width: '100%', margin: '10px auto', boxSizing: 'border-box' }}>
+			<button
+				onClick={() => setShowLocationSection(!showLocationSection)}
+				style={{
+					width: '100%',
+					padding: '12px 16px',
+					background: '#f8f9fa',
+					border: '1px solid #dee2e6',
+					borderRadius: '8px',
+					fontSize: '1.4rem',
+					color: '#495057',
+					cursor: 'pointer',
+					textAlign: 'left',
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'space-between'
+				}}
+			>
+				<span>{showLocationSection ? t('location.hideLocation') : t('location.showLocation')}</span>
+				<span style={{ fontSize: '1.6rem' }}>{showLocationSection ? '▼' : '▶'}</span>
+			</button>
+
+			{showLocationSection && locationMessage && (
+				<div style={{ 
+					padding: '12px 16px', 
+					maxWidth: '1200px', 
+					width: '100%', 
+					margin: '10px 0 0 0', 
+					boxSizing: 'border-box',
+					background: locationMessage.startsWith('✅') ? '#d4edda' : '#fff3cd',
+					border: `1px solid ${locationMessage.startsWith('✅') ? '#c3e6cb' : '#ffeaa7'}`,
+					borderRadius: '8px',
+					fontSize: '14px',
+					display: 'flex',
+					flexDirection: 'column',
+					gap: '8px'
+				}}>
+					<div>{locationMessage}</div>
+					{showManualLocationInput && !userLocation && (
+						<form onSubmit={handleManualLocationSubmit} style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+							<input
+								type="text"
+								value={manualLocationInput}
+								onChange={(e) => setManualLocationInput(e.target.value)}
+								placeholder={t('location.cityPlaceholder')}
+								disabled={geocodingManual}
+								style={{
+									flex: '1',
+									minWidth: '200px',
+									padding: '8px 12px',
+									border: '1px solid #ddd',
+									borderRadius: '6px',
+									fontSize: '14px'
+								}}
+							/>
+							<button
+								type="submit"
+								disabled={geocodingManual || !manualLocationInput.trim()}
+								style={{
+									padding: '8px 16px',
+									background: '#007bff',
+									color: 'white',
+									border: 'none',
+									borderRadius: '6px',
+									fontSize: '14px',
+									cursor: geocodingManual || !manualLocationInput.trim() ? 'not-allowed' : 'pointer',
+									opacity: geocodingManual || !manualLocationInput.trim() ? 0.6 : 1
+								}}
+							>
+								{geocodingManual ? t('location.finding') : t('location.setLocation')}
+							</button>
+							<button
+								type="button"
+								onClick={() => setShowManualLocationInput(false)}
+								style={{
+									padding: '8px 16px',
+									background: '#6c757d',
+									color: 'white',
+									border: 'none',
+									borderRadius: '6px',
+									fontSize: '14px',
+									cursor: 'pointer'
+								}}
+							>
+								{t('common.cancel')}
+							</button>
+						</form>
+					)}
+					{userLocation && (
 						<button
-							type="submit"
-							disabled={geocodingManual || !manualLocationInput.trim()}
+							onClick={() => {
+								setUserLocation(null);
+								setLocationMessage('');
+								setShowManualLocationInput(true);
+								// Clear from localStorage
+								localStorage.removeItem('userLocation');
+								console.log('[LOCATION] ✅ Cleared location from localStorage');
+							}}
 							style={{
-								padding: '8px 16px',
-								background: '#007bff',
-								color: 'white',
-								border: 'none',
-								borderRadius: '6px',
-								fontSize: '14px',
-								cursor: geocodingManual || !manualLocationInput.trim() ? 'not-allowed' : 'pointer',
-								opacity: geocodingManual || !manualLocationInput.trim() ? 0.6 : 1
+								padding: '6px 12px',
+								background: 'transparent',
+								color: '#007bff',
+								border: '1px solid #007bff',
+								borderRadius: '4px',
+								fontSize: '12px',
+								cursor: 'pointer',
+								alignSelf: 'flex-start'
 							}}
 						>
-							{geocodingManual ? t('location.finding') : t('location.setLocation')}
+							{t('location.clearLocation')}
 						</button>
-						<button
-							type="button"
-							onClick={() => setShowManualLocationInput(false)}
-							style={{
-								padding: '8px 16px',
-								background: '#6c757d',
-								color: 'white',
-								border: 'none',
-								borderRadius: '6px',
-								fontSize: '14px',
-								cursor: 'pointer'
-							}}
-						>
-							{t('common.cancel')}
-						</button>
-					</form>
-				)}
-				{userLocation && (
-					<button
-						onClick={() => {
-							setUserLocation(null);
-							setLocationMessage('');
-							setShowManualLocationInput(true);
-							// Clear from localStorage
-							localStorage.removeItem('userLocation');
-							console.log('[LOCATION] ✅ Cleared location from localStorage');
-						}}
-						style={{
-							padding: '6px 12px',
-							background: 'transparent',
-							color: '#007bff',
-							border: '1px solid #007bff',
-							borderRadius: '4px',
-							fontSize: '12px',
-							cursor: 'pointer',
-							alignSelf: 'flex-start'
-						}}
-					>
-						{t('location.clearLocation')}
-					</button>
-				)}
-			</div>
-		)}
+					)}
+				</div>
+			)}
+		</div>
 
 			<div style={{ maxWidth: '1600px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
 			<main

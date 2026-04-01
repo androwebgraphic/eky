@@ -259,16 +259,18 @@
     "selectAria": "Sprache auswählen"
   },
   "location": {
-    "enterLocation": "Geben Sie Ihren Standort unten ein, um Hunde nach Entfernung sortiert zu sehen:",
+    "enterLocation": "Geben Sie unten Ihren Standort ein, um Hunde nach Entfernung sortiert zu sehen:",
     "cityPlaceholder": "Stadt eingeben (z.B. Berlin, Deutschland)",
     "setLocation": "Standort festlegen",
     "finding": "Suche...",
-    "usingSavedLocation": "✅ Ich verwende meinen gespeicherten Standort",
-    "usingLocation": "✅ Standort verwenden: {{displayName}}",
+    "usingSavedLocation": "✅ Verwende meinen gespeicherten Standort",
+    "usingLocation": "✅ Verwende Standort: {{displayName}}",
     "locationDetected": "✅ Standort erkannt: {{lat}}, {{lng}}",
     "locationNotFound": "❌ Standort nicht gefunden. Versuchen Sie einen anderen Standort.",
     "geocodeFailed": "❌ Standort-Geocodierung fehlgeschlagen. Versuchen Sie es erneut.",
-    "clearLocation": "Standort löschen"
+    "clearLocation": "Standort löschen",
+    "showLocation": "Standortseinstellungen anzeigen",
+    "hideLocation": "Standortseinstellungen ausblenden"
   },
   "adoption": {
     "title": "Anfragen",

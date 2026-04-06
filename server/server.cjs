@@ -23,13 +23,34 @@ const adoptionRoutes = require('./routes/adoptionRoutes.js'); // <-- Add adoptio
 
 const app = express();
 
-// 3. Set up CORS middleware FIRST (more permissive for development)
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://eky-3xf1.onrender.com'
-];
+  // 3. Set up CORS middleware FIRST (more permissive for development)
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://eky-3xf1.onrender.com'
+  ];
 
-app.use(cors({
+  // Security headers middleware to prevent copying and cloning
+  app.use((req, res, next) => {
+    // Prevent clickjacking
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Content-Security-Policy', "frame-ancestors 'self'");
+    
+    // Prevent MIME type sniffing
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    
+    // Enable XSS protection
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    
+    // Prevent referrer leakage
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    
+    // Prevent search engines from indexing
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+    
+    next();
+  });
+
+  app.use(cors({
   origin: function(origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
@@ -76,7 +97,28 @@ const staticCors = cors({
   optionsSuccessStatus: 200
 });
 
-app.use('/uploads', staticCors, express.static(uploadsPath, {
+// Hotlinking protection middleware
+const checkReferrer = (req, res, next) => {
+  const referrer = req.get('referer') || req.get('referrer');
+  const host = req.get('host');
+  
+  // Allow requests with no referrer or from allowed origins
+  if (!referrer || referrer.includes(host)) {
+    next();
+  } else {
+    // Check if referrer is in allowed origins
+    const isAllowed = allowedOrigins.some(origin => referrer.includes(origin.replace(/https?:\/\//, '')));
+    if (isAllowed) {
+      next();
+    } else {
+      // Block hotlinking
+      console.log('[HOTLINK] Blocked request from:', referrer);
+      res.status(403).send('Forbidden: Hotlinking not allowed');
+    }
+  }
+};
+
+app.use('/uploads', staticCors, checkReferrer, express.static(uploadsPath, {
   setHeaders: (res, filePath) => {
     console.log('[STATIC FILE] Serving:', filePath, 'Status: OK');
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -87,6 +129,9 @@ app.use('/uploads', staticCors, express.static(uploadsPath, {
     // Critical headers to prevent OpaqueResponseBlocking
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
     res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+    // Anti-hotlinking headers
+    res.setHeader('X-Robots-Tag', 'noimageindex');
+    res.setHeader('Permissions-Policy', 'interest-cohort=()');
     // Set proper content type based on file extension
     const ext = path.extname(filePath).toLowerCase();
     const mimeTypes = {
@@ -105,7 +150,7 @@ app.use('/uploads', staticCors, express.static(uploadsPath, {
   }
 }));
 
-app.use('/u', staticCors, express.static(uploadsPath, {
+app.use('/u', staticCors, checkReferrer, express.static(uploadsPath, {
   setHeaders: (res, filePath) => {
     console.log('[STATIC FILE] Serving:', filePath, 'Status: OK');
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -116,6 +161,9 @@ app.use('/u', staticCors, express.static(uploadsPath, {
     // Critical headers to prevent OpaqueResponseBlocking
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
     res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+    // Anti-hotlinking headers
+    res.setHeader('X-Robots-Tag', 'noimageindex');
+    res.setHeader('Permissions-Policy', 'interest-cohort=()');
     // Set proper content type based on file extension
     const ext = path.extname(filePath).toLowerCase();
     const mimeTypes = {

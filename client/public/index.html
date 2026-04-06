@@ -12,6 +12,134 @@
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <link rel="stylesheet" href="/fonts.css" />
+    
+    <!-- Protection Meta Tags -->
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="no-referrer">
+    <meta name="referrer" content="no-referrer">
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; frame-ancestors 'self';">
+    
+    <!-- Disable Right Click and Context Menu -->
+    <script>
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      });
+      
+      // Disable keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        // Prevent Ctrl+C, Ctrl+U, Ctrl+S, Ctrl+Shift+I, F12
+        if (
+          (e.ctrlKey && (e.key === 'c' || e.key === 'C' || e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) ||
+          (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) ||
+          e.key === 'F12'
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      });
+      
+      // Disable drag and drop
+      document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        return false;
+      });
+      
+      // Disable image drag
+      document.addEventListener('mousedown', function(e) {
+        if (e.target.tagName === 'IMG') {
+          e.preventDefault();
+        }
+      });
+      
+      // Disable text selection
+      document.addEventListener('selectstart', function(e) {
+        e.preventDefault();
+        return false;
+      });
+      
+      // Disable copy
+      document.addEventListener('copy', function(e) {
+        e.preventDefault();
+        e.clipboardData.setData('text/plain', '');
+        return false;
+      });
+      
+      // Disable cut
+      document.addEventListener('cut', function(e) {
+        e.preventDefault();
+        return false;
+      });
+      
+      // Prevent inspect element via right click
+      document.addEventListener('mousedown', function(e) {
+        if (e.button === 2 || e.button === 3) {
+          e.preventDefault();
+          return false;
+        }
+      });
+      
+      // Disable print
+      window.addEventListener('beforeprint', function(e) {
+        e.preventDefault();
+        return false;
+      });
+      
+      // Add copyright notice to clipboard
+      document.addEventListener('copy', function(e) {
+        e.preventDefault();
+        var copyright = '© Eky App - All Rights Reserved';
+        e.clipboardData.setData('text/plain', copyright);
+        return false;
+      });
+    </script>
+    
+    <!-- Anti-Cloning CSS -->
+    <style>
+      /* Disable text selection */
+      * {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+      }
+      
+      /* Disable image dragging */
+      img {
+        -webkit-user-drag: none !important;
+        -moz-user-drag: none !important;
+        -ms-user-drag: none !important;
+        user-drag: none !important;
+        pointer-events: none !important;
+      }
+      
+      /* Disable right click */
+      body {
+        -webkit-touch-callout: none !important;
+        -webkit-user-select: none !important;
+        -khtml-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+      }
+      
+      /* Disable text highlighting */
+      ::selection {
+        background: transparent !important;
+        color: transparent !important;
+      }
+      
+      ::-moz-selection {
+        background: transparent !important;
+        color: transparent !important;
+      }
+    </style>
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/

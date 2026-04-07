@@ -458,3 +458,25 @@
   width: 100% !important;
   height: 100% !important;
 }
+
+/* CRITICAL: Override centering to align left on desktop */
+/* Override dog cards centering */
+.dog-card-mini {
+  justify-content: flex-start !important;
+  justify-items: flex-start !important;
+}
+
+/* Override modal content centering */
+.modal-overlay {
+  align-items: flex-start !important;
+}
+
+/* Ensure dog images are fully visible */
+.card .img {
+  overflow: visible !important;
+}
+
+.dog-details .dog-details-image {
+  margin: 4px auto !important;
+  max-height: 150px !important;
+}

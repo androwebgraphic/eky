@@ -91,18 +91,6 @@ const sendMessage = async (req, res) => {
       senderUser.violationCount = (senderUser.violationCount || 0) + 1;
       senderUser.lastViolationDate = new Date();
       
-      // Reset violation count if last violation was more than 30 days ago
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      if (senderUser.lastViolationDate && senderUser.violationCount > 1) {
-        const timeSinceLastViolation = new Date() - senderUser.lastViolationDate;
-        // Only reset if this is the only recent violation
-        if (timeSinceLastViolation > 30 * 24 * 60 * 60 * 1000) {
-          senderUser.violationCount = 1;
-        }
-      }
-      
       let warningMessage = '';
       let messageType = 'system_warning';
       
@@ -111,20 +99,23 @@ const sendMessage = async (req, res) => {
         // First violation - just warn
         warningMessage = getWarningMessage('first', language || 'en');
         console.log(`First violation for user ${sender}, sending warning`);
-      } else if (senderUser.violationCount === 2) {
-        // Second violation - suspend for 30 days
-        const suspensionDate = new Date();
-        suspensionDate.setDate(suspensionDate.getDate() + 30);
-        senderUser.suspendedUntil = suspensionDate;
-        warningMessage = getWarningMessage('suspended', language || 'en', suspensionDate);
-        console.log(`Second violation for user ${sender}, suspending until ${suspensionDate}`);
-        messageType = 'system_warning';
       } else {
-        // Third+ violation - delete account
-        senderUser.isDeleted = true;
-        warningMessage = getWarningMessage('deleted', language || 'en');
-        console.log(`Third+ violation for user ${sender}, deleting account`);
-        messageType = 'system_warning';
+        // Second violation or more - suspend for 30 days or delete account
+        if (senderUser.violationCount === 2) {
+          // Second violation - suspend for 30 days
+          const suspensionDate = new Date();
+          suspensionDate.setDate(suspensionDate.getDate() + 30);
+          senderUser.suspendedUntil = suspensionDate;
+          warningMessage = getWarningMessage('suspended', language || 'en', suspensionDate);
+          console.log(`Second violation for user ${sender}, suspending until ${suspensionDate}`);
+          messageType = 'system_warning';
+        } else if (senderUser.violationCount >= 3) {
+          // Third+ violation - delete account
+          senderUser.isDeleted = true;
+          warningMessage = getWarningMessage('deleted', language || 'en');
+          console.log(`Third+ violation for user ${sender}, deleting account`);
+          messageType = 'system_warning';
+        }
       }
       
       await senderUser.save();

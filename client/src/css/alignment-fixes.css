@@ -1,0 +1,29 @@
+/* Alignment Fixes for Dog Cards and Modals - Firefox and Safari */
+/* Force dog cards to align left instead of center */
+.dog-card-mini {
+  justify-items: start !important;
+}
+
+/* Force card content to align left */
+.dog-card-mini .dog-info-mini,
+.dog-card-mini .dog-actions-mini {
+  align-items: flex-start !important;
+}
+
+/* Force modal buttons to align left */
+.card-details-buttons-container,
+.card-details .dog-details-mobile-actions,
+.card-actions.call-to-action.dog-details-mobile-actions {
+  align-items: flex-start !important;
+}
+
+/* Fix dog image cut-off issue */
+.card .img {
+  overflow: visible !important;
+}
+
+/* Fix dog details image spacing and height */
+.dog-details .dog-details-image {
+  margin: 4px auto !important;
+  max-height: 150px !important;
+}

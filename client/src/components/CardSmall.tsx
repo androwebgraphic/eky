@@ -271,18 +271,12 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		return (
 		<div
 			className="card card-small"
-			style={{
-				display: 'flex',
-				flexDirection: 'column',
-			}}
 		>
-				<div className="card-small-image-wrapper">
+				<div className="card-small-image-wrapper" onClick={(e) => { onViewDetails(e); }}
 					{hasVideoUrl && !videoError ? (
 							<div onClick={e => onViewDetails && onViewDetails(e)} title={t('dogDetails.showDetails', 'Show details')}>
 								<video
 									controls
-									width="100%"
-									height="200"
 									poster={posterUrl}
 									className="card-small-video"
 									onError={() => setVideoError(true)}

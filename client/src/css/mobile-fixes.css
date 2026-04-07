@@ -1533,3 +1533,23 @@ main {
     visibility: visible !important;
   }
 }
+
+/* === CRITICAL FIX: Dog Images Too Small === */
+/* Fix card-small-image wrapper - allow natural image sizing */
+.card-small-image-wrapper {
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* Fix card-small-image itself - remove fixed constraints */
+.card-small-image,
+.card-small-video {
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+}

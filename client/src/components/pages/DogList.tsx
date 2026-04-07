@@ -799,7 +799,9 @@ function DogList() {
 										setEditDog(null);
 										setDetailsDog(null);
 										setMapDog(null);
-										if (e && Object.keys(e).length === 0) {
+										// Check if this is a location/map click (empty object marker)
+						// Only treat as map click if e is explicitly an empty object {}
+						if (e && typeof e === 'object' && !e.nativeEvent && Object.keys(e).length === 0) {
 											// Location click - open map only
 											openMapForDog(dog);
 										} else {
@@ -851,7 +853,9 @@ function DogList() {
 											setEditDog(null);
 											setDetailsDog(null);
 											setMapDog(null);
-											if (e && Object.keys(e).length === 0) {
+											// Check if this is a location/map click (empty object marker)
+						// Only treat as map click if e is explicitly an empty object {}
+						if (e && typeof e === 'object' && !e.nativeEvent && Object.keys(e).length === 0) {
 												// Location click - open map only
 												openMapForDog(dog);
 											} else {

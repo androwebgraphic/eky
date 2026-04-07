@@ -268,133 +268,131 @@ const CardSmall: React.FC<CardSmallProps> = (props) => {
 		setWishlistLoading(false);
 	};
 
-		return (
-		<div
-			className="card card-small"
-		>
-				<div className="card-small-image-wrapper" onClick={(e) => { onViewDetails(e); }}
-					{hasVideoUrl && !videoError ? (
-							<div onClick={e => onViewDetails && onViewDetails(e)} title={t('dogDetails.showDetails', 'Show details')}>
-								<video
-									controls
-									poster={posterUrl}
-									className="card-small-video"
-									onError={() => setVideoError(true)}
-									onClick={e => onViewDetails && onViewDetails(e)}
-								>
-									<source src={videoUrl} />
-								</video>
-							</div>
-						) : videoError ? (
-							<div className="card-small-image-error">{t('alerts.videoFailedToLoad')}</div>
-						) : largestImgUrl && !imgError ? (
-							<img
-								src={largestImgUrl}
-								alt={name}
-								className="card-small-image"
-								loading="lazy"
-								onError={handleImgError}
-								onLoad={() => setImgLoaded(true)}
-								onClick={e => onViewDetails && onViewDetails(e)}
-								title={t('dogDetails.showDetails', 'Show details')}
-							/>
-						) : imgError ? (
-							<div className="card-small-image-error">{t('alerts.imageFailedToLoad') || 'Image failed to load'}</div>
-						) : thumbUrl && !imgError ? (
-							<img
-								src={thumbUrl}
-								alt={name}
-								className="card-small-image"
-								loading="lazy"
-								onError={handleImgError}
-								onLoad={() => setImgLoaded(true)}
-								onClick={e => onViewDetails && onViewDetails(e)}
-								title={t('dogDetails.showDetails', 'Show details')}
-							/>
-						) : (
-							<div className="card-small-placeholder" />
-						)}
-						{uniqueImages.length > 1 && (
-							<div
-								className="multi-photo-indicator"
-								title={t('dogDetails.showMoreImages', 'View all images')}
-							>
-								<span className="multi-photo-icon">
-									<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-									{uniqueImages.length}
-								</span>
-							</div>
-						)}
-				</div>
-				<div className="card-small-content">
-					{adoptionStatus && adoptionStatus !== 'available' && (
-						<div className={`adoption-status-badge ${adoptionStatus === 'adopted' ? 'adopted' : ''}`}>
-							{t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)}
-						</div>
-					)}
-					<div className="card-small-name">{name}</div>
-					<div className="card-small-field"><strong className="field-label">{t('fields.breed', 'Breed')}</strong> {breed}</div>
-					{age !== undefined && <div className="card-small-field secondary"><strong className="field-label">{t('fields.age', 'Age')}</strong> {age}</div>}
-					{gender && <div className="card-small-field secondary"><strong className="field-label">{t('fields.gender', 'Gender')}</strong> {t(`gender.${gender}`, gender)}</div>}
-					{size && <div className="card-small-field secondary"><strong className="field-label">{t('fields.size', 'Size')}</strong> {t(`size.${size}`, size)}</div>}
-					{location && (
-						<div className="card-small-location">
-							<strong>{t('fields.location', 'Location')}</strong>
-							<span
-								className="location-text"
-								onClick={() => onViewDetails && onViewDetails({} as any)}
-								title={t('dogDetails.showMap', 'Show map')}
-							>
-								{location}
-							</span>
-						</div>
-					)}
-					{vaccinated && <div className="card-small-health">{t('fields.vaccinated')}</div>}
-					{user && (
-						<div className="card-small-user">
-							<span className="user-label">{t('fields.postedBy', 'Posted by')}:</span>{' '}
-							<span className="user-name">
-								{user.username || user.name}
-							</span>
-						</div>
-					)}
-					{createdAt && (
-						<div className="card-small-date">
-							{new Date(createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-						</div>
-					)}
-				</div>
-				<div className="card-small-actions">
-					<button type="button" onClick={onViewDetails} className="card-small-btn btn-details">{t('button.viewDetails', 'Details')}</button>
-					<button 
-						type="button" 
-						onClick={handleAdopt} 
-						disabled={adoptionStatus && adoptionStatus !== 'available'}
-						className="card-small-btn btn-adopt"
+	return (
+		<div className="card card-small">
+			<div className="card-small-image-wrapper" onClick={(e) => { onViewDetails(e); }}>
+				{hasVideoUrl && !videoError ? (
+					<div onClick={e => onViewDetails && onViewDetails(e)} title={t('dogDetails.showDetails', 'Show details')}>
+						<video
+							controls
+							poster={posterUrl}
+							className="card-small-video"
+							onError={() => setVideoError(true)}
+							onClick={e => onViewDetails && onViewDetails(e)}
+						>
+							<source src={videoUrl} />
+						</video>
+					</div>
+				) : videoError ? (
+					<div className="card-small-image-error">{t('alerts.videoFailedToLoad')}</div>
+				) : largestImgUrl && !imgError ? (
+					<img
+						src={largestImgUrl}
+						alt={name}
+						className="card-small-image"
+						loading="lazy"
+						onError={handleImgError}
+						onLoad={() => setImgLoaded(true)}
+						onClick={e => onViewDetails && onViewDetails(e)}
+						title={t('dogDetails.showDetails', 'Show details')}
+					/>
+				) : imgError ? (
+					<div className="card-small-image-error">{t('alerts.imageFailedToLoad') || 'Image failed to load'}</div>
+				) : thumbUrl && !imgError ? (
+					<img
+						src={thumbUrl}
+						alt={name}
+						className="card-small-image"
+						loading="lazy"
+						onError={handleImgError}
+						onLoad={() => setImgLoaded(true)}
+						onClick={e => onViewDetails && onViewDetails(e)}
+						title={t('dogDetails.showDetails', 'Show details')}
+					/>
+				) : (
+					<div className="card-small-placeholder" />
+				)}
+				{uniqueImages.length > 1 && (
+					<div
+						className="multi-photo-indicator"
+						title={t('dogDetails.showMoreImages', 'View all images')}
 					>
-						{adoptionStatus && adoptionStatus !== 'available' 
-							? t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)
-							: t('adopt')
-						}
-					</button>
-					<button
-						type="button"
-						onClick={handleWishlist}
-						className={`card-small-btn btn-wishlist ${isInWishlist && props._id && isInWishlist(props._id) ? 'in-wishlist' : ''}`}
-						disabled={wishlistLoading}
-					>
-						{isInWishlist && props._id && isInWishlist(props._id)
-							? <div className="wishlist-heart"><span className="check-mark">✓</span>❤️<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
-							: <div className="wishlist-heart"><span>❤️</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>}
-					</button>
-					{canEdit && (
-						<button type="button" onClick={onEdit} className="card-small-btn btn-edit">{t('common.edit')}</button>
-					)}
-					{canEdit && (
-						<button type="button" onClick={onRemove} className="card-small-btn btn-remove">{t('common.remove')}</button>
-					)}
-				</div>
+						<span className="multi-photo-icon">
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+							{uniqueImages.length}
+						</span>
+					</div>
+				)}
 			</div>
+			<div className="card-small-content">
+				{adoptionStatus && adoptionStatus !== 'available' && (
+					<div className={`adoption-status-badge ${adoptionStatus === 'adopted' ? 'adopted' : ''}`}>
+						{t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)}
+					</div>
+				)}
+				<div className="card-small-name">{name}</div>
+				<div className="card-small-field"><strong className="field-label">{t('fields.breed', 'Breed')}</strong> {breed}</div>
+				{age !== undefined && <div className="card-small-field secondary"><strong className="field-label">{t('fields.age', 'Age')}</strong> {age}</div>}
+				{gender && <div className="card-small-field secondary"><strong className="field-label">{t('fields.gender', 'Gender')}</strong> {t(`gender.${gender}`, gender)}</div>}
+				{size && <div className="card-small-field secondary"><strong className="field-label">{t('fields.size', 'Size')}</strong> {t(`size.${size}`, size)}</div>}
+				{location && (
+					<div className="card-small-location">
+						<strong>{t('fields.location', 'Location')}</strong>
+						<span
+							className="location-text"
+							onClick={() => onViewDetails && onViewDetails({} as any)}
+							title={t('dogDetails.showMap', 'Show map')}
+						>
+							{location}
+						</span>
+					</div>
+				)}
+				{vaccinated && <div className="card-small-health">{t('fields.vaccinated')}</div>}
+				{user && (
+					<div className="card-small-user">
+						<span className="user-label">{t('fields.postedBy', 'Posted by')}:</span>{' '}
+						<span className="user-name">
+							{user.username || user.name}
+						</span>
+					</div>
+				)}
+				{createdAt && (
+					<div className="card-small-date">
+						{new Date(createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+					</div>
+				)}
+			</div>
+			<div className="card-small-actions">
+				<button type="button" onClick={onViewDetails} className="card-small-btn btn-details">{t('button.viewDetails', 'Details')}</button>
+				<button 
+					type="button" 
+					onClick={handleAdopt} 
+					disabled={adoptionStatus && adoptionStatus !== 'available'}
+					className="card-small-btn btn-adopt"
+				>
+					{adoptionStatus && adoptionStatus !== 'available' 
+						? t(`adoptionStatus.${adoptionStatus}`, adoptionStatus)
+						: t('adopt')
+					}
+				</button>
+				<button
+					type="button"
+					onClick={handleWishlist}
+					className={`card-small-btn btn-wishlist ${isInWishlist && props._id && isInWishlist(props._id) ? 'in-wishlist' : ''}`}
+					disabled={wishlistLoading}
+				>
+					{isInWishlist && props._id && isInWishlist(props._id)
+						? <div className="wishlist-heart"><span className="check-mark">✓</span>❤️<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+						: <div className="wishlist-heart"><span>❤️</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="menu-icon"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>}
+				</button>
+				{canEdit && (
+					<button type="button" onClick={onEdit} className="card-small-btn btn-edit">{t('common.edit')}</button>
+				)}
+				{canEdit && (
+					<button type="button" onClick={onRemove} className="card-small-btn btn-remove">{t('common.remove')}</button>
+				)}
+			</div>
+		</div>
 	);
 }
 

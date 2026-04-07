@@ -324,7 +324,14 @@
     "adoptionCancelError": "Az örökbefogadás törlése sikertelen",
     "adoptionNotFound": "Ez az örökbefogadási kérés törlésre került vagy már nem elérhető.",
     "actionFailed": "Művelet sikertelen",
-    "years": "év"
+    "years": "év",
+    "wordFilter": {
+      "messageBlocked": "Üzenet blokkolva",
+      "firstWarning": "⚠️ FIGYELMEZTETÉS: Üzenete törölve lett. Kutyák eladásának, cseréjének vagy cserejének kísérlete szigorúan tilos. Fiókja 30 napra felfüggesztésre kerül, ha továbbra is megszegi feltételeinket.",
+      "accountSuspended": "⛔ FELFÜGGESZTETT FIÓK: Fiókja a szabályok ismételt megsértése miatt 30 napra felfüggesztésre került. Nem küldhet üzeneteket {{date}}-ig.",
+      "accountDeleted": "🚂 TÖRÖLT FIÓK: Fiókja a használati feltételek ismételt megsértése miatt véglegesen törlésre került.",
+      "prohibitedWords": "Üzenete tiltott szavakat tartalmaz, amelyek a kutyák eladásához, cseréjéhez vagy cseréjéhez kapcsolódnak."
+    }
   },
   "alerts": {
     "pleaseLoginToAdopt": "Be kell jelentkeznie a kutya örökbe fogadásához.",

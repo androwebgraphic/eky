@@ -329,7 +329,14 @@
     "adoptionCancelError": "Abbrechen der Adoption fehlgeschlagen",
     "adoptionNotFound": "Diese Adoptionsanfrage wurde storniert oder ist nicht mehr verfügbar.",
     "actionFailed": "Aktion fehlgeschlagen",
-    "years": "Jahre"
+    "years": "Jahre",
+    "wordFilter": {
+      "messageBlocked": "Nachricht blockiert",
+      "firstWarning": "⚠️ WARNUNG: Ihre Nachricht wurde gelöscht. Der Versuch, Hunde zu verkaufen, zu tauschen oder auszutauschen, ist strengstens verboten. Ihr Konto wird für 30 Tage gesperrt, wenn Sie unsere Bedingungen weiterhin verletzen.",
+      "accountSuspended": "⛔ KONTOSPERRUNG: Ihr Konto wurde aufgrund wiederholter Verstöße für 30 Tage gesperrt. Sie können keine Nachrichten senden bis {{date}}.",
+      "accountDeleted": "🚫 KONTO GELÖSCHT: Ihr Konto wurde aufgrund wiederholter Verstöße gegen unsere Nutzungsbedingungen dauerhaft gelöscht.",
+      "prohibitedWords": "Ihre Nachricht enthält verbotene Wörter im Zusammenhang mit dem Verkauf, Tausch oder Austausch von Hunden."
+    }
   },
   "alerts": {
     "pleaseLoginToAdopt": "Bitte melden Sie sich an, um einen Hund zu adoptieren.",

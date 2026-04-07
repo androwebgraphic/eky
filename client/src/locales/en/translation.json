@@ -336,7 +336,14 @@
     "years": "years",
     "noMessagesYet": "No messages yet.",
     "socketNotConnected": "Socket not connected. Check backend/server.",
-    "searching": "Searching..."
+    "searching": "Searching...",
+    "wordFilter": {
+      "messageBlocked": "Message blocked",
+      "firstWarning": "⚠️ WARNING: Your message was deleted. Attempting to sell, trade, or exchange dogs is strictly prohibited. Your account will be suspended for 30 days if you continue to violate our terms.",
+      "accountSuspended": "⛔ ACCOUNT SUSPENDED: Your account has been suspended for 30 days due to repeated violations. You cannot send messages until {{date}}.",
+      "accountDeleted": "🚫 ACCOUNT DELETED: Your account has been permanently deleted due to repeated violations of our terms of use.",
+      "prohibitedWords": "Your message contains prohibited words related to selling, trading, or exchanging dogs."
+    }
   },
   "adoptionRequests": {
     "failedToFetch": "Failed to fetch adoption requests",

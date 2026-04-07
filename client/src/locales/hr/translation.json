@@ -353,7 +353,14 @@
     "adoptionCancelError": "Neuspjelo otkazivanje posvajanja",
     "adoptionNotFound": "Ovaj zahtjev za posvajanje je otkazan ili više nije dostupan.",
     "actionFailed": "Akcija nije uspjela",
-    "years": "godine"
+    "years": "godine",
+    "wordFilter": {
+      "messageBlocked": "Poruka blokirana",
+      "firstWarning": "⚠️ UPOZORENJE: Vaša poruka je obrisana. Pokušaj prodaje, razmjene ili zamjena pasa strogo je zabranjen. Vaš račun bit će suspendiran 30 dana ako nastavite kršiti naše uvjete.",
+      "accountSuspended": "⛔ SUSPENDIRAN RAČUN: Vaš račun je suspendiran na 30 dana zbog ponavljanja prekršaja. Ne možete slati poruke do {{date}}.",
+      "accountDeleted": "🚫 IZBRISAN RAČUN: Vaš račun je trajno izbrisan zbog ponavljanja kršenja naših uvjeta korištenja.",
+      "prohibitedWords": "Vaša poruka sadrži zabranjene riječi vezane uz prodaju, razmjenu ili zamjenu pasa."
+    }
   },
   "alerts": {
     "pleaseLoginToAdopt": "Morate biti prijavljeni da biste posvojili psa.",

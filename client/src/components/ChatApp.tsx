@@ -93,7 +93,7 @@ interface ChatAppProps {
 }
 
 const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, token } = useAuth();
   
   const [dogStatusMap, setDogStatusMap] = useState<Record<string, string>>({});
@@ -159,7 +159,8 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       message: sanitizedMessage,
       messageType: 'text',
       dogId: adoptionDogId || undefined,
-      isOwner: adoptionIsOwner
+      isOwner: adoptionIsOwner,
+      language: i18n.language || 'en' // Send current language for word filter
     };
     socketRef.current?.emit('sendMessage', messagePayload);
     try {
@@ -173,6 +174,37 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       });
       if (!res.ok) {
         console.error('[SEND MESSAGE] Failed to send message:', res.status, res.statusText);
+        
+        // Handle word filter violation
+        if (res.status === 403) {
+          try {
+            const errorData = await res.json();
+            if (errorData.warning) {
+              setNotification(errorData.warning);
+              // If account is suspended or deleted, show appropriate message
+              if (errorData.isDeleted) {
+                setNotification(t('chat.wordFilter.accountDeleted'));
+                // Optionally redirect or logout user
+                setTimeout(() => {
+                  window.dispatchEvent(new CustomEvent('logout'));
+                }, 3000);
+              } else if (errorData.isSuspended && errorData.suspendedUntil) {
+                const suspensionDate = new Date(errorData.suspendedUntil);
+                setNotification(t('chat.wordFilter.accountSuspended', { date: suspensionDate.toLocaleDateString() }));
+              }
+            } else {
+              const error = await res.text();
+              console.error('[SEND MESSAGE] Error response:', error);
+              setNotification(t('chat.wordFilter.prohibitedWords'));
+            }
+          } catch (e) {
+            const error = await res.text();
+            console.error('[SEND MESSAGE] Error response:', error);
+            setNotification(t('chat.wordFilter.prohibitedWords'));
+          }
+          return;
+        }
+        
         const error = await res.text();
         console.error('[SEND MESSAGE] Error response:', error);
         return;

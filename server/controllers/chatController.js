@@ -4,6 +4,7 @@ const ChatConversation = require('../models/chatConversationModel');
 const User = require('../models/userModel');
 const { io } = require('../socket');
 const mongoose = require('mongoose');
+const { checkMessage: checkWordFilter } = require('../utils/wordFilter');
 
 const deleteChatHistory = async (req, res) => {
   const { conversationId } = req.params;
@@ -55,16 +56,163 @@ const getOrCreateConversation = async (req, res) => {
 };
 
 const sendMessage = async (req, res) => {
-  const { conversationId, sender, recipient, message } = req.body;
+  const { conversationId, sender, recipient, message, language } = req.body;
   if (!conversationId || !sender || !recipient || !message) return res.status(400).json({ error: 'Missing fields' });
-  const msg = await ChatMessage.create({ conversationId, sender, recipient, message });
-  await ChatConversation.findByIdAndUpdate(conversationId, { updatedAt: Date.now() });
-  // Emit to recipient if io is available
-  if (io && typeof io.to === 'function') {
-    io.to(recipient).emit('receiveMessage', { conversationId, sender, message, sentAt: msg.sentAt });
+  
+  try {
+    // Get sender user to check suspension/deletion status
+    const senderUser = await User.findById(sender);
+    if (!senderUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Check if user is deleted
+    if (senderUser.isDeleted) {
+      return res.status(403).json({ error: 'Account deleted' });
+    }
+    
+    // Check if user is suspended
+    if (senderUser.suspendedUntil && senderUser.suspendedUntil > new Date()) {
+      const suspensionEndDate = new Date(senderUser.suspendedUntil);
+      return res.status(403).json({ 
+        error: 'Account suspended',
+        suspendedUntil: suspensionEndDate,
+        message: 'Your account is suspended. You cannot send messages until ' + suspensionEndDate.toISOString()
+      });
+    }
+    
+    // Check message against word filter
+    const filterResult = checkWordFilter(message, language || 'en');
+    
+    if (filterResult.isProhibited) {
+      console.log(`Word filter violation by user ${sender}: matched word "${filterResult.matchedWord}"`);
+      
+      // Increment violation count
+      senderUser.violationCount = (senderUser.violationCount || 0) + 1;
+      senderUser.lastViolationDate = new Date();
+      
+      // Reset violation count if last violation was more than 30 days ago
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      if (senderUser.lastViolationDate && senderUser.violationCount > 1) {
+        const timeSinceLastViolation = new Date() - senderUser.lastViolationDate;
+        // Only reset if this is the only recent violation
+        if (timeSinceLastViolation > 30 * 24 * 60 * 60 * 1000) {
+          senderUser.violationCount = 1;
+        }
+      }
+      
+      let warningMessage = '';
+      let messageType = 'system_warning';
+      
+      // Handle based on violation count
+      if (senderUser.violationCount === 1) {
+        // First violation - just warn
+        warningMessage = getWarningMessage('first', language || 'en');
+        console.log(`First violation for user ${sender}, sending warning`);
+      } else if (senderUser.violationCount === 2) {
+        // Second violation - suspend for 30 days
+        const suspensionDate = new Date();
+        suspensionDate.setDate(suspensionDate.getDate() + 30);
+        senderUser.suspendedUntil = suspensionDate;
+        warningMessage = getWarningMessage('suspended', language || 'en', suspensionDate);
+        console.log(`Second violation for user ${sender}, suspending until ${suspensionDate}`);
+        messageType = 'system_warning';
+      } else {
+        // Third+ violation - delete account
+        senderUser.isDeleted = true;
+        warningMessage = getWarningMessage('deleted', language || 'en');
+        console.log(`Third+ violation for user ${sender}, deleting account`);
+        messageType = 'system_warning';
+      }
+      
+      await senderUser.save();
+      
+      // Send system warning message to the conversation
+      const warningMsg = await ChatMessage.create({
+        conversationId,
+        sender: null,
+        recipient: sender,
+        message: warningMessage,
+        messageType: messageType,
+        sentAt: new Date()
+      });
+      
+      await ChatConversation.findByIdAndUpdate(conversationId, { updatedAt: Date.now() });
+      
+      // Emit warning to sender if io is available
+      if (io && typeof io.to === 'function') {
+        io.to(sender).emit('receiveMessage', { 
+          conversationId, 
+          sender: null, 
+          message: warningMessage, 
+          sentAt: warningMsg.sentAt,
+          messageType: messageType
+        });
+      }
+      
+      // Return error to client with warning details
+      return res.status(403).json({ 
+        error: 'Message blocked',
+        reason: 'Contains prohibited words',
+        warning: warningMessage,
+        violationCount: senderUser.violationCount,
+        isSuspended: !!senderUser.suspendedUntil,
+        isDeleted: senderUser.isDeleted
+      });
+    }
+    
+    // Message is safe - send it
+    const msg = await ChatMessage.create({ conversationId, sender, recipient, message });
+    await ChatConversation.findByIdAndUpdate(conversationId, { updatedAt: Date.now() });
+    
+    // Emit to recipient if io is available
+    if (io && typeof io.to === 'function') {
+      io.to(recipient).emit('receiveMessage', { conversationId, sender, message, sentAt: msg.sentAt });
+    }
+    
+    res.json(msg);
+  } catch (error) {
+    console.error('Error in sendMessage:', error);
+    res.status(500).json({ error: 'Failed to send message' });
   }
-  res.json(msg);
 };
+
+/**
+ * Get warning message based on violation type and language
+ * @param {string} type - 'first', 'suspended', or 'deleted'
+ * @param {string} language - Language code
+ * @param {Date} suspensionDate - Suspension end date (for suspended type)
+ * @returns {string} - Warning message
+ */
+function getWarningMessage(type, language, suspensionDate) {
+  const messages = {
+    en: {
+      first: '⚠️ WARNING: Your message was deleted. Attempting to sell, trade, or exchange dogs is strictly prohibited. Your account will be suspended for 30 days if you continue to violate our terms.',
+      suspended: `⛔ ACCOUNT SUSPENDED: Your account has been suspended for 30 days due to repeated violations. You cannot send messages until ${suspensionDate ? suspensionDate.toLocaleDateString() : 'the suspension period ends'}.`,
+      deleted: '🚫 ACCOUNT DELETED: Your account has been permanently deleted due to repeated violations of our terms of use. You can no longer use this service.'
+    },
+    hr: {
+      first: '⚠️ UPOZORENJE: Vaša poruka je obrisana. Pokušaj prodaje, razmjene ili zamjena pasa strogo je zabranjen. Vaš račun bit će suspendiran 30 dana ako nastavite kršiti naše uvjete.',
+      suspended: `⛔ SUSPENDIRAN RAČUN: Vaš račun je suspendiran na 30 dana zbog ponavljanja prekršaja. Ne možete slati poruke do ${suspensionDate ? suspensionDate.toLocaleDateString('hr-HR') : 'isteka perioda suspenzije'}.`,
+      deleted: '🚫 IZBRISAN RAČUN: Vaš račun je trajno izbrisan zbog ponavljanja kršenja naših uvjeta korištenja. Više ne možete koristiti ovu uslugu.'
+    },
+    de: {
+      first: '⚠️ WARNUNG: Ihre Nachricht wurde gelöscht. Der Versuch, Hunde zu verkaufen, zu tauschen oder auszutauschen, ist strengstens verboten. Ihr Konto wird für 30 Tage gesperrt, wenn Sie unsere Bedingungen weiterhin verletzen.',
+      suspended: `⛔ KONTOSPERRUNG: Ihr Konto wurde aufgrund wiederholter Verstöße für 30 Tage gesperrt. Sie können keine Nachrichten senden, bis ${suspensionDate ? suspensionDate.toLocaleDateString('de-DE') : 'die Sperrfrist endt'}.`,
+      deleted: '🚫 KONTO GELÖSCHT: Ihr Konto wurde aufgrund wiederholter Verstöße gegen unsere Nutzungsbedingungen dauerhaft gelöscht. Sie diesen Dienst nicht mehr nutzen können.'
+    },
+    hu: {
+      first: '⚠️ FIGYELMEZTETÉS: Üzenete törölve lett. Kutyák eladásának, cseréjének vagy cserejének kísérlete szigorúan tilos. Fiókja 30 napra felfüggesztésre kerül, ha továbbra is megszegi feltételeinket.',
+      suspended: `⛔ FELFÜGGESZTETT FIÓK: Fiókja a szabályok ismételt megsértése miatt 30 napra felfüggesztésre került. Nem küldhet üzeneteket ${suspensionDate ? suspensionDate.toLocaleDateString('hu-HU') : 'a felfüggesztési időszak végéig'}.`,
+      deleted: '🚂 TÖRÖLT FIÓK: Fiókja a használati feltételek ismételt megsértése miatt véglegesen törlésre került. Továbbá nem használhatja ezt a szolgáltatást.'
+    }
+  };
+  
+  const langMessages = messages[language] || messages.en;
+  return langMessages[type] || langMessages.first;
+}
 
 const getMessages = async (req, res) => {
   const { conversationId } = req.params;

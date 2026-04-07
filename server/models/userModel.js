@@ -96,6 +96,25 @@ const userSchema = mongoose.Schema({
 		default: Date.now
 	},
 	
+	// Word filter violation tracking
+	violationCount: {
+		type: Number,
+		default: 0
+	},
+	
+	lastViolationDate: {
+		type: Date
+	},
+	
+	suspendedUntil: {
+		type: Date
+	},
+	
+	isDeleted: {
+		type: Boolean,
+		default: false
+	},
+	
 	// User's location coordinates for distance calculations
 	coordinates: {
 		type: {

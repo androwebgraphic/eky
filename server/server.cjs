@@ -218,7 +218,7 @@ httpServer.listen(PORT, '0.0.0.0', () => {
 const { Server: SocketIOServer } = require('socket.io');
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: allowedOrigins,
+    origin: '*', // Allow all origins for development (will be restricted in production)
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -234,6 +234,9 @@ const User = require('./models/userModel.js');
 const onlineUsers = new Map(); // userId -> { _id, userName, socketId }
 
 io.on('connection', (socket) => {
+  console.log('[Socket.IO] New connection from:', socket.id);
+  console.log('[Socket.IO] Connection handshake origin:', socket.handshake.headers.origin);
+  
   // Join user room and register online user
   socket.on('join', async (userId) => {
     console.log('[Socket.IO] join event for userId:', userId);

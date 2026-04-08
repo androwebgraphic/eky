@@ -3003,7 +3003,7 @@ h1.extra-large {
   color: #fbe1cd;
 }
 .card-small .card-small-actions .card-small-btn.btn-adopt {
-  background: #43a047;
+  background: #ef9f27;
   color: #fff;
 }
 .card-small .card-small-actions .card-small-btn.btn-adopt:disabled {
@@ -3018,7 +3018,7 @@ h1.extra-large {
   background: #a67c52;
 }
 .card-small .card-small-actions .card-small-btn.btn-edit {
-  background: #d7c96c;
+  background: #ef9f27;
   color: #c44a0b;
 }
 .card-small .card-small-actions .card-small-btn.btn-remove {

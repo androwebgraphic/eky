@@ -1553,3 +1553,49 @@ main {
   object-fit: contain !important;
   display: block !important;
 }
+/* Mobile Header Fix */
+@media (max-width: 768px) {
+  .mobile-nav-simple, .mobile-nav-only {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100vw !important;
+    height: 60px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .mobile-nav-simple .sharedog-icon, .mobile-nav-simple svg {
+    display: flex !important;
+    align-items: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 1 !important;
+  }
+  .header-mobile-right {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    height: 60px !important;
+    gap: 12px !important;
+  }
+}
+
+/* Mobile Modal Fix */
+@media (max-width: 767px) {
+  .card-actions.dog-details-mobile-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+  .card-actions.dog-details-mobile-actions button {
+    width: 100% !important;
+    min-height: 50px !important;
+  }
+  .card-actions.dog-details-mobile-actions button#adopt {
+    grid-column: 1 / -1 !important;
+    background-color: #ef9f27 !important;
+    color: #ffffff !important;
+  }
+}

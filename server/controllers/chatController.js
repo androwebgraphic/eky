@@ -9,7 +9,14 @@ const { checkMessage: checkWordFilter } = require('../utils/wordFilter');
 const deleteChatHistory = async (req, res) => {
   const { conversationId } = req.params;
   if (!conversationId) return res.status(400).json({ error: 'Missing conversationId' });
+  
+  // Delete all messages in the conversation
   await ChatMessage.deleteMany({ conversationId });
+  
+  // Also delete the conversation document itself
+  await ChatConversation.deleteOne({ _id: conversationId });
+  
+  console.log(`[DELETE] Conversation ${conversationId} deleted completely`);
   res.json({ success: true });
 };
 
@@ -218,20 +225,27 @@ const getUserConversations = async (req, res) => {
   
   const convos = await ChatConversation.find({ participants: userId }).sort({ updatedAt: -1 });
   
-  // Add unread count for each conversation
-  const convosWithUnread = await Promise.all(convos.map(async (convo) => {
+  // Add unread count and last message for each conversation
+  const convosWithDetails = await Promise.all(convos.map(async (convo) => {
     const unreadCount = await ChatMessage.countDocuments({
       conversationId: convo._id,
       recipient: userId,
       readAt: { $exists: false }
     });
+    
+    // Get last message for preview
+    const lastMessage = await ChatMessage.findOne({ conversationId: convo._id })
+      .sort({ sentAt: -1 })
+      .select('message sentAt');
+    
     return {
       ...convo.toObject(),
-      unreadCount
+      unreadCount,
+      lastMessage: lastMessage ? lastMessage.message : ''
     };
   }));
   
-  res.json(convosWithUnread);
+  res.json(convosWithDetails);
 };
 
 // Get unread message count for a user

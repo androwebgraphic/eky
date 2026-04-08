@@ -381,16 +381,19 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     }
   };
 
-  const handleDeleteConversation = async () => {
-    if (!selectedConvo || !token) {
+  const handleDeleteConversation = async (conversationId?: string) => {
+    const convoId = conversationId || selectedConvo?._id;
+    if (!convoId || !token) {
       return;
     }
-    await fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
+    await fetch(`${getApiUrl()}/api/chat/messages/${convoId}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    setSelectedConvo(null);
-    setMessages([]);
+    if (!conversationId) {
+      setSelectedConvo(null);
+      setMessages([]);
+    }
     // Refresh conversations list to remove deleted conversation
     const apiUrl = getApiUrl();
     try {
@@ -1232,8 +1235,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setSelectedConvo(convo);
-                        handleDeleteConversation();
+                        handleDeleteConversation(convo._id);
                       }}
                       style={{
                         position: 'absolute',
@@ -1308,7 +1310,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                 <button className={`chat-header-btn btn-block ${isBlocked ? 'blocked' : ''}`} onClick={handleBlockUnblock}>
                   {isBlocked ? (t('unblock') || 'Unblock') : (t('block') || 'Block')}
                 </button>
-                <button className="chat-header-btn btn-delete" onClick={handleDeleteConversation}>
+                <button className="chat-header-btn btn-delete" onClick={() => handleDeleteConversation()}>
                   {t('deleteConversation') || 'Delete Conversation'}
                 </button>
               </div>

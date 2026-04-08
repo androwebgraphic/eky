@@ -26,6 +26,7 @@ const app = express();
   // 3. Set up CORS middleware FIRST (more permissive for development)
   const allowedOrigins = [
     'http://localhost:3000',
+    'http://172.20.10.4:3000',
     'https://eky-3xf1.onrender.com'
   ];
 
@@ -211,7 +212,7 @@ httpServer.headersTimeout = 66000; // Headers timeout
 httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`Server started at:`);
   console.log(`  Local:   http://localhost:${PORT}`);
-  console.log(`  Network: http://172.20.10.2:${PORT}`);
+  console.log(`  Network: http://172.20.10.4:${PORT}`);
   console.log(`  Timeouts configured: Request=60s, KeepAlive=65s, Headers=66s`);
 });
 

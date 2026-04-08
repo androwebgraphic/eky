@@ -1,0 +1,204 @@
+/* Mobile Action Buttons Fix - Ensure dog details buttons are visible */
+
+/* Force grid layout for mobile action buttons - broader breakpoint */
+@media (max-width: 1024px) {
+  .dog-details-mobile-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+    padding: 8px !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    border-top: 2px solid #eee !important;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.15) !important;
+    position: relative !important;
+    z-index: 1000 !important;
+  }
+  
+  /* Force all buttons to be visible */
+  .dog-details-mobile-actions button,
+  .dog-details-mobile-actions .details {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -webkit-box-align: center !important;
+        -ms-flex-align: center !important;
+            align-items: center !important;
+    -webkit-box-pack: center !important;
+        -ms-flex-pack: center !important;
+            justify-content: center !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    padding: 10px 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    border: none !important;
+    cursor: pointer !important;
+  }
+  
+  /* Status messages and textarea span full width */
+  .dog-details-mobile-actions > div[style*="color"],
+  .dog-details-mobile-actions > div[style*="margin-top"] {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  .dog-details-mobile-actions textarea {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-height: 50px !important;
+    padding: 8px !important;
+    font-size: 14px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+  
+  /* Button colors */
+  .dog-details-mobile-actions .edit-dog-btn {
+    background-color: #ff9800 !important;
+    color: white !important;
+  }
+  
+  .dog-details-mobile-actions .delete-dog-btn {
+    background-color: #e74c3c !important;
+    color: white !important;
+  }
+  
+  .dog-details-mobile-actions button#add-to-list {
+    background-color: #dbb69d !important;
+    color: #333 !important;
+  }
+  
+  .dog-details-mobile-actions button#adopt,
+  .dog-details-mobile-actions .adopt-btn {
+    background-color: #4CAF50 !important;
+    color: white !important;
+  }
+  
+  .dog-details-mobile-actions .adopt-confirm-btn {
+    background-color: #28a745 !important;
+    color: white !important;
+  }
+  
+  .dog-details-mobile-actions .adopt-cancel-btn {
+    background-color: #e74c3c !important;
+    color: white !important;
+  }
+  
+  .dog-details-mobile-actions .adopt-requested-btn {
+    background-color: #aaa !important;
+    color: white !important;
+  }
+  
+  /* Ensure card-details wrapper allows buttons to show */
+  .card-details {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-box-direction: normal !important;
+        -ms-flex-direction: column !important;
+            flex-direction: column !important;
+    height: 100% !important;
+  }
+  
+  .card-details > .img {
+    -webkit-box-flex: 0 !important;
+        -ms-flex: 0 0 auto !important;
+            flex: 0 0 auto !important;
+  }
+  
+  .card-details > .description {
+    -webkit-box-flex: 1 !important;
+        -ms-flex: 1 1 auto !important;
+            flex: 1 1 auto !important;
+    overflow-y: auto !important;
+  }
+  
+  .card-details .card-actions,
+  .card-details .dog-details-mobile-actions {
+    -webkit-box-flex: 0 !important;
+        -ms-flex: 0 0 auto !important;
+            flex: 0 0 auto !important;
+  }
+}
+
+/* iPhone SE specific fixes */
+@media (max-width: 375px) {
+  .dog-details-mobile-actions {
+    gap: 6px !important;
+    padding: 6px !important;
+  }
+  
+  .dog-details-mobile-actions button,
+  .dog-details-mobile-actions .details {
+    padding: 8px 6px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* Ensure buttons don't get hidden by any other CSS */
+.dog-details-mobile-actions * {
+  box-sizing: border-box !important;
+}
+
+/* Fix for modal content to ensure buttons are visible at bottom */
+.doglist-details-content {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-box-direction: normal !important;
+      -ms-flex-direction: column !important;
+          flex-direction: column !important;
+  height: 100% !important;
+}
+
+.doglist-details-content > * {
+  -webkit-box-flex: 0 !important;
+      -ms-flex: 0 0 auto !important;
+          flex: 0 0 auto !important;
+}
+
+.doglist-details-content > .card-details {
+  -webkit-box-flex: 1 !important;
+      -ms-flex: 1 1 auto !important;
+          flex: 1 1 auto !important;
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-box-direction: normal !important;
+      -ms-flex-direction: column !important;
+          flex-direction: column !important;
+}
+
+.doglist-details-content .card-details > .description {
+  -webkit-box-flex: 1 !important;
+      -ms-flex: 1 1 auto !important;
+          flex: 1 1 auto !important;
+  overflow-y: auto !important;
+}
+
+.doglist-details-content .card-details .card-actions,
+.doglist-details-content .card-details .dog-details-mobile-actions {
+  -webkit-box-flex: 0 !important;
+      -ms-flex: 0 0 auto !important;
+          flex: 0 0 auto !important;
+  position: sticky !important;
+  bottom: 0 !important;
+}

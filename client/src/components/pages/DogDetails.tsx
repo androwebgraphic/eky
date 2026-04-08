@@ -58,7 +58,17 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   React.useEffect(() => {
     if (buttonsContainerRef.current && typeof window !== 'undefined') {
       const container = buttonsContainerRef.current;
-      const isMobile = window.innerWidth < 900;
+      const isMobile = window.innerWidth < 1024;
+      
+      console.log('[DOG DETAILS DEBUG] Buttons container:', {
+        exists: !!container,
+        className: container.className,
+        computedDisplay: window.getComputedStyle(container).display,
+        computedVisibility: window.getComputedStyle(container).visibility,
+        computedOpacity: window.getComputedStyle(container).opacity,
+        isMobile,
+        parent: container.parentElement?.className,
+      });
       
       if (isMobile) {
         // Directly set styles on the DOM element
@@ -69,6 +79,8 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         container.style.setProperty('flex-direction', 'unset', 'important');
         container.style.setProperty('flex-wrap', 'unset', 'important');
         container.style.setProperty('justify-content', 'unset', 'important');
+        
+        console.log('[DOG DETAILS DEBUG] Applied mobile styles to buttons container');
       } else {
         // Reset to allow CSS to handle desktop
         container.style.removeProperty('display');
@@ -85,7 +97,7 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    const isMobile = window.innerWidth < 900;
+    const isMobile = window.innerWidth < 1024;
     if (!isMobile) return;
     
     let isSetup = false;

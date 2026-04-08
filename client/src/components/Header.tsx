@@ -266,7 +266,7 @@ const Header: React.FC = () => {
   // Detect mobile screen size
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth < 768);
     };
 
     checkMobile();
@@ -292,6 +292,28 @@ const Header: React.FC = () => {
       });
     }
   }, [user]);
+
+  // Debug: Log header elements visibility
+  useEffect(() => {
+    const headerRight = document.querySelector('.header-right-inner');
+    const userInfo = document.querySelector('.header-user-info-inner');
+    const notification = document.querySelector('.notification-wrapper');
+    const language = document.querySelector('.language-selector');
+    
+    console.log('[HEADER DEBUG] Element visibility:', {
+      isMobile,
+      isAuthenticated,
+      hasUser: !!user,
+      headerRightExists: !!headerRight,
+      headerRightDisplay: headerRight ? window.getComputedStyle(headerRight).display : 'N/A',
+      userInfoExists: !!userInfo,
+      userInfoDisplay: userInfo ? window.getComputedStyle(userInfo).display : 'N/A',
+      notificationExists: !!notification,
+      notificationDisplay: notification ? window.getComputedStyle(notification).display : 'N/A',
+      languageExists: !!language,
+      languageDisplay: language ? window.getComputedStyle(language).display : 'N/A',
+    });
+  }, [isMobile, isAuthenticated, user]);
   
   // Calculate dropdown position based on header height
   const dropdownTop = headerRef.current ? `${headerRef.current.offsetHeight}px` : '60px';

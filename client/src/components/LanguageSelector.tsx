@@ -61,7 +61,7 @@ const LanguageSelector: React.FC = () => {
   const currentLang = languages.find(l => l.code === i18n.language) || languages[1]; // Default to EN
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div className="language-selector" style={{ position: 'relative', display: 'inline-block' }}>
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}

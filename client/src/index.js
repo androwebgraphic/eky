@@ -9,6 +9,8 @@ import './css/modal.css';
 import './css/mobile-fixes.css';
 import './css/doglist-details-modal.css';
 import './css/ios-buttons.css';
+import './css/header-desktop-fixes.css';
+import './css/mobile-buttons-fix.css';
 
 ReactDOM.render(
   <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>

@@ -752,12 +752,37 @@
 }
 
 // Hide hamburger on desktop
-@media (min-width: 769px) {
+@media (min-width: 768px) {
   .authenticated-hamburger-btn {
     display: none !important;
   }
 
   .authenticated-mobile-menu {
     display: none !important;
+  }
+  
+  // Force display of header elements on desktop
+  .header-right-inner {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 4px !important;
+  }
+  
+  .header-right-inner > div:first-child,
+  .notification-wrapper,
+  .header-user-info-inner {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    align-items: center !important;
+  }
+  
+  .header-avatar-inner {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .header-username-inner {
+    font-size: 14px !important;
   }
 }

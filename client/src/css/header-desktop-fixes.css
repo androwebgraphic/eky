@@ -1,0 +1,146 @@
+/* Desktop Header Fixes - Ensure logged-in user elements are visible */
+
+/* Apply to ALL screen sizes for debugging */
+.header-right-inner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  height: 50px !important;
+  width: auto !important;
+  min-width: 300px !important;
+  max-width: 100% !important;
+  position: relative !important;
+  z-index: 9999 !important;
+  overflow: visible !important;
+  flex-shrink: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  padding-right: 20px !important;
+  background: red !important;
+  border: 5px solid yellow !important;
+}
+
+.header-right-inner > div:first-child {
+  display: flex !important;
+  align-items: center !important;
+  height: 50px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: #000 !important;
+  background: blue !important;
+  border: 3px solid green !important;
+}
+
+.notification-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  height: 50px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: #000 !important;
+  background: purple !important;
+  border: 3px solid orange !important;
+}
+
+.header-user-info-inner {
+  display: flex !important;
+  align-items: center !important;
+  height: 50px !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: #000 !important;
+  background: cyan !important;
+  border: 3px solid magenta !important;
+}
+
+/* Desktop-specific fixes */
+@media (min-width: 768px) {
+  /* Ensure header container has proper height and z-index */
+  header.UserHeader {
+    display: flex !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    width: 100% !important;
+    position: relative !important;
+    z-index: 1000 !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+  }
+  
+  /* Higher specificity to override inline styles */
+  header.UserHeader .header-content-inner {
+    display: flex !important;
+    width: 100% !important;
+    -webkit-box-pack: justify !important;
+        -ms-flex-pack: justify !important;
+            justify-content: space-between !important;
+  }
+  
+  /* Flex spacer to push elements apart */
+  .header-flex-spacer {
+    -webkit-box-flex: 1 !important;
+        -ms-flex: 1 !important;
+            flex: 1 !important;
+  }
+  
+  header.UserHeader {
+    display: flex !important;
+  }
+  
+  .header-content-inner {
+    display: flex !important;
+    width: 100%;
+  }
+  
+  .header-nav-inner {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -webkit-box-pack: start !important;
+        -ms-flex-pack: start !important;
+            justify-content: flex-start !important;
+  }
+  
+  /* Hide mobile-specific elements on desktop */
+  .authenticated-hamburger-btn {
+    display: none !important;
+  }
+  
+  .authenticated-mobile-menu {
+    display: none !important;
+  }
+}
+
+/* Ensure spacing between header elements */
+.header-right-inner > * {
+  margin: 0 4px !important;
+}
+
+/* Fix language selector visibility */
+.language-selector {
+  display: inline-block !important;
+  position: relative !important;
+}
+
+.language-selector .language-btn {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -webkit-box-align: center !important;
+      -ms-flex-align: center !important;
+          align-items: center !important;
+  background: transparent !important;
+  border: none !important;
+  color: #f5f5f5 !important;
+  padding: 8px 12px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+}
+
+/* Fix notification bell visibility */
+.notification-wrapper > * {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}

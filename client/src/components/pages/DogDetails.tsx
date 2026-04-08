@@ -116,12 +116,17 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         const clientHeight = modalContent.clientHeight;
         const scrollHeight = modalContent.scrollHeight;
         
-        // Simple logic: hide only when user has actually scrolled near the bottom
+        // Check if content is already fully visible without scrolling
+        const isContentFullyVisible = scrollHeight <= clientHeight;
+        
+        // Check if user has scrolled near the bottom
         const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50;
         const hasScrolledDown = scrollTop > 50; // User has scrolled down
         
-        // Hide indicator only if user has scrolled down and is now at bottom
-        const shouldHide = hasScrolledDown && isAtBottom;
+        // Hide indicator if:
+        // 1. Content is already fully visible (no scroll needed), OR
+        // 2. User has scrolled down and is now at bottom
+        const shouldHide = isContentFullyVisible || (hasScrolledDown && isAtBottom);
         
         // Toggle class on modal content
         if (shouldHide) {

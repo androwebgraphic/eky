@@ -292,6 +292,7 @@
   z-index: 1000;
   border-top: 4px solid #c44a0b;
   box-sizing: border-box;
+  overflow: visible !important;
 }
 
 .header-content-inner {
@@ -305,19 +306,18 @@
 .header-nav-inner {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 15px;
+  flex: 0 0 auto;
+  max-width: 50%;
 }
 
 .header-nav-desktop {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 20px;
   flex-shrink: 0;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .header-right-desktop {
@@ -340,7 +340,7 @@
 }
 
 .header-flex-spacer {
-  flex: 1;
+  display: none;
 }
 
 .header-right-inner {

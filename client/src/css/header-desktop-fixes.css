@@ -1,6 +1,6 @@
 /* Desktop Header Fixes - Ensure logged-in user elements are visible */
 
-/* Apply to ALL screen sizes for debugging */
+/* Apply to ALL screen sizes */
 .header-right-inner {
   display: flex !important;
   align-items: center !important;
@@ -16,8 +16,6 @@
   right: 0 !important;
   top: 0 !important;
   padding-right: 20px !important;
-  background: red !important;
-  border: 5px solid yellow !important;
 }
 
 .header-right-inner > div:first-child {
@@ -26,9 +24,6 @@
   height: 50px !important;
   opacity: 1 !important;
   visibility: visible !important;
-  color: #000 !important;
-  background: blue !important;
-  border: 3px solid green !important;
 }
 
 .notification-wrapper {
@@ -37,9 +32,6 @@
   height: 50px !important;
   opacity: 1 !important;
   visibility: visible !important;
-  color: #000 !important;
-  background: purple !important;
-  border: 3px solid orange !important;
 }
 
 .header-user-info-inner {
@@ -49,9 +41,6 @@
   cursor: pointer !important;
   opacity: 1 !important;
   visibility: visible !important;
-  color: #000 !important;
-  background: cyan !important;
-  border: 3px solid magenta !important;
 }
 
 /* Desktop-specific fixes */

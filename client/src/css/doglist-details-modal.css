@@ -459,17 +459,8 @@
   height: 100% !important;
 }
 
-/* CRITICAL: Override centering to align left on desktop */
-/* Override dog cards centering */
-.dog-card-mini {
-  justify-content: flex-start !important;
-  justify-items: flex-start !important;
-}
-
-/* Override modal content centering */
-.modal-overlay {
-  align-items: flex-start !important;
-}
+  /* Remove left alignment override - allow modals to be centered on desktop */
+  /* The modal-overlay already has proper centering in modal.css */
 
 /* Ensure dog images are fully visible */
 .card .img {

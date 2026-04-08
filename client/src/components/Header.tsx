@@ -128,7 +128,7 @@ const Header: React.FC = () => {
 
   // Handle notification bell click
   const handleNotificationClick = () => {
-    // Store# Store current new dogs in a separate state for the modal
+    // Store current new dogs in a separate state for modal
     setNewDogsForModal([...newDogs]);
     setShowNewDogsModal(true);
     // Don't update lastVisit here - update it when modal closes
@@ -299,13 +299,27 @@ const Header: React.FC = () => {
     const userInfo = document.querySelector('.header-user-info-inner');
     const notification = document.querySelector('.notification-wrapper');
     const language = document.querySelector('.language-selector');
+    const headerContent = document.querySelector('.header-content-inner');
+    const userHeader = document.querySelector('.UserHeader');
     
     console.log('[HEADER DEBUG] Element visibility:', {
+      windowWidth: window.innerWidth,
       isMobile,
       isAuthenticated,
       hasUser: !!user,
+      userHeaderExists: !!userHeader,
+      userHeaderDisplay: userHeader ? window.getComputedStyle(userHeader).display : 'N/A',
+      headerContentExists: !!headerContent,
+      headerContentDisplay: headerContent ? window.getComputedStyle(headerContent).display : 'N/A',
+      headerContentWidth: headerContent ? window.getComputedStyle(headerContent).width : 'N/A',
       headerRightExists: !!headerRight,
       headerRightDisplay: headerRight ? window.getComputedStyle(headerRight).display : 'N/A',
+      headerRightPosition: headerRight ? window.getComputedStyle(headerRight).position : 'N/A',
+      headerRightWidth: headerRight ? window.getComputedStyle(headerRight).width : 'N/A',
+      headerRightLeft: headerRight ? window.getComputedStyle(headerRight).left : 'N/A',
+      headerRightRight: headerRight ? window.getComputedStyle(headerRight).right : 'N/A',
+      headerRightOffsetLeft: headerRight ? (headerRight as HTMLElement).offsetLeft : 'N/A',
+      headerRightOffsetTop: headerRight ? (headerRight as HTMLElement).offsetTop : 'N/A',
       userInfoExists: !!userInfo,
       userInfoDisplay: userInfo ? window.getComputedStyle(userInfo).display : 'N/A',
       notificationExists: !!notification,
@@ -322,10 +336,11 @@ const Header: React.FC = () => {
     <>
       {isAuthenticated ? (
         <>
-        <header className="UserHeader" style={{ display: 'flex', alignItems: 'center' }}>
+        <header className="UserHeader" style={{ display: 'flex', alignItems: 'center', overflow: 'visible !important' }}>
           <div className="header-content-inner" style={{ 
             display: 'flex', 
             alignItems: 'center', 
+            justifyContent: 'space-between',
             width: '100%',
             height: '50px'
           }}>
@@ -358,22 +373,19 @@ const Header: React.FC = () => {
             
             <div className="header-flex-spacer" />
             {/* Right: Language Selector, Chat, Notifications, and User Info */}
-            <div className="header-right-inner" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', height: '50px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', height: '50px' }}>
+            <div className="header-right-inner">
+              <div>
                 <LanguageSelector />
               </div>
-                <div className="notification-wrapper" style={{ display: 'flex', alignItems: 'center', height: '50px' }}>
-                <NotificationBell count={newDogsCount} onClick={handleNotificationClick} />
-              </div>
+                <div className="notification-wrapper">
+                  <NotificationBell count={newDogsCount} onClick={handleNotificationClick} />
+                </div>
               {user && (
                 <div 
                   className="header-user-info-inner"
                   style={{ 
                     cursor: 'pointer', 
-                    pointerEvents: 'auto',
-                    display: 'flex',
-                    alignItems: 'center',
-                    height: '50px'
+                    pointerEvents: 'auto'
                   }}
                   onClick={e => { 
                     e.preventDefault();
@@ -590,7 +602,7 @@ const Header: React.FC = () => {
             setShowNewDogsModal(false);
             setNewDogsCount(0);
             setNewDogsForModal([]);
-            // Update lastVisit after user has viewed and closed the modal
+            // Update lastVisit after user has viewed and closed modal
             updateLastVisit();
           }}
           dogs={newDogsForModal}

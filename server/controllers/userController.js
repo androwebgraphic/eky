@@ -319,7 +319,8 @@ const updateProfile = async (req, res) => {
 				if (!mainUpload) {
 					throw new Error('Failed to upload profile picture');
 				}
-				profilePictureUrl = mainUpload.url;
+				// Use secure_url to ensure HTTPS URLs
+				profilePictureUrl = mainUpload.secure_url;
 				console.log('[CLOUDINARY] Profile picture URL:', profilePictureUrl);
 			} catch (cloudinaryError) {
 				console.error('[PROFILE UPLOAD ERROR] Cloudinary upload failed:', cloudinaryError);

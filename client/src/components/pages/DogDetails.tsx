@@ -513,15 +513,24 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   const handleShowMap = () => {
     if (!location) return;
     
-    // Use stored coordinates if available
+    console.log('[DogDetails] handleShowMap called with coordinates:', coordinates);
+    console.log('[DogDetails] location:', location);
+    console.log('[DogDetails] place:', place);
+    
+    // Use stored coordinates if available and NOT [0, 0] (default value)
     if (coordinates && coordinates.coordinates && coordinates.coordinates.length === 2) {
       // GeoJSON format: [longitude, latitude]
       const [lng, lat] = coordinates.coordinates;
-      const mapCoords = { lat, lng };
-      console.log('Using stored coordinates:', mapCoords);
-      setCoords(mapCoords);
-      showMapModal(location, place, mapCoords);
-      return;
+      // Skip [0, 0] coordinates (default value, not geocoded yet)
+      if (lat === 0 && lng === 0) {
+        console.log('[DogDetails] Coordinates are [0, 0], skipping and using geocoding');
+      } else {
+        const mapCoords = { lat, lng };
+        console.log('[DogDetails] Using stored coordinates:', mapCoords);
+        setCoords(mapCoords);
+        showMapModal(location, place, mapCoords);
+        return;
+      }
     }
     
     // Fall back to geocoding if no stored coordinates

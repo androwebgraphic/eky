@@ -40,11 +40,15 @@ export interface DogDetailsProps {
   onDogChanged?: () => void;
   onEdit?: (dog: DogDetailsProps) => void;
   createdAt?: string;
+  coordinates?: {
+    type?: string;
+    coordinates?: [number, number]; // [longitude, latitude]
+  };
 }
 
 const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
   _id, name, breed, age, images, video, thumbnail, color, place, location, description, size, gender, vaccinated, neutered, onClose, user: owner,
-  adoptionStatus, adoptionQueue, onDogUpdate, onDogChanged, onEdit, createdAt, _showMap
+  adoptionStatus, adoptionQueue, onDogUpdate, onDogChanged, onEdit, createdAt, _showMap, coordinates
 }) => {
   const [coords, setCoords] = useState<{lat: number, lng: number} | null>(null);
   const [loadingCoords, setLoadingCoords] = useState(false);
@@ -505,41 +509,55 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
     return [];
   }, [images, thumbnail, apiBase]);
 
-  // Geocode location if needed
-  const handleShowMap = async () => {
+  // Show map with coordinates
+  const handleShowMap = () => {
     if (!location) return;
     
+    // Use stored coordinates if available
+    if (coordinates && coordinates.coordinates && coordinates.coordinates.length === 2) {
+      // GeoJSON format: [longitude, latitude]
+      const [lng, lat] = coordinates.coordinates;
+      const mapCoords = { lat, lng };
+      console.log('Using stored coordinates:', mapCoords);
+      setCoords(mapCoords);
+      showMapModal(location, place, mapCoords);
+      return;
+    }
+    
+    // Fall back to geocoding if no stored coordinates
     setLoadingCoords(true);
     setCoordsError(null);
-    try {
-      // Use location as-is - don't append country to avoid breaking international cities
-      const query = location.trim();
-      
-      // Use OpenStreetMap Nominatim API for geocoding with higher precision
-      const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&extratags=1`);
-      const data = await resp.json();
-      
+    const query = location.trim();
+    
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1&extratags=1`, {
+      headers: {
+        'User-Agent': 'EkyApp/1.0'
+      }
+    })
+    .then(resp => resp.json())
+    .then(data => {
       console.log('Geocoding response for', query, data);
       if (data && data.length > 0) {
         const result = data[0];
-        const mapCoords = { 
-          lat: parseFloat(result.lat), 
+        const mapCoords = {
+          lat: parseFloat(result.lat),
           lng: parseFloat(result.lon)
         };
         setCoords(mapCoords);
         showMapModal(location, place, mapCoords);
       } else {
-        // Show map with search query if geocoding fails
         showMapModal(location, place, undefined);
         setCoordsError(t('dogDetails.approximateLocation'));
       }
-    } catch (e) {
-      // Show map anyway with search fallback
+    })
+    .catch(e => {
+      console.error('Geocoding error:', e);
       showMapModal(location, place, undefined);
       setCoordsError(t('dogDetails.searchBasedLocation'));
-    } finally {
+    })
+    .finally(() => {
       setLoadingCoords(false);
-    }
+    });
   };
 
   return (

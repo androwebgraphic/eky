@@ -176,8 +176,10 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
         
         // Handle word filter violation
         if (res.status === 403) {
+          console.log('[SEND MESSAGE] Word filter violation detected (403)');
           try {
             const errorData = await res.json();
+            console.log('[SEND MESSAGE] Error data:', errorData);
             // If account is suspended or deleted, show appropriate message
             if (errorData.isDeleted) {
               setNotification(t('chat.wordFilter.accountDeleted'));
@@ -190,29 +192,43 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
               setNotification(t('chat.wordFilter.accountSuspended', { date: suspensionDate.toLocaleDateString() }));
             } else {
               // Show generic warning for prohibited words - don't show the actual message content
-              setNotification(t('chat.wordFilter.prohibitedWords'));
+              const warningMessage = t('chat.wordFilter.prohibitedWords') || 'Message contains prohibited words and was not sent';
+              console.log('[SEND MESSAGE] Adding warning message to chat:', warningMessage);
+              setNotification(warningMessage);
               // Add system warning message to sender's chat
-              setMessages(prev => [...prev, {
-                _id: Math.random().toString(36).substr(2, 9),
-                sender: null,
-                recipient: user._id,
-                message: t('chat.wordFilter.prohibitedWords'),
-                sentAt: new Date().toISOString(),
-                messageType: 'system_warning'
-              }]);
+              setMessages(prev => {
+                const newMessage = {
+                  _id: Math.random().toString(36).substr(2, 9),
+                  sender: null,
+                  recipient: user._id,
+                  message: warningMessage,
+                  sentAt: new Date().toISOString(),
+                  messageType: 'system_warning'
+                };
+                console.log('[SEND MESSAGE] New message object:', newMessage);
+                console.log('[SEND MESSAGE] Current messages:', prev);
+                const newMessages = [...prev, newMessage];
+                console.log('[SEND MESSAGE] Updated messages:', newMessages);
+                return newMessages;
+              });
             }
           } catch (e) {
             console.error('[SEND MESSAGE] Error parsing 403 response:', e);
-            setNotification(t('chat.wordFilter.prohibitedWords'));
+            const warningMessage = t('chat.wordFilter.prohibitedWords') || 'Message contains prohibited words and was not sent';
+            setNotification(warningMessage);
             // Add system warning message to sender's chat
-            setMessages(prev => [...prev, {
-              _id: Math.random().toString(36).substr(2, 9),
-              sender: null,
-              recipient: user._id,
-              message: t('chat.wordFilter.prohibitedWords'),
-              sentAt: new Date().toISOString(),
-              messageType: 'system_warning'
-            }]);
+            setMessages(prev => {
+              const newMessage = {
+                _id: Math.random().toString(36).substr(2, 9),
+                sender: null,
+                recipient: user._id,
+                message: warningMessage,
+                sentAt: new Date().toISOString(),
+                messageType: 'system_warning'
+              };
+              console.log('[SEND MESSAGE] New message object (catch block):', newMessage);
+              return [...prev, newMessage];
+            });
           }
           return;
         }
@@ -673,6 +689,8 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     });
     
     socketRef.current.on('receiveMessage', (msg) => {
+      console.log('[RECEIVE MESSAGE] Raw message received:', msg);
+      
       const adoptionSystemKeywords = ['confirmed', 'completed', 'closed', 'canceled', 'cancelled'];
       const isAdoptionSystemMsg = (msg.messageType === 'adoption' || msg.messageType === 'adoption_cancelled') && msg.dogId && msg.message && adoptionSystemKeywords.some(k => msg.message.toLowerCase().includes(k));
       

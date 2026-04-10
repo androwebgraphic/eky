@@ -23,11 +23,26 @@ const adoptionRoutes = require('./routes/adoptionRoutes.js'); // <-- Add adoptio
 
 const app = express();
 
+// Global error handler for uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL ERROR] Uncaught Exception:', err);
+  console.error('[FATAL ERROR] Stack:', err.stack);
+  process.exit(1);
+});
+
+// Global error handler for unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[FATAL ERROR] Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
   // 3. Set up CORS middleware FIRST (more permissive for development)
   const allowedOrigins = [
     'http://localhost:3000',
     'http://172.20.10.4:3000',
-    'https://eky-3xf1.onrender.com'
+    'https://eky-3xf1.onrender.com',
+    'http://localhost:3001', // Backend development
+    process.env.CLIENT_ORIGIN || 'https://eky-3xf1.onrender.com'
   ];
 
   // Security headers middleware to prevent copying and cloning
@@ -192,7 +207,34 @@ app.use("/api/test", testCloudinaryRoute);
 
 // Health check endpoint - must be after CORS middleware
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', uptime: process.uptime() });
+  try {
+    const mongoose = require('mongoose');
+    const health = {
+      status: 'OK',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      port: process.env.PORT || 3001,
+      database: {
+        status: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        readyState: mongoose.connection.readyState,
+        name: mongoose.connection.name || 'unknown',
+        host: mongoose.connection.host || 'unknown'
+      },
+      memory: {
+        used: process.memoryUsage().heapUsed / 1024 / 1024,
+        total: process.memoryUsage().heapTotal / 1024 / 1024
+      }
+    };
+    res.status(200).json(health);
+  } catch (error) {
+    console.error('[HEALTH CHECK ERROR]:', error);
+    res.status(500).json({ 
+      status: 'ERROR', 
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // If you want to use the auth middleware globally, use ONLY function, not the module object:

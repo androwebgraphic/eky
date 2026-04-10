@@ -28,11 +28,11 @@ const wordLists = {
     'for sale', 'for sale!',
     'selling dog', 'selling dogs', 'sell my dog', 'sell my dogs',
     'how much', 'how much?', 'how much is', 'how much are',
-    'buy dog', 'buy dogs', 'buy a dog', 'buy the dog',
+    'buy dog', 'buy dogs', 'buy a dog', 'buy dogs',
     'purchase dog', 'purchase dogs', 'buying dog', 'buying dogs',
-    'trade dog', 'trade dogs', 'trade a dog', 'trade the dog',
-    'swap dog', 'swap dogs', 'swap a dog', 'swap the dog',
-    'exchange dog', 'exchange dogs', 'exchange a dog', 'exchange the dog',
+    'trade dog', 'trade dogs', 'trade a dog', 'trade dog',
+    'swap dog', 'swap dogs', 'swap a dog', 'swap dog',
+    'exchange dog', 'exchange dogs', 'exchange a dog', 'exchange dog',
     'price of dog', 'price of dogs', 'price for dog', 'price for dogs',
     'cost of dog', 'cost of dogs', 'cost for dog', 'cost for dogs',
     'dog for sale', 'dogs for sale', 'dog on sale', 'dogs on sale',
@@ -248,6 +248,8 @@ function checkMessage(message, language = 'en') {
         if (regex.test(lowerMessage)) {
           return { isProhibited: true, matchedWord: bannedWord };
         }
+        // Continue to next word if single word doesn't match word boundaries
+        continue;
       } else {
         // For phrases, just check inclusion
         return { isProhibited: true, matchedWord: bannedWord };

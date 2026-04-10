@@ -1,0 +1,405 @@
+import React, { useState, useEffect } from 'react';
+import './UserManagement.css';
+
+interface User {
+  _id: string;
+  name: string;
+  username: string;
+  email: string;
+  role: string;
+  phone: string;
+  profilePicture?: string;
+  suspendedUntil?: string | Date;
+  isDeleted?: boolean;
+  createdAt?: string | Date;
+}
+
+const UserManagement: React.FC = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showSuspendModal, setShowSuspendModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [suspendDays, setSuspendDays] = useState(30);
+
+  useEffect(() => {
+    fetchCurrentUser();
+    fetchUsers();
+  }, []);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/users/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentUser(data);
+      }
+    } catch (err) {
+      console.error('Error fetching current user:', err);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/users/all', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+      } else {
+        setError('Failed to fetch users');
+      }
+    } catch (err) {
+      setError('An error occurred while fetching users');
+      console.error('Error fetching users:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSuspend = async (userId: string, days: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const suspendedUntil = new Date();
+      suspendedUntil.setDate(suspendedUntil.getDate() + days);
+      
+      const response = await fetch(`/api/users/${userId}/suspend`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ suspendedUntil })
+      });
+
+      if (response.ok) {
+        await fetchUsers();
+        setShowSuspendModal(false);
+        setSelectedUser(null);
+        setSuspendDays(30);
+      } else {
+        const data = await response.json();
+        setError(data.message || 'Failed to suspend user');
+      }
+    } catch (err) {
+      setError('An error occurred while suspending user');
+      console.error('Error suspending user:', err);
+    }
+  };
+
+  const handleUnsuspend = async (userId: string) => {
+    if (!window.confirm('Are you sure you want to unsuspend this user?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/users/${userId}/unsuspend`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        await fetchUsers();
+      } else {
+        const data = await response.json();
+        setError(data.message || 'Failed to unsuspend user');
+      }
+    } catch (err) {
+      setError('An error occurred while unsuspending user');
+      console.error('Error unsuspending user:', err);
+    }
+  };
+
+  const handleDelete = async (userId: string) => {
+    if (!window.confirm('Are you sure you want to permanently delete this account? This action cannot be undone.')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/users/${userId}/account`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        await fetchUsers();
+        setShowDeleteModal(false);
+        setSelectedUser(null);
+      } else {
+        const data = await response.json();
+        setError(data.message || 'Failed to delete user');
+      }
+    } catch (err) {
+      setError('An error occurred while deleting user');
+      console.error('Error deleting user:', err);
+    }
+  };
+
+  const isUserSuspended = (user: User) => {
+    if (!user.suspendedUntil) return false;
+    return new Date(user.suspendedUntil) > new Date();
+  };
+
+  const getSuspensionEndDate = (user: User) => {
+    if (!user.suspendedUntil) return null;
+    return new Date(user.suspendedUntil).toLocaleDateString('hr-HR');
+  };
+
+  const filterUsers = users.filter(user => {
+    const matchesSearch = 
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesRole = filterRole === 'all' || user.role === filterRole;
+    
+    let matchesStatus = true;
+    if (filterStatus === 'suspended') {
+      matchesStatus = isUserSuspended(user);
+    } else if (filterStatus === 'deleted') {
+      matchesStatus = user.isDeleted === true;
+    } else if (filterStatus === 'active') {
+      matchesStatus = !isUserSuspended(user) && user.isDeleted !== true;
+    }
+    
+    return matchesSearch && matchesRole && matchesStatus;
+  });
+
+  const canManageUser = (user: User) => {
+    if (!currentUser) return false;
+    if (user._id === currentUser._id) return false;
+    if (user.role === 'superadmin') return false;
+    return true;
+  };
+
+  if (loading) {
+    return (
+      <div className="user-management-container">
+        <div className="loading">Loading users...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="user-management-container">
+        <div className="error-message">{error}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="user-management-container">
+      <div className="user-management-header">
+        <h1>User Management</h1>
+        <p className="user-count">Total Users: {users.length}</p>
+      </div>
+
+      <div className="filters-section">
+        <div className="filter-group">
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
+        
+        <div className="filter-group">
+          <select
+            value={filterRole}
+            onChange={(e) => setFilterRole(e.target.value)}
+            className="filter-select"
+          >
+            <option value="all">All Roles</option>
+            <option value="user">Users</option>
+            <option value="admin">Admins</option>
+            <option value="superadmin">Superadmins</option>
+          </select>
+        </div>
+        
+        <div className="filter-group">
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="filter-select"
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="suspended">Suspended</option>
+            <option value="deleted">Deleted</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="users-list">
+        {filterUsers.length === 0 ? (
+          <div className="no-users">No users found matching the criteria</div>
+        ) : (
+          filterUsers.map(user => (
+            <div key={user._id} className="user-card">
+              <div className="user-card-header">
+                <div className="user-avatar">
+                  {user.profilePicture ? (
+                    <img src={user.profilePicture} alt={user.username} />
+                  ) : (
+                    <div className="avatar-placeholder">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="user-info">
+                  <h3>{user.name}</h3>
+                  <p className="username">@{user.username}</p>
+                </div>
+                <div className="user-badges">
+                  <span className={`role-badge role-${user.role}`}>{user.role}</span>
+                  {isUserSuspended(user) && (
+                    <span className="status-badge suspended">Suspended</span>
+                  )}
+                  {user.isDeleted && (
+                    <span className="status-badge deleted">Deleted</span>
+                  )}
+                </div>
+              </div>
+              
+              <div className="user-card-body">
+                <div className="user-detail">
+                  <span className="detail-label">Email:</span>
+                  <span className="detail-value">{user.email}</span>
+                </div>
+                <div className="user-detail">
+                  <span className="detail-label">Phone:</span>
+                  <span className="detail-value">{user.phone}</span>
+                </div>
+                {isUserSuspended(user) && (
+                  <div className="user-detail">
+                    <span className="detail-label">Suspended until:</span>
+                    <span className="detail-value text-danger">{getSuspensionEndDate(user)}</span>
+                  </div>
+                )}
+              </div>
+              
+              {canManageUser(user) && (
+                <div className="user-card-actions">
+                  {isUserSuspended(user) ? (
+                    <button
+                      onClick={() => handleUnsuspend(user._id)}
+                      className="btn btn-unsuspend"
+                    >
+                      Unsuspend
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setShowSuspendModal(true);
+                      }}
+                      className="btn btn-suspend"
+                    >
+                      Suspend
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setShowDeleteModal(true);
+                    }}
+                    className="btn btn-delete"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Suspend Modal */}
+      {showSuspendModal && selectedUser && (
+        <div className="modal-overlay" onClick={() => setShowSuspendModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h2>Suspend User</h2>
+            <p>You are about to suspend <strong>{selectedUser.name}</strong> (@{selectedUser.username})</p>
+            <div className="modal-form-group">
+              <label>Suspend for:</label>
+              <select
+                value={suspendDays}
+                onChange={(e) => setSuspendDays(parseInt(e.target.value))}
+                className="modal-select"
+              >
+                <option value={7}>7 days</option>
+                <option value={30}>30 days</option>
+                <option value={90}>90 days</option>
+                <option value={365}>1 year</option>
+              </select>
+            </div>
+            <div className="modal-actions">
+              <button
+                onClick={() => setShowSuspendModal(false)}
+                className="btn btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleSuspend(selectedUser._id, suspendDays)}
+                className="btn btn-danger"
+              >
+                Suspend
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {showDeleteModal && selectedUser && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h2>Delete User Account</h2>
+            <p className="warning-text">
+              You are about to permanently delete the account of <strong>{selectedUser.name}</strong> (@{selectedUser.username})
+            </p>
+            <p className="warning-text">This action cannot be undone!</p>
+            <div className="modal-actions">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="btn btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(selectedUser._id)}
+                className="btn btn-danger"
+              >
+                Delete Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default UserManagement;

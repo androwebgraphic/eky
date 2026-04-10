@@ -9,6 +9,7 @@ import DogList from './pages/DogList';
 import AuthCallback from './pages/AuthCallback';
 import AdoptionRequests from './AdoptionRequests';
 import Statistics from './pages/Statistics';
+import UserManagement from './UserManagement';
 
 const Navbar: React.FC = () => {
   return (
@@ -21,6 +22,7 @@ const Navbar: React.FC = () => {
       <Route path="/dodajpsa" element={<AdddogForm />} />
       <Route path="/zahtjevi-za-posvajanjem" element={<AdoptionRequests />} />
       <Route path="/statistika" element={<Statistics />} />
+      <Route path="/admin/korisnici" element={<UserManagement />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
     </Routes>
   );

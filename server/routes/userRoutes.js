@@ -6,7 +6,7 @@ console.log('[ROUTES DEBUG] userRoutes.js loaded');
 const express = require('express');
 const multer = require('multer');
 const User = require('../models/userModel');
-const { signupUser, loginUser, updateProfile, deleteProfile, addToWishlist, removeFromWishlist, getWishlist, requestPasswordReset, searchUsers, getUserById, getAllUsers, updateLastVisit } = require('../controllers/userController.js');
+const { signupUser, loginUser, updateProfile, deleteProfile, addToWishlist, removeFromWishlist, getWishlist, requestPasswordReset, searchUsers, getUserById, getAllUsers, updateLastVisit, suspendUser, unsuspendUser, deleteUserAccount } = require('../controllers/userController.js');
 const auth = require('../middleware/auth.js');
 const { isAdmin, isSuperAdmin } = auth;
 
@@ -98,5 +98,10 @@ router.delete('/profile', auth, deleteProfile);
 router.get('/:id', auth, getUserById);
 router.put('/:id/profile', auth, upload.single('profilePicture'), updateProfile);
 router.delete('/:id/profile', auth, isSuperAdmin, deleteProfile);
+
+// Superadmin routes for user management
+router.put('/:id/suspend', auth, isSuperAdmin, suspendUser);
+router.put('/:id/unsuspend', auth, isSuperAdmin, unsuspendUser);
+router.delete('/:id/account', auth, isSuperAdmin, deleteUserAccount);
 
 module.exports = router;

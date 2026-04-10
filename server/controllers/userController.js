@@ -501,6 +501,106 @@ const updateUserLocation = async (req, res) => {
 	}
 };
 
+// Suspend a user account
+const suspendUser = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { suspendedUntil } = req.body;
+		
+		// Prevent suspending yourself
+		if (id === req.user._id.toString()) {
+			return res.status(403).json({ message: "Cannot suspend yourself" });
+		}
+		
+		const user = await User.findById(id);
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+		
+		// Prevent suspending other superadmins
+		if (user.role === 'superadmin') {
+			return res.status(403).json({ message: "Cannot suspend another superadmin" });
+		}
+		
+		let suspensionDate = null;
+		if (suspendedUntil) {
+			suspensionDate = new Date(suspendedUntil);
+		} else {
+			// Default to 30 days if no date provided
+			suspensionDate = new Date();
+			suspensionDate.setDate(suspensionDate.getDate() + 30);
+		}
+		
+		user.suspendedUntil = suspensionDate;
+		await user.save();
+		
+		res.status(200).json({ 
+			message: "User suspended successfully", 
+			suspendedUntil: user.suspendedUntil 
+		});
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+		console.log("Error in suspendUser: ", error.message);
+	}
+};
+
+// Unsuspend a user account
+const unsuspendUser = async (req, res) => {
+	try {
+		const { id } = req.params;
+		
+		// Prevent unsuspending yourself (not that you could be suspended)
+		if (id === req.user._id.toString()) {
+			return res.status(403).json({ message: "Cannot unsuspend yourself" });
+		}
+		
+		const user = await User.findById(id);
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+		
+		user.suspendedUntil = null;
+		await user.save();
+		
+		res.status(200).json({ message: "User unsuspended successfully" });
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+		console.log("Error in unsuspendUser: ", error.message);
+	}
+};
+
+// Permanently delete a user account
+const deleteUserAccount = async (req, res) => {
+	try {
+		const { id } = req.params;
+		
+		// Prevent deleting yourself
+		if (id === req.user._id.toString()) {
+			return res.status(403).json({ message: "Cannot delete yourself" });
+		}
+		
+		const user = await User.findById(id);
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+		
+		// Prevent deleting other superadmins
+		if (user.role === 'superadmin') {
+			return res.status(403).json({ message: "Cannot delete another superadmin" });
+		}
+		
+		// Mark as deleted instead of actual deletion to preserve data
+		user.isDeleted = true;
+		user.suspendedUntil = null;
+		await user.save();
+		
+		res.status(200).json({ message: "User account deleted successfully" });
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+		console.log("Error in deleteUserAccount: ", error.message);
+	}
+};
+
 module.exports = {
 	signupUser: async (req, res) => await signupUser(req, res),
 	loginUser: async (req, res) => await loginUser(req, res),
@@ -514,5 +614,8 @@ module.exports = {
 	searchUsers: async (req, res) => await searchUsers(req, res),
 	getAllUsers: async (req, res) => await getAllUsers(req, res),
 	updateLastVisit: async (req, res) => await updateLastVisit(req, res),
-	updateUserLocation: async (req, res) => await updateUserLocation(req, res)
+	updateUserLocation: async (req, res) => await updateUserLocation(req, res),
+	suspendUser: async (req, res) => await suspendUser(req, res),
+	unsuspendUser: async (req, res) => await unsuspendUser(req, res),
+	deleteUserAccount: async (req, res) => await deleteUserAccount(req, res)
 };

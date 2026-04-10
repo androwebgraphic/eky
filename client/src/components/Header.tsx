@@ -447,6 +447,12 @@ const Header: React.FC = () => {
               <StatisticsIcon style={{marginRight: '10px', color: '#f5f5f5', width: '24px', height: '24px'}} />
               {t('nav.statistics') || 'Statistics'}
             </Link>
+            {user.role === 'superadmin' && (
+              <Link to="admin/korisnici" className="authenticated-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+                <span style={{marginRight: '10px', fontSize: '24px'}}>👥</span>
+                User Management
+              </Link>
+            )}
             <div 
               className="authenticated-mobile-link"
               onClick={(e) => {
@@ -511,6 +517,26 @@ const Header: React.FC = () => {
                 >
                   ⚙️ {t('button.profile')}
                 </button>
+
+                {user.role === 'superadmin' && (
+                  <Link
+                    to="admin/korisnici"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsExpanded(false);
+                    }}
+                    className="user-dropdown-btn profile"
+                    title="User Management"
+                    style={{
+                      display: 'inline-block',
+                      padding: '0.75rem 1rem',
+                      textDecoration: 'none',
+                      color: '#f5f5f5'
+                    }}
+                  >
+                    👥 User Management
+                  </Link>
+                )}
 
                 <button 
                   onClick={(e) => {

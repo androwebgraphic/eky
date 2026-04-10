@@ -6,7 +6,8 @@ const { checkMessage, getWordList, getSupportedLanguages } = require('../utils/w
 console.log('=== WORD FILTER TEST ===\n');
 
 const languages = getSupportedLanguages();
-console.log('Supported languages:', languages.join(', '), '\n');
+console.log('Supported languages:', languages.join(', '));
+console.log('');
 
 // Test messages that should be blocked
 const testMessages = {

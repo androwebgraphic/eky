@@ -72,9 +72,10 @@ const wordLists = {
     'zamjena', 'zamjeniti', 'zamjena',
     'novac', 'novca', 'novce', 'valuta',
     'cijena', 'cijenu', 'cijene', 'cijenom',
-    'plaćanje', 'platiti', 'plaćam', 'plaćeno', 'plaćanje',
+    'plaćanje', 'platiti', 'plaćam', 'plaćeno',
     'gotovina', 'gotovinski',
     'ponuda', 'ponudu', 'ponude', 'ponuđen',
+    'tražim', 'tražiti',
     'posao', 'poslovi', 'poslovanje',
     'transakcija', 'transakcije',
     'tržište', 'tržišna',
@@ -93,7 +94,7 @@ const wordLists = {
     'želim kupiti', 'želim prodati', 'želim razmijeniti',
     'hoću kupiti', 'hoću prodati', 'hoću razmijeniti',
     'interesiran za kupnju', 'interesiran za prodaju',
-    'platiti za psa', 'platio za psa', 'placanje za psa',
+    'platiti za psa', 'platio za psa', 'plaćanje za psa',
     'cijena psa', 'cijena pasa', 'psa cijena',
     'košta psa', 'košta pas', 'koliko novca',
     'prodavam ovog psa', 'prodavam ove pse',
@@ -109,16 +110,17 @@ const wordLists = {
     'sniziti cijenu', 'popust',
     'besplatno', 'besplatan pas',
     'naknada za udomljavanje', 'naknada za preuzimanje',
-    'naknada za usvajanje', 'naknada usvajanja'
+    'naknada za usvajanje', 'naknada usvajanja',
+    'paypal'
   ],
   
   // German banned words - Comprehensive sale/trade/exchange phrases
   de: [
-    'verkauf', 'verkaufe', 'verkaufen', 'verkauf', 'verkäufer',
+    'verkauf', 'verkaufe', 'verkaufen', 'verkauf', 'verkäufer', 'tausche', 'tauschpartner',
     'kaufen', 'kauf', 'kaufe', 'gekauft', 'käufer',
     'einkaufen', 'einkauf',
     'handel', 'handeln', 'händler', 'handeln',
-    'tausch', 'tauschen', 'tauschen', 'tauschen',
+    'tausch', 'tauschen',
     'wechsel', 'wechseln', 'austauschen',
     'geld', 'geldes', 'gelder', 'währung',
     'preis', 'preise', 'preisen',
@@ -131,6 +133,7 @@ const wordLists = {
     'markt', 'marktplatz', 'marktführer',
     'auktion', 'auktions', 'auktionieren',
     'miete', 'mieten', 'vermieten', 'mietvertrag',
+    'kostenlos', 'kostenloser', 'umsonst', 'gratis hund',
     'zu verkaufen', 'zu verkaufen!', 'zum verkauf',
     'hund verkaufen', 'hunde verkaufen', 'hunde verkaufen',
     'wie viel', 'wie viel?', 'wie viel kostet', 'wie viel kosten',
@@ -162,19 +165,19 @@ const wordLists = {
     'verhandeln', 'verhandlung',
     'feilschen', 'feilschen',
     'rabatt', 'rabatte', 'nachlass',
-    'kostenlos', 'umsonst', 'gratis hund',
     'umgangsgebühr', 'abgabepreis', 'abgabepreise',
-    'vermittlungsgebühr', 'vermittlungsgebühren'
+    'vermittlungsgebühr', 'vermittlungsgebühren',
+    'paypal'
   ],
   
   // Hungarian banned words - Comprehensive sale/trade/exchange phrases
   hu: [
     'eladás', 'eladom', 'eladása', 'eladni', 'eladtam', 'eladó',
     'veszek', 'venni', 'vétel', 'vásárol', 'vásárolni', 'megvettem', 'vásárló',
-    'kereskedelem', 'kereskedem', 'kereskedni', 'kereskedő',
+    'kereskedelem', 'kereskedem', 'kereskedni', 'kereskedő', 'keresek',
     'csere', 'cserélni', 'cserélem', 'csere', 'cserél',
     'pénz', 'pénze', 'pénzek', 'valuta',
-    'ár', 'ára', 'ára', 'árai', 'árban',
+    'ár', 'ára', 'árai', 'árban', 'mi az ára', 'cserét',
     'fizetés', 'fizetni', 'fizetek', 'fizettem', 'kifizetés',
     'készpénz', 'készpénzes',
     'ajánlat', 'ajánlatot', 'ajánlatok', 'ajánl',
@@ -213,7 +216,8 @@ const wordLists = {
     'kedvezmény', 'kedvezmények', 'árengedmény',
     'ingyen', 'ingyenes kutya', ' ingyen elvihető',
     'átvételi díj', 'hozájárulási díj',
-    'adoptálási díj', 'adoptálási díjak'
+    'adoptálási díj', 'adoptálási díjak',
+    'paypal'
   ]
 };
 

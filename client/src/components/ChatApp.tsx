@@ -662,6 +662,25 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     socketRef.current.on('receiveMessage', (msg) => {
       const adoptionSystemKeywords = ['confirmed', 'completed', 'closed', 'canceled', 'cancelled'];
       const isAdoptionSystemMsg = (msg.messageType === 'adoption' || msg.messageType === 'adoption_cancelled') && msg.dogId && msg.message && adoptionSystemKeywords.some(k => msg.message.toLowerCase().includes(k));
+      
+      // Handle system warning messages (word filter violations)
+      const isSystemWarning = msg.messageType === 'system_warning';
+      if (isSystemWarning) {
+        console.log('[RECEIVE MESSAGE] System warning received:', msg.message);
+        // Add warning message to chat
+        setMessages(prev => [...prev, {
+          _id: Math.random().toString(36).substr(2, 9),
+          sender: null,
+          recipient: msg.recipient || user._id,
+          message: msg.message,
+          sentAt: msg.sentAt || new Date().toISOString(),
+          messageType: 'system_warning'
+        }]);
+        // Show notification
+        setNotification(msg.message);
+        return;
+      }
+      
       if (isAdoptionSystemMsg) {
         setMessages(prev => [...prev, {
           _id: Math.random().toString(36).substr(2, 9),
@@ -1364,8 +1383,14 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
               ) : (
                 messages.map(msg => {
                   const isAdoptionRequest = msg.messageType === 'adoption_request' && msg.requiresAction && !msg.actionTakenBy;
+                  const isSystemWarning = msg.messageType === 'system_warning';
                   const isOwnerMessage = msg.recipient === user._id;
-                  const bubbleClass = isAdoptionRequest ? 'chat-app-bubble adoption-request' : 'chat-app-bubble';
+                  let bubbleClass = 'chat-app-bubble';
+                  if (isAdoptionRequest) {
+                    bubbleClass = 'chat-app-bubble adoption-request';
+                  } else if (isSystemWarning) {
+                    bubbleClass = 'chat-app-bubble system-warning';
+                  }
                   
                   return (
                     <div key={msg._id} className={`chat-app-message${msg.sender === user._id ? ' self' : ''}`}>

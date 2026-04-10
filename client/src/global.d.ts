@@ -47,3 +47,16 @@ declare module '*.gif' {
 declare function setInterval(handler: () => void, timeout: number): number;
 declare function setInterval(handler: () => void, timeout?: number, ...arguments: any[]): number;
 declare function clearInterval(handle: number): void;
+
+// Node.js Process type for environment variables
+declare namespace NodeJS {
+  interface ProcessEnv {
+    NODE_ENV?: string;
+    REACT_APP_API_URL?: string;
+    [key: string]: string | undefined;
+  }
+}
+
+declare const process: {
+  env: NodeJS.ProcessEnv;
+};

@@ -191,10 +191,28 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
             } else {
               // Show generic warning for prohibited words - don't show the actual message content
               setNotification(t('chat.wordFilter.prohibitedWords'));
+              // Add system warning message to sender's chat
+              setMessages(prev => [...prev, {
+                _id: Math.random().toString(36).substr(2, 9),
+                sender: null,
+                recipient: user._id,
+                message: t('chat.wordFilter.prohibitedWords'),
+                sentAt: new Date().toISOString(),
+                messageType: 'system_warning'
+              }]);
             }
           } catch (e) {
             console.error('[SEND MESSAGE] Error parsing 403 response:', e);
             setNotification(t('chat.wordFilter.prohibitedWords'));
+            // Add system warning message to sender's chat
+            setMessages(prev => [...prev, {
+              _id: Math.random().toString(36).substr(2, 9),
+              sender: null,
+              recipient: user._id,
+              message: t('chat.wordFilter.prohibitedWords'),
+              sentAt: new Date().toISOString(),
+              messageType: 'system_warning'
+            }]);
           }
           return;
         }

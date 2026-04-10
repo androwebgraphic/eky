@@ -195,7 +195,7 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', uptime: process.uptime() });
 });
 
-// If you want to use the auth middleware globally, use ONLY the function, not the module object:
+// If you want to use the auth middleware globally, use ONLY function, not the module object:
 // const auth = require('./middleware/auth.js');
 // app.use(auth); // Uncomment if you want global auth protection
 
@@ -228,8 +228,46 @@ const io = new SocketIOServer(httpServer, {
 const { setIo } = require('./socket.js');
 setIo(io);
 
-// Load User model for socket operations
+// Load models for socket operations
 const User = require('./models/userModel.js');
+const ChatMessage = require('./models/chatMessageModel.js');
+const ChatConversation = require('./models/chatConversationModel.js');
+const { checkMessage: checkWordFilter } = require('./utils/wordFilter');
+
+/**
+ * Get warning message based on violation type and language
+ * @param {string} type - 'first', 'suspended', or 'deleted'
+ * @param {string} language - Language code
+ * @param {Date} suspensionDate - Suspension end date (for suspended type)
+ * @returns {string} - Warning message
+ */
+function getWarningMessage(type, language, suspensionDate) {
+  const messages = {
+    en: {
+      first: '⚠️ WARNING: Your message was deleted. Attempting to sell, trade, or exchange dogs is strictly prohibited. Your account will be suspended for 30 days if you continue to violate our terms.',
+      suspended: `⛔ ACCOUNT SUSPENDED: Your account has been suspended for 30 days due to repeated violations. You cannot send messages until ${suspensionDate ? suspensionDate.toLocaleDateString() : 'the suspension period ends'}.`,
+      deleted: '🚫 ACCOUNT DELETED: Your account has been permanently deleted due to repeated violations of our terms of use. You can no longer use this service.'
+    },
+    hr: {
+      first: '⚠️ UPOZORENJE: Vaša poruka je obrisana. Pokušaj prodaje, razmjene ili zamjena pasa strogo je zabranjen. Vaš račun bit će suspendiran 30 dana ako nastavite kršiti naše uvjete.',
+      suspended: `⛔ SUSPENDIRAN RAČUN: Vaš račun je suspendiran na 30 dana zbog ponavljanja prekršaja. Ne možete slati poruke do ${suspensionDate ? suspensionDate.toLocaleDateString('hr-HR') : 'isteka perioda suspenzije'}.`,
+      deleted: '🚫 IZBRISAN RAČUN: Vaš račun je trajno izbrisan zbog ponavljanja kršenja naših uvjeta korištenja. Više ne možete koristiti ovu uslugu.'
+    },
+    de: {
+      first: '⚠️ WARNUNG: Ihre Nachricht wurde gelöscht. Der Versuch, Hunde zu verkaufen, zu tauschen oder auszutauschen, ist strengstens verboten. Ihr Konto wird für 30 Tage gesperrt, wenn Sie unsere Bedingungen weiterhin verletzen.',
+      suspended: `⛔ KONTOSPERRUNG: Ihr Konto wurde aufgrund wiederholter Verstöße für 30 Tage gesperrt. Sie können keine Nachrichten senden, bis ${suspensionDate ? suspensionDate.toLocaleDateString('de-DE') : 'die Sperrfrist endt'}.`,
+      deleted: '🚫 KONTO GELÖSCHT: Ihr Konto wurde aufgrund wiederholter Verstöße gegen unsere Nutzungsbedingungen dauerhaft gelöscht. Sie diesen Dienst nicht mehr nutzen können.'
+    },
+    hu: {
+      first: '⚠️ FIGYELMEZTETÉS: Üzenete törölve lett. Kutyák eladásának, cseréjének vagy cserejének kísérlete szigorúan tilos. Fiókja 30 napra felfüggesztésre kerül, ha továbbra is megszegi feltételeinket.',
+      suspended: `⛔ FELFÜGGESZTETT FIÓK: Fiókja a szabályok ismételt megsértése miatt 30 napra felfüggesztésre került. Nem küldhet üzeneteket ${suspensionDate ? suspensionDate.toLocaleDateString('hu-HU') : 'a felfüggesztési időszak végéig'}.`,
+      deleted: '🚂 TÖRÖLT FIÓK: Fiókja a használati feltételek ismételt megsértése miatt véglegesen törlésre került. Továbbá nem használhatja ezt a szolgáltatást.'
+    }
+  };
+  
+  const langMessages = messages[language] || messages.en;
+  return langMessages[type] || langMessages.first;
+}
 
 // --- Online users tracking ---
 const onlineUsers = new Map(); // userId -> { _id, userName, socketId }
@@ -271,9 +309,135 @@ io.on('connection', (socket) => {
   });
 
   // Send message event
-  socket.on('sendMessage', ({ conversationId, sender, recipient, message }) => {
-    io.to(recipient).emit('receiveMessage', { conversationId, sender, message, sentAt: new Date().toISOString() });
-    io.to(recipient).emit('notification', { from: sender, message });
+  socket.on('sendMessage', async ({ conversationId, sender, recipient, message, language }) => {
+    try {
+      // Get sender user to check suspension/deletion status
+      const senderUser = await User.findById(sender);
+      if (!senderUser) {
+        console.log('[Socket.IO] Sender not found:', sender);
+        return;
+      }
+      
+      // Check if user is deleted
+      if (senderUser.isDeleted) {
+        console.log('[Socket.IO] Attempt to send message from deleted user:', sender);
+        io.to(sender).emit('messageBlocked', { 
+          reason: 'Account deleted',
+          message: 'Your account has been deleted. You cannot send messages.'
+        });
+        return;
+      }
+      
+      // Check if user is suspended
+      if (senderUser.suspendedUntil && senderUser.suspendedUntil > new Date()) {
+        const suspensionEndDate = new Date(senderUser.suspendedUntil);
+        console.log('[Socket.IO] Attempt to send message from suspended user:', sender);
+        io.to(sender).emit('messageBlocked', { 
+          reason: 'Account suspended',
+          suspendedUntil: suspensionEndDate,
+          message: 'Your account is suspended. You cannot send messages until ' + suspensionEndDate.toISOString()
+        });
+        return;
+      }
+      
+      // Check message against word filter
+      const filterResult = checkWordFilter(message, language || 'en');
+      
+      if (filterResult.isProhibited) {
+        console.log(`[Socket.IO] Word filter violation by user ${sender}: matched word "${filterResult.matchedWord}"`);
+        
+        // Increment violation count
+        senderUser.violationCount = (senderUser.violationCount || 0) + 1;
+        senderUser.lastViolationDate = new Date();
+        
+        let warningMessage = '';
+        let messageType = 'system_warning';
+        
+        // Handle based on violation count
+        if (senderUser.violationCount === 1) {
+          // First violation - just warn
+          warningMessage = getWarningMessage('first', language || 'en');
+          console.log(`[Socket.IO] First violation for user ${sender}, sending warning`);
+        } else {
+          // Second violation or more - suspend for 30 days or delete account
+          if (senderUser.violationCount === 2) {
+            // Second violation - suspend for 30 days
+            const suspensionDate = new Date();
+            suspensionDate.setDate(suspensionDate.getDate() + 30);
+            senderUser.suspendedUntil = suspensionDate;
+            warningMessage = getWarningMessage('suspended', language || 'en', suspensionDate);
+            console.log(`[Socket.IO] Second violation for user ${sender}, suspending until ${suspensionDate}`);
+            messageType = 'system_warning';
+          } else if (senderUser.violationCount >= 3) {
+            // Third+ violation - delete account
+            senderUser.isDeleted = true;
+            warningMessage = getWarningMessage('deleted', language || 'en');
+            console.log(`[Socket.IO] Third+ violation for user ${sender}, deleting account`);
+            messageType = 'system_warning';
+          }
+        }
+        
+        await senderUser.save();
+        
+        // Create and save warning message to database
+        const warningMsg = await ChatMessage.create({
+          conversationId,
+          sender: null, // null sender indicates system/superadmin
+          recipient: sender,
+          message: warningMessage,
+          messageType: messageType,
+          sentAt: new Date()
+        });
+        
+        // Update conversation timestamp
+        await ChatConversation.findByIdAndUpdate(conversationId, { updatedAt: Date.now() });
+        
+        // Send warning to sender from superadmin
+        io.to(sender).emit('receiveMessage', { 
+          conversationId, 
+          sender: null, // null indicates superadmin/system
+          message: warningMessage, 
+          sentAt: warningMsg.sentAt,
+          messageType: messageType
+        });
+        
+        // Notify sender that message was blocked
+        io.to(sender).emit('messageBlocked', { 
+          reason: 'Contains prohibited words',
+          warning: warningMessage,
+          violationCount: senderUser.violationCount,
+          isSuspended: !!senderUser.suspendedUntil,
+          isDeleted: senderUser.isDeleted
+        });
+        
+        // Do NOT send the original message to recipient - it's blocked
+        return;
+      }
+      
+      // Message is safe - send it normally
+      const msg = await ChatMessage.create({ 
+        conversationId, 
+        sender, 
+        recipient, 
+        message,
+        sentAt: new Date()
+      });
+      
+      await ChatConversation.findByIdAndUpdate(conversationId, { updatedAt: Date.now() });
+      
+      // Emit to recipient
+      io.to(recipient).emit('receiveMessage', { 
+        conversationId, 
+        sender, 
+        message, 
+        sentAt: msg.sentAt 
+      });
+      
+      // Send notification to recipient
+      io.to(recipient).emit('notification', { from: sender, message });
+    } catch (error) {
+      console.error('[Socket.IO] Error in sendMessage:', error);
+    }
   });
 
   // Typing indicator

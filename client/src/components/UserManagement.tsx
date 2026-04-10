@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../utils/apiUrl';
 import './UserManagement.css';
 
 interface User {
@@ -35,17 +36,40 @@ const UserManagement: React.FC = () => {
   const fetchCurrentUser = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/users/me', {
+      const apiUrl = getApiUrl();
+      const url = `${apiUrl}/api/users/me`;
+      console.log('[UserManagement] Fetching current user from:', url);
+      console.log('[UserManagement] Token exists:', !!token);
+      
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+      
+      console.log('[UserManagement] Response status:', response.status);
+      console.log('[UserManagement] Response ok:', response.ok);
+      
       if (response.ok) {
-        const data = await response.json();
-        setCurrentUser(data);
+        const contentType = response.headers.get('content-type');
+        console.log('[UserManagement] Content-Type:', contentType);
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          console.log('[UserManagement] User data received:', data);
+          setCurrentUser(data);
+        } else {
+          const text = await response.text();
+          console.error('[UserManagement] Non-JSON response:', text);
+          setError('Server returned invalid data format');
+        }
+      } else {
+        const text = await response.text();
+        console.error('[UserManagement] Error response:', response.status, text);
+        setError(`Failed to fetch user data: ${response.status}`);
       }
     } catch (err) {
-      console.error('Error fetching current user:', err);
+      console.error('[UserManagement] Error fetching current user:', err);
+      setError('Error connecting to server');
     }
   };
 
@@ -53,21 +77,38 @@ const UserManagement: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/users/all', {
+      const apiUrl = getApiUrl();
+      const url = `${apiUrl}/api/users/all`;
+      console.log('[UserManagement] Fetching all users from:', url);
+      
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       
+      console.log('[UserManagement] Response status:', response.status);
+      
       if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
+        const contentType = response.headers.get('content-type');
+        console.log('[UserManagement] Content-Type:', contentType);
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          console.log('[UserManagement] Users data received:', data);
+          setUsers(data);
+        } else {
+          const text = await response.text();
+          console.error('[UserManagement] Non-JSON response:', text);
+          setError('Server returned invalid data format');
+        }
       } else {
-        setError('Failed to fetch users');
+        const text = await response.text();
+        console.error('[UserManagement] Error response:', response.status, text);
+        setError(`Failed to fetch users: ${response.status}`);
       }
     } catch (err) {
       setError('An error occurred while fetching users');
-      console.error('Error fetching users:', err);
+      console.error('[UserManagement] Error fetching users:', err);
     } finally {
       setLoading(false);
     }
@@ -76,10 +117,11 @@ const UserManagement: React.FC = () => {
   const handleSuspend = async (userId: string, days: number) => {
     try {
       const token = localStorage.getItem('token');
+      const apiUrl = getApiUrl();
       const suspendedUntil = new Date();
       suspendedUntil.setDate(suspendedUntil.getDate() + days);
       
-      const response = await fetch(`/api/users/${userId}/suspend`, {
+      const response = await fetch(`${apiUrl}/api/users/${userId}/suspend`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -108,7 +150,8 @@ const UserManagement: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/users/${userId}/unsuspend`, {
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/api/users/${userId}/unsuspend`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -132,7 +175,8 @@ const UserManagement: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/users/${userId}/account`, {
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/api/users/${userId}/account`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

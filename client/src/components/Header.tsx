@@ -57,7 +57,7 @@ const Header: React.FC = () => {
   const [unreadMessages, setUnreadMessages] = useState(0);
   const timerRef = useRef<number | null>(null);
   const headerRef = useRef<HTMLElement | null>(null);
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingRef = useRef<number | null>(null);
 
 
   // Fetch new dogs since last visit
@@ -204,7 +204,7 @@ const Header: React.FC = () => {
       fetchNewDogs();
       
       // Poll every 5 minutes
-      pollingRef.current = setInterval(() => {
+      pollingRef.current = window.setInterval(() => {
         console.log('[NOTIFICATION] Polling for new dogs...');
         fetchNewDogs();
       }, 5 * 60 * 1000);

@@ -24,9 +24,9 @@ async function fixUserProfileUrls() {
   try {
     console.log('🔍 Searching for users with HTTP profile picture URLs...');
     
-    // Find users with HTTP profile picture URLs
+    // Find users with HTTP Cloudinary URLs (catches res.cloudinary.com and cloudinary.com)
     const users = await User.find({
-      profilePicture: { $regex: '^http://cloudinary\\.com' }
+      profilePicture: { $regex: '^http://.*cloudinary\\.com' }
     });
     
     console.log(`Found ${users.length} users with HTTP profile picture URLs`);

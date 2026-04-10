@@ -162,7 +162,6 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       isOwner: adoptionIsOwner,
       language: i18n.language || 'en' // Send current language for word filter
     };
-    socketRef.current?.emit('sendMessage', messagePayload);
     try {
       const res = await fetch(`${getApiUrl()}/api/chat/message`, {
         method: 'POST',

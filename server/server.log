@@ -24,6 +24,6 @@ dogController: {
 [STATIC DEBUG] uploadsPath resolved to: /Applications/MAMP/htdocs/eky/server/uploads
 Server started at:
   Local:   http://localhost:3001
-  Network: http://172.20.10.2:3001
+  Network: http://172.20.10.4:3001
   Timeouts configured: Request=60s, KeepAlive=65s, Headers=66s
-MongoDB connected: ac-pkzabov-shard-00-02.zw3yij8.mongodb.net
+MongoDB connected: ac-pkzabov-shard-00-00.zw3yij8.mongodb.net

@@ -178,27 +178,22 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
         if (res.status === 403) {
           try {
             const errorData = await res.json();
-            if (errorData.warning) {
-              setNotification(errorData.warning);
-              // If account is suspended or deleted, show appropriate message
-              if (errorData.isDeleted) {
-                setNotification(t('chat.wordFilter.accountDeleted'));
-                // Optionally redirect or logout user
-                setTimeout(() => {
-                  window.dispatchEvent(new CustomEvent('logout'));
-                }, 3000);
-              } else if (errorData.isSuspended && errorData.suspendedUntil) {
-                const suspensionDate = new Date(errorData.suspendedUntil);
-                setNotification(t('chat.wordFilter.accountSuspended', { date: suspensionDate.toLocaleDateString() }));
-              }
+            // If account is suspended or deleted, show appropriate message
+            if (errorData.isDeleted) {
+              setNotification(t('chat.wordFilter.accountDeleted'));
+              // Optionally redirect or logout user
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('logout'));
+              }, 3000);
+            } else if (errorData.isSuspended && errorData.suspendedUntil) {
+              const suspensionDate = new Date(errorData.suspendedUntil);
+              setNotification(t('chat.wordFilter.accountSuspended', { date: suspensionDate.toLocaleDateString() }));
             } else {
-              const error = await res.text();
-              console.error('[SEND MESSAGE] Error response:', error);
+              // Show generic warning for prohibited words - don't show the actual message content
               setNotification(t('chat.wordFilter.prohibitedWords'));
             }
           } catch (e) {
-            const error = await res.text();
-            console.error('[SEND MESSAGE] Error response:', error);
+            console.error('[SEND MESSAGE] Error parsing 403 response:', e);
             setNotification(t('chat.wordFilter.prohibitedWords'));
           }
           return;

@@ -2353,7 +2353,7 @@ h1.extra-large {
 }
 
 .adopt-btn {
-  background: #c44a0b;
+  background: #4CAF50;
   color: #fbe1cd;
   border: 2px solid #1f4b72;
   border-radius: 15px;
@@ -2365,7 +2365,7 @@ h1.extra-large {
 }
 
 .adopt-btn:hover, .adopt-btn:focus {
-  background: #1f4b72;
+  background: #388E3C;
   color: #cdf0fb;
 }
 
@@ -2962,19 +2962,6 @@ h1.extra-large {
   pointer-events: none !important;
 }
 .card-small .card-small-image-wrapper .multi-photo-indicator .multi-photo-icon svg {
-  pointer-events: none !important;
-}
-.card-small .card-small-image-wrapper .multi-photo-indicator .multi-photo-icon svg {
-  cursor: default;
-}
- +++++++ REPLACE
-.card-small .card-small-image-wrapper .multi-photo-indicator:hover {
-  background: rgba(0, 0, 0, 0.9);
-}
-.card-small .card-small-image-wrapper .multi-photo-indicator .multi-photo-icon {
-  font-size: 18px;
-}
-.card-small .card-small-image-wrapper .multi-photo-indicator .multi-photo-icon svg {
+  cursor: auto;
   pointer-events: auto;
 }
-.card-small .card-small-image-wrapper .multi-photo-indicator .multi-photo-icon svg {

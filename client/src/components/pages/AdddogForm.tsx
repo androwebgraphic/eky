@@ -39,8 +39,9 @@ const getApiUrl = () => {
   return `${window.location.protocol}//${hostname}:3001`;
 };
 
-// Media restriction constants
-const MAX_VIDEO_DURATION_SECONDS = 30;
+  // Media restriction constants
+  const MAX_IMAGES = 3;
+  const MAX_VIDEO_DURATION_SECONDS = 30;
 
 // Comprehensive list of dog breeds with "Mixed Breed" at the top
 const DOG_BREEDS = [
@@ -230,13 +231,15 @@ const AdddogForm: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // State for media handling
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
-  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
-  const [smallPreview, setSmallPreview] = useState<string | null>(null);
-  const [isVideo, setIsVideo] = useState(false);
-  const [posterBlob, setPosterBlob] = useState<Blob | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [videoPoster, setVideoPoster] = useState<string | null>(null);
   const [mediaError, setMediaError] = useState<string | null>(null);
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
+  const [customBreed, setCustomBreed] = useState('');
+  const [useCustomBreed, setUseCustomBreed] = useState(false);
 
   // Check if user is superadmin
   const isSuperAdmin = user?.role === 'superadmin';
@@ -358,70 +361,131 @@ const AdddogForm: React.FC = () => {
     });
   };
 
-  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files && e.target.files[0];
-    if (!f) return;
+  const onImagesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    // Reset previous states
     setMediaError(null);
-    setVideoDuration(null);
-    setPosterBlob(null);
-    
-    // For non-superadmin users, validate media restrictions
+
+    // Check if adding would exceed max images
+    if (imageFiles.length + files.length > MAX_IMAGES) {
+      setMediaError(`You can only upload up to ${MAX_IMAGES} images. You have ${imageFiles.length} images.`);
+      return;
+    }
+
+    // Validate all files are images
+    const nonImageFiles = files.filter(f => !f.type.startsWith('image/'));
+    if (nonImageFiles.length > 0) {
+      setMediaError('Please select only image files.');
+      return;
+    }
+
+    const newFiles = [...imageFiles, ...files];
+    const newPreviews = [...imagePreviews];
+
+    // Create previews for new images
+    for (const file of files) {
+      const url = URL.createObjectURL(file);
+      newPreviews.push(url);
+    }
+
+    setImageFiles(newFiles);
+    setImagePreviews(newPreviews);
+  };
+
+  const onRemoveImage = (index: number) => {
+    // Revoke the URL to avoid memory leaks
+    if (imagePreviews[index] && imagePreviews[index].startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreviews[index]);
+    }
+
+    const newFiles = imageFiles.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+
+    setImageFiles(newFiles);
+    setImagePreviews(newPreviews);
+  };
+
+  const onVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    setMediaError(null);
+
+    if (!file.type.startsWith('video/')) {
+      setMediaError('Please select a video file.');
+      return;
+    }
+
+    // For non-superadmin users, validate video duration
     if (!isSuperAdmin) {
-      if (f.type.startsWith('video/')) {
-        try {
-          const duration = await getVideoDuration(f);
-          setVideoDuration(duration);
-          if (duration > MAX_VIDEO_DURATION_SECONDS) {
-            setMediaError(`Video duration cannot exceed ${MAX_VIDEO_DURATION_SECONDS} seconds. Your video is ${Math.round(duration)} seconds.`);
-            return;
-          }
-        } catch (err) {
-          console.warn('Could not get video duration', err);
+      try {
+        const duration = await getVideoDuration(file);
+        setVideoDuration(duration);
+        if (duration > MAX_VIDEO_DURATION_SECONDS) {
+          setMediaError(`Video duration cannot exceed ${MAX_VIDEO_DURATION_SECONDS} seconds. Your video is ${Math.round(duration)} seconds.`);
+          return;
         }
-      }
-    }
-
-    setMediaFile(f);
-
-    // Revoke previous object URLs to avoid memory leaks
-    if (mediaPreview && mediaPreview.startsWith('blob:')) {
-      URL.revokeObjectURL(mediaPreview);
-    }
-    if (smallPreview && smallPreview.startsWith('blob:')) {
-      URL.revokeObjectURL(smallPreview);
-    }
-
-    // Create main preview URL
-    const url = URL.createObjectURL(f);
-    setMediaPreview(url);
-
-    const videoCheck = f.type.startsWith('video/');
-    setIsVideo(videoCheck);
-
-    // Generate thumbnails/posters
-    if (videoCheck) {
-      try {
-        const poster = await createVideoPoster(f);
-        setPosterBlob(poster);
-        // Create a local URL for the poster blob for UI display
-        const posterUrl = URL.createObjectURL(poster);
-        setSmallPreview(posterUrl);
       } catch (err) {
-        console.error('Error generating video poster:', err);
-        setSmallPreview(null);
+        console.warn('Could not get video duration', err);
       }
+    }
+
+    // Revoke previous preview URLs
+    if (videoPreview && videoPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(videoPreview);
+    }
+    if (videoPoster && videoPoster.startsWith('blob:')) {
+      URL.revokeObjectURL(videoPoster);
+    }
+
+    setVideoFile(file);
+    const url = URL.createObjectURL(file);
+    setVideoPreview(url);
+
+    // Generate poster image
+    try {
+      const poster = await createVideoPoster(file);
+      const posterUrl = URL.createObjectURL(poster);
+      setVideoPoster(posterUrl);
+    } catch (err) {
+      console.error('Error generating video poster:', err);
+      setVideoPoster(null);
+    }
+  };
+
+  const onRemoveVideo = () => {
+    // Revoke preview URLs
+    if (videoPreview && videoPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(videoPreview);
+    }
+    if (videoPoster && videoPoster.startsWith('blob:')) {
+      URL.revokeObjectURL(videoPoster);
+    }
+
+    setVideoFile(null);
+    setVideoPreview(null);
+    setVideoPoster(null);
+    setVideoDuration(null);
+  };
+
+  const handleBreedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === 'custom') {
+      setUseCustomBreed(true);
+      setValue('breed', '');
+      setCustomBreed('');
     } else {
-      try {
-        // For images, create a base64 thumbnail
-        const thumb = await createImageThumbnail(f);
-        setSmallPreview(thumb);
-      } catch (err) {
-        console.error('Error generating image thumbnail:', err);
-        setSmallPreview(null);
-      }
+      setUseCustomBreed(false);
+      setValue('breed', value);
+      setCustomBreed('');
     }
+  };
+
+  const handleCustomBreedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCustomBreed(value);
+    setValue('breed', value);
   };
 
   const onSubmit: SubmitHandler<AddDogFormData> = async (fields) => {
@@ -439,8 +503,8 @@ const AdddogForm: React.FC = () => {
       setSubmitError(t('adddog.locationRequired'));
       return;
     }
-    if (!mediaFile) {
-      setMediaError(t('adddog.mediaRequired') || 'Image is required');
+    if (imageFiles.length === 0) {
+      setMediaError('At least one image is required');
       return;
     }
 
@@ -462,12 +526,24 @@ const AdddogForm: React.FC = () => {
       formData.append('vaccinated', fields.vaccinated ? 'true' : 'false');
       formData.append('neutered', fields.neutered ? 'true' : 'false');
 
-      if (mediaFile) {
-        formData.append('media', mediaFile, mediaFile.name);
-        if (posterBlob) {
-          const posterFile = new File([posterBlob], 'poster.jpg', { type: 'image/jpeg' });
-          formData.append('poster', posterFile, 'poster.jpg');
-        }
+      // Prepare media array for upload
+      const mediaFiles = [...imageFiles];
+      if (videoFile) {
+        mediaFiles.push(videoFile);
+      }
+      
+      // Append all media files (server expects 'media' field)
+      mediaFiles.forEach((file) => {
+        formData.append('media', file, file.name);
+      });
+
+      // Append poster if video is present (server expects 'poster' field)
+      if (videoFile && videoPoster) {
+        // Convert poster blob URL back to blob for upload
+        const response = await fetch(videoPoster);
+        const blob = await response.blob();
+        const posterFile = new File([blob], 'poster.jpg', { type: 'image/jpeg' });
+        formData.append('poster', posterFile, 'poster.jpg');
       }
 
       const apiUrl = getApiUrl();
@@ -547,21 +623,49 @@ const AdddogForm: React.FC = () => {
         {errors.name && <div className="error" role="alert">{t('adddog.name')} is required</div>}
 
         <label htmlFor="breed">{t('fields.breed')}</label>
-        <select 
-          id="breed" 
-          name="breed" 
-          autoComplete="off" 
-          className="breed-select"
-          style={{ maxWidth: '150px', width: 'auto', position: 'relative', zIndex: 9999 }}
-          {...register('breed')} 
-        >
-          <option value="">{t('fields.breed')}</option>
-          {DOG_BREEDS.map((breed) => (
-            <option key={breed} value={breed}>
-              {breed}
-            </option>
-          ))}
-        </select>
+        {!useCustomBreed ? (
+          <select 
+            id="breed" 
+            name="breed" 
+            autoComplete="off" 
+            className="breed-select"
+            style={{ maxWidth: '150px', width: 'auto', position: 'relative', zIndex: 9999 }}
+            {...register('breed')}
+            onChange={handleBreedChange}
+          >
+            <option value="">{t('fields.breed')}</option>
+            {DOG_BREEDS.map((breed) => (
+              <option key={breed} value={breed}>
+                {breed}
+              </option>
+            ))}
+            <option value="custom">Other (specify)</option>
+          </select>
+        ) : (
+          <>
+            <button 
+              type="button" 
+              onClick={() => {
+                setUseCustomBreed(false);
+                setValue('breed', '');
+                setCustomBreed('');
+              }}
+              style={{ marginBottom: '8px', padding: '4px 8px', fontSize: '12px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer' }}
+            >
+              ← Back to list
+            </button>
+            <input 
+              type="text" 
+              id="custom-breed" 
+              name="customBreed" 
+              autoComplete="off" 
+              placeholder="Enter breed name"
+              value={customBreed}
+              onChange={handleCustomBreedChange}
+              style={{ maxWidth: '150px', width: 'auto', marginBottom: '8px' }}
+            />
+          </>
+        )}
 
         <label htmlFor="adddog-color">{t('adddog.color')}</label>
         <input type="text" id="adddog-color" name="color" autoComplete="off" placeholder={t('adddog.color')} {...register('color')} />
@@ -617,27 +721,95 @@ const AdddogForm: React.FC = () => {
         </div>
 
         <div id="media-upload">
-          <label htmlFor="media">{t('adddog.media')}</label>
+          <label htmlFor="images">Images (up to {MAX_IMAGES})</label>
           <div className="media-input-row">
-            <input type="file" accept="image/*,video/*" id="adddog-media" name="media" onChange={onFileChange} />
-            {smallPreview && <img className="thumb-small" src={smallPreview} alt="thumb" />}
+            <input type="file" accept="image/*" id="adddog-images" name="images" multiple onChange={onImagesChange} />
+            {imageFiles.length > 0 && <span>{imageFiles.length}/{MAX_IMAGES}</span>}
           </div>
-          {mediaError && <div className="error" role="alert" style={{ color: 'red', marginTop: 4 }}>{mediaError}</div>}
-          {mediaPreview && (
-            <div id="media-preview">
-              {isVideo ? (
-                <div className="preview-wrap">
-                  <video src={mediaPreview} controls width={150} poster={smallPreview || undefined}></video>
-                  <button type="button" className="view-full" onClick={() => window.open(mediaPreview, '_blank')}>View full</button>
+          
+          {/* Image previews */}
+          {imagePreviews.length > 0 && (
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
+              {imagePreviews.map((preview, index) => (
+                <div key={index} style={{ position: 'relative' }}>
+                  <img 
+                    src={preview} 
+                    alt={`preview-${index}`} 
+                    style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }} 
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => onRemoveImage(index)}
+                    style={{
+                      position: 'absolute',
+                      top: '-5px',
+                      right: '-5px',
+                      background: '#e74c3c',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '20px',
+                      height: '20px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      lineHeight: '1',
+                      padding: '0'
+                    }}
+                  >
+                    ×
+                  </button>
                 </div>
-              ) : (
-                <div className="preview-wrap">
-                  <img src={smallPreview || mediaPreview} alt="preview" style={{ maxWidth: '150px', maxHeight: '150px', objectFit: 'contain' }} />
-                  <button type="button" className="view-full" onClick={() => window.open(mediaPreview, '_blank')}>View full</button>
+              ))}
+            </div>
+          )}
+
+          <label htmlFor="video" style={{ marginTop: '15px' }}>Video (optional, max {MAX_VIDEO_DURATION_SECONDS}s)</label>
+          {!videoFile ? (
+            <div className="media-input-row">
+              <input type="file" accept="video/*" id="adddog-video" name="video" onChange={onVideoChange} />
+            </div>
+          ) : (
+            <div style={{ marginTop: '10px' }}>
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <video 
+                  src={videoPreview || undefined} 
+                  controls 
+                  width={200} 
+                  poster={videoPoster || undefined}
+                  style={{ borderRadius: '8px' }}
+                ></video>
+                <button 
+                  type="button"
+                  onClick={onRemoveVideo}
+                  style={{
+                    position: 'absolute',
+                    top: '-5px',
+                    right: '-5px',
+                    background: '#e74c3c',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '24px',
+                    height: '24px',
+                    cursor: 'pointer',
+                    fontSize: '18px',
+                    lineHeight: '1',
+                    padding: '0',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+              {videoDuration && (
+                <div style={{ marginTop: '5px', fontSize: '12px', color: '#666' }}>
+                  Duration: {Math.round(videoDuration)}s
                 </div>
               )}
             </div>
           )}
+          
+          {mediaError && <div className="error" role="alert" style={{ color: 'red', marginTop: 4 }}>{mediaError}</div>}
         </div>
 
         <div className="form-actions">

@@ -2353,8 +2353,8 @@ h1.extra-large {
 }
 
 .adopt-btn {
-  background: #4CAF50;
-  color: #fbe1cd;
+  background: #4CAF50 !important;
+  color: #fff !important;
   border: 2px solid #1f4b72;
   border-radius: 15px;
   font-size: 12px;
@@ -2365,13 +2365,42 @@ h1.extra-large {
 }
 
 .adopt-btn:hover, .adopt-btn:focus {
-  background: #388E3C;
-  color: #cdf0fb;
+  background: #388E3C !important;
+  color: #fff !important;
 }
 
 .adopt-btn:disabled {
-  background: #aaa;
-  color: white;
+  background: #aaa !important;
+  color: white !important;
+  cursor: not-allowed !important;
+}
+
+.adopt-confirm-btn {
+  background: #28a745 !important;
+  color: #fff !important;
+  border: 2px solid #1f4b72;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  -webkit-transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s;
+}
+
+.adopt-confirm-btn:hover, .adopt-confirm-btn:focus {
+  background: #1e7e34 !important;
+  color: #fff !important;
+}
+
+.adopt-requested-btn {
+  background: #6c757d !important;
+  color: #fff !important;
+  border: 2px solid #1f4b72;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  cursor: not-allowed !important;
 }
 
 .cancel-adopt-btn {
@@ -2802,6 +2831,7 @@ h1.extra-large {
   position: relative;
   max-width: 400px;
   width: 100%;
+  height: 100%;
 }
 .card-small:hover {
   -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);

@@ -2845,6 +2845,12 @@ h1.extra-large {
       align-self: stretch;
   height: 100%;
 }
+@media (max-width: 767px) {
+  .card-small {
+    width: calc(50% - 12px);
+    max-width: 50%;
+  }
+}
 .card-small:hover {
   -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);

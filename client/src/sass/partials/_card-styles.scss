@@ -25,15 +25,17 @@
     background: #fff;
     transition: box-shadow 0.2s;
     position: relative;
-    max-width: 400px;
-    width: calc(33.333% - 12px);
+    width: calc(33.333% - 8px);
     flex: 0 0 auto;
     align-self: stretch;
     height: 100%;
 
+    @media (min-width: 768px) {
+      max-width: 400px;
+    }
+
     @media (max-width: 767px) {
-      width: calc(50% - 12px);
-      max-width: 50%;
+      width: calc(50% - 8px);
     }
 
   &:hover {

@@ -96,9 +96,9 @@
 }
 
 .adopt-btn {
-  background: variables.$primary-color;
-  color: variables.$secondary-color;
-  border: 2px solid variables.$primary-compl;
+  background: #4CAF50 !important;
+  color: #fff !important;
+  border: 2px solid #1f4b72;
   border-radius: 15px;
   font-size: 12px;
   font-weight: 600;
@@ -106,12 +106,18 @@
   transition: background 0.2s, color 0.2s;
 }
 .adopt-btn:hover, .adopt-btn:focus {
-  background: variables.$primary-compl;
-  color: variables.$secondary-compl;
+  background: #388E3C !important;
+  color: #fff !important;
 }
 .adopt-btn:disabled {
-  background: #aaa;
-  color: white;
+  background: #aaa !important;
+  color: white !important;
+}
+
+// Adopt button in card list (dog list)
+.card-small .card-small-actions .card-small-btn.btn-adopt {
+  background: #4CAF50 !important;
+  color: #fff !important;
 }
 
 .cancel-adopt-btn {

@@ -1498,6 +1498,114 @@ button:hover, .button:hover, button:focus, .button:focus {
   gap: 0.6rem;
 }
 
+/* Fix image preview container and images */
+#adddog-form #media-upload > div[style*="display: flex"] {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  gap: 10px !important;
+  margin-top: 10px !important;
+  -ms-flex-wrap: wrap !important;
+      flex-wrap: wrap !important;
+}
+
+#adddog-form #media-upload > div[style*="display: flex"] > div {
+  position: relative !important;
+  display: block !important;
+  width: 100px !important;
+  height: 100px !important;
+}
+
+/* Ensure images in media upload display properly */
+#adddog-form #media-upload img {
+  display: inline-block !important;
+  width: 100px !important;
+  height: 100px !important;
+  -o-object-fit: cover !important;
+     object-fit: cover !important;
+  border-radius: 8px !important;
+  background-color: #f0f0f0 !important;
+  image-rendering: auto !important;
+  -webkit-image-rendering: auto !important;
+  -ms-interpolation-mode: bicubic !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Fix close button size in image/video previews */
+#adddog-form #media-upload button[type=button] {
+  position: absolute !important;
+  top: -5px !important;
+  right: -5px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-width: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  border-radius: 50% !important;
+  background: #e74c3c !important;
+  color: white !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -webkit-box-align: center !important;
+      -ms-flex-align: center !important;
+          align-items: center !important;
+  -webkit-box-pack: center !important;
+      -ms-flex-pack: center !important;
+          justify-content: center !important;
+  -webkit-box-flex: 0 !important;
+      -ms-flex: none !important;
+          flex: none !important;
+}
+
+/* Override global button styles for media upload close buttons */
+#adddog-form #media-upload button[type=button],
+#adddog-form #media-upload button[type=button]:hover,
+#adddog-form #media-upload button[type=button]:focus,
+#adddog-form #media-upload button[type=button]:active,
+form#adddog-form div#media-upload button[type=button],
+form#adddog-form div#media-upload div[style*="position: relative"] button[type=button] {
+  background: #e74c3c !important;
+  color: white !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-width: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  border-radius: 50% !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -webkit-box-align: center !important;
+      -ms-flex-align: center !important;
+          align-items: center !important;
+  -webkit-box-pack: center !important;
+      -ms-flex-pack: center !important;
+          justify-content: center !important;
+  -webkit-box-flex: 0 !important;
+      -ms-flex: none !important;
+          flex: none !important;
+  -webkit-box-sizing: border-box !important;
+          box-sizing: border-box !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  font-weight: normal !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  text-transform: none !important;
+}
+
 .thumb-small {
   width: 48px;
   height: 48px;
@@ -2275,8 +2383,8 @@ h1.extra-large {
 }
 
 .adopt-btn {
-  background: #c44a0b;
-  color: #fbe1cd;
+  background: #4CAF50 !important;
+  color: #fff !important;
   border: 2px solid #1f4b72;
   border-radius: 15px;
   font-size: 12px;
@@ -2287,13 +2395,18 @@ h1.extra-large {
 }
 
 .adopt-btn:hover, .adopt-btn:focus {
-  background: #1f4b72;
-  color: #cdf0fb;
+  background: #388E3C !important;
+  color: #fff !important;
 }
 
 .adopt-btn:disabled {
-  background: #aaa;
-  color: white;
+  background: #aaa !important;
+  color: white !important;
+}
+
+.card-small .card-small-actions .card-small-btn.btn-adopt {
+  background: #4CAF50 !important;
+  color: #fff !important;
 }
 
 .cancel-adopt-btn {
@@ -2691,9 +2804,9 @@ h1.extra-large {
   gap: 12px;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
-  -webkit-box-align: start;
-      -ms-flex-align: start;
-          align-items: flex-start;
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
   -ms-flex-line-pack: start;
       align-content: flex-start;
   -webkit-box-pack: start;
@@ -2723,7 +2836,14 @@ h1.extra-large {
   transition: box-shadow 0.2s, -webkit-box-shadow 0.2s;
   position: relative;
   max-width: 400px;
-  width: 100%;
+  width: calc(33.333% - 12px);
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+  -ms-flex-item-align: stretch;
+      -ms-grid-row-align: stretch;
+      align-self: stretch;
+  height: 100%;
 }
 .card-small:hover {
   -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -2837,6 +2957,9 @@ h1.extra-large {
 .card-small .card-small-content {
   padding: 16px;
   width: 100%;
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
 }
 @media (min-width: 768px) {
   .card-small .card-small-content {
@@ -3003,11 +3126,11 @@ h1.extra-large {
   color: #fbe1cd;
 }
 .card-small .card-small-actions .card-small-btn.btn-adopt {
-  background: #ef9f27;
-  color: #fff;
+  background: #4CAF50 !important;
+  color: #fff !important;
 }
 .card-small .card-small-actions .card-small-btn.btn-adopt:disabled {
-  background: #9e9e9e;
+  background: #9e9e9e !important;
   cursor: not-allowed;
 }
 .card-small .card-small-actions .card-small-btn.btn-wishlist {

@@ -571,6 +571,12 @@ a {
     border-radius: 6px !important;
     cursor: pointer !important;
   }
+  /* Adopt button in card list (dog list) */
+  .card-small .card-small-actions .card-small-btn.btn-adopt {
+    background-color: #4CAF50 !important;
+    color: #fff !important;
+    border: none !important;
+  }
 }
 .notification-bell {
   position: relative;
@@ -1573,6 +1579,24 @@ button:hover, .button:hover, button:focus, .button:focus {
       -ms-flex-align: center;
           align-items: center;
   gap: 0.6rem;
+}
+
+/* Image previews in Add Dog Form */
+#adddog-form #media-upload img {
+  display: block !important;
+  width: 100px !important;
+  height: 100px !important;
+  -o-object-fit: cover !important;
+     object-fit: cover !important;
+  border-radius: 8px !important;
+  border: 2px solid #ddd !important;
+  -webkit-box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+#adddog-form #media-upload img[src] {
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .thumb-small {
@@ -2798,9 +2822,9 @@ h1.extra-large {
   gap: 12px;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
-  -webkit-box-align: start;
-      -ms-flex-align: start;
-          align-items: flex-start;
+  -webkit-box-align: stretch !important;
+      -ms-flex-align: stretch !important;
+          align-items: stretch !important;
   -ms-flex-line-pack: start;
       align-content: flex-start;
   -webkit-box-pack: start;
@@ -2994,4 +3018,18 @@ h1.extra-large {
 .card-small .card-small-image-wrapper .multi-photo-indicator .multi-photo-icon svg {
   cursor: auto;
   pointer-events: auto;
+}
+
+/* Equal height cards */
+.dog-list-grid {
+  -webkit-box-align: stretch !important;
+      -ms-flex-align: stretch !important;
+          align-items: stretch !important;
+}
+
+.card-small {
+  -webkit-box-flex: 1 !important;
+      -ms-flex: 1 1 300px !important;
+          flex: 1 1 300px !important;
+  height: 100% !important;
 }

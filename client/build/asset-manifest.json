@@ -1,0 +1,18 @@
+{
+  "files": {
+    "main.css": "/static/css/main.28e16d19.css",
+    "main.js": "/static/js/main.61237b72.js",
+    "static/media/sharedog-icon.svg": "/static/media/sharedog-icon.384fb38aca278ca46039.svg",
+    "static/media/sharedog-icon.eot": "/static/media/sharedog-icon.193da4499af19b756b8e.eot",
+    "static/media/sharedog-icon.woff": "/static/media/sharedog-icon.005ebb98fbe0f6a32346.woff",
+    "static/media/sharedog-icon.ttf": "/static/media/sharedog-icon.e401d965c60477aadf20.ttf",
+    "index.html": "/index.html",
+    "static/media/chat-icon.svg": "/static/media/chat-icon.25f4fcefd31d221d69a4.svg",
+    "main.28e16d19.css.map": "/static/css/main.28e16d19.css.map",
+    "main.61237b72.js.map": "/static/js/main.61237b72.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.28e16d19.css",
+    "static/js/main.61237b72.js"
+  ]
+}

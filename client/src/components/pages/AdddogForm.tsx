@@ -43,8 +43,9 @@ const getApiUrl = () => {
   const MAX_IMAGES = 3;
   const MAX_VIDEO_DURATION_SECONDS = 30;
 
-// Comprehensive list of dog breeds with "Mixed Breed" at the top
+// Comprehensive list of dog breeds with "Mixed Breed" and "Other (type custom)" at the top
 const DOG_BREEDS = [
+  'Other (type custom breed below)',
   'Mixed Breed',
   'Afghan Hound',
   'Airedale Terrier',
@@ -622,50 +623,32 @@ const AdddogForm: React.FC = () => {
         <input type="text" id="adddog-name" name="name" autoComplete="name" placeholder={t('adddog.name')} autoFocus {...register('name', { required: true })} />
         {errors.name && <div className="error" role="alert">{t('adddog.name')} is required</div>}
 
-        <label htmlFor="breed">{t('fields.breed')}</label>
-        {!useCustomBreed ? (
-          <select 
-            id="breed" 
-            name="breed" 
-            autoComplete="off" 
-            className="breed-select"
-            style={{ maxWidth: '150px', width: 'auto', position: 'relative', zIndex: 9999 }}
-            {...register('breed')}
-            onChange={handleBreedChange}
-          >
-            <option value="">{t('fields.breed')}</option>
-            {DOG_BREEDS.map((breed) => (
-              <option key={breed} value={breed}>
-                {breed}
-              </option>
-            ))}
-            <option value="custom">Other (specify)</option>
-          </select>
-        ) : (
-          <>
-            <button 
-              type="button" 
-              onClick={() => {
-                setUseCustomBreed(false);
-                setValue('breed', '');
-                setCustomBreed('');
-              }}
-              style={{ marginBottom: '8px', padding: '4px 8px', fontSize: '12px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer' }}
-            >
-              ← Back to list
-            </button>
-            <input 
-              type="text" 
-              id="custom-breed" 
-              name="customBreed" 
-              autoComplete="off" 
-              placeholder="Enter breed name"
-              value={customBreed}
-              onChange={handleCustomBreedChange}
-              style={{ maxWidth: '150px', width: 'auto', marginBottom: '8px' }}
-            />
-          </>
-        )}
+        <label htmlFor="adddog-breed">{t('fields.breed')}</label>
+        <input 
+          id="adddog-breed"
+          name="breed"
+          type="text" 
+          autoComplete="off"
+          list="dog-breeds"
+          placeholder="Select or type breed"
+          {...register('breed')} 
+          style={{
+            width: '200px',
+            padding: '0.5rem',
+            border: '2px solid #ddd',
+            borderRadius: '8px',
+            fontSize: '1rem',
+            boxSizing: 'border-box',
+            maxWidth: '100%'
+          }}
+        />
+        <datalist id="dog-breeds">
+          {DOG_BREEDS.map((breed) => (
+            <option key={breed} value={breed}>
+              {breed}
+            </option>
+          ))}
+        </datalist>
 
         <label htmlFor="adddog-color">{t('adddog.color')}</label>
         <input type="text" id="adddog-color" name="color" autoComplete="off" placeholder={t('adddog.color')} {...register('color')} />

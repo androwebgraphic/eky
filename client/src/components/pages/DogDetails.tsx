@@ -407,8 +407,13 @@ const DogDetails: React.FC<DogDetailsProps & { _showMap?: boolean }> = ({
         // Test for -orig FIRST (before testing general pattern)
         if (base.endsWith('-orig')) {
           base = base.replace(/-orig$/, '');
-          // Now remove trailing -INDEX (e.g., "img-0-orig" -> "img-0" -> "img")
-          base = base.replace(/-\d+$/, '');
+          // For updateDog format: remove -TIMESTAMP-HASH pattern if present
+          // e.g., "img-0-1774876786338-6qmali" -> "img-0"
+          const origMatch = base.match(/^(.+?)-\d{10,13}-[a-z0-9]{6}$/);
+          if (origMatch) {
+            base = origMatch[1];
+          }
+          // NOTE: Don't remove trailing -INDEX here, as we want to keep "img-0" for both formats
         } else {
           // Test for img-INDEX-SIZE pattern (e.g., "img-0-320")
           const createDogMatch = base.match(/^(.+?)-\d+-\d{3,4}$/);

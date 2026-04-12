@@ -384,10 +384,23 @@ const AdddogForm: React.FC = () => {
     const newFiles = [...imageFiles, ...files];
     const newPreviews = [...imagePreviews];
 
-    // Create previews for new images
+    // Create previews for new images using FileReader (base64)
+    const createPreview = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    };
+
     for (const file of files) {
-      const url = URL.createObjectURL(file);
-      newPreviews.push(url);
+      try {
+        const preview = await createPreview(file);
+        newPreviews.push(preview);
+      } catch (err) {
+        console.error('Error creating image preview:', err);
+      }
     }
 
     setImageFiles(newFiles);

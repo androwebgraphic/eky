@@ -35,7 +35,7 @@
     }
 
     @media (max-width: 767px) {
-      width: calc(50% - 8px);
+      width: 50vw;
     }
 
   &:hover {
@@ -352,10 +352,10 @@
             font-weight: bold;
           }
         }
-      }
 
-      .menu-icon {
-        margin-left: 4px;
+        .menu-icon {
+          margin-left: 4px;
+        }
       }
     }
   }

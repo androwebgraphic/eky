@@ -2851,7 +2851,7 @@ h1.extra-large {
 }
 @media (max-width: 767px) {
   .card-small {
-    width: calc(50% - 8px);
+    width: 50vw;
   }
 }
 .card-small:hover {
@@ -3187,7 +3187,7 @@ h1.extra-large {
   font-size: 10px;
   font-weight: bold;
 }
-.card-small .card-small-actions .wishlist-heart .menu-icon {
+.card-small .card-small-actions .wishlist-heart .heart-icon .menu-icon {
   margin-left: 4px;
 }
 

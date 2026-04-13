@@ -35,7 +35,7 @@
     }
 
     @media (max-width: 767px) {
-      width: calc(50vw - 6px);
+      width: calc((100vw - 24px) / 2);
     }
 
   &:hover {

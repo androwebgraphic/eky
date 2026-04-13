@@ -2851,7 +2851,7 @@ h1.extra-large {
 }
 @media (max-width: 767px) {
   .card-small {
-    width: 50vw;
+    width: calc(50vw - 6px);
   }
 }
 .card-small:hover {

@@ -356,7 +356,8 @@
       "firstWarning": "⚠️ UPOZORENJE: Vaša poruka je obrisana. Pokušaj prodaje, razmjene ili zamjena pasa strogo je zabranjen. Vaš račun bit će suspendiran 30 dana ako nastavite kršiti naše uvjete.",
       "accountSuspended": "⛔ SUSPENDIRAN RAČUN: Vaš račun je suspendiran na 30 dana zbog ponavljanja prekršaja. Ne možete slati poruke do {{date}}.",
       "accountDeleted": "🚫 IZBRISAN RAČUN: Vaš račun je trajno izbrisan zbog ponavljanja kršenja naših uvjeta korištenja.",
-      "prohibitedWords": "Vaša poruka sadrži zabranjene riječi vezane uz prodaju, razmjenu ili zamjenu pasa."
+      "prohibitedWords": "Vaša poruka sadrži zabranjene riječi vezane uz prodaju, razmjenu ili zamjenu pasa.",
+      "suspensionPeriodEnd": "isteka perioda suspenzije"
     }
   },
   "alerts": {

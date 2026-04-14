@@ -342,7 +342,8 @@
       "firstWarning": "⚠️ WARNING: Your message was deleted. Attempting to sell, trade, or exchange dogs is strictly prohibited. Your account will be suspended for 30 days if you continue to violate our terms.",
       "accountSuspended": "⛔ ACCOUNT SUSPENDED: Your account has been suspended for 30 days due to repeated violations. You cannot send messages until {{date}}.",
       "accountDeleted": "🚫 ACCOUNT DELETED: Your account has been permanently deleted due to repeated violations of our terms of use.",
-      "prohibitedWords": "Your message contains prohibited words related to selling, trading, or exchanging dogs."
+      "prohibitedWords": "Your message contains prohibited words related to selling, trading, or exchanging dogs.",
+      "suspensionPeriodEnd": "the suspension period ends"
     }
   },
   "adoptionRequests": {

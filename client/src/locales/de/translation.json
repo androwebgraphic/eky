@@ -335,7 +335,8 @@
       "firstWarning": "⚠️ WARNUNG: Ihre Nachricht wurde gelöscht. Der Versuch, Hunde zu verkaufen, zu tauschen oder auszutauschen, ist strengstens verboten. Ihr Konto wird für 30 Tage gesperrt, wenn Sie unsere Bedingungen weiterhin verletzen.",
       "accountSuspended": "⛔ KONTOSPERRUNG: Ihr Konto wurde aufgrund wiederholter Verstöße für 30 Tage gesperrt. Sie können keine Nachrichten senden bis {{date}}.",
       "accountDeleted": "🚫 KONTO GELÖSCHT: Ihr Konto wurde aufgrund wiederholter Verstöße gegen unsere Nutzungsbedingungen dauerhaft gelöscht.",
-      "prohibitedWords": "Ihre Nachricht enthält verbotene Wörter im Zusammenhang mit dem Verkauf, Tausch oder Austausch von Hunden."
+      "prohibitedWords": "Ihre Nachricht enthält verbotene Wörter im Zusammenhang mit dem Verkauf, Tausch oder Austausch von Hunden.",
+      "suspensionPeriodEnd": "die Sperrfrist endt"
     }
   },
   "alerts": {

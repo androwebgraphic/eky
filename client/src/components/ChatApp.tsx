@@ -730,6 +730,49 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       }
     });
     
+    socketRef.current.on('messageBlocked', (data) => {
+      console.log('[SOCKET] Message blocked:', data);
+      
+      // Translate warning message based on warningCode
+      let warningMessage = '';
+      if (data.warningCode) {
+        switch (data.warningCode) {
+          case 'firstWarning':
+            warningMessage = t('chat.wordFilter.firstWarning');
+            break;
+          case 'accountSuspended':
+            if (data.suspensionEnd) {
+              const suspensionDate = new Date(data.suspensionEnd);
+              warningMessage = t('chat.wordFilter.accountSuspended', { 
+                date: suspensionDate.toLocaleDateString() 
+              });
+            } else {
+              warningMessage = t('chat.wordFilter.accountSuspended', { 
+                date: t('chat.wordFilter.suspensionPeriodEnd') 
+              });
+            }
+            break;
+          case 'accountDeleted':
+            warningMessage = t('chat.wordFilter.accountDeleted');
+            break;
+          default:
+            warningMessage = t('chat.wordFilter.prohibitedWords');
+        }
+      } else {
+        warningMessage = t('chat.wordFilter.prohibitedWords');
+      }
+      
+      // Show notification
+      setNotification(warningMessage);
+      
+      // If account is deleted, logout user
+      if (data.isDeleted) {
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('logout'));
+        }, 3000);
+      }
+    });
+    
     socketRef.current.on('receiveMessage', (msg) => {
       console.log('[RECEIVE MESSAGE] Raw message received:', msg);
       console.log('[RECEIVE MESSAGE] Message conversationId:', msg.conversationId);
@@ -747,20 +790,50 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       // Handle system warning messages (word filter violations)
       const isSystemWarning = msg.messageType === 'system_warning';
       if (isSystemWarning) {
-        console.log('[RECEIVE MESSAGE] System warning received:', msg.message);
+        console.log('[RECEIVE MESSAGE] System warning received:', msg.warningCode);
+        
+        // Translate warning message based on warningCode
+        let warningMessage = '';
+        if (msg.warningCode) {
+          switch (msg.warningCode) {
+            case 'firstWarning':
+              warningMessage = t('chat.wordFilter.firstWarning');
+              break;
+            case 'accountSuspended':
+              if (msg.suspensionEnd) {
+                const suspensionDate = new Date(msg.suspensionEnd);
+                warningMessage = t('chat.wordFilter.accountSuspended', { 
+                  date: suspensionDate.toLocaleDateString() 
+                });
+              } else {
+                warningMessage = t('chat.wordFilter.accountSuspended', { 
+                  date: t('chat.wordFilter.suspensionPeriodEnd') 
+                });
+              }
+              break;
+            case 'accountDeleted':
+              warningMessage = t('chat.wordFilter.accountDeleted');
+              break;
+            default:
+              warningMessage = msg.message || t('chat.wordFilter.prohibitedWords');
+          }
+        } else {
+          warningMessage = msg.message || t('chat.wordFilter.prohibitedWords');
+        }
+        
         // Add warning message to chat if it belongs to current conversation
         if (currentConvo && msg.conversationId === currentConvo._id) {
           setMessages(prev => [...prev, {
-            _id: Math.random().toString(36).substr(2, 9),
+            _id: msg._id || Math.random().toString(36).substr(2, 9),
             sender: null,
             recipient: msg.recipient || userId,
-            message: msg.message,
+            message: warningMessage,
             sentAt: msg.sentAt || new Date().toISOString(),
             messageType: 'system_warning'
           }]);
         }
         // Show notification
-        setNotification(msg.message);
+        setNotification(warningMessage);
         return;
       }
       

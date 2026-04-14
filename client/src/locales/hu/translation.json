@@ -327,7 +327,8 @@
       "firstWarning": "⚠️ FIGYELMEZTETÉS: Üzenete törölve lett. Kutyák eladásának, cseréjének vagy cserejének kísérlete szigorúan tilos. Fiókja 30 napra felfüggesztésre kerül, ha továbbra is megszegi feltételeinket.",
       "accountSuspended": "⛔ FELFÜGGESZTETT FIÓK: Fiókja a szabályok ismételt megsértése miatt 30 napra felfüggesztésre került. Nem küldhet üzeneteket {{date}}-ig.",
       "accountDeleted": "🚂 TÖRÖLT FIÓK: Fiókja a használati feltételek ismételt megsértése miatt véglegesen törlésre került.",
-      "prohibitedWords": "Üzenete tiltott szavakat tartalmaz, amelyek a kutyák eladásához, cseréjéhez vagy cseréjéhez kapcsolódnak."
+      "prohibitedWords": "Az üzenete tiltott szavakat tartalmaz a kutyák eladásával, cseréjével vagy cserejével kapcsolatban.",
+      "suspensionPeriodEnd": "a felfüggesztési időszak végéig"
     }
   },
   "alerts": {

@@ -68,20 +68,38 @@ interface Conversation {
 }
 
 const getApiUrl = () => {
+  const hostname = window.location.hostname;
+  
+  // Check for localhost or 127.0.0.1 first
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    // Try to use environment variable if it's set and is an IP address
+    if (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim() !== '') {
+      const envUrl = process.env.REACT_APP_API_URL.trim();
+      // If env URL is an IP address (not localhost), use it for localhost development
+      if (/^\d+\.\d+\.\d+\.\d+:\d+$/.test(envUrl)) {
+        console.log('[API URL] Using network IP from env for localhost:', envUrl);
+        return envUrl;
+      }
+    }
+    // Default localhost behavior
+    return `http://${hostname}:3001`;
+  }
+  
+  // For other cases (production, mobile IP access)
   if (process.env.REACT_APP_API_URL !== undefined && process.env.REACT_APP_API_URL.trim() !== '') {
+    console.log('[API URL] Using env var:', process.env.REACT_APP_API_URL);
     return process.env.REACT_APP_API_URL;
   }
-  const hostname = window.location.hostname;
+  
   if (window.location.protocol === 'https:') {
     return `https://${hostname}`;
   }
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return `http://${hostname}:3001`;
-  }
+  
   // For IP addresses (including mobile network access)
   if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
     return `http://${hostname}:3001`;
   }
+  
   // Fallback - use current protocol and hostname
   return `${window.location.protocol}//${hostname}:3001`;
 };

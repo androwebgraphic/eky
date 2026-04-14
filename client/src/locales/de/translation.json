@@ -305,7 +305,10 @@
     "cancelSuccess": "Adoptionsanfrage abgebrochen."
   },
   "chat": {
+    "online": "Online",
+    "offline": "Offline",
     "onlineUsers": "Benutzer online",
+    "offlineUsers": "Benutzer offline",
     "noUsersOnline": "Keine Benutzer online.",
     "chatWith": "Chat mit",
     "selectUserToChat": "Wählen Sie einen Benutzer aus, um zu chatten.",
@@ -330,6 +333,9 @@
     "adoptionNotFound": "Diese Adoptionsanfrage wurde storniert oder ist nicht mehr verfügbar.",
     "actionFailed": "Aktion fehlgeschlagen",
     "years": "Jahre",
+    "noMessagesYet": "Noch keine Nachrichten.",
+    "socketNotConnected": "Socket nicht verbunden. Backend/Server prüfen.",
+    "searching": "Suche...",
     "wordFilter": {
       "messageBlocked": "Nachricht blockiert",
       "firstWarning": "⚠️ WARNUNG: Ihre Nachricht wurde gelöscht. Der Versuch, Hunde zu verkaufen, zu tauschen oder auszutauschen, ist strengstens verboten. Ihr Konto wird für 30 Tage gesperrt, wenn Sie unsere Bedingungen weiterhin verletzen.",

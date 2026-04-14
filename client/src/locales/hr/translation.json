@@ -326,9 +326,13 @@
     "cancelSuccess": "Zahtjev za posvajanje otkazan."
   },
   "chat": {
+    "online": "Online",
+    "offline": "Offline",
     "onlineUsers": "Korisnici na mreži",
+    "offlineUsers": "Korisnici izvan mreže",
     "noUsersOnline": "Nema korisnika na mreži.",
     "chatWith": "Razgovor s",
+    "noMessagesYet": "Još nema poruka.",
     "selectUserToChat": "Odaberite korisnika za početak razgovora.",
     "typeMessagePlaceholder": "Upišite poruku...",
     "send": "Pošalji",
@@ -351,6 +355,8 @@
     "adoptionNotFound": "Ovaj zahtjev za posvajanje je otkazan ili više nije dostupan.",
     "actionFailed": "Akcija nije uspjela",
     "years": "godine",
+    "searching": "Pretražujem...",
+    "socketNotConnected": "Socket nije povezan. Provjerite pozadinski sustav/poslužitelj.",
     "wordFilter": {
       "messageBlocked": "Poruka blokirana",
       "firstWarning": "⚠️ UPOZORENJE: Vaša poruka je obrisana. Pokušaj prodaje, razmjene ili zamjena pasa strogo je zabranjen. Vaš račun bit će suspendiran 30 dana ako nastavite kršiti naše uvjete.",

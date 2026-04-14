@@ -309,6 +309,8 @@
     "cancelSuccess": "Adoption request cancelled."
   },
   "chat": {
+    "online": "Online",
+    "offline": "Offline",
     "onlineUsers": "Online Users",
     "noUsersOnline": "No users online.",
     "chatWith": "Chat with",
@@ -336,6 +338,7 @@
     "years": "years",
     "noMessagesYet": "No messages yet.",
     "socketNotConnected": "Socket not connected. Check backend/server.",
+    "offlineUsers": "Offline Users",
     "searching": "Searching...",
     "wordFilter": {
       "messageBlocked": "Message blocked",

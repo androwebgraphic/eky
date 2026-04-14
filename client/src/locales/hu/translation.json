@@ -297,9 +297,12 @@
     "cancelSuccess": "Örökbe fogadási kérés visszavonva."
   },
   "chat": {
+    "online": "Online",
+    "offline": "Offline",
     "onlineUsers": "Online felhasználók",
     "noUsersOnline": "Nincsenek online felhasználók.",
     "chatWith": "Csevegés vele",
+    "noMessagesYet": "Még nincsenek üzenetek.",
     "selectUserToChat": "Válasszon felhasználót a csevegéshez.",
     "typeMessagePlaceholder": "Írjon üzenetet...",
     "send": "Küldés",
@@ -322,6 +325,9 @@
     "adoptionNotFound": "Ez az örökbefogadási kérés törlésre került vagy már nem elérhető.",
     "actionFailed": "Művelet sikertelen",
     "years": "év",
+    "offlineUsers": "Offline felhasználók",
+    "searching": "Keresés...",
+    "socketNotConnected": "Socket nincs csatlakoztatva. Ellenőrizze a backend/szervert.",
     "wordFilter": {
       "messageBlocked": "Üzenet blokkolva",
       "firstWarning": "⚠️ FIGYELMEZTETÉS: Üzenete törölve lett. Kutyák eladásának, cseréjének vagy cserejének kísérlete szigorúan tilos. Fiókja 30 napra felfüggesztésre kerül, ha továbbra is megszegi feltételeinket.",

@@ -1375,7 +1375,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
               transition: 'all 0.2s'
             }}
           >
-            {t('online') || 'Online'} ({onlineUsers.length})
+            {t('chat.online') || 'Online'} ({onlineUsers.length})
           </button>
           <button
             onClick={() => setActiveTab('offline')}
@@ -1392,12 +1392,12 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
               transition: 'all 0.2s'
             }}
           >
-            {t('offline') || 'Offline'} ({allConversations.filter((c: any) => !onlineUsers.some((u: any) => u._id === c.otherUser?._id)).length})
+            {t('chat.offline') || 'Offline'} ({allConversations.filter((c: any) => !onlineUsers.some((u: any) => u._id === c.otherUser?._id)).length})
           </button>
         </div>
         
         <div className="chat-users-header" style={{ marginTop: '8px' }}>
-          {activeTab === 'online' ? (t('onlineUsers') || 'Online Users') : (t('offlineUsers') || 'Offline Users')}
+          {activeTab === 'online' ? (t('chat.onlineUsers') || 'Online Users') : (t('chat.offlineUsers') || 'Offline Users')}
         </div>
         <div style={{ position: 'relative' }}>
           <input
@@ -1405,7 +1405,7 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
             type="text"
             value={userSearchQuery}
             onChange={(e) => setUserSearchQuery(e.target.value)}
-            placeholder={t('searchUsers') || 'Search users...'}
+            placeholder={t('chat.searchUsers') || 'Search users...'}
             style={{ paddingRight: userSearchQuery ? '32px' : '12px' }}
           />
           {userSearchQuery && (

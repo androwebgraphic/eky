@@ -1,8 +1,5 @@
 .statistics-page {
   min-height: 100vh;
-  background-image: url("../../img/dog_paw.png");
-  background-color: rgba(253, 124, 43, 0.1843137255);
-  background-position: cover;
   padding: 20px;
   padding-top: 80px;
   overflow-x: hidden;

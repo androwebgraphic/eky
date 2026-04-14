@@ -491,6 +491,93 @@ button:hover, .button:hover, button:focus, .button:focus {
   gap: 0.6rem;
 }
 
+/* Fix image preview container and images */
+#adddog-form #media-upload > div[style*="display: flex"] {
+  display: flex !important;
+  gap: 10px !important;
+  margin-top: 10px !important;
+  flex-wrap: wrap !important;
+}
+
+#adddog-form #media-upload > div[style*="display: flex"] > div {
+  position: relative !important;
+  display: block !important;
+  width: 100px !important;
+  height: 100px !important;
+}
+
+/* Ensure images in media upload display properly */
+#adddog-form #media-upload img {
+  display: inline-block !important;
+  width: 100px !important;
+  height: 100px !important;
+  object-fit: cover !important;
+  border-radius: 8px !important;
+  background-color: #f0f0f0 !important;
+  image-rendering: auto !important;
+  -webkit-image-rendering: auto !important;
+  -ms-interpolation-mode: bicubic !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Fix close button size in image/video previews */
+#adddog-form #media-upload button[type="button"] {
+  position: absolute !important;
+  top: -5px !important;
+  right: -5px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-width: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  border-radius: 50% !important;
+  background: #e74c3c !important;
+  color: white !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: none !important;
+}
+
+/* Override global button styles for media upload close buttons */
+#adddog-form #media-upload button[type="button"],
+#adddog-form #media-upload button[type="button"]:hover,
+#adddog-form #media-upload button[type="button"]:focus,
+#adddog-form #media-upload button[type="button"]:active,
+form#adddog-form div#media-upload button[type="button"],
+form#adddog-form div#media-upload div[style*="position: relative"] button[type="button"] {
+  background: #e74c3c !important;
+  color: white !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-width: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  border-radius: 50% !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: none !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  font-weight: normal !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  text-transform: none !important;
+}
+
 .thumb-small {
   width: 48px;
   height: 48px;

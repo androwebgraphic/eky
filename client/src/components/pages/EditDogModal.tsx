@@ -333,86 +333,17 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<any[]>([]);
-  // Deduplicate images on mount and when dog changes
+  // Store all images without complex deduplication
   const [uniqueImages, setUniqueImages] = useState<any[]>([]);
   useEffect(() => {
     console.log('[EDITDOG] useEffect triggered, dog.images:', dog.images?.length);
     if (dog.images && dog.images.length > 0) {
-      console.log('[EDITDOG] First few images:', dog.images.slice(0, 3).map(img => ({ url: img.url, width: img.width })));
-      const baseToImage = new Map();
-      const allBases: string[] = [];
-      
-      dog.images.forEach((img: any, imgIndex: number) => {
-        if (!img.url) {
-          console.log('[EDITDOG] Skipping image with no url at index', imgIndex);
-          return;
-        }
-        const url = getImageUrl(img.url);
-        const base = getImageBase(img.url);
-        allBases.push(base);
-        console.log('[EDITDOG] Processing image', imgIndex, ':', { url, base, width: img.width });
-        
-        if (!baseToImage.has(base)) {
-          baseToImage.set(base, img);
-          console.log('[EDITDOG]   -> First occurrence, adding to Map (total:', baseToImage.size, ')');
-        } else {
-          // Keep one with larger width
-          const existing = baseToImage.get(base);
-          const imgWidth = img.width || 0;
-          const existingWidth = existing.width || 0;
-          console.log('[EDITDOG]   -> Duplicate base found. Current width:', imgWidth, 'Existing width:', existingWidth);
-          
-          if (imgWidth > existingWidth) {
-            baseToImage.set(base, img);
-            console.log('[EDITDOG]   -> Replacing with larger width:', imgWidth, '>', existingWidth);
-          } else {
-            console.log('[EDITDOG]   -> Skipping, same or smaller width:', imgWidth, '<=', existingWidth);
-          }
-        }
-      });
-      
-      // Second pass: check for duplicates using similarity matching
-      const uniqueList = Array.from(baseToImage.values());
-      const finalUnique: any[] = [];
-      const usedBases = new Set<string>();
-      
-      uniqueList.forEach((img, idx) => {
-        const currentBase = getImageBase(img.url);
-        console.log('[EDITDOG] Second pass - checking image', idx, 'with base:', currentBase);
-        
-        // Check if this base or any similar base has been used
-        let isDuplicate = false;
-        let matchingBase = '';
-        
-        Array.from(usedBases).forEach(usedBase => {
-          if (areLikelyDuplicates(currentBase, usedBase)) {
-            isDuplicate = true;
-            matchingBase = usedBase;
-            console.log('[EDITDOG]   -> Duplicate found via similarity! Current:', currentBase, 'matches existing:', usedBase);
-          }
-        });
-        
-        if (!isDuplicate) {
-          usedBases.add(currentBase);
-          finalUnique.push(img);
-          console.log('[EDITDOG]   -> Adding unique image (total:', finalUnique.length, ')');
-        } else {
-          console.log('[EDITDOG]   -> Skipping duplicate (similar to base:', matchingBase, ')');
-        }
-      });
-      
-      console.log('[EDITDOG] === DEDUPLICATION SUMMARY ===');
-      console.log('[EDITDOG] Total images:', dog.images.length);
-      console.log('[EDITDOG] Unique images:', finalUnique.length);
-      console.log('[EDITDOG] All bases:', allBases);
-      console.log('[EDITDOG] Unique bases:', finalUnique.map(img => getImageBase(img.url)));
-      finalUnique.forEach((img, idx) => {
-        console.log('[EDITDOG] Unique image', idx, 'url:', getImageUrl(img.url), 'base:', getImageBase(img.url), 'width:', img.width);
-      });
-      
-      setUniqueImages(finalUnique);
-      // Set existingImages for API calls (keep all variants for server to delete properly)
-      setExistingImages(dog.images ? [...dog.images] : []);
+      // Simply use all images without deduplication
+      // The server will handle proper image management
+      const allImages = dog.images.filter((img: any) => img && img.url);
+      console.log('[EDITDOG] Setting', allImages.length, 'images');
+      setUniqueImages(allImages);
+      setExistingImages([...dog.images]);
     } else {
       console.log('[EDITDOG] No images, clearing arrays');
       setUniqueImages([]);

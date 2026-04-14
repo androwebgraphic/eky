@@ -165,9 +165,43 @@ const sendMessage = async (req, res) => {
     const msg = await ChatMessage.create({ conversationId, sender, recipient, message });
     await ChatConversation.findByIdAndUpdate(conversationId, { updatedAt: Date.now() });
     
-    // Emit to recipient if io is available
+    // Emit to both sender and recipient if io is available
     if (io && typeof io.to === 'function') {
-      io.to(recipient).emit('receiveMessage', { conversationId, sender, message, sentAt: msg.sentAt });
+      console.log('[SERVER] Emitting message to both sender and recipient');
+      console.log('[SERVER] conversationId:', conversationId);
+      console.log('[SERVER] sender:', sender);
+      console.log('[SERVER] recipient:', recipient);
+      console.log('[SERVER] message:', message);
+      
+      // Check if rooms exist and have members
+      const senderRoom = io.sockets.adapter.rooms.get(String(sender));
+      const recipientRoom = io.sockets.adapter.rooms.get(String(recipient));
+      
+      console.log('[SERVER] Sender room members:', senderRoom ? Array.from(senderRoom).length : 0);
+      console.log('[SERVER] Recipient room members:', recipientRoom ? Array.from(recipientRoom).length : 0);
+      
+      // Create complete message object for socket emission
+      const socketMessage = {
+        _id: msg._id,
+        conversationId: conversationId,
+        sender: sender,
+        recipient: recipient,
+        message: message,
+        sentAt: msg.sentAt,
+        messageType: 'text'
+      };
+      
+      // Emit to recipient
+      console.log('[SERVER] Emitting to recipient room:', String(recipient));
+      io.to(recipient).emit('receiveMessage', socketMessage);
+      
+      // Also emit to sender so they get confirmation via socket
+      console.log('[SERVER] Emitting to sender room:', String(sender));
+      io.to(sender).emit('receiveMessage', socketMessage);
+      
+      console.log('[SERVER] Message emitted successfully');
+    } else {
+      console.log('[SERVER] io is not available or io.to is not a function');
     }
     
     res.json(msg);

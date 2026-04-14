@@ -237,19 +237,12 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
         console.error('[SEND MESSAGE] Error response:', error);
         return;
       }
-      setMessages(prev => [
-        ...prev,
-        {
-          _id: Math.random().toString(36).substr(2, 9),
-          sender: user._id,
-          recipient,
-          message: input,
-          sentAt: new Date().toISOString(),
-          messageType: 'text',
-          dogId: adoptionDogId || undefined,
-          isOwner: adoptionIsOwner
-        }
-      ]);
+      // Message sent successfully - get the real message from server response
+      const savedMessage = await res.json();
+      console.log('[SEND MESSAGE] Message saved successfully:', savedMessage);
+      
+      // Add the server-returned message to state (has real MongoDB _id)
+      setMessages(prev => [...prev, savedMessage]);
       setInput('');
     } catch (err) {
       console.error('[SEND MESSAGE] Error sending message:', err);
@@ -391,7 +384,8 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
   useEffect(() => {
     if (!selectedConvo && onlineUsers.length > 0 && user?._id && !adoptionConvoUserId) {
       const firstUser = onlineUsers[0];
-      setSelectedConvo({ _id: firstUser._id, participants: [user._id, firstUser._id] });
+      console.log('[AUTO SELECT] Auto-starting conversation with first online user:', firstUser._id);
+      startConversation(firstUser._id);
     }
   }, [selectedConvo, onlineUsers, user?._id, adoptionConvoUserId]);
 
@@ -582,6 +576,12 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
   };
 
   const userIdRef = useRef<string | null>(null);
+  const selectedConvoRef = useRef<Conversation | null>(null);
+  
+  // Update ref when selectedConvo changes
+  useEffect(() => {
+    selectedConvoRef.current = selectedConvo;
+  }, [selectedConvo]);
   
   useEffect(() => {
     const userId = user?._id;
@@ -611,16 +611,40 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     
     socketRef.current.on('connect', () => {
       console.log('[SOCKET] Connected successfully, joining as user:', userId);
+      console.log('[SOCKET] Socket ID:', socketRef.current?.id);
+      console.log('[SOCKET] Socket connected:', socketRef.current?.connected);
+      
+      // Join user room
       socketRef.current?.emit('join', userId);
+      
+      // Request online users
       socketRef.current?.emit('getOnlineUsers');
+      
+      // Verify room membership after a short delay
+      setTimeout(() => {
+        console.log('[SOCKET] Verifying connection status...');
+        console.log('[SOCKET] Socket connected:', socketRef.current?.connected);
+        console.log('[SOCKET] Socket ID:', socketRef.current?.id);
+        
+        // Send a test event to verify socket is working
+        socketRef.current?.emit('testConnection', { userId, timestamp: new Date().toISOString() });
+      }, 1000);
+      
+      // Listen for test response
+      socketRef.current.on('testConnectionResponse', (data) => {
+        console.log('[SOCKET] Test connection response received:', data);
+      });
     });
     
     socketRef.current.on('connect_error', (err) => {
       console.error('[SOCKET] Connection error:', err.message, err);
+      console.error('[SOCKET] Full error details:', JSON.stringify(err, null, 2));
+      console.error('[SOCKET] Connection URL:', apiUrl);
     });
     
     socketRef.current.on('disconnect', (reason) => {
       console.log('[SOCKET] Disconnected:', reason);
+      console.log('[SOCKET] Was connected:', socketRef.current?.connected);
     });
     
     socketRef.current.on('onlineUsers', (users) => {
@@ -690,6 +714,14 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
     
     socketRef.current.on('receiveMessage', (msg) => {
       console.log('[RECEIVE MESSAGE] Raw message received:', msg);
+      console.log('[RECEIVE MESSAGE] Message conversationId:', msg.conversationId);
+      console.log('[RECEIVE MESSAGE] Message sender:', msg.sender);
+      console.log('[RECEIVE MESSAGE] Message recipient:', msg.recipient);
+      console.log('[RECEIVE MESSAGE] Current user ID:', userId);
+      
+      // Use ref to get current selected conversation (not stale closure value)
+      const currentConvo = selectedConvoRef.current;
+      console.log('[RECEIVE MESSAGE] Current selected conversation:', currentConvo?._id);
       
       const adoptionSystemKeywords = ['confirmed', 'completed', 'closed', 'canceled', 'cancelled'];
       const isAdoptionSystemMsg = (msg.messageType === 'adoption' || msg.messageType === 'adoption_cancelled') && msg.dogId && msg.message && adoptionSystemKeywords.some(k => msg.message.toLowerCase().includes(k));
@@ -698,30 +730,35 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       const isSystemWarning = msg.messageType === 'system_warning';
       if (isSystemWarning) {
         console.log('[RECEIVE MESSAGE] System warning received:', msg.message);
-        // Add warning message to chat
-        setMessages(prev => [...prev, {
-          _id: Math.random().toString(36).substr(2, 9),
-          sender: null,
-          recipient: msg.recipient || user._id,
-          message: msg.message,
-          sentAt: msg.sentAt || new Date().toISOString(),
-          messageType: 'system_warning'
-        }]);
+        // Add warning message to chat if it belongs to current conversation
+        if (currentConvo && msg.conversationId === currentConvo._id) {
+          setMessages(prev => [...prev, {
+            _id: Math.random().toString(36).substr(2, 9),
+            sender: null,
+            recipient: msg.recipient || userId,
+            message: msg.message,
+            sentAt: msg.sentAt || new Date().toISOString(),
+            messageType: 'system_warning'
+          }]);
+        }
         // Show notification
         setNotification(msg.message);
         return;
       }
       
       if (isAdoptionSystemMsg) {
-        setMessages(prev => [...prev, {
-          _id: Math.random().toString(36).substr(2, 9),
-          sender: null,
-          recipient: null,
-          message: msg.message,
-          sentAt: new Date().toISOString(),
-          messageType: 'system',
-          dogId: msg.dogId
-        }]);
+        // Add adoption system message to current conversation
+        if (currentConvo && msg.conversationId === currentConvo._id) {
+          setMessages(prev => [...prev, {
+            _id: Math.random().toString(36).substr(2, 9),
+            sender: null,
+            recipient: null,
+            message: msg.message,
+            sentAt: new Date().toISOString(),
+            messageType: 'system',
+            dogId: msg.dogId
+          }]);
+        }
         setNotification(msg.message);
         fetch(`${getApiUrl()}/api/dogs/${msg.dogId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -750,10 +787,17 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
           })
           .catch(err => console.error('[RECEIVE MESSAGE] Error:', err));
       } else {
-        setMessages(prev => [...prev, msg]);
-        if (msg.messageType === 'adoption' && msg.dogId) {
-          setAdoptionDogId(msg.dogId);
-          setAdoptionIsOwner(!!msg.isOwner);
+        // Only add message to state if it belongs to the currently selected conversation
+        if (currentConvo && msg.conversationId === currentConvo._id) {
+          console.log('[RECEIVE MESSAGE] Adding message to state:', msg);
+          setMessages(prev => [...prev, msg]);
+          if (msg.messageType === 'adoption' && msg.dogId) {
+            setAdoptionDogId(msg.dogId);
+            setAdoptionIsOwner(!!msg.isOwner);
+          }
+        } else {
+          console.log('[RECEIVE MESSAGE] Message not for current conversation, skipping');
+          console.log('[RECEIVE MESSAGE] Message conversationId:', msg.conversationId, '!= Current conversationId:', currentConvo?._id);
         }
       }
     });
@@ -854,6 +898,102 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       });
   }, [selectedConvo, token, user._id]);
 
+  // Fast poller: Check current conversation every 1 second for instant updates
+  useEffect(() => {
+    if (!selectedConvo || !token) {
+      return;
+    }
+    
+    // Use a ref to persist lastMessageCount across effect re-runs
+    const lastMessageCountRef = { current: messages.length };
+    console.log('[FAST POLL] Initialized with', lastMessageCountRef.current, 'messages');
+    
+    // Poll for new messages every 1 second for near-real-time experience
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`${getApiUrl()}/api/chat/messages/${selectedConvo._id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          const fetchedMessages = await res.json();
+          
+          // If total message count increased, force refresh entire message list
+          if (fetchedMessages.length > lastMessageCountRef.current) {
+            console.log('[FAST POLL] Message count changed from', lastMessageCountRef.current, 'to', fetchedMessages.length);
+            lastMessageCountRef.current = fetchedMessages.length;
+            
+            // Force refresh by setting all messages
+            setMessages(fetchedMessages);
+            console.log('[FAST POLL] Updated messages state with', fetchedMessages.length, 'messages');
+          }
+        }
+      } catch (err) {
+        console.error('[FAST POLL] Error polling messages:', err);
+      }
+    }, 1000); // Poll every 1 second (near real-time)
+    
+    return () => clearInterval(pollInterval);
+  }, [selectedConvo, token]); // Remove messages.length from dependency array
+  
+  // Global poller: Check all conversations for new messages every 3 seconds
+  useEffect(() => {
+    if (!token || !user?._id) {
+      return;
+    }
+    
+    const globalPollInterval = setInterval(async () => {
+      try {
+        // Get all conversations for current user
+        const apiUrl = getApiUrl();
+        const response = await fetch(`${apiUrl}/api/chat/conversations/${user._id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const conversations = await response.json();
+          console.log('[GLOBAL POLL] Checking', conversations.length, 'conversations');
+          
+          // For each conversation, fetch latest messages
+          for (const convo of conversations) {
+            try {
+              const msgRes = await fetch(`${apiUrl}/api/chat/messages/${convo._id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              
+              if (msgRes.ok) {
+                const fetchedMessages = await msgRes.json();
+                
+                // If this is currently selected conversation, update messages state
+                if (selectedConvo && convo._id === selectedConvo._id) {
+                  setMessages(prev => {
+                    const currentMessageIds = new Set(prev.map(m => m._id));
+                    const newMessages = fetchedMessages.filter(m => !currentMessageIds.has(m._id));
+                    
+                    if (newMessages.length > 0) {
+                      console.log('[GLOBAL POLL] Found', newMessages.length, 'new messages in selected conversation');
+                      return [...prev, ...newMessages];
+                    }
+                    return prev;
+                  });
+                } else {
+                  // For non-selected conversations, just log that we checked
+                  console.log('[GLOBAL POLL] Checked conversation', convo._id, '-', fetchedMessages.length, 'messages');
+                }
+              }
+            } catch (err) {
+              console.error('[GLOBAL POLL] Error fetching messages for conversation', convo._id, ':', err);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[GLOBAL POLL] Error fetching conversations:', err);
+      }
+    }, 3000); // Poll every 3 seconds for all conversations
+    
+    return () => clearInterval(globalPollInterval);
+  }, [token, user?._id, selectedConvo]);
+  
   // Poll dog status when we have a pending adoption
   useEffect(() => {
     if (!adoptionDogId || !token) {
@@ -944,6 +1084,8 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       return;
     }
     
+    console.log('[START CONVERSATION] Starting conversation with user:', otherUserId);
+    
     let convo;
     try {
       const res = await fetch(`${getApiUrl()}/api/chat/conversation`, {
@@ -954,13 +1096,25 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
         },
         body: JSON.stringify({ userId: user._id, otherUserId })
       });
+      
+      if (!res.ok) {
+        console.error('[START CONVERSATION] Failed to create/fetch conversation:', res.status, res.statusText);
+        return;
+      }
+      
       convo = await res.json();
-    } catch {
-      convo = null;
+      console.log('[START CONVERSATION] Received conversation:', convo);
+    } catch (err) {
+      console.error('[START CONVERSATION] Error fetching conversation:', err);
+      return;
     }
+    
     if (!convo || !convo._id || !convo.participants) {
-      convo = { _id: otherUserId, participants: [user._id, otherUserId] };
+      console.error('[START CONVERSATION] Invalid conversation data received:', convo);
+      return;
     }
+    
+    console.log('[START CONVERSATION] Setting selected conversation:', convo._id);
     setSelectedConvo(convo);
     
     try {

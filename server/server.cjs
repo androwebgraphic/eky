@@ -320,8 +320,16 @@ io.on('connection', (socket) => {
   
   // Join user room and register online user
   socket.on('join', async (userId) => {
-    console.log('[Socket.IO] join event for userId:', userId);
-    socket.join(userId);
+    console.log('[Socket.IO] join event for userId:', userId, 'socket.id:', socket.id);
+    console.log('[Socket.IO] Socket rooms before join:', socket.rooms);
+    
+    // Ensure userId is a string for consistent room naming
+    const roomName = String(userId);
+    socket.join(roomName);
+    
+    console.log('[Socket.IO] Socket rooms after join:', socket.rooms);
+    console.log('[Socket.IO] Joined room:', roomName);
+    
     try {
       // Fetch userName from DB for display
       const userDoc = await User.findById(userId).select('_id username name email profilePicture').lean();
@@ -336,6 +344,10 @@ io.on('connection', (socket) => {
         // Emit online users
         io.emit('onlineUsers', Array.from(onlineUsers.values()));
         io.emit('userOnline', { _id: userId, userName, profilePicture });
+        
+        // Verify room membership
+        const roomMembers = io.sockets.adapter.rooms.get(roomName);
+        console.log('[Socket.IO] Room members for', roomName, ':', roomMembers ? Array.from(roomMembers).length : 0, 'sockets');
       } else {
         console.log('[Socket.IO] No user found for userId:', userId);
       }

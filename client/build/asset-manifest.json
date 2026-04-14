@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "/static/css/main.95718de0.css",
-    "main.js": "/static/js/main.8ce2635b.js",
+    "main.css": "/static/css/main.095def62.css",
+    "main.js": "/static/js/main.0f983102.js",
     "static/media/sharedog-icon.svg": "/static/media/sharedog-icon.384fb38aca278ca46039.svg",
     "static/media/sharedog-icon.eot": "/static/media/sharedog-icon.193da4499af19b756b8e.eot",
     "static/media/sharedog-icon.woff": "/static/media/sharedog-icon.005ebb98fbe0f6a32346.woff",
     "static/media/sharedog-icon.ttf": "/static/media/sharedog-icon.e401d965c60477aadf20.ttf",
     "index.html": "/index.html",
     "static/media/chat-icon.svg": "/static/media/chat-icon.25f4fcefd31d221d69a4.svg",
-    "main.95718de0.css.map": "/static/css/main.95718de0.css.map",
-    "main.8ce2635b.js.map": "/static/js/main.8ce2635b.js.map"
+    "main.095def62.css.map": "/static/css/main.095def62.css.map",
+    "main.0f983102.js.map": "/static/js/main.0f983102.js.map"
   },
   "entrypoints": [
-    "static/css/main.95718de0.css",
-    "static/js/main.8ce2635b.js"
+    "static/css/main.095def62.css",
+    "static/js/main.0f983102.js"
   ]
 }

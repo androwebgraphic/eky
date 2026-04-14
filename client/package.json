@@ -36,7 +36,7 @@
     "test": "react-scripts test",
     "stop": "pkill -f react-scripts || true",
     "eject": "react-scripts eject",
-    "postbuild": "cp public/_redirects build/_redirects"
+    "postbuild": "cp public/_redirects build/_redirects && node scripts/fix-build-html.js"
   },
   "eslintConfig": {
     "extends": [

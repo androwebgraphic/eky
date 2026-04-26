@@ -1,103 +1,96 @@
 /**
  * Word Filter System for Chat Messages
- * Blocks messages containing dog sale/trade/exchange related words
+ * Blocks messages containing dog sale/trade/exchange related phrases
  * Supports English, Croatian, German, and Hungarian
+ * 
+ * IMPORTANT: Only include specific multi-word phrases that clearly indicate
+ * dog selling/trading. Single common words (offer, deal, cost, how many, etc.)
+ * cause too many false positives in normal conversation.
  */
 
 const wordLists = {
-  // English banned words - Comprehensive sale/trade/exchange phrases
+  // English banned phrases - ONLY specific sale/trade/exchange phrases
   en: [
-    'sale', 'sell', 'selling', 'sold', 'seller',
-    'buy', 'buying', 'bought', 'buyer',
-    'purchase', 'purchasing', 'purchased',
-    'trade', 'trading', 'trader',
-    'exchange', 'exchanging',
-    'swap', 'swapping',
-    'money', 'cash', 'currency',
-    'price', 'pricing', 'priced', 'prices',
-    'cost', 'costs', 'costing',
-    'payment', 'pay', 'paying', 'paid',
+    // Currency symbols and payment methods (clear commercial intent)
     'paypal', 'venmo', 'bank transfer',
-    'eur', 'euro', '€', 'dollars', '$', 'usd', 'gbp', 'pounds', 'forint', 'ft',
-    'offer', 'offers', 'offering',
-    'deal', 'deals', 'dealing',
-    'transaction', 'transactions',
-    'commerce', 'commercial',
-    'market', 'marketing',
-    'auction', 'auctioning',
-    'rent', 'renting', 'rental',
+    
+    // Specific dog sale phrases
     'for sale', 'for sale!',
     'selling dog', 'selling dogs', 'sell my dog', 'sell my dogs',
-    'how much', 'how much?', 'how much is', 'how much are',
-    'buy dog', 'buy dogs', 'buy a dog', 'buy dogs',
+    'buy dog', 'buy dogs', 'buy a dog',
     'purchase dog', 'purchase dogs', 'buying dog', 'buying dogs',
-    'trade dog', 'trade dogs', 'trade a dog', 'trade dog',
-    'swap dog', 'swap dogs', 'swap a dog', 'swap dog',
-    'exchange dog', 'exchange dogs', 'exchange a dog', 'exchange dog',
+    'trade dog', 'trade dogs', 'trade a dog',
+    'swap dog', 'swap dogs', 'swap a dog',
+    'exchange dog', 'exchange dogs', 'exchange a dog',
     'price of dog', 'price of dogs', 'price for dog', 'price for dogs',
     'cost of dog', 'cost of dogs', 'cost for dog', 'cost for dogs',
     'dog for sale', 'dogs for sale', 'dog on sale', 'dogs on sale',
     'puppy for sale', 'puppies for sale', 'pup for sale', 'pups for sale',
     'sell for', 'sold for', 'buy for', 'bought for',
-    'looking to buy', 'looking to sell', 'looking to trade',
-    'want to buy', 'want to sell', 'want to trade',
-    'interested in buying', 'interested in selling', 'interested in trading',
+    'looking to buy dog', 'looking to sell dog', 'looking to trade dog',
+    'want to buy dog', 'want to sell dog', 'want to trade dog',
+    'interested in buying dog', 'interested in selling dog', 'interested in trading dog',
     'pay for dog', 'pay for dogs', 'payment for dog',
     'dog price', 'dog prices', 'dog cost', 'dog costs',
-    'how many', 'how many?', 'how much money',
+    'how much money',
     'selling this dog', 'selling these dogs',
     'buy this dog', 'buy these dogs',
     'trade this dog', 'trade these dogs',
     'exchange this dog', 'exchange these dogs',
-    'selling my dog', 'selling my dogs', 'sell my dog', 'sell my dogs',
+    'selling my dog', 'selling my dogs',
     'buy my dog', 'buy my dogs',
     'trade my dog', 'trade my dogs',
     'exchange my dog', 'exchange my dogs',
     'dog business', 'dog commerce',
-    'make an offer', 'make offer', 'send offer',
-    'accept offer', 'accepting offers',
-    'negotiate', 'negotiating',
-    'bargain', 'bargaining',
-    'discount', 'discounts',
+    'make an offer for dog', 'make offer for dog', 'send offer for dog',
+    'accept offer for dog', 'accepting offers for dog',
     'free to good home', 'free dog', 'free dogs',
     'rehoming fee', 'rehome fee', 'rehome for',
-    'adoption fee', 'adoption fees'
+    'adoption fee', 'adoption fees',
+    'dog for trade', 'dogs for trade',
+    'dog for exchange', 'dogs for exchange',
+    'sell puppy', 'sell puppies', 'selling puppy', 'selling puppies',
+    'buy puppy', 'buy puppies', 'buying puppy', 'buying puppies',
+    'price for puppy', 'price for puppies',
+    'puppy price', 'puppy prices', 'puppy cost',
+    'how much for dog', 'how much for the dog', 'how much for this dog',
+    'how much for puppy', 'how much for the puppy',
+    'willing to sell', 'willing to buy', 'willing to trade',
+    'let me buy', 'let me sell', 'let me trade',
+    'i want to sell', 'i want to buy', 'i want to trade',
+    'i am selling', 'i am buying', 'i am trading',
+    'sell it for', 'sell him for', 'sell her for',
+    'buy it for', 'buy him for', 'buy her for',
+    'how much are you selling', 'how much are you asking',
+    'what is your price', 'what is the price',
+    ' negotiable price', 'price is negotiable',
+    'cash for dog', 'cash for dogs', 'cash for puppy',
+    'pay cash for', 'pay with cash',
+    'dog for cash', 'dogs for cash', 'puppy for cash',
   ],
   
-  // Croatian banned words - Comprehensive sale/trade/exchange phrases
+  // Croatian banned phrases - ONLY specific sale/trade/exchange phrases
   hr: [
-    'prodaja', 'prodajem', 'prodajna', 'prodavati', 'prodano',
-    'kupim', 'kupiti', 'kupnja', 'kupovati', 'kupljen', 'kupujem',
-    'trgovina', 'trgovim', 'trgovati', 'trgovac',
-    'razmjena', 'razmijeniti', 'razmjena', 'razmjenjivati',
-    'zamjena', 'zamjeniti', 'zamjena', 'mijenjam',
-    'novac', 'novca', 'novce', 'valuta', 'eur', '€', 'kuna', 'kn',
-    'cijena', 'cijenu', 'cijene', 'cijenom',
-    'plaćanje', 'platiti', 'plaćam', 'plaćeno',
-    'gotovina', 'gotovinski',
-    'ponuda', 'ponudu', 'ponude', 'ponuđen',
-    'tražim', 'tražiti',
-    'posao', 'poslovi', 'poslovanje',
-    'transakcija', 'transakcije',
-    'tržište', 'tržišna',
-    'aukcija', 'aukcijska',
-    'najam', 'najmiti', 'najmovati',
+    // Currency and payment methods
+    'paypal',
+    
+    // Specific dog sale phrases
     'na prodaju', 'na prodaju!', 'u prodaji',
     'prodajem psa', 'prodajem pse', 'prodajem svog psa',
     'prodaja psa', 'prodaja pasa', 'prodaja mojih pasa',
-    'koliko', 'koliko?', 'koliko košta', 'koliko koštaju',
-    'kupiti psa', 'kupim psa', 'kupiti psa', 'kupujem psa', 'kupujem pse',
+    'koliko košta pas', 'koliko koštaju psi', 'koliko košta pas?',
+    'koliko koštaju psi?',
+    'kupiti psa', 'kupim psa', 'kupujem psa', 'kupujem pse',
     'trgovina psa', 'razmjena psa', 'zamjena psa', 'mijenjam psa', 'mijenjam pse',
     'cijena psa', 'cijena pasa', 'cijena za psa',
     'pas na prodaju', 'psi na prodaju', 'pas u prodaji',
     'štene na prodaju', 'štenad na prodaju', 'štene u prodaji',
     'prodajem za', 'prodato za', 'prodao za',
-    'želim kupiti', 'želim prodati', 'želim razmijeniti',
-    'hoću kupiti', 'hoću prodati', 'hoću razmijeniti',
-    'interesiran za kupnju', 'interesiran za prodaju',
+    'želim kupiti psa', 'želim prodati psa', 'želim razmijeniti psa',
+    'hoću kupiti psa', 'hoću prodati psa',
+    'interesiran za kupnju psa', 'interesiran za prodaju psa',
     'platiti za psa', 'platio za psa', 'plaćanje za psa',
-    'cijena psa', 'cijena pasa', 'psa cijena',
-    'košta psa', 'košta pas', 'koliko novca',
+    'košta psa', 'košta pas',
     'prodavam ovog psa', 'prodavam ove pse',
     'kupiti ovog psa', 'kupiti ove pse',
     'razmijeniti ovog psa', 'razmijeniti ove pse',
@@ -105,54 +98,52 @@ const wordLists = {
     'kupiti svog psa', 'kupiti moje pse',
     'razmijeniti svog psa', 'razmijeniti moje pse',
     'psa poslovanje', 'pas trgovina',
-    'napraviti ponudu', 'napraviti ponudu',
-    'prihvaćam ponudu', 'prihvaćam ponude',
-    'pregovarati', 'pregovaranje',
-    'sniziti cijenu', 'popust',
-    'besplatno', 'besplatan pas',
+    'napraviti ponudu za psa', 'prihvaćam ponude za psa',
+    'sniziti cijenu za psa',
+    'besplatan pas', 'besplatno psa',
     'naknada za udomljavanje', 'naknada za preuzimanje',
     'naknada za usvajanje', 'naknada usvajanja',
-    'paypal'
+    'pas za prodaju', 'psi za prodaju',
+    'pas za zamjenu', 'psi za zamjenu',
+    'štene za prodaju', 'štenad za prodaju',
+    'koliko novaca za psa', 'koliko novaca za štene',
+    'prodajem štene', 'prodajem štenad',
+    'kupujem štene', 'kupujem štenad',
+    'cijena šteneta', 'cijena štenadi',
+    'koliko košta štene', 'koliko koštaju štenad',
+    'prodajem ti psa', 'prodajem vam psa',
+    'kupujem od tebe psa', 'kupujem od vas psa',
+    'meni novac za psa', 'meni novac za štene',
+    'novac za psa', 'novac za štene',
+    'gotovina za psa', 'gotovina za štene',
   ],
   
-  // German banned words - Comprehensive sale/trade/exchange phrases
+  // German banned phrases - ONLY specific sale/trade/exchange phrases
   de: [
-    'verkauf', 'verkaufe', 'verkaufen', 'verkauf', 'verkäufer', 'tausche', 'tauschpartner',
-    'kaufen', 'kauf', 'kaufe', 'gekauft', 'käufer',
-    'einkaufen', 'einkauf',
-    'handel', 'handeln', 'händler', 'handeln',
-    'tausch', 'tauschen',
-    'wechsel', 'wechseln', 'austauschen',
-    'geld', 'geldes', 'gelder', 'währung', 'euro', '€', 'dollar', '$', 'usd', 'pfund', 'gbp',
-    'preis', 'preise', 'preisen',
-    'kosten', 'kostet', 'kosten',
-    'bezahlung', 'bezahlen', 'bezahle', 'bezahlt', 'zahlung',
-    'bargeld', 'barzahlung',
-    'angebot', 'angebote', 'anbieten', 'angeboten',
-    'geschäft', 'geschäfte', 'geschäftlich',
-    'transaktion', 'transaktionen',
-    'markt', 'marktplatz', 'marktführer',
-    'auktion', 'auktions', 'auktionieren',
-    'miete', 'mieten', 'vermieten', 'mietvertrag',
-    'kostenlos', 'kostenloser', 'umsonst', 'gratis hund',
+    // Payment methods
+    'paypal',
+    
+    // Specific dog sale phrases
     'zu verkaufen', 'zu verkaufen!', 'zum verkauf',
-    'hund verkaufen', 'hunde verkaufen', 'hunde verkaufen',
-    'wie viel', 'wie viel?', 'wie viel kostet', 'wie viel kosten',
-    'hund kaufen', 'hunde kaufen', 'einen hund kaufen', 'hunde kaufen',
+    'hund verkaufen', 'hunde verkaufen',
+    'wie viel kostet der hund', 'wie viel kosten hunde',
+    'wie viel kostet ein hund',
+    'hund kaufen', 'hunde kaufen', 'einen hund kaufen',
     'hund einkaufen', 'hunde einkaufen',
-    'hund tauschen', 'hunde tauschen', 'hund tauschen',
+    'hund tauschen', 'hunde tauschen',
     'hund austauschen', 'hunde austauschen',
     'preis für hund', 'preis für hunde', 'hund preis', 'hunde preise',
     'kosten für hund', 'kosten für hunde',
     'hund zu verkaufen', 'hunde zu verkaufen', 'zum verkauf stehende hunde',
     'welpe zu verkaufen', 'welpen zu verkaufen', 'welpe kaufen', 'welpen kaufen',
     'verkaufe für', 'verkauft für', 'kaufe für', 'gekauft für',
-    'möchte kaufen', 'möchte verkaufen', 'möchte tauschen',
-    'will kaufen', 'will verkaufen', 'will tauschen',
-    'interesse an kauf', 'interesse an verkauf', 'interesse an tausch',
+    'möchte hund kaufen', 'möchte hund verkaufen', 'möchte hund tauschen',
+    'möchte hunde kaufen', 'möchte hunde verkaufen',
+    'will hund kaufen', 'will hund verkaufen', 'will hund tauschen',
+    'interesse an hund kauf', 'interesse an hund verkauf', 'interesse an hund tausch',
     'bezahle für hund', 'bezahlt für hund', 'zahlung für hund',
     'hund preis', 'hund preise', 'hund kosten', 'hund kostet',
-    'wie viele', 'wie viele?', 'wie viel geld',
+    'wie viel geld für hund',
     'diesen hund verkaufen', 'diese hunde verkaufen',
     'diesen hund kaufen', 'diese hunde kaufen',
     'diesen hund tauschen', 'diese hunde tauschen',
@@ -161,64 +152,59 @@ const wordLists = {
     'meinen hund kaufen', 'meine hunde kaufen',
     'meinen hund tauschen', 'meine hunde tauschen',
     'hund geschäft', 'hunde handel',
-    'angebot machen', 'angebot machen',
-    'angebot annehmen', 'angebote annehmen',
-    'verhandeln', 'verhandlung',
-    'feilschen', 'feilschen',
-    'rabatt', 'rabatte', 'nachlass',
-    'umgangsgebühr', 'abgabepreis', 'abgabepreise',
-    'vermittlungsgebühr', 'vermittlungsgebühren',
-    'paypal'
+    'angebot für hund', 'angebote für hunde',
+    'rabatt für hund',
+    'kostenloser hund', 'kostenlose hund', 'umsonst hund', 'gratis hund',
+    'umgangsgebühr für hund', 'abgabepreis für hund', 'abgabepreise für hunde',
+    'vermittlungsgebühr für hund',
+    'hund für bargeld', 'hunde für bargeld',
+    'welpe preis', 'welpen preise', 'welpe kosten',
+    'wie viel kostet ein welpe', 'wie viel kosten welpen',
+    'ich verkaufe hund', 'ich verkaufe hunde',
+    'ich kaufe hund', 'ich kaufe hunde',
+    'barzahlung für hund',
   ],
   
-  // Hungarian banned words - Comprehensive sale/trade/exchange phrases
+  // Hungarian banned phrases - ONLY specific sale/trade/exchange phrases
   hu: [
-    'eladás', 'eladom', 'eladása', 'eladni', 'eladtam', 'eladó',
-    'veszek', 'venni', 'vétel', 'vásárol', 'vásárolni', 'megvettem', 'vásárló',
-    'kereskedelem', 'kereskedem', 'kereskedni', 'kereskedő', 'keresek',
-    'csere', 'cserélni', 'cserélem', 'csere', 'cserél',
-    'pénz', 'pénze', 'pénzek', 'valuta', 'eur', 'euro', '€', 'dollár', '$', 'usd', 'font', 'gbp', 'ft', 'forint',
-    'ár', 'ára', 'árai', 'árban', 'mi az ára', 'cserét',
-    'fizetés', 'fizetni', 'fizetek', 'fizettem', 'kifizetés',
-    'készpénz', 'készpénzes',
-    'ajánlat', 'ajánlatot', 'ajánlatok', 'ajánl',
-    'üzlet', 'üzletek', 'üzleti',
-    'tranzakció', 'tranzakciók',
-    'piac', 'piaci', 'piacter',
-    'aukció', 'aukciós', 'aukción',
-    'bérlet', 'bérelni', 'bérlés',
+    // Payment methods
+    'paypal',
+    
+    // Specific dog sale phrases
     'eladásra', 'eladásra!', 'eladóban',
     'eladom a kutyát', 'eladom a kutyákat', 'eladom a kutyámat',
     'kutyák eladása', 'kutya eladása', 'kutyámat eladom',
-    'mennyit', 'mennyit?', 'mennyibe kerül', 'mennyibe kerülnek',
+    'mennyibe kerül a kutya', 'mennyibe kerülnek a kutyák',
     'kutyát venni', 'kutyát veszek', 'kutyát vásárolni',
     'kutyát cserélni', 'kutyákat cserélni', 'kutyát cserél',
     'kutya ára', 'kutyák ára', 'kutya árak', 'kutyák árai',
     'kutya költsége', 'kutyák költsége',
     'eladásra kutya', 'eladásra kutyák', 'eladásban lévő kutya',
     'kölyök eladásra', 'kölykök eladásra', 'kölyök eladása',
-    'eladom forintért', 'eladtam forintért', 'eladóért forint',
-    'szeretnék venni', 'szeretnék eladni', 'szeretnék cserélni',
-    'akarok venni', 'akarok eladni', 'akarok cserélni',
-    'érdekel a vásárlás', 'érdekel az eladás', 'érdekel a csere',
+    'eladom forintért', 'eladtam forintért',
+    'szeretnék venni kutyát', 'szeretnék eladni kutyát', 'szeretnék cserélni kutyát',
+    'akarok venni kutyát', 'akarok eladni kutyát', 'akarok cserélni kutyát',
+    'érdekel a kutya vásárlás', 'érdekel a kutya eladás', 'érdekel a kutya csere',
     'fizetek a kutyáért', 'fizettem a kutyáért', 'fizetés a kutyáért',
-    'kutya ára', 'kutyák ára', 'kutyáért fizet',
-    'kutya mennyi', 'kutyák mennyi', 'mennyi pénz',
-    ' ezt a kutyát eladom', 'ezeket a kutyákat eladom',
-    ' ezt a kutyát veszem', 'ezeket a kutyákat veszem',
-    ' ezt a kutyát cserélem', 'ezeket a kutyákat cserélem',
+    'kutyáért fizet',
+    'mennyi pénz a kutyáért',
+    'ezt a kutyát eladom', 'ezeket a kutyákat eladom',
+    'ezt a kutyát veszem', 'ezeket a kutyákat veszem',
+    'ezt a kutyát cserélem', 'ezeket a kutyákat cserélem',
     'a kutyámat eladom', 'a kutyáimat eladom',
     'a kutyámat veszem', 'a kutyáimat veszem',
     'a kutyámat cserélem', 'a kutyáimat cserélem',
     'kutya üzlet', 'kutya kereskedelem',
-    'ajánlatot teszek', 'ajánlatot tenni',
-    'ajánlatot fogadok', 'ajánlatot fogadni',
-    'alkudni', 'alkudás',
-    'kedvezmény', 'kedvezmények', 'árengedmény',
-    'ingyen', 'ingyenes kutya', ' ingyen elvihető',
-    'átvételi díj', 'hozájárulási díj',
-    'adoptálási díj', 'adoptálási díjak',
-    'paypal'
+    'ajánlatot teszek a kutyáért', 'ajánlatot a kutyáért',
+    'ajánlatot fogadok a kutyáért',
+    'ingyenes kutya', 'ingyen elvihető kutya', 'ingyen kutya',
+    'átvételi díj kutyáért', 'hozájárulási díj kutyáért',
+    'adoptálási díj kutyáért', 'adoptálási díjak kutyáért',
+    'kutya eladó', 'kutyák eladók',
+    'kutyát cserélnék', 'kutyát eladnák', 'kutyát vennék',
+    'kölyök eladó', 'kölyök ár', 'kölyök eladása',
+    'mennyibe kerül a kölyök',
+    'készpénz a kutyáért', 'készpénz a kutyáért',
   ]
 };
 
@@ -234,27 +220,25 @@ function checkMessage(message, language = 'en') {
   }
   
   const lowerMessage = message.toLowerCase();
-  const words = wordLists[language] || wordLists.en;
   
-  // Check each banned word/phrase
-  for (const bannedWord of words) {
-    const lowerBannedWord = bannedWord.toLowerCase();
+  // Check all language lists for comprehensive filtering
+  // This prevents users from bypassing by using a different language
+  const allWords = [];
+  for (const lang of Object.keys(wordLists)) {
+    allWords.push(...wordLists[lang]);
+  }
+  
+  // Also add the specific language list first for priority matching
+  const primaryWords = wordLists[language] || wordLists.en;
+  const wordsToCheck = [...new Set([...primaryWords, ...allWords])];
+  
+  // Check each banned phrase
+  for (const bannedPhrase of wordsToCheck) {
+    const lowerBannedPhrase = bannedPhrase.toLowerCase();
     
-    // Check for exact match (case-insensitive)
-    if (lowerMessage.includes(lowerBannedWord)) {
-      // Additional check for word boundaries to avoid false positives
-      // For single words, check word boundaries
-      if (!lowerBannedWord.includes(' ')) {
-        const regex = new RegExp(`\\b${escapeRegex(lowerBannedWord)}\\b`, 'i');
-        if (regex.test(lowerMessage)) {
-          return { isProhibited: true, matchedWord: bannedWord };
-        }
-        // Continue to next word if single word doesn't match word boundaries
-        continue;
-      } else {
-        // For phrases, just check inclusion
-        return { isProhibited: true, matchedWord: bannedWord };
-      }
+    // All entries are now phrases - check for inclusion
+    if (lowerMessage.includes(lowerBannedPhrase)) {
+      return { isProhibited: true, matchedWord: bannedPhrase };
     }
   }
   

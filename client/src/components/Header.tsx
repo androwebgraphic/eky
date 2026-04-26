@@ -7,6 +7,7 @@ import LanguageSelector from './LanguageSelector';
 import UserProfileModal from './UserProfileModal';
 import NotificationBell from './NotificationBell';
 import NewDogsModal from './NewDogsModal';
+import '../css/header-desktop-fixes.css';
 
 // Custom Statistics Icon - bar chart matching sharedog-icon style
 const StatisticsIcon: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
@@ -336,13 +337,22 @@ const Header: React.FC = () => {
     <>
       {isAuthenticated ? (
         <>
-        <header className="UserHeader" style={{ display: 'flex', alignItems: 'center', overflow: 'visible !important' }}>
-          <div className="header-content-inner" style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+        <header className="UserHeader" style={{
+          maxWidth: '100vw',
+          width: '100%',
+          overflow: 'visible',
+          boxSizing: 'border-box'
+        }}>
+          <div className="header-content-inner" style={{
+            display: 'flex',
+            alignItems: 'center',
             justifyContent: 'space-between',
+            gap: 0,
+            padding: '0 1rem',
+            maxWidth: '100vw',
+            minWidth: 0,
             width: '100%',
-            height: '50px'
+            boxSizing: 'border-box'
           }}>
             {/* Mobile hamburger menu button */}
             {isMobile && (
@@ -364,17 +374,41 @@ const Header: React.FC = () => {
             
             {/* Desktop navigation */}
             {!isMobile && (
-              <nav className="header-nav-inner">
-                <Link to="/" className="header-nav-link-inner">{t('nav.about')}</Link>
-                <Link to="psi" className="header-nav-link-inner">{t('nav.dogs')}</Link>
-                <Link to="statistika" className="header-nav-link-inner">{t('nav.statistics') || 'Statistics'}</Link>
+              <nav className="header-nav-inner" style={{
+                display: 'flex',
+                gap: '0.25rem',
+                flexShrink: 1,
+                minWidth: 0,
+                overflow: 'visible'
+              }}>
+                <Link to="/" className="header-nav-link-inner" style={{fontSize: '1.4rem', padding: '0.3rem 0.5rem', whiteSpace: 'nowrap'}}>{t('nav.about')}</Link>
+                <Link to="psi" className="header-nav-link-inner" style={{fontSize: '1.4rem', padding: '0.3rem 0.5rem', whiteSpace: 'nowrap'}}>{t('nav.dogs')}</Link>
+                <Link to="statistika" className="header-nav-link-inner" style={{fontSize: '1.4rem', padding: '0.3rem 0.5rem', whiteSpace: 'nowrap'}}>{t('nav.statistics') || 'Statistics'}</Link>
               </nav>
             )}
             
             <div className="header-flex-spacer" />
             {/* Right: Language Selector, Chat, Notifications, and User Info */}
-            <div className="header-right-inner">
-              <div>
+            <div className="header-right-inner" style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px',
+              flexShrink: 0,
+              position: 'relative',
+              zIndex: 10001,
+              overflow: 'visible'
+            }}>
+              <div style={{ 
+                position: 'relative', 
+                zIndex: 10002, 
+                overflow: 'visible',
+                display: 'flex',
+                alignItems: 'center',
+                visibility: 'visible',
+                opacity: 1,
+                width: 'auto',
+                height: 'auto'
+              }}>
                 <LanguageSelector />
               </div>
                 <div className="notification-wrapper">
@@ -558,7 +592,23 @@ const Header: React.FC = () => {
         </>
       ) : (
         <>
-        <header className="header-mobile-container mobile-nav-only">
+        <header className="header-mobile-container mobile-nav-only" style={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          flexWrap: isMobile ? 'wrap' : 'nowrap',
+          alignItems: 'center',
+          justifyContent: isMobile ? 'space-around' : 'space-between',
+          gap: isMobile ? '0.5rem' : '0',
+          height: 'auto',
+          minHeight: '3.5rem',
+          padding: isMobile ? '0.75rem 0.5rem' : '0.5rem 1rem',
+          overflow: 'visible',
+          width: '100%',
+          maxWidth: '100vw',
+          boxSizing: 'border-box',
+          flexShrink: 0,
+          minWidth: 0,
+        }}>
           {/* Mobile navigation - simple icon bar for unauthenticated users */}
           {isMobile && (
             <nav className="mobile-nav-simple">
@@ -591,18 +641,33 @@ const Header: React.FC = () => {
 
           {/* Desktop navigation */}
           {!isMobile && (
-            <nav className="header-nav-desktop">
-              <Link to="/" className="header-nav-link-inner">{t('nav.about')}</Link>
-              <Link to="psi" className="header-nav-link-inner">{t('nav.dogs')}</Link>
-              <Link to="logiranje" className="header-nav-link-inner">{t('nav.login')}</Link>
-              <Link to="registracija" className="header-nav-link-inner">{t('nav.register')}</Link>
-              <Link to="statistika" className="header-nav-link-inner">{t('nav.statistics') || 'Statistics'}</Link>
+            <nav className="header-nav-desktop" style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: '0.25rem',
+              flexShrink: 1,
+              minWidth: 0,
+              overflow: 'visible',
+            }}>
+              <Link to="/" className="header-nav-link-inner" style={{ fontSize: '1.4rem', padding: '0.3rem 0.5rem', whiteSpace: 'nowrap' }}>{t('nav.about')}</Link>
+              <Link to="psi" className="header-nav-link-inner" style={{ fontSize: '1.4rem', padding: '0.3rem 0.5rem', whiteSpace: 'nowrap' }}>{t('nav.dogs')}</Link>
+              <Link to="logiranje" className="header-nav-link-inner" style={{ fontSize: '1.4rem', padding: '0.3rem 0.5rem', whiteSpace: 'nowrap' }}>{t('nav.login')}</Link>
+              <Link to="registracija" className="header-nav-link-inner" style={{ fontSize: '1.4rem', padding: '0.3rem 0.5rem', whiteSpace: 'nowrap' }}>{t('nav.register')}</Link>
+              <Link to="statistika" className="header-nav-link-inner" style={{ fontSize: '1.4rem', padding: '0.3rem 0.5rem', whiteSpace: 'nowrap' }}>{t('nav.statistics') || 'Statistics'}</Link>
             </nav>
           )}
 
-          {/* Desktop language selector - separate from nav */}
+          {/* Desktop language selector - pushed to far right */}
           {!isMobile && (
-            <div className="header-right-desktop">
+            <div className="header-right-desktop" style={{
+              marginLeft: 'auto',
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              position: 'relative',
+              zIndex: 10001,
+            }}>
               <LanguageSelector />
             </div>
           )}

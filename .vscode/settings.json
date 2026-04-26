@@ -1,3 +1,10 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "chat.agent.sandbox.fileSystem.linux": {
+        "denyRead": [],
+        "allowWrite": [
+            "."
+        ],
+        "denyWrite": []
+    }
 }

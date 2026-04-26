@@ -1,13 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
-import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 const LanguageSelector: React.FC = () => {
   const { i18n, t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: string } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+
+  // Calculate dropdown position when opening
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: buttonRect.bottom + 4, // 4px margin below button
+        right: `${window.innerWidth - buttonRect.right}px`, // Align right edge
+      });
+    }
+  }, [isOpen]);
 
   const languages = [
     { code: 'hr', name: 'HR' },
@@ -24,17 +34,6 @@ const LanguageSelector: React.FC = () => {
     localStorage.setItem('i18nextLng', langCode);
     setIsOpen(false);
   };
-
-  // Calculate dropdown position when opened
-  useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + 4,
-        right: window.innerWidth - rect.right,
-      });
-    }
-  }, [isOpen]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -58,10 +57,20 @@ const LanguageSelector: React.FC = () => {
     };
   }, [isOpen]);
 
-  const currentLang = languages.find(l => l.code === i18n.language) || languages[1]; // Default to EN
+  const currentLang = languages.find(l => l.code === i18n.language) || languages[1];
 
   return (
-    <div className="language-selector" style={{ position: 'relative', display: 'inline-block' }}>
+    <div className="language-selector" style={{ 
+      position: 'relative', 
+      display: 'inline-block', 
+      zIndex: 10002,
+      visibility: 'visible',
+      opacity: 1,
+      width: 'auto',
+      height: 'auto',
+      minWidth: 'auto',
+      maxWidth: 'none'
+    }}>
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
@@ -86,13 +95,13 @@ const LanguageSelector: React.FC = () => {
         <span style={{ fontSize: '8px', marginLeft: '2px', opacity: 0.8 }}>▼</span>
       </button>
 
-      {isOpen && ReactDOM.createPortal(
+      {isOpen && dropdownPosition && (
         <div
           ref={dropdownRef}
           style={{
             position: 'fixed',
             top: `${dropdownPosition.top}px`,
-            right: `${dropdownPosition.right}px`,
+            right: dropdownPosition.right,
             backgroundColor: 'white',
             border: '1px solid #ddd',
             borderRadius: '4px',
@@ -129,8 +138,7 @@ const LanguageSelector: React.FC = () => {
               {lang.name}
             </button>
           ))}
-        </div>,
-        document.body
+        </div>
       )}
     </div>
   );

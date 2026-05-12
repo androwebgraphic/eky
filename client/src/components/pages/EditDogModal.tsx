@@ -489,12 +489,10 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
         className="edit-modal-overlay"
         style={{
           position: 'fixed',
-          top: window.innerWidth > 768 ? '0' : '70px',
+          top: window.innerWidth > 768 ? '0' : '50px',
           left: '0',
           right: '0',
-          bottom: window.innerWidth > 768 ? '0' : '70px',
-          width: '100vw',
-          height: window.innerWidth > 768 ? '100vh' : 'calc(100vh - 140px)',
+          bottom: window.innerWidth > 768 ? '0' : '50px',
           backgroundColor: 'rgba(0, 0, 0, 0.7)',
           zIndex: 9999999999999999,
           display: 'flex',
@@ -503,7 +501,9 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
           padding: window.innerWidth > 768 ? '16px' : '0',
           boxSizing: 'border-box',
           pointerEvents: 'auto',
-          overflow: 'hidden',
+          overflowY: window.innerWidth > 768 ? 'hidden' : 'auto',
+          overflowX: 'hidden',
+          WebkitOverflowScrolling: 'touch',
           overscrollBehavior: 'contain'
         }}
         onClick={(e) => {
@@ -522,7 +522,7 @@ function EditDogModal({ dog, onClose, onSave }: EditDogModalProps) {
           width: window.innerWidth > 768 ? '85vw' : 'calc(90vw - 2rem)',
           maxWidth: window.innerWidth > 768 ? '550px' : 'calc(90vw - 2rem)',
           height: 'auto',
-          maxHeight: window.innerWidth > 768 ? '90vh' : 'calc(100vh - 120px)',
+          maxHeight: window.innerWidth > 768 ? '90vh' : 'calc(100vh - 100px)',
           overflowY: 'auto',
           overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch',

@@ -572,33 +572,47 @@ const unsuspendUser = async (req, res) => {
 
 // Permanently delete a user account
 const deleteUserAccount = async (req, res) => {
+	console.log('[DELETE USER ACCOUNT] === START ===');
+	console.log('[DELETE USER ACCOUNT] Request user:', req.user ? { _id: req.user._id, role: req.user.role } : 'NO USER');
+	console.log('[DELETE USER ACCOUNT] Params:', req.params);
 	try {
 		const { id } = req.params;
+		console.log('[DELETE USER ACCOUNT] Target user ID:', id);
+		console.log('[DELETE USER ACCOUNT] Current user ID:', req.user._id.toString());
+		console.log('[DELETE USER ACCOUNT] IDs match?', id === req.user._id.toString());
 		
 		// Prevent deleting yourself
 		if (id === req.user._id.toString()) {
+			console.log('[DELETE USER ACCOUNT] BLOCKED: Cannot delete yourself');
 			return res.status(403).json({ message: "Cannot delete yourself" });
 		}
 		
 		const user = await User.findById(id);
+		console.log('[DELETE USER ACCOUNT] Found user:', user ? { _id: user._id, name: user.name, role: user.role, isDeleted: user.isDeleted } : 'NOT FOUND');
+		
 		if (!user) {
+			console.log('[DELETE USER ACCOUNT] BLOCKED: User not found');
 			return res.status(404).json({ message: "User not found" });
 		}
 		
 		// Prevent deleting other superadmins
 		if (user.role === 'superadmin') {
+			console.log('[DELETE USER ACCOUNT] BLOCKED: Cannot delete superadmin');
 			return res.status(403).json({ message: "Cannot delete another superadmin" });
 		}
 		
 		// Mark as deleted instead of actual deletion to preserve data
 		user.isDeleted = true;
 		user.suspendedUntil = null;
-		await user.save();
+		const savedUser = await user.save();
+		console.log('[DELETE USER ACCOUNT] User saved successfully, isDeleted:', savedUser.isDeleted);
 		
+		console.log('[DELETE USER ACCOUNT] === SUCCESS ===');
 		res.status(200).json({ message: "User account deleted successfully" });
 	} catch (error) {
+		console.log("[DELETE USER ACCOUNT] ERROR:", error.message);
+		console.log("[DELETE USER ACCOUNT] ERROR STACK:", error.stack);
 		res.status(500).json({ message: error.message });
-		console.log("Error in deleteUserAccount: ", error.message);
 	}
 };
 

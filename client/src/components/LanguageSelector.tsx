@@ -1,5 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+
+// Portal container for language dropdown (rendered at body level to escape stacking context)
+const dropdownPortalRoot = typeof document !== 'undefined' 
+  ? document.getElementById('lang-dropdown-portal') || (() => {
+      const root = document.createElement('div');
+      root.id = 'lang-dropdown-portal';
+      root.style.position = 'absolute';
+      root.style.top = '0';
+      root.style.left = '0';
+      root.style.zIndex = '0';
+      root.style.pointerEvents = 'none';
+      document.body.appendChild(root);
+      return root;
+    })()
+  : null;
 
 const LanguageSelector: React.FC = () => {
   const { i18n, t } = useTranslation();
@@ -35,9 +51,9 @@ const LanguageSelector: React.FC = () => {
     setIsOpen(false);
   };
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking/tapping outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (
         dropdownRef.current && 
         !dropdownRef.current.contains(event.target as Node) &&
@@ -50,10 +66,12 @@ const LanguageSelector: React.FC = () => {
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [isOpen]);
 
@@ -95,7 +113,7 @@ const LanguageSelector: React.FC = () => {
         <span style={{ fontSize: '8px', marginLeft: '2px', opacity: 0.8 }}>▼</span>
       </button>
 
-      {isOpen && dropdownPosition && (
+      {isOpen && dropdownPosition && dropdownPortalRoot && createPortal(
         <div
           ref={dropdownRef}
           style={{
@@ -110,6 +128,7 @@ const LanguageSelector: React.FC = () => {
             zIndex: 99999,
             display: 'flex',
             flexDirection: 'column',
+            pointerEvents: 'auto',
           }}
         >
           {languages.map((lang) => (
@@ -138,7 +157,8 @@ const LanguageSelector: React.FC = () => {
               {lang.name}
             </button>
           ))}
-        </div>
+        </div>,
+        dropdownPortalRoot
       )}
     </div>
   );

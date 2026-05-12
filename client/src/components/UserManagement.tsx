@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { getApiUrl } from '../utils/apiUrl';
 import './UserManagement.css';
 
@@ -171,29 +172,49 @@ const UserManagement: React.FC = () => {
   };
 
   const handleDelete = async (userId: string) => {
-    if (!window.confirm('Are you sure you want to permanently delete this account? This action cannot be undone.')) return;
-
+    console.log('[DELETE USER] Starting delete for userId:', userId);
     try {
       const token = localStorage.getItem('token');
       const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/api/users/${userId}/account`, {
+      const url = `${apiUrl}/api/users/${userId}/account`;
+      console.log('[DELETE USER] API URL:', url);
+      console.log('[DELETE USER] Token exists:', !!token);
+      console.log('[DELETE USER] Token preview:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
+
+      const response = await fetch(url, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 
+      console.log('[DELETE USER] Response status:', response.status);
+      console.log('[DELETE USER] Response ok:', response.ok);
+
       if (response.ok) {
-        await fetchUsers();
+        console.log('[DELETE USER] Success - refreshing user list');
         setShowDeleteModal(false);
         setSelectedUser(null);
+        await fetchUsers();
       } else {
-        const data = await response.json();
-        setError(data.message || 'Failed to delete user');
+        let errorMsg = 'Failed to delete user';
+        try {
+          const data = await response.json();
+          console.log('[DELETE USER] Error response data:', data);
+          errorMsg = data.message || errorMsg;
+        } catch (parseErr) {
+          console.error('[DELETE USER] Could not parse error response:', parseErr);
+        }
+        setError(errorMsg);
+        setShowDeleteModal(false);
+        setSelectedUser(null);
       }
     } catch (err) {
+      console.error('[DELETE USER] Network/exception error:', err);
       setError('An error occurred while deleting user');
-      console.error('Error deleting user:', err);
+      setShowDeleteModal(false);
+      setSelectedUser(null);
     }
   };
 
@@ -379,10 +400,10 @@ const UserManagement: React.FC = () => {
         )}
       </div>
 
-      {/* Suspend Modal */}
-      {showSuspendModal && selectedUser && (
-        <div className="modal-overlay" onClick={() => setShowSuspendModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+      {/* Suspend Modal - rendered via Portal to body for correct positioning */}
+      {showSuspendModal && selectedUser && createPortal(
+        <div className="user-mgmt-modal-overlay" onClick={() => setShowSuspendModal(false)}>
+          <div className="user-mgmt-modal-content" onClick={e => e.stopPropagation()}>
             <h2>Suspend User</h2>
             <p>You are about to suspend <strong>{selectedUser.name}</strong> (@{selectedUser.username})</p>
             <div className="modal-form-group">
@@ -413,13 +434,14 @@ const UserManagement: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Delete Modal */}
-      {showDeleteModal && selectedUser && (
-        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+      {/* Delete Modal - rendered via Portal to body for correct positioning */}
+      {showDeleteModal && selectedUser && createPortal(
+        <div className="user-mgmt-modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="user-mgmt-modal-content" onClick={e => e.stopPropagation()}>
             <h2>Delete User Account</h2>
             <p className="warning-text">
               You are about to permanently delete the account of <strong>{selectedUser.name}</strong> (@{selectedUser.username})
@@ -440,7 +462,8 @@ const UserManagement: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

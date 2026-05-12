@@ -68,27 +68,19 @@ interface Conversation {
 }
 
 const getApiUrl = () => {
-  const hostname = window.location.hostname;
-  
-  // Check for localhost or 127.0.0.1 first
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    // Try to use environment variable if it's set and is an IP address
-    if (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim() !== '') {
-      const envUrl = process.env.REACT_APP_API_URL.trim();
-      // If env URL is an IP address (not localhost), use it for localhost development
-      if (/^\d+\.\d+\.\d+\.\d+:\d+$/.test(envUrl)) {
-        console.log('[API URL] Using network IP from env for localhost:', envUrl);
-        return envUrl;
-      }
-    }
-    // Default localhost behavior
-    return `http://${hostname}:3001`;
+  // IMPORTANT: Always use env variable when set to ensure all clients
+  // (desktop, mobile, localhost) connect to the SAME backend server.
+  // This was previously inconsistent - localhost ignored the env URL,
+  // causing desktop and mobile to connect to different backends.
+  if (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim() !== '') {
+    return process.env.REACT_APP_API_URL.trim();
   }
   
-  // For other cases (production, mobile IP access)
-  if (process.env.REACT_APP_API_URL !== undefined && process.env.REACT_APP_API_URL.trim() !== '') {
-    console.log('[API URL] Using env var:', process.env.REACT_APP_API_URL);
-    return process.env.REACT_APP_API_URL;
+  // Fallback: construct URL based on hostname
+  const hostname = window.location.hostname;
+  
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `http://${hostname}:3001`;
   }
   
   if (window.location.protocol === 'https:') {
@@ -400,12 +392,22 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
   }, [adoptionConvoUserId, user?._id]); // eslint-disable-line react-hooks/exhaustive-deps
   
   useEffect(() => {
-    if (!selectedConvo && onlineUsers.length > 0 && user?._id && !adoptionConvoUserId) {
-      const firstUser = onlineUsers[0];
-      console.log('[AUTO SELECT] Auto-starting conversation with first online user:', firstUser._id);
-      startConversation(firstUser._id);
+    if (!selectedConvo && user?._id && !adoptionConvoUserId) {
+      if (onlineUsers.length > 0) {
+        const firstUser = onlineUsers[0];
+        console.log('[AUTO SELECT] Auto-starting conversation with first online user:', firstUser._id);
+        startConversation(firstUser._id);
+      } else if (allConversations.length > 0) {
+        // No online users, but we have conversations - select first conversation
+        const firstConvo = allConversations[0];
+        const otherUserId = firstConvo.participants?.find((id: string) => id !== user._id);
+        if (otherUserId) {
+          console.log('[AUTO SELECT] No online users, auto-starting conversation with offline user:', otherUserId);
+          startConversation(otherUserId);
+        }
+      }
     }
-  }, [selectedConvo, onlineUsers, user?._id, adoptionConvoUserId]);
+  }, [selectedConvo, onlineUsers, allConversations, user?._id, adoptionConvoUserId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
@@ -652,6 +654,15 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
       socketRef.current.on('testConnectionResponse', (data) => {
         console.log('[SOCKET] Test connection response received:', data);
       });
+      
+      // Periodically re-request online users to catch late-joining users
+      const onlineUsersInterval = setInterval(() => {
+        if (socketRef.current?.connected) {
+          socketRef.current.emit('getOnlineUsers');
+        }
+      }, 5000); // Every 5 seconds
+      // Store interval for cleanup
+      (socketRef.current as any)._onlineUsersInterval = onlineUsersInterval;
     });
     
     socketRef.current.on('connect_error', (err) => {
@@ -1555,12 +1566,11 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
           </div>
         )}
         
-        {onlineUsers.length === 0 && allConversations.length === 0 && searchResults.length === 0 && userSearchQuery.length === 0 ? (
-          <div className="chat-users-empty">{t('noConversations') || 'No conversations yet.'}</div>
-        ) : onlineUsers.length > 0 && (
-          <ul className="chat-users-list">
-            {onlineUsers.map(u => {
-              return (
+        {/* Online tab: show online users, or conversations if no online users */}
+        {activeTab === 'online' && searchResults.length === 0 && userSearchQuery.length === 0 && (
+          onlineUsers.length > 0 ? (
+            <ul className="chat-users-list">
+              {onlineUsers.map(u => (
                 <li key={u._id} 
                     className={`chat-user-item ${selectedConvo && selectedConvo.participants.includes(u._id) ? 'selected' : ''}`}
                     onClick={() => startConversation(u._id)}
@@ -1570,12 +1580,49 @@ const ChatApp: React.FC<ChatAppProps> = ({ dogId, adoptionConvoUserId }) => {
                     alt={u.userName || 'User'}
                     className="chat-user-avatar"
                   />
-                  <span key={`name-${u._id}`} className="chat-user-name">{u.userName || u._id}</span>
-                  <span key={`status-${u._id}`} className="chat-user-status" title="Online"></span>
+                  <span className="chat-user-name">{u.userName || u._id}</span>
+                  <span className="chat-user-status" title="Online"></span>
                 </li>
-              );
-            })}
-          </ul>
+              ))}
+            </ul>
+          ) : allConversations.length > 0 ? (
+            <div>
+              <div className="chat-users-empty" style={{ padding: '4px 8px', fontSize: '11px' }}>
+                {t('noUsersOnline') || 'No users online. Recent conversations:'}
+              </div>
+              <ul className="chat-users-list">
+                {allConversations.map((convo: any) => {
+                  const otherUser = convo.otherUser;
+                  return (
+                    <li key={convo._id}
+                        className={`chat-user-item ${selectedConvo && selectedConvo._id === convo._id ? 'selected' : ''}`}
+                        onClick={() => startConversation(otherUser?._id || convo.participants.find((id: string) => id !== user._id))}
+                        style={{ position: 'relative' }}>
+                      <img 
+                        src={getProfilePic(otherUser)}
+                        alt={otherUser?.userName || 'User'}
+                        className="chat-user-avatar"
+                      />
+                      <div className="chat-user-info">
+                        <span className="chat-user-name">{otherUser?.userName || 'User'}</span>
+                        {convo.lastMessage && (
+                          <span className="chat-user-preview" style={{ 
+                            fontSize: '11px', color: '#666', display: 'block',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px'
+                          }}>
+                            {convo.lastMessage}
+                          </span>
+                        )}
+                      </div>
+                      <span className="chat-user-status" style={{ background: '#ccc' }} title="Offline"></span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ) : (
+            <div className="chat-users-empty">{t('noConversations') || 'No conversations yet.'}</div>
+          )
         )}
       </div>
       <div className="chat-app-main">
